@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiS
 import nl.rhaydus.toad.UiAction
 
 internal sealed interface BookDetailAction : UiAction<
-        BookDetailDependencies,
-        BookDetailUiState,
-        BookDetailEvent,
-        BookDetailLocalVariables,
-        >
+    BookDetailDependencies,
+    BookDetailUiState,
+    BookDetailEvent,
+    BookDetailLocalVariables,
+>

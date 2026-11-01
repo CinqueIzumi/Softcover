@@ -112,10 +112,12 @@ class ExploreBookCardMapperTest {
 
             // ----- Assert -----
             card.key shouldBe BookCardKey.Book(bookId = 7)
+
             card.stacked().cover shouldBe BookCardCover(
                 model = cover,
                 badge = overlay,
             )
+
             card.stacked().text.title shouldBe "Piranesi"
         }
 
@@ -184,10 +186,12 @@ class ExploreBookCardMapperTest {
 
             // ----- Assert -----
             card.stacked().text.byline shouldBe "By Susanna Clarke, Neil Gaiman"
+
             card.stacked().cover shouldBe BookCardCover(
                 model = cover,
                 badge = overlay,
             )
+
             card.key shouldBe BookCardKey.Book(bookId = 7)
         }
 
@@ -231,6 +235,7 @@ class ExploreBookCardMapperTest {
 
             // ----- Assert -----
             card.stacked().text.eyebrow.shouldNotBeNull().text shouldBe "EARTHSEA"
+
             card.stacked().text.supportingLines shouldBe persistentListOf(
                 persistentListOf(BookCardLinePart.Text(text = "Book #2")),
             )
@@ -320,6 +325,7 @@ class ExploreBookCardMapperTest {
                 journals = emptyList(),
                 reads = emptyList(),
             )
+
             val input = book(userBook = savedBook)
 
             // ----- Act -----
@@ -343,6 +349,7 @@ class ExploreBookCardMapperTest {
                 ),
                 positionsInSeries = listOf(2.0),
             )
+
             val standaloneInput = book(bookSeries = null)
 
             // ----- Act -----
@@ -365,6 +372,7 @@ class ExploreBookCardMapperTest {
                     ),
                 ),
             )
+
             val withoutAuthorInput = book(authors = emptyList())
 
             // ----- Act -----
@@ -440,11 +448,14 @@ class ExploreBookCardMapperTest {
 
             // ----- Assert -----
             val text = card.stacked().text
+
             text.titleTransitionKey shouldBe titleKey(
                 bookId = 7,
                 surface = "trending",
             )
+
             val rating = text.supportingLines.single().single().shouldBeInstanceOf<BookCardLinePart.Rating>()
+
             rating.transitionKey shouldBe ratingKey(
                 bookId = 7,
                 surface = "trending",
@@ -462,6 +473,7 @@ class ExploreBookCardMapperTest {
                 coverBadge = null,
                 transitionSurface = "trending",
             ).stacked().text
+
             val second = input.toTrendingCard(
                 cover = cover,
                 coverBadge = null,
@@ -487,6 +499,7 @@ class ExploreBookCardMapperTest {
 
             // ----- Assert -----
             text.supportingLines shouldBe persistentListOf()
+
             text.titleTransitionKey shouldBe titleKey(
                 bookId = 7,
                 surface = "trending",
@@ -550,7 +563,9 @@ class ExploreBookCardMapperTest {
                 bookId = 3,
                 surface = "search",
             )
+
             val ratings = text.supportingLines.flatten().filterIsInstance<BookCardLinePart.Rating>()
+
             ratings.map { it.transitionKey } shouldBe listOf(
                 ratingKey(
                     bookId = 3,

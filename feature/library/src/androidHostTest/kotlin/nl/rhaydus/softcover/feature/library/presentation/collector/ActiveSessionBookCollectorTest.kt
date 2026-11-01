@@ -30,11 +30,13 @@ class ActiveSessionBookCollectorTest {
     fun setUp() {
         activeSession = MutableStateFlow(null)
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk<LibraryDependencies>(relaxed = true).also { mock ->
             every {
                 mock.activeSessionController
@@ -59,26 +61,26 @@ class ActiveSessionBookCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `mirrors the running session's book id and clears it when the session ends`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val job = launch {
-                    ActiveSessionBookCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-                stateFlow.value.activeSessionBookId shouldBe null
-
-                // ----- Act -----
-                activeSession.value = sessionFor(bookId = 7)
-                val whileRunning = stateFlow.value.activeSessionBookId
-                activeSession.value = null
-
-                // ----- Assert -----
-                whileRunning shouldBe 7
-                stateFlow.value.activeSessionBookId shouldBe null
-                job.cancel()
+        fun `mirrors the running session's book id and clears it when the session ends`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val job = launch {
+                ActiveSessionBookCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            stateFlow.value.activeSessionBookId shouldBe null
+
+            // ----- Act -----
+            activeSession.value = sessionFor(bookId = 7)
+            val whileRunning = stateFlow.value.activeSessionBookId
+            activeSession.value = null
+
+            // ----- Assert -----
+            whileRunning shouldBe 7
+            stateFlow.value.activeSessionBookId shouldBe null
+            job.cancel()
+        }
     }
 }

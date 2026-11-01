@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiSt
 import nl.rhaydus.toad.Collector
 
 internal sealed interface ExploreCollector : Collector<
-        ExploreScreenUiState,
-        ExploreEvent,
-        ExploreDependencies,
-        ExploreLocalVariables
-        >
+    ExploreScreenUiState,
+    ExploreEvent,
+    ExploreDependencies,
+    ExploreLocalVariables
+>

@@ -20,6 +20,7 @@ internal class CycleQuoteCallback : ActionCallback, KoinComponent {
         parameters: ActionParameters,
     ) {
         val step = parameters[StepKey] ?: return
+
         val dependencies = get<QuoteWidgetDependencies>()
         val appWidgetId = GlanceAppWidgetManager(context).getAppWidgetId(glanceId)
 

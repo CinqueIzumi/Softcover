@@ -134,6 +134,7 @@ internal class RateLimitInterceptor(
      */
     private suspend fun adoptServerBudget(response: ApolloResponse<*>) {
         val snapshot: RateLimitSnapshot = response.rateLimitSnapshot() ?: return
+
         val throttled: Boolean = response.wasThrottled()
 
         mutex.withLock {
@@ -246,6 +247,7 @@ internal class RateLimitInterceptor(
 
         availableTokens = (availableTokens + elapsedSeconds * refillTokensPerSecond)
             .coerceAtMost(bucketCeiling)
+
         lastRefillMark = timeSource.markNow()
     }
 
@@ -258,11 +260,10 @@ internal class RateLimitInterceptor(
      * looping forever — the server would reject such a document outright (its own cap is 5 top-level
      * fields), and a hang would be a worse failure than that rejection.
      */
-    private fun Operation<*>.rateLimitCost(): Int =
-        rootField().selections.countTopLevelFields().coerceIn(
-            minimumValue = 1,
-            maximumValue = bucketCeiling.toInt().coerceAtLeast(1),
-        )
+    private fun Operation<*>.rateLimitCost(): Int = rootField().selections.countTopLevelFields().coerceIn(
+        minimumValue = 1,
+        maximumValue = bucketCeiling.toInt().coerceAtLeast(1),
+    )
 
     /**
      * Counts the billable root fields in [this]. `__typename` is excluded: it is a meta field the

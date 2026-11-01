@@ -10,16 +10,15 @@ import nl.rhaydus.softcover.feature.settings.presentation.model.PlacedWidgetRowU
 
 private const val NO_SETTINGS_GLOSS = "Nothing to set up"
 
-internal fun placedWidgetRowsFor(widgets: List<PlacedHomeScreenWidget>): ImmutableList<PlacedWidgetRowUiModel> =
-    widgets.map { widget ->
-        PlacedWidgetRowUiModel(
-            widgetId = widget.id,
-            title = widget.kind.title(),
-            gloss = widget.summary ?: NO_SETTINGS_GLOSS,
-            icon = widget.kind.icon(),
-            hasSettings = widget.hasSettings,
-        )
-    }.toImmutableList()
+internal fun placedWidgetRowsFor(widgets: List<PlacedHomeScreenWidget>): ImmutableList<PlacedWidgetRowUiModel> = widgets.map { widget ->
+    PlacedWidgetRowUiModel(
+        widgetId = widget.id,
+        title = widget.kind.title(),
+        gloss = widget.summary ?: NO_SETTINGS_GLOSS,
+        icon = widget.kind.icon(),
+        hasSettings = widget.hasSettings,
+    )
+}.toImmutableList()
 
 internal fun addWidgetRowsFor(): ImmutableList<AddWidgetRowUiModel> = HomeScreenWidgetKind.entries.map { kind ->
     AddWidgetRowUiModel(

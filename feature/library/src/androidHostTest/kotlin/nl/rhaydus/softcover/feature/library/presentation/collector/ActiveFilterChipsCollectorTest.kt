@@ -31,11 +31,13 @@ class ActiveFilterChipsCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk<LibraryDependencies>(relaxed = true).also { mock ->
             every {
                 mock.defaultDispatcher
@@ -49,6 +51,7 @@ class ActiveFilterChipsCollectorTest {
         fun `activeFilterChipsByTab is populated per tab with chips and payloads`() = runTest(testDispatcher) {
             // ----- Arrange -----
             val collector = ActiveFilterChipsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -67,10 +70,13 @@ class ActiveFilterChipsCollectorTest {
             // ----- Assert -----
             stateFlow.value.activeFilterChipsFor("all").chips.chips.map { it.key } shouldBe
                 listOf("format:ebook")
+
             stateFlow.value.activeFilterChipsFor("read").chips.chips.map { it.key } shouldBe
                 listOf("readYear:2021")
+
             stateFlow.value.activeFilterChipsFor("all").chips["format:ebook"] shouldBe
                 LibraryFilterValue.Format(value = "ebook")
+
             job.cancel()
         }
 
@@ -78,6 +84,7 @@ class ActiveFilterChipsCollectorTest {
         fun `a tab absent from filtersByTab falls back to an empty active-filter model`() = runTest(testDispatcher) {
             // ----- Arrange -----
             val collector = ActiveFilterChipsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -95,30 +102,31 @@ class ActiveFilterChipsCollectorTest {
         }
 
         @Test
-        fun `unrelated state change that leaves filtersByTab equal does not retrigger recompute`() =
-            runTest(testDispatcher) {
-                // ----- Arrange -----
-                val collector = ActiveFilterChipsCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+        fun `unrelated state change that leaves filtersByTab equal does not retrigger recompute`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val collector = ActiveFilterChipsCollector()
 
-                stateFlow.value = LibraryUiState(
-                    filtersByTab = persistentMapOf(
-                        "all" to LibraryFilters(formats = persistentSetOf("ebook")),
-                    ),
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-                val chipsByTabAfterFirstEmit = stateFlow.value.activeFilterChipsByTab
-
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(isArrangeSheetExpanded = true)
-
-                // ----- Assert -----
-                (stateFlow.value.activeFilterChipsByTab === chipsByTabAfterFirstEmit) shouldBe true
-                job.cancel()
             }
+
+            stateFlow.value = LibraryUiState(
+                filtersByTab = persistentMapOf(
+                    "all" to LibraryFilters(formats = persistentSetOf("ebook")),
+                ),
+            )
+
+            val chipsByTabAfterFirstEmit = stateFlow.value.activeFilterChipsByTab
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(isArrangeSheetExpanded = true)
+
+            // ----- Assert -----
+            (stateFlow.value.activeFilterChipsByTab === chipsByTabAfterFirstEmit) shouldBe true
+            job.cancel()
+        }
     }
 }

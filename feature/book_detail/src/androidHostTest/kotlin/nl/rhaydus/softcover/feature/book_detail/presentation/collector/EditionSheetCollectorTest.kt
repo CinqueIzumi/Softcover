@@ -37,11 +37,13 @@ class EditionSheetCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk(relaxed = true)
     }
 
@@ -49,9 +51,11 @@ class EditionSheetCollectorTest {
         every {
             it.title
         } returns title
+
         every {
             it.userBook
         } returns null
+
         every {
             it.currentEdition
         } returns null
@@ -88,6 +92,7 @@ class EditionSheetCollectorTest {
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 val current = buildEdition(id = 1)
+
                 stateFlow.value = buildBookDetailUiState().copy(
                     editionSheetRequested = true,
                     book = offShelfBook("Dune"),
@@ -113,12 +118,14 @@ class EditionSheetCollectorTest {
             // ----- Arrange -----
             val current = buildEdition(id = 1)
             val other = buildEdition(id = 2)
+
             stateFlow.value = buildBookDetailUiState().copy(
                 editionSheetRequested = true,
                 book = offShelfBook("Dune"),
                 previewEdition = current,
                 editions = persistentListOf(current, other),
             )
+
             launchCollector()
 
             // ----- Act -----
@@ -139,6 +146,7 @@ class EditionSheetCollectorTest {
             // ----- Arrange -----
             val current = buildEdition(id = 1)
             val other = buildEdition(id = 2)
+
             stateFlow.value = buildBookDetailUiState().copy(
                 editionSheetRequested = true,
                 book = offShelfBook("Dune"),
@@ -146,6 +154,7 @@ class EditionSheetCollectorTest {
                 editions = persistentListOf(current, other),
                 selectedEditionId = other.id,
             )
+
             launchCollector()
 
             // ----- Act -----
@@ -169,6 +178,7 @@ class EditionSheetCollectorTest {
                 book = offShelfBook("Dune"),
                 previewEdition = buildEdition(id = 1),
             )
+
             launchCollector()
 
             // ----- Act -----
@@ -179,42 +189,44 @@ class EditionSheetCollectorTest {
         }
 
         @Test
-        fun `carries the cards, count header and search query from state into editionSheet`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val current = buildEdition(id = 1)
-                val cards = persistentListOf(mockk<BookCardUiModel>())
-                val countHeader = SectionHeaderUiModel.Label(eyebrow = "1 EDITIONS")
-                stateFlow.value = buildBookDetailUiState().copy(
-                    editionSheetRequested = true,
-                    book = offShelfBook("Dune"),
-                    previewEdition = current,
-                    editions = persistentListOf(current),
-                    editionCards = cards,
-                    editionCountHeader = countHeader,
-                    editionSearchQuery = "penguin",
-                )
+        fun `carries the cards, count header and search query from state into editionSheet`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val current = buildEdition(id = 1)
+            val cards = persistentListOf(mockk<BookCardUiModel>())
+            val countHeader = SectionHeaderUiModel.Label(eyebrow = "1 EDITIONS")
 
-                // ----- Act -----
-                launchCollector()
+            stateFlow.value = buildBookDetailUiState().copy(
+                editionSheetRequested = true,
+                book = offShelfBook("Dune"),
+                previewEdition = current,
+                editions = persistentListOf(current),
+                editionCards = cards,
+                editionCountHeader = countHeader,
+                editionSearchQuery = "penguin",
+            )
 
-                // ----- Assert -----
-                val sheet = stateFlow.value.editionSheet.modelOrNull.shouldNotBeNull()
-                sheet.cards shouldBe cards
-                sheet.countHeader shouldBe countHeader
-                sheet.searchQuery shouldBe "penguin"
-            }
+            // ----- Act -----
+            launchCollector()
+
+            // ----- Assert -----
+            val sheet = stateFlow.value.editionSheet.modelOrNull.shouldNotBeNull()
+            sheet.cards shouldBe cards
+            sheet.countHeader shouldBe countHeader
+            sheet.searchQuery shouldBe "penguin"
+        }
 
         @Test
         fun `follows the search query as it changes`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val current = buildEdition(id = 1)
+
             stateFlow.value = buildBookDetailUiState().copy(
                 editionSheetRequested = true,
                 book = offShelfBook("Dune"),
                 previewEdition = current,
                 editions = persistentListOf(current),
             )
+
             launchCollector()
 
             // ----- Act -----
@@ -228,6 +240,7 @@ class EditionSheetCollectorTest {
         fun `shows search and empty-state copy once the sheet is built`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val current = buildEdition(id = 1)
+
             stateFlow.value = buildBookDetailUiState().copy(
                 editionSheetRequested = true,
                 book = offShelfBook("Dune"),
@@ -248,6 +261,7 @@ class EditionSheetCollectorTest {
         fun `shows the empty state when loaded without error and no edition matches`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val current = buildEdition(id = 1)
+
             stateFlow.value = buildBookDetailUiState().copy(
                 editionSheetRequested = true,
                 book = offShelfBook("Dune"),
@@ -267,6 +281,7 @@ class EditionSheetCollectorTest {
         fun `omits the empty state while editions are loading`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val current = buildEdition(id = 1)
+
             stateFlow.value = buildBookDetailUiState().copy(
                 editionSheetRequested = true,
                 book = offShelfBook("Dune"),
@@ -287,6 +302,7 @@ class EditionSheetCollectorTest {
         fun `carries editionsError and omits the empty state when loading failed`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val current = buildEdition(id = 1)
+
             stateFlow.value = buildBookDetailUiState().copy(
                 editionSheetRequested = true,
                 book = offShelfBook("Dune"),

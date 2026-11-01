@@ -24,11 +24,10 @@ import org.koin.dsl.KoinAppDeclaration
  * `debugRoutesModule`, iOS passes `iosAppModule`, desktop its `desktopAppModule`. Keeping the
  * declaration a lambda means no platform-only Koin API (e.g. `androidContext`) leaks into common.
  */
-fun initKoin(platformDeclaration: KoinAppDeclaration = {}): KoinApplication =
-    startKoin {
-        modules(softcoverModules)
-        platformDeclaration()
-    }
+fun initKoin(platformDeclaration: KoinAppDeclaration = {}): KoinApplication = startKoin {
+    modules(softcoverModules)
+    platformDeclaration()
+}
 
 /**
  * Platform-neutral post-Koin startup wiring, shared by every entry point so it can't drift between

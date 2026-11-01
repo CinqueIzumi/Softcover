@@ -105,10 +105,12 @@ class TrendingWidgetModelSourceTest {
             // ----- Arrange -----
             val models = listOf(
                 model(TrendingWidgetUiModel.Content.SignedOut),
-                model(TrendingWidgetUiModel.Content.Empty(
-                    eyebrow = "TRENDING",
-                    headline = "Nothing",
-                ),),
+                model(
+                    TrendingWidgetUiModel.Content.Empty(
+                        eyebrow = "TRENDING",
+                        headline = "Nothing",
+                    ),
+                ),
                 model(TrendingWidgetUiModel.Content.FetchFailed(eyebrow = "TRENDING")),
             )
 

@@ -15,6 +15,7 @@ internal object PausedShelfMigration : DataMigration<AppSettingsEntity> {
     override suspend fun migrate(currentData: AppSettingsEntity): AppSettingsEntity {
         val order = currentData.libraryTabOrder
         val anchor = order.indexOf(CURRENTLY_READING_TAB_KEY)
+
         val migratedOrder = when {
             order.isEmpty() || PAUSED_TAB_KEY in order -> order
             anchor >= 0 -> order.take(anchor + 1) + PAUSED_TAB_KEY + order.drop(anchor + 1)

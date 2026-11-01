@@ -31,6 +31,7 @@ class OnProgressTimeChangedActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -78,6 +79,7 @@ class OnProgressTimeChangedActionTest {
         fun `seeds the draft from the book position and applies the edited hours`() = runTest {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState().copy(book = bookAt(currentSeconds = 3725))
+
             val action = OnProgressTimeChangedAction(
                 unit = ProgressTimeUnit.HOURS,
                 text = "7",
@@ -102,6 +104,7 @@ class OnProgressTimeChangedActionTest {
         fun `clamps minutes above 59 down to 59`() = runTest {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState().copy(book = bookAt(currentSeconds = 0))
+
             val action = OnProgressTimeChangedAction(
                 unit = ProgressTimeUnit.MINUTES,
                 text = "99",
@@ -121,6 +124,7 @@ class OnProgressTimeChangedActionTest {
         fun `clamps seconds above 59 down to 59`() = runTest {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState().copy(book = bookAt(currentSeconds = 0))
+
             val action = OnProgressTimeChangedAction(
                 unit = ProgressTimeUnit.SECONDS,
                 text = "75",
@@ -140,6 +144,7 @@ class OnProgressTimeChangedActionTest {
         fun `keeps an empty text so the field can be cleared`() = runTest {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState().copy(book = bookAt(currentSeconds = 3725))
+
             val action = OnProgressTimeChangedAction(
                 unit = ProgressTimeUnit.MINUTES,
                 text = "",
@@ -159,6 +164,7 @@ class OnProgressTimeChangedActionTest {
         fun `ignores text that is not a number`() = runTest {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState().copy(book = bookAt(currentSeconds = 3725))
+
             val action = OnProgressTimeChangedAction(
                 unit = ProgressTimeUnit.HOURS,
                 text = "abc",
@@ -183,10 +189,12 @@ class OnProgressTimeChangedActionTest {
                 minutes = "8",
                 seconds = "7",
             )
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = bookAt(currentSeconds = 3725),
                 progressTimeDraft = stored,
             )
+
             val action = OnProgressTimeChangedAction(
                 unit = ProgressTimeUnit.SECONDS,
                 text = "30",
@@ -211,10 +219,12 @@ class OnProgressTimeChangedActionTest {
                 minutes = "8",
                 seconds = "7",
             )
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = bookAt(currentSeconds = 3725),
                 progressTimeDraft = stale,
             )
+
             val action = OnProgressTimeChangedAction(
                 unit = ProgressTimeUnit.SECONDS,
                 text = "30",
@@ -239,6 +249,7 @@ class OnProgressTimeChangedActionTest {
         fun `treats a book without a recorded position as starting from zero`() = runTest {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState().copy(book = bookAt(currentSeconds = null))
+
             val action = OnProgressTimeChangedAction(
                 unit = ProgressTimeUnit.HOURS,
                 text = "2",

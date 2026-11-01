@@ -345,6 +345,7 @@ class ShareTagCandidatesTest {
                     category = TagCategory.GENRE,
                 ),
             )
+
             val onlyOther = mixed.filter { it.category == TagCategory.OTHER }
 
             // ----- Act -----

@@ -92,14 +92,17 @@ object ShareCardDebugScreen : Screen {
             config = softcoverShareCardCaptureConfig,
             ioDispatcher = ioDispatcher,
         )
+
         val statCapture = rememberShareCardCapture(
             config = softcoverShareCardCaptureConfig,
             ioDispatcher = ioDispatcher,
         )
+
         val quoteCapture = rememberShareCardCapture(
             config = softcoverShareCardCaptureConfig,
             ioDispatcher = ioDispatcher,
         )
+
         val recapCapture = rememberShareCardCapture(
             config = softcoverShareCardCaptureConfig,
             ioDispatcher = ioDispatcher,

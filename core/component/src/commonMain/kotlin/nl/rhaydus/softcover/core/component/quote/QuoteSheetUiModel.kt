@@ -77,18 +77,17 @@ data class QuoteSheetUiModel(
             selected = selected,
         )
 
-        fun privacyFor(selected: QuotePrivacyOption): SegmentedControlUiModel<QuotePrivacyOption> =
-            SegmentedControlUiModel(
-                options = QuotePrivacyOption.entries
-                    .map { option ->
-                        SegmentUiModel(
-                            key = option,
-                            label = option.label,
-                        )
-                    }
-                    .toImmutableList(),
-                selected = selected,
-            )
+        fun privacyFor(selected: QuotePrivacyOption): SegmentedControlUiModel<QuotePrivacyOption> = SegmentedControlUiModel(
+            options = QuotePrivacyOption.entries
+                .map { option ->
+                    SegmentUiModel(
+                        key = option,
+                        label = option.label,
+                    )
+                }
+                .toImmutableList(),
+            selected = selected,
+        )
 
         /** Save is offered only once there is a passage to keep. */
         fun scaffoldFor(

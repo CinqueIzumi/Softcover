@@ -53,6 +53,7 @@ class YearHistoryCollectorTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(ProfileUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalProfileVariables()),
@@ -92,6 +93,7 @@ class YearHistoryCollectorTest {
                 series = null,
                 metric = YearMetric.BOOKS,
             )
+
             stateFlow.value.yearHistoryChart.isLoading shouldBe true
             job.cancel()
         }
@@ -117,6 +119,7 @@ class YearHistoryCollectorTest {
                 series = null,
                 metric = YearMetric.BOOKS,
             )
+
             job.cancel()
         }
 
@@ -141,10 +144,12 @@ class YearHistoryCollectorTest {
                 series = books,
                 metric = YearMetric.BOOKS,
             )
+
             stateFlow.value.yearHistoryCaption shouldBe yearHistoryCaption(
                 series = books,
                 metric = YearMetric.BOOKS,
             )
+
             job.cancel()
         }
 
@@ -155,6 +160,7 @@ class YearHistoryCollectorTest {
                 isLoading = false,
                 readingLife = buildReadingLife(),
             )
+
             val job = launch {
                 YearHistoryCollector().onLaunch(
                     scope = scope,
@@ -170,10 +176,12 @@ class YearHistoryCollectorTest {
                 series = pages,
                 metric = YearMetric.PAGES,
             )
+
             stateFlow.value.yearHistoryCaption shouldBe yearHistoryCaption(
                 series = pages,
                 metric = YearMetric.PAGES,
             )
+
             job.cancel()
         }
     }

@@ -46,6 +46,7 @@ class OnAddUnknownIsbnConfirmedActionTest {
         addBookByIsbnUseCase = mockk()
         stateFlow = MutableStateFlow(ScanUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalScanVariables()),
@@ -105,6 +106,7 @@ class OnAddUnknownIsbnConfirmedActionTest {
             coVerify(exactly = 0) {
                 addBookByIsbnUseCase(isbn = any())
             }
+
             stateFlow.value shouldBe stateBefore
         }
 
@@ -116,6 +118,7 @@ class OnAddUnknownIsbnConfirmedActionTest {
                 unknownIsbnSheet = openSession(isbn = "9780451524935"),
                 isAddingBook = true,
             )
+
             val dependencies = stubDependencies(this)
             val stateBefore = stateFlow.value
             val action = OnAddUnknownIsbnConfirmedAction()
@@ -130,6 +133,7 @@ class OnAddUnknownIsbnConfirmedActionTest {
             coVerify(exactly = 0) {
                 addBookByIsbnUseCase(isbn = any())
             }
+
             stateFlow.value shouldBe stateBefore
         }
 
@@ -140,6 +144,7 @@ class OnAddUnknownIsbnConfirmedActionTest {
                 unknownIsbn = "9781111111111",
                 unknownIsbnSheet = openSession(isbn = "9781111111111"),
             )
+
             val dependencies = stubDependencies(this)
 
             coEvery {
@@ -167,6 +172,7 @@ class OnAddUnknownIsbnConfirmedActionTest {
                 unknownIsbn = "9780451524935",
                 unknownIsbnSheet = openSession(isbn = "9780451524935"),
             )
+
             val dependencies = stubDependencies(this)
             var stateAtInvocation: ScanUiState? = null
 
@@ -194,10 +200,12 @@ class OnAddUnknownIsbnConfirmedActionTest {
             // ----- Arrange -----
             val book = PreviewData.baseBook
             val editionId = 7
+
             stateFlow.value = ScanUiState(
                 unknownIsbn = "9780451524935",
                 unknownIsbnSheet = openSession(isbn = "9780451524935"),
             )
+
             val dependencies = stubDependencies(this)
 
             coEvery {
@@ -236,6 +244,7 @@ class OnAddUnknownIsbnConfirmedActionTest {
                 unknownIsbn = "9780451524935",
                 unknownIsbnSheet = openSession(isbn = "9780451524935"),
             )
+
             val dependencies = stubDependencies(this)
 
             coEvery {
@@ -267,6 +276,7 @@ class OnAddUnknownIsbnConfirmedActionTest {
                 unknownIsbn = "9780451524935",
                 unknownIsbnSheet = openSession(isbn = "9780451524935"),
             )
+
             val dependencies = stubDependencies(this)
 
             coEvery {
@@ -297,6 +307,7 @@ class OnAddUnknownIsbnConfirmedActionTest {
                 unknownIsbn = "9780451524935",
                 unknownIsbnSheet = openSession(isbn = "9780451524935"),
             )
+
             val dependencies = stubDependencies(this)
 
             coEvery {
@@ -323,6 +334,7 @@ class OnAddUnknownIsbnConfirmedActionTest {
                 unknownIsbn = "9780451524935",
                 unknownIsbnSheet = openSession(isbn = "9780451524935"),
             )
+
             val dependencies = stubDependencies(this)
             val gate = CompletableDeferred<Unit>()
 
@@ -342,6 +354,7 @@ class OnAddUnknownIsbnConfirmedActionTest {
                     scope = scope,
                 )
             }
+
             val isAddingWhileSuspended = stateFlow.value.isAddingBook
             val eventWhileSuspended = eventChannel.tryReceive().getOrNull()
             gate.complete(Unit)
@@ -362,6 +375,7 @@ class OnAddUnknownIsbnConfirmedActionTest {
                 unknownIsbnSheet = openSession(isbn = "9780451524935"),
                 isImportPending = true,
             )
+
             val dependencies = stubDependencies(this)
             var pendingAtInvocation: Boolean? = null
 
@@ -392,6 +406,7 @@ class OnAddUnknownIsbnConfirmedActionTest {
                 unknownIsbnSheet = openSession(isbn = "9780451524935"),
                 isImportPending = true,
             )
+
             val dependencies = stubDependencies(this)
 
             coEvery {
@@ -419,6 +434,7 @@ class OnAddUnknownIsbnConfirmedActionTest {
                 unknownIsbnSheet = openSession(isbn = "9780451524935"),
                 isImportPending = true,
             )
+
             val dependencies = stubDependencies(this)
 
             coEvery {
@@ -441,5 +457,5 @@ class OnAddUnknownIsbnConfirmedActionTest {
             // ----- Assert -----
             stateFlow.value.isImportPending shouldBe false
         }
-}
+    }
 }

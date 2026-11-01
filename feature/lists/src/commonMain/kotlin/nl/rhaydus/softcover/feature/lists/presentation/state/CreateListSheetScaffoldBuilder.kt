@@ -7,15 +7,14 @@ import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 internal fun createListSheetScaffold(
     canSubmit: Boolean,
     submitting: Boolean,
-): SheetScaffoldUiModel =
-    SheetScaffoldUiModel(
-        header = null,
-        footer = SheetFooterUiModel.Stacked(
-            primary = SheetFooterButton(
-                label = "Create list",
-                enabled = canSubmit,
-                running = submitting,
-            ),
-            secondary = null,
+): SheetScaffoldUiModel = SheetScaffoldUiModel(
+    header = null,
+    footer = SheetFooterUiModel.Stacked(
+        primary = SheetFooterButton(
+            label = "Create list",
+            enabled = canSubmit,
+            running = submitting,
         ),
-    )
+        secondary = null,
+    ),
+)

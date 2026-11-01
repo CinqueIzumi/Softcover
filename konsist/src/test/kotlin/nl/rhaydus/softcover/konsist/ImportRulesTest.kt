@@ -15,6 +15,7 @@ class ImportRulesTest {
         fun `no file uses a banned import outside its allowlist`() {
             // ----- Arrange -----
             val scope = Konsist.scopeFromProject()
+
             val bans = listOf(
                 ForbiddenImport(
                     import = "androidx.compose.material3.Text",

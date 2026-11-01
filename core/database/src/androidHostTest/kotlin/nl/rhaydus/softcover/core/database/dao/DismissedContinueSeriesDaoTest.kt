@@ -28,6 +28,7 @@ class DismissedContinueSeriesDaoTest {
             builder = Room.inMemoryDatabaseBuilder(context = context),
             queryContext = testDispatcher,
         )
+
         dao = database.dismissedContinueSeriesDao()
     }
 

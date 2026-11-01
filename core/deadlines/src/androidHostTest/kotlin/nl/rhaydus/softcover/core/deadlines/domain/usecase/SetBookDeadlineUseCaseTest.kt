@@ -27,6 +27,7 @@ class SetBookDeadlineUseCaseTest {
         fun `returns success when repository setDeadline completes normally`() = runTest {
             // ----- Arrange -----
             val bookId = 1
+
             val deadlineDate = LocalDate(
                 2026,
                 6,
@@ -60,11 +61,13 @@ class SetBookDeadlineUseCaseTest {
         fun `returns failure when repository setDeadline throws`() = runTest {
             // ----- Arrange -----
             val bookId = 2
+
             val deadlineDate = LocalDate(
                 2026,
                 6,
                 1,
             )
+
             val expectedError = RuntimeException("db error")
 
             coEvery {

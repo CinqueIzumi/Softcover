@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.VerticalDivider as MaterialVerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,6 +15,7 @@ import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import androidx.compose.material3.VerticalDivider as MaterialVerticalDivider
 
 /** A hairline rule, bare or broken by a centred glyph or label. */
 @Composable
@@ -34,6 +34,7 @@ fun Divider(
             modifier = modifier,
             color = color,
         )
+
         return
     }
 

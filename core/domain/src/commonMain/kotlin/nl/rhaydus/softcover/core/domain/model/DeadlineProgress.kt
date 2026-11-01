@@ -33,10 +33,12 @@ data class DeadlineProgress(
             today: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
         ): DeadlineProgress {
             val daysRemaining = today.daysUntil(deadline.deadlineDate).toLong()
+
             val unitsRemaining = max(
                 0,
                 total - current,
             )
+
             val isExpired = daysRemaining < 0 || (daysRemaining == 0L && unitsRemaining > 0)
 
             val requiredPerDay = when {

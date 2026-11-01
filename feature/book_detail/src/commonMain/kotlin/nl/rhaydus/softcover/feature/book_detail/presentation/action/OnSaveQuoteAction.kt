@@ -29,12 +29,15 @@ internal class OnSaveQuoteAction : BookDetailAction {
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
         val draft: QuoteDraft = scope.currentState.quoteDraft ?: return
+
         val book: Book = scope.currentState.book ?: return
+
         val text = draft.text.trim()
 
         if (text.isEmpty()) return
 
         val position = draft.toPosition(book = book)
+
         val advance: QuoteProgressAdvance? = position
             ?.let { book.progressAdvanceFor(it) }
             ?.takeIf { draft.progressAdvanceEnabled }

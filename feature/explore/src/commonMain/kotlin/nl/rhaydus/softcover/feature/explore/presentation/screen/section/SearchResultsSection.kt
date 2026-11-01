@@ -110,7 +110,7 @@ internal fun ColumnScope.SearchResultsSection(
             is BookCardEvent.PressStarted,
             is BookCardEvent.MenuClicked,
             is BookCardEvent.ShakeEnded,
-                -> Unit
+            -> Unit
         }
     }
 
@@ -133,6 +133,7 @@ internal fun LoadMoreSearchResultsEffect(
 
     LaunchedEffect(state.queriedBooks.size, state.queriedBooksHasMore, showsStandIns) {
         val itemCount = state.queriedBooks.size
+
         if (state.queriedBooksHasMore.not() || itemCount == 0 || showsStandIns) return@LaunchedEffect
 
         snapshotFlow(lastVisibleIndex)
@@ -160,6 +161,7 @@ internal fun ScrollToTopWhenResultsReplacedEffect(
         .firstOrNull()
         ?.takeUnless(BookCardUiModel::isLoading)
         ?.key
+
     var previousHeadKey by remember { mutableStateOf(headKey) }
 
     LaunchedEffect(headKey) {
@@ -175,6 +177,7 @@ internal fun ScrollToTopWhenResultsReplacedEffect(
 @Composable
 internal fun Modifier.dimWhileRefreshing(refreshing: Boolean): Modifier {
     val target = if (refreshing) REFRESHING_RESULTS_ALPHA else 1f
+
     val alpha by animateFloatAsState(
         targetValue = target,
         animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),

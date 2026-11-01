@@ -32,11 +32,13 @@ class ShelveControlHeaderCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk(relaxed = true)
     }
 
@@ -56,6 +58,7 @@ class ShelveControlHeaderCollectorTest {
                     book = stubBook(id = 1),
                     failedMutationBookIds = persistentSetOf(),
                 )
+
                 val collector = ShelveControlHeaderCollector()
 
                 // ----- Act -----
@@ -80,6 +83,7 @@ class ShelveControlHeaderCollectorTest {
                     book = stubBook(id = 1),
                     failedMutationBookIds = persistentSetOf(1),
                 )
+
                 val collector = ShelveControlHeaderCollector()
 
                 // ----- Act -----
@@ -104,6 +108,7 @@ class ShelveControlHeaderCollectorTest {
                     book = stubBook(id = 1),
                     failedMutationBookIds = persistentSetOf(2),
                 )
+
                 val collector = ShelveControlHeaderCollector()
 
                 // ----- Act -----
@@ -121,27 +126,27 @@ class ShelveControlHeaderCollectorTest {
             }
 
         @Test
-        fun `sets shelveControlHeader to the default Inline header when state book is null`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                stateFlow.value = buildBookDetailUiState().copy(
-                    book = null,
-                    failedMutationBookIds = persistentSetOf(1),
+        fun `sets shelveControlHeader to the default Inline header when state book is null`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = buildBookDetailUiState().copy(
+                book = null,
+                failedMutationBookIds = persistentSetOf(1),
+            )
+
+            val collector = ShelveControlHeaderCollector()
+
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-                val collector = ShelveControlHeaderCollector()
-
-                // ----- Act -----
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Assert -----
-                val header = stateFlow.value.shelveControlHeader
-                header.shouldBeInstanceOf<SectionHeaderUiModel.Inline>().tone shouldNotBe SectionHeaderTone.Error
-                job.cancel()
             }
+
+            // ----- Assert -----
+            val header = stateFlow.value.shelveControlHeader
+            header.shouldBeInstanceOf<SectionHeaderUiModel.Inline>().tone shouldNotBe SectionHeaderTone.Error
+            job.cancel()
+        }
     }
 }

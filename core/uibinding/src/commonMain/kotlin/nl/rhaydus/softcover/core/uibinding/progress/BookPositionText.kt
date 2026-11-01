@@ -21,6 +21,7 @@ fun Book.resolvedTotalPages(): Int = currentEdition?.pages ?: defaultEdition?.pa
  */
 fun Book.toPositionText(): BookPositionText? {
     val read = currentRead ?: return null
+
     val edition = currentEdition ?: return null
 
     return read.toPositionText(

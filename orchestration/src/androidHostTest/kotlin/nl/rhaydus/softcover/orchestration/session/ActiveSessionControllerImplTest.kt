@@ -105,21 +105,27 @@ class ActiveSessionControllerImplTest {
         every {
             book.id
         } returns id
+
         every {
             book.status
         } returns status
+
         every {
             book.title
         } returns "Stub Book"
+
         every {
             book.authors
         } returns emptyList()
+
         every {
             book.currentEdition
         } returns null
+
         every {
             book.defaultEdition
         } returns null
+
         every {
             book.coverUrl
         } returns ""
@@ -128,6 +134,7 @@ class ActiveSessionControllerImplTest {
             every {
                 this@mockk.currentPage
             } returns currentPage
+
             every {
                 this@mockk.currentSeconds
             } returns currentSeconds
@@ -146,6 +153,7 @@ class ActiveSessionControllerImplTest {
         every {
             observeActiveSessionUseCase()
         } returns sessionFlow
+
         every {
             observeUserBookUseCase(id = any())
         } returns bookFlow
@@ -176,6 +184,7 @@ class ActiveSessionControllerImplTest {
         fun `keeps emitting the session when the book is Paused`() = runTest {
             // ----- Arrange -----
             val controller = buildController(this)
+
             val book = stubBook(
                 id = 42,
                 status = BookStatus.Paused,
@@ -280,6 +289,7 @@ class ActiveSessionControllerImplTest {
         fun `session cover key differs from the un-surfaced key of the same book`() = runTest {
             // ----- Arrange -----
             val controller = buildController(this)
+
             val unsurfacedKey = bookTransitionKey(
                 element = BookTransitionElement.Cover,
                 bookId = 42,
@@ -303,6 +313,7 @@ class ActiveSessionControllerImplTest {
         fun `is false before the underlying flow first emits`() = runTest {
             // ----- Arrange -----
             val gatedSession = MutableSharedFlow<ReadingSession?>()
+
             every {
                 observeActiveSessionUseCase()
             } returns gatedSession
@@ -318,9 +329,11 @@ class ActiveSessionControllerImplTest {
         fun `is true after the first emission even when it is null`() = runTest {
             // ----- Arrange -----
             val gatedSession = MutableSharedFlow<ReadingSession?>()
+
             every {
                 observeActiveSessionUseCase()
             } returns gatedSession
+
             val controller = buildController(this)
 
             // ----- Act -----
@@ -334,17 +347,21 @@ class ActiveSessionControllerImplTest {
         fun `activeSession already holds the emitted value when it flips to true`() = runTest {
             // ----- Arrange -----
             val gatedSession = MutableSharedFlow<ReadingSession?>()
+
             every {
                 observeActiveSessionUseCase()
             } returns gatedSession
+
             bookFlow.value = stubBook(id = 42)
             val controller = buildController(this)
             val sessionAtFlip = mutableListOf<ReadingSession?>()
+
             backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
                 controller.sessionLoaded.collect { loaded ->
                     if (loaded) sessionAtFlip.add(controller.activeSession.value?.session)
                 }
             }
+
             val session = stubSession(bookId = 42)
 
             // ----- Act -----
@@ -361,6 +378,7 @@ class ActiveSessionControllerImplTest {
         fun `invokes pauseReadingSessionUseCase with the active session id`() = runTest {
             // ----- Arrange -----
             val controller = buildController(this)
+
             val session = stubSession(
                 id = 7L,
                 bookId = 42,
@@ -395,6 +413,7 @@ class ActiveSessionControllerImplTest {
         fun `invokes resumeReadingSessionUseCase with the active session id`() = runTest {
             // ----- Arrange -----
             val controller = buildController(this)
+
             val session = stubSession(
                 id = 11L,
                 bookId = 42,
@@ -417,11 +436,13 @@ class ActiveSessionControllerImplTest {
         fun `invokes stopReadingSessionUseCase with id and book progress`() = runTest {
             // ----- Arrange -----
             val controller = buildController(this)
+
             val book = stubBook(
                 id = 42,
                 currentPage = 150,
                 currentSeconds = null,
             )
+
             val session = stubSession(
                 id = 3L,
                 bookId = 42,
@@ -523,6 +544,7 @@ class ActiveSessionControllerImplTest {
         fun `start emits Started when the use case succeeds`() = runTest {
             // ----- Arrange -----
             val controller = buildController(this)
+
             val emitted = collectOutcomes(
                 testScope = this,
                 controller = controller,
@@ -547,6 +569,7 @@ class ActiveSessionControllerImplTest {
         fun `start begins the session from the given book page and seconds`() = runTest {
             // ----- Arrange -----
             val controller = buildController(this)
+
             val book = stubBook(
                 currentPage = 55,
                 currentSeconds = 300,
@@ -577,6 +600,7 @@ class ActiveSessionControllerImplTest {
         fun `start emits StartFailed when the use case throws`() = runTest {
             // ----- Arrange -----
             val controller = buildController(this)
+
             val emitted = collectOutcomes(
                 testScope = this,
                 controller = controller,
@@ -601,10 +625,12 @@ class ActiveSessionControllerImplTest {
         fun `start emits StartFailed and not Started when the launcher throws`() = runTest {
             // ----- Arrange -----
             val launcher = mockk<ReadingSessionLauncher>()
+
             val controller = buildController(
                 testScope = this,
                 readingSessionLauncher = launcher,
             )
+
             val emitted = collectOutcomes(
                 testScope = this,
                 controller = controller,
@@ -617,6 +643,7 @@ class ActiveSessionControllerImplTest {
                     any(),
                 )
             } returns 1L
+
             every {
                 launcher.start()
             } throws IllegalStateException("boom")
@@ -632,12 +659,14 @@ class ActiveSessionControllerImplTest {
         fun `stop emits Stopped when the use case succeeds`() = runTest {
             // ----- Arrange -----
             val controller = buildController(this)
+
             val emitted = collectOutcomes(
                 testScope = this,
                 controller = controller,
             )
 
             bookFlow.value = stubBook(id = 42)
+
             sessionFlow.value = stubSession(
                 id = 3L,
                 bookId = 42,
@@ -654,16 +683,19 @@ class ActiveSessionControllerImplTest {
         fun `stop emits StopFailed when the use case throws`() = runTest {
             // ----- Arrange -----
             val controller = buildController(this)
+
             val emitted = collectOutcomes(
                 testScope = this,
                 controller = controller,
             )
 
             bookFlow.value = stubBook(id = 42)
+
             sessionFlow.value = stubSession(
                 id = 3L,
                 bookId = 42,
             )
+
             coEvery {
                 stopReadingSessionUseCase(
                     any(),
@@ -683,6 +715,7 @@ class ActiveSessionControllerImplTest {
         fun `stop emits nothing when no session is active`() = runTest {
             // ----- Arrange -----
             val controller = buildController(this)
+
             val emitted = collectOutcomes(
                 testScope = this,
                 controller = controller,

@@ -26,6 +26,7 @@ class OnShowChooseListsSheetActionTest {
         dependencies = mockk<BookDetailDependencies>(relaxed = true)
         stateFlow = MutableStateFlow(buildBookDetailUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),

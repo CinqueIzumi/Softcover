@@ -18,14 +18,14 @@ import nl.rhaydus.softcover.fragment.EditionDetailFragment
 import nl.rhaydus.softcover.fragment.EditionFragment
 import nl.rhaydus.softcover.fragment.ReadingJournalFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment
-import nl.rhaydus.softcover.fragment.UserBookFragment.Progress_updated_journal.Companion.readingJournalFragment as progressUpdatedJournalFragment
-import nl.rhaydus.softcover.fragment.UserBookFragment.Status_stopped_journal.Companion.readingJournalFragment as statusStoppedJournalFragment
-import nl.rhaydus.softcover.fragment.UserBookFragment.User_book_read_finished_journal.Companion.readingJournalFragment as userBookReadFinishedJournalFragment
-import nl.rhaydus.softcover.fragment.UserBookFragment.User_book_read_started_journal.Companion.readingJournalFragment as userBookReadStartedJournalFragment
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.fragment.UserBookFragment.Progress_updated_journal.Companion.readingJournalFragment as progressUpdatedJournalFragment
+import nl.rhaydus.softcover.fragment.UserBookFragment.Status_stopped_journal.Companion.readingJournalFragment as statusStoppedJournalFragment
+import nl.rhaydus.softcover.fragment.UserBookFragment.User_book_read_finished_journal.Companion.readingJournalFragment as userBookReadFinishedJournalFragment
+import nl.rhaydus.softcover.fragment.UserBookFragment.User_book_read_started_journal.Companion.readingJournalFragment as userBookReadStartedJournalFragment
 
 class BookMapperTest {
     companion object {
@@ -68,45 +68,59 @@ class BookMapperTest {
         every {
             this@stubEditionFields.id
         } returns id
+
         every {
             canonical_id
         } returns canonicalId
+
         every {
             this@stubEditionFields.title
         } returns title
+
         every {
             book_id
         } returns bookId
+
         every {
             isbn_10
         } returns isbn10
+
         every {
             isbn_13
         } returns isbn13
+
         every {
             this@stubEditionFields.pages
         } returns pages
+
         every {
             this@stubEditionFields.publisher
         } returns publisher
+
         every {
             this@stubEditionFields.image
         } returns image
+
         every {
             this@stubEditionFields.fallbackImages
         } returns fallbackImages
+
         every {
             release_year
         } returns releaseYear
+
         every {
             release_date
         } returns releaseDate
+
         every {
             edition_format
         } returns editionFormat
+
         every {
             audio_seconds
         } returns audioSeconds
+
         every {
             reading_format_id
         } returns readingFormatId
@@ -157,6 +171,7 @@ class BookMapperTest {
                 } returns canonicalValue
             }
         }
+
         val image = imageUrl?.let { urlValue ->
             mockk<BookListFragment.Image> {
                 every {
@@ -169,45 +184,59 @@ class BookMapperTest {
             every {
                 this@mockk.id
             } returns id
+
             every {
                 this@mockk.canonical
             } returns canonical
+
             every {
                 this@mockk.title
             } returns title
+
             every {
                 this@mockk.rating
             } returns rating
+
             every {
                 this@mockk.image
             } returns image
+
             every {
                 release_year
             } returns releaseYear
+
             every {
                 release_date
             } returns releaseDate
+
             every {
                 book_series
             } returns emptyList()
+
             every {
                 this@mockk.compilation
             } returns compilation
+
             every {
                 this@mockk.contributions
             } returns contributions
+
             every {
                 users_count
             } returns usersCount
+
             every {
                 ratings_count
             } returns ratingsCount
+
             every {
                 this@mockk.description
             } returns description
+
             every {
                 this@mockk.headline
             } returns headline
+
             every {
                 taggable_counts
             } returns taggableCounts
@@ -235,6 +264,7 @@ class BookMapperTest {
         userBookReads: List<UserBookFragment.User_book_read> = emptyList(),
     ): UserBookFragment {
         val bookInner = mockk<UserBookFragment.Book>()
+
         val editionInner = editionFragment?.let { editionValue ->
             mockk<UserBookFragment.Edition>().also { inner ->
                 every {
@@ -251,60 +281,79 @@ class BookMapperTest {
             every {
                 book
             } returns bookInner
+
             every {
                 edition
             } returns editionInner
+
             every {
                 progress_updated_journal
             } returns progressUpdated
+
             every {
                 user_book_read_started_journal
             } returns userBookReadStarted
+
             every {
                 user_book_read_finished_journal
             } returns userBookReadFinished
+
             every {
                 status_stopped_journal
             } returns statusStopped
+
             every {
                 user_book_reads
             } returns userBookReads
+
             every {
                 id
             } returns 1
+
             every {
                 status_id
             } returns statusId
+
             every {
                 edition_id
             } returns editionId
+
             every {
                 last_read_date
             } returns lastReadDate
+
             every {
                 date_added
             } returns "2024-01-01"
+
             every {
                 privacy_setting_id
             } returns privacySettingId
+
             every {
                 this@mockk.rating
             } returns rating
+
             every {
                 referrer_user_id
             } returns referrerUserId
+
             every {
                 review_has_spoilers
             } returns reviewHasSpoilers
+
             every {
                 review_slate
             } returns reviewSlate
+
             every {
                 reviewed_at
             } returns reviewedAt
+
             every {
                 updated_at
             } returns updatedAt
+
             every {
                 created_at
             } returns createdAt
@@ -329,48 +378,63 @@ class BookMapperTest {
             every {
                 id
             } returns 1
+
             every {
                 canonical
             } returns null
+
             every {
                 title
             } returns "My Book"
+
             every {
                 rating
             } returns null
+
             every {
                 image
             } returns null
+
             every {
                 release_year
             } returns null
+
             every {
                 release_date
             } returns null
+
             every {
                 book_series
             } returns bookSeries
+
             every {
                 compilation
             } returns false
+
             every {
                 contributions
             } returns emptyList()
+
             every {
                 this@mockk.description
             } returns description
+
             every {
                 headline
             } returns null
+
             every {
                 users_count
             } returns usersCount
+
             every {
                 ratings_count
             } returns 0
+
             every {
                 default_cover_edition
             } returns defaultEditionInner
+
             every {
                 taggable_counts
             } returns emptyList()
@@ -387,11 +451,13 @@ class BookMapperTest {
                     name
                 } returns "Penguin"
             }
+
             val image = mockk<EditionFragment.Image> {
                 every {
                     url
                 } returns "https://example.com/cover.jpg"
             }
+
             val fragment = mockk<EditionFragment>()
 
             fragment.stubEditionFields(
@@ -425,11 +491,13 @@ class BookMapperTest {
             result.publisher shouldBe "Penguin"
             result.url shouldBe "https://example.com/cover.jpg"
             result.releaseYear shouldBe 2020
+
             result.releaseDate shouldBe LocalDate(
                 year = 2020,
                 month = 3,
                 day = 4,
             )
+
             result.format shouldBe "Audiobook"
             result.audioSeconds shouldBe 3_600
             result.readingFormat shouldBe ReadingFormat.Audio
@@ -460,6 +528,7 @@ class BookMapperTest {
                 id = 7,
                 name = "Jane Austen",
             )
+
             val fragment = stubEditionFragment()
 
             // ----- Act -----
@@ -477,11 +546,13 @@ class BookMapperTest {
                     url
                 } returns "https://example.com/primary.jpg"
             }
+
             val fallback = mockk<EditionFragment.FallbackImage> {
                 every {
                     url
                 } returns "https://example.com/fallback.jpg"
             }
+
             val fragment = stubEditionFragment(
                 image = image,
                 fallbackImages = listOf(fallback),
@@ -502,6 +573,7 @@ class BookMapperTest {
                     url
                 } returns "https://example.com/fallback.jpg"
             }
+
             val fragment = stubEditionFragment(fallbackImages = listOf(fallback))
 
             // ----- Act -----
@@ -519,6 +591,7 @@ class BookMapperTest {
                     url
                 } returns null
             }
+
             val fragment = stubEditionFragment(fallbackImages = listOf(fallback))
 
             // ----- Act -----
@@ -550,20 +623,24 @@ class BookMapperTest {
                 every {
                     id
                 } returns 5
+
                 every {
                     name
                 } returns "George Orwell"
             }
+
             val withAuthor = mockk<EditionDetailFragment.Contribution> {
                 every {
                     this@mockk.author
                 } returns author
             }
+
             val withoutAuthor = mockk<EditionDetailFragment.Contribution> {
                 every {
                     this@mockk.author
                 } returns null
             }
+
             val fragment = mockk<EditionDetailFragment>()
 
             fragment.stubEditionFields()
@@ -595,6 +672,7 @@ class BookMapperTest {
                     every {
                         id
                     } returns index
+
                     every {
                         name
                     } returns rawName
@@ -606,6 +684,7 @@ class BookMapperTest {
                     } returns author
                 }
             }
+
             val fragment = mockk<EditionDetailFragment>()
 
             fragment.stubEditionFields()
@@ -646,20 +725,24 @@ class BookMapperTest {
                 every {
                     id
                 } returns 3
+
                 every {
                     name
                 } returns "Ursula Le Guin"
             }
+
             val withAuthor = mockk<BookListFragment.Contribution> {
                 every {
                     this@mockk.author
                 } returns author
             }
+
             val withoutAuthor = mockk<BookListFragment.Contribution> {
                 every {
                     this@mockk.author
                 } returns null
             }
+
             val fragment = stubUserBookFragment(
                 bookListFragment = stubBookListFragment(
                     id = 100,
@@ -689,17 +772,20 @@ class BookMapperTest {
             result.rating shouldBe 4.3
             result.coverUrl shouldBe "https://example.com/cover.jpg"
             result.releaseYear shouldBe 2020
+
             result.releaseDate shouldBe LocalDate(
                 year = 2020,
                 month = 3,
                 day = 4,
             )
+
             result.authors shouldBe listOf(
                 Author(
                     id = 3,
                     name = "Ursula Le Guin",
                 ),
             )
+
             result.usersCount shouldBe 250
             result.ratingsCount shouldBe 77
             result.isCompilation shouldBe true
@@ -715,6 +801,7 @@ class BookMapperTest {
                     every {
                         id
                     } returns index
+
                     every {
                         name
                     } returns rawName
@@ -726,6 +813,7 @@ class BookMapperTest {
                     } returns author
                 }
             }
+
             val fragment = stubUserBookFragment(
                 bookListFragment = stubBookListFragment(
                     contributions = contributions,
@@ -784,15 +872,18 @@ class BookMapperTest {
                 every {
                     id
                 } returns 3
+
                 every {
                     name
                 } returns "Ursula Le Guin"
             }
+
             val contribution = mockk<BookListFragment.Contribution> {
                 every {
                     this@mockk.author
                 } returns author
             }
+
             val fragment = stubUserBookFragment(
                 bookListFragment = stubBookListFragment(
                     id = 100,
@@ -894,6 +985,7 @@ class BookMapperTest {
                     with(UserBookFragment.Progress_updated_journal.Companion) { progressUpdatedJournalFragment() }
                 } returns stubReadingJournalFragment(event = "progress_updated")
             }
+
             val started = mockk<UserBookFragment.User_book_read_started_journal> {
                 every {
                     with(UserBookFragment.User_book_read_started_journal.Companion) {
@@ -901,6 +993,7 @@ class BookMapperTest {
                     }
                 } returns stubReadingJournalFragment(event = "user_book_read_started")
             }
+
             val finished = mockk<UserBookFragment.User_book_read_finished_journal> {
                 every {
                     with(UserBookFragment.User_book_read_finished_journal.Companion) {
@@ -908,11 +1001,13 @@ class BookMapperTest {
                     }
                 } returns stubReadingJournalFragment(event = "user_book_read_finished")
             }
+
             val stopped = mockk<UserBookFragment.Status_stopped_journal> {
                 every {
                     with(UserBookFragment.Status_stopped_journal.Companion) { statusStoppedJournalFragment() }
                 } returns stubReadingJournalFragment(event = "status_stopped")
             }
+
             val fragment = stubUserBookFragment(
                 progressUpdated = listOf(progress),
                 userBookReadStarted = listOf(started),
@@ -948,6 +1043,7 @@ class BookMapperTest {
                     ),
                 ),
             )
+
             val fragment = stubUserBookFragment(reviewSlate = slate)
 
             // ----- Act -----
@@ -980,20 +1076,24 @@ class BookMapperTest {
                 category = "Genre",
                 count = 15,
             )
+
             val uncategorisedTag = stubTaggableCount(
                 tagId = 8L,
                 tagName = "Cozy",
                 category = null,
                 count = 4,
             )
+
             val missingTag = mockk<BookListFragment.Taggable_count> {
                 every {
                     count
                 } returns 1
+
                 every {
                     tag
                 } returns null
             }
+
             val fragment = stubUserBookFragment(
                 bookListFragment = stubBookListFragment(
                     taggableCounts = listOf(
@@ -1018,6 +1118,7 @@ class BookMapperTest {
             every {
                 this@mockk.event
             } returns event
+
             every {
                 updated_at
             } returns "2024-01-01"
@@ -1034,13 +1135,16 @@ class BookMapperTest {
                     this@mockk.category
                 } returns category
             }
+
             val tag = mockk<BookListFragment.Taggable_count.Tag> {
                 every {
                     id
                 } returns tagId
+
                 every {
                     tag
                 } returns tagName
+
                 every {
                     tag_category
                 } returns tagCategory
@@ -1050,6 +1154,7 @@ class BookMapperTest {
                 every {
                     this@mockk.count
                 } returns count
+
                 every {
                     this@mockk.tag
                 } returns tag
@@ -1110,12 +1215,15 @@ class BookMapperTest {
                 every {
                     this@mockk.details
                 } returns details
+
                 every {
                     this@mockk.position
                 } returns position
+
                 every {
                     this@mockk.series
                 } returns null
+
                 every {
                     __typename
                 } returns "book_series"
@@ -1255,18 +1363,23 @@ class BookMapperTest {
             every {
                 this@mockk.id
             } returns id
+
             every {
                 this@mockk.progress
             } returns progress
+
             every {
                 progress_pages
             } returns progressPages
+
             every {
                 progress_seconds
             } returns progressSeconds
+
             every {
                 started_at
             } returns startedAt
+
             every {
                 finished_at
             } returns finishedAt
@@ -1295,10 +1408,12 @@ class BookMapperTest {
                 startedAt = "2024-01-02",
                 finishedAt = "2024-02-03",
             )
+
             val laterRead = stubRead(
                 id = 8,
                 progress = 100.0,
             )
+
             val fragment = stubUserBookFragment(userBookReads = listOf(firstRead, laterRead))
 
             // ----- Act -----
@@ -1346,12 +1461,15 @@ class BookMapperTest {
                 every {
                     details
                 } returns null
+
                 every {
                     position
                 } returns 1.0
+
                 every {
                     this@mockk.series
                 } returns series
+
                 every {
                     __typename
                 } returns "book_series"
@@ -1364,9 +1482,11 @@ class BookMapperTest {
             every {
                 id
             } returns 9
+
             every {
                 name
             } returns "The Expanse"
+
             every {
                 primary_books_count
             } returns primaryBooksCount

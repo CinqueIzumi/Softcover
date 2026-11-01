@@ -35,11 +35,13 @@ class CoverSourceResolverTest {
         fun `a local file on edition wins over defaultEdition's url and the fallback`() {
             // ----- Arrange -----
             val editionLocalPath = localFile("edition-cover.jpg")
+
             val subject = edition(
                 id = 1,
                 url = null,
                 localImagePath = editionLocalPath,
             )
+
             val defaultEdition = edition(
                 id = 2,
                 url = "https://example.com/default.jpg",
@@ -69,7 +71,9 @@ class CoverSourceResolverTest {
                 url = null,
                 localImagePath = null,
             )
+
             val defaultLocalPath = localFile("default-cover.jpg")
+
             val defaultEdition = edition(
                 id = 2,
                 localImagePath = defaultLocalPath,
@@ -95,6 +99,7 @@ class CoverSourceResolverTest {
         fun `the local result's path and cacheKey are keyed off the winning edition`() {
             // ----- Arrange -----
             val localPath = localFile("keyed-cover.jpg")
+
             val subject = edition(
                 id = 1,
                 url = "https://example.com/edition.jpg",
@@ -130,6 +135,7 @@ class CoverSourceResolverTest {
                 url = "https://example.com/edition.jpg",
                 localImagePath = null,
             )
+
             val defaultEdition = edition(
                 id = 8,
                 url = "https://example.com/default.jpg",
@@ -159,6 +165,7 @@ class CoverSourceResolverTest {
                 url = null,
                 localImagePath = null,
             )
+
             val defaultEdition = edition(
                 id = 8,
                 url = "https://example.com/default.jpg",
@@ -191,6 +198,7 @@ class CoverSourceResolverTest {
                 url = null,
                 localImagePath = null,
             )
+
             val defaultEdition = edition(
                 id = 2,
                 url = null,

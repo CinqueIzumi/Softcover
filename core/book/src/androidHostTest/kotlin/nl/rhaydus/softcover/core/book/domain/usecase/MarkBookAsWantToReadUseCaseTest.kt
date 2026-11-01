@@ -192,6 +192,7 @@ class MarkBookAsWantToReadUseCaseTest {
 
             // ----- Assert -----
             result.getOrNull() shouldBe ShelfMutationOutcome.NoChange
+
             coVerify(exactly = 0) {
                 booksRepository.markBookAsWantToRead(
                     any(),

@@ -27,16 +27,16 @@ internal class HiddenSuggestionsScreenModel(
     appDispatchers: AppDispatchers,
     flows: List<HiddenSuggestionsCollector>,
 ) : ToadScreenModel<
-    HiddenSuggestionsUiState,
-    HiddenSuggestionsEvent,
-    HiddenSuggestionsDependencies,
-    HiddenSuggestionsCollector,
-    HiddenSuggestionsLocalVariables,
+        HiddenSuggestionsUiState,
+        HiddenSuggestionsEvent,
+        HiddenSuggestionsDependencies,
+        HiddenSuggestionsCollector,
+        HiddenSuggestionsLocalVariables,
     >(
-    initialState = HiddenSuggestionsUiState(),
-    initialLocalVariables = HiddenSuggestionsLocalVariables(),
-    initializers = flows,
-) {
+        initialState = HiddenSuggestionsUiState(),
+        initialLocalVariables = HiddenSuggestionsLocalVariables(),
+        initializers = flows,
+    ) {
     override val dependencies = HiddenSuggestionsDependencies(
         getDismissedContinueSeriesBooksUseCase = getDismissedContinueSeriesBooksUseCase,
         getDismissedContinueSeriesUseCase = getDismissedContinueSeriesUseCase,

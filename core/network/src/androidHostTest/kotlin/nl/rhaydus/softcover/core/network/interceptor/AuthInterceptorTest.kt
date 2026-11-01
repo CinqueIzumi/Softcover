@@ -38,6 +38,7 @@ class AuthInterceptorTest {
         every {
             authTokenProvider.apiKey
         } returns flowOf(token)
+
         return AuthInterceptor(authTokenProvider = authTokenProvider)
     }
 
@@ -63,6 +64,7 @@ class AuthInterceptorTest {
             // ----- Assert -----
             val authHeader = capturedRequest.captured.httpHeaders
                 ?.firstOrNull { it.name == "Authorization" }
+
             authHeader?.value shouldBe "Bearer my-secret-key"
         }
 
@@ -86,6 +88,7 @@ class AuthInterceptorTest {
             // ----- Assert -----
             val authHeader = capturedRequest.captured.httpHeaders
                 ?.firstOrNull { it.name == "Authorization" }
+
             authHeader shouldBe null
         }
 
@@ -109,6 +112,7 @@ class AuthInterceptorTest {
             // ----- Assert -----
             val authHeader = capturedRequest.captured.httpHeaders
                 ?.firstOrNull { it.name == "Authorization" }
+
             authHeader shouldBe null
         }
 
@@ -132,6 +136,7 @@ class AuthInterceptorTest {
             // ----- Assert -----
             val authHeader = capturedRequest.captured.httpHeaders
                 ?.firstOrNull { it.name == "Authorization" }
+
             authHeader shouldBe null
         }
     }
@@ -144,6 +149,7 @@ class AuthInterceptorTest {
             every {
                 authTokenProvider.apiKey
             } returnsMany listOf(flowOf("first-key"), flowOf("second-key"))
+
             val interceptor = AuthInterceptor(authTokenProvider = authTokenProvider)
 
             val captured1 = slot<ApolloRequest<GetUserBookListsQuery.Data>>()

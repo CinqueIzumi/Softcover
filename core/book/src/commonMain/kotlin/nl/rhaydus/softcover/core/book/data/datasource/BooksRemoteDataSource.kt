@@ -16,11 +16,9 @@ import nl.rhaydus.softcover.GetBookByIdQuery
 import nl.rhaydus.softcover.GetBookByIdQuery.Data.Book.Companion.bookDetailFragment
 import nl.rhaydus.softcover.GetBookIdByEditionIdQuery
 import nl.rhaydus.softcover.GetBooksByIdsQuery
-import nl.rhaydus.softcover.GetBooksByIdsQuery.Data.Book.Companion.bookDetailFragment as booksByIdsBookDetailFragment
 import nl.rhaydus.softcover.GetEditionsByBookIdQuery
 import nl.rhaydus.softcover.GetEditionsByBookIdQuery.Data.Edition.Companion.editionDetailFragment
 import nl.rhaydus.softcover.GetEditionsByIdsQuery
-import nl.rhaydus.softcover.GetEditionsByIdsQuery.Data.Edition.Companion.editionDetailFragment as editionsByIdsDetailFragment
 import nl.rhaydus.softcover.GetEditionsByIsbnsQuery
 import nl.rhaydus.softcover.GetLatestUnfinishedReadQuery
 import nl.rhaydus.softcover.GetRecentReleaseIdsQuery
@@ -29,7 +27,6 @@ import nl.rhaydus.softcover.GetUpcomingReleaseIdsQuery
 import nl.rhaydus.softcover.GetUserBooksQuery
 import nl.rhaydus.softcover.GetUserBooksQuery.Data.Me.User_book.Companion.userBookFragment
 import nl.rhaydus.softcover.InsertUserBookWithStatusMutation
-import nl.rhaydus.softcover.InsertUserBookWithStatusMutation.Data.Insert_user_book.User_book.Companion.userBookFragment as insertUserBookWithStatusFragment
 import nl.rhaydus.softcover.MarkBookAsReadMutation
 import nl.rhaydus.softcover.MarkBookAsReadMutation.Data.Insert_user_book.User_book.Companion.userBookFragment
 import nl.rhaydus.softcover.MarkBookAsWantToReadMutation
@@ -40,9 +37,7 @@ import nl.rhaydus.softcover.UpdateBookEditionMutation.Data.Update_user_book.User
 import nl.rhaydus.softcover.UpdateReadingProgressMutation
 import nl.rhaydus.softcover.UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.User_book.Companion.userBookFragment
 import nl.rhaydus.softcover.UpdateUserBookRatingMutation
-import nl.rhaydus.softcover.UpdateUserBookRatingMutation.Data.Update_user_book.User_book.Companion.userBookFragment as updateUserBookRatingUserBookFragment
 import nl.rhaydus.softcover.UpdateUserBookReviewMutation
-import nl.rhaydus.softcover.UpdateUserBookReviewMutation.Data.Update_user_book.User_book.Companion.userBookFragment as updateUserBookReviewUserBookFragment
 import nl.rhaydus.softcover.UpdateUserBookStatusMutation
 import nl.rhaydus.softcover.UpdateUserBookStatusMutation.Data.Update_user_book.User_book.Companion.userBookFragment
 import nl.rhaydus.softcover.core.book.data.mapper.toBook
@@ -72,6 +67,11 @@ import nl.rhaydus.softcover.type.DatesReadInput
 import nl.rhaydus.softcover.type.UserBookCreateInput
 import nl.rhaydus.softcover.type.UserBookUpdateInput
 import kotlin.time.Clock
+import nl.rhaydus.softcover.GetBooksByIdsQuery.Data.Book.Companion.bookDetailFragment as booksByIdsBookDetailFragment
+import nl.rhaydus.softcover.GetEditionsByIdsQuery.Data.Edition.Companion.editionDetailFragment as editionsByIdsDetailFragment
+import nl.rhaydus.softcover.InsertUserBookWithStatusMutation.Data.Insert_user_book.User_book.Companion.userBookFragment as insertUserBookWithStatusFragment
+import nl.rhaydus.softcover.UpdateUserBookRatingMutation.Data.Update_user_book.User_book.Companion.userBookFragment as updateUserBookRatingUserBookFragment
+import nl.rhaydus.softcover.UpdateUserBookReviewMutation.Data.Update_user_book.User_book.Companion.userBookFragment as updateUserBookReviewUserBookFragment
 
 interface BooksRemoteDataSource {
     suspend fun fetchBookById(id: Int): Book
@@ -276,6 +276,7 @@ internal class BooksRemoteDataSourceImpl(
         // isbn_13 matches take precedence, so they are folded in before isbn_10 matches fill any gaps.
         result.editions.forEach { edition ->
             val isbn13 = edition.isbn_13
+
             if (isbn13 != null && isbn13 in requested && isbn13 !in matches) {
                 matches[isbn13] = IsbnEditionMatch(
                     bookId = edition.book_id,
@@ -286,6 +287,7 @@ internal class BooksRemoteDataSourceImpl(
 
         result.editions.forEach { edition ->
             val isbn10 = edition.isbn_10
+
             if (isbn10 != null && isbn10 in requested && isbn10 !in matches) {
                 matches[isbn10] = IsbnEditionMatch(
                     bookId = edition.book_id,
@@ -639,6 +641,7 @@ internal class BooksRemoteDataSourceImpl(
                 AppLog.w("Canonical $canonicalId for book ${book.id} not returned; keeping pre-merge metadata.")
                 return@map book
             }
+
             book.withCanonicalMetadata(canonical = canonical)
         }
     }

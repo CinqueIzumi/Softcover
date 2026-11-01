@@ -4,7 +4,6 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldNotContain
-import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
@@ -12,6 +11,7 @@ import nl.rhaydus.softcover.core.domain.model.Quote
 import nl.rhaydus.softcover.core.domain.model.QuotePosition
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import kotlin.time.Instant
 
 class QuoteCardMapperTest {
     private val savedOn: Instant = Instant.parse("2020-03-05T12:00:00Z")
@@ -153,6 +153,7 @@ class QuoteCardMapperTest {
                 timeZone = TimeZone.UTC,
                 today = today,
             )
+
             val farEastCard = quote.toQuoteCardUiModel(
                 timeZone = TimeZone.of("Pacific/Kiritimati"),
                 today = today,

@@ -305,6 +305,7 @@ private fun ReadingLifeRidgeline(monthlyPages: ImmutableList<Int>) {
                 path = areaPath,
                 color = areaColor,
             )
+
             drawPath(
                 path = linePath,
                 color = lineColor,

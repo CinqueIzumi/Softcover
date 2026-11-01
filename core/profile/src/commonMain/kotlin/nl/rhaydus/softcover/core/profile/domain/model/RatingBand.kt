@@ -48,10 +48,12 @@ enum class RatingBand {
             if (totalRatings == 0) return false
 
             val low = halfStarBuckets.take(WING_BUCKET_COUNT).sum()
+
             val mid = halfStarBuckets
                 .drop(WING_BUCKET_COUNT)
                 .take(MID_BUCKET_COUNT)
                 .sum()
+
             val high = halfStarBuckets.takeLast(WING_BUCKET_COUNT).sum()
 
             val lowFraction = low.toDouble() / totalRatings

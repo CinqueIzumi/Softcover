@@ -38,6 +38,7 @@ class ContinueSeriesBooksCollectorTest {
         getContinueSeriesBooksUseCase = mockk()
         getAllUserBooksUseCase = mockk()
         stateFlow = MutableStateFlow(ExploreScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
@@ -98,6 +99,7 @@ class ContinueSeriesBooksCollectorTest {
             // ----- Arrange -----
             val book = stubBook(id = 1)
             val collector = ContinueSeriesBooksCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -123,7 +125,9 @@ class ContinueSeriesBooksCollectorTest {
             } returns kotlinx.coroutines.flow.flow {
                 throw RuntimeException("use case error")
             }
+
             val collector = ContinueSeriesBooksCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -146,6 +150,7 @@ class ContinueSeriesBooksCollectorTest {
             val fetchedBook = stubBook(id = 5)
             val userBook = stubBook(id = 5)
             val collector = ContinueSeriesBooksCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -168,6 +173,7 @@ class ContinueSeriesBooksCollectorTest {
             val fetchedBook = stubBook(id = 10)
             val userBook = stubBook(id = 99)
             val collector = ContinueSeriesBooksCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

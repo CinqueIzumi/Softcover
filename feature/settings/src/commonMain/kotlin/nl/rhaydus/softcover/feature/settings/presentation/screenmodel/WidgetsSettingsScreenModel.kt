@@ -15,16 +15,16 @@ internal class WidgetsSettingsScreenModel(
     appDispatchers: AppDispatchers,
     flows: List<WidgetsSettingsCollector>,
 ) : ToadScreenModel<
-    WidgetsSettingsUiState,
-    WidgetsSettingsEvent,
-    WidgetsSettingsDependencies,
-    WidgetsSettingsCollector,
-    WidgetsSettingsLocalVariables,
+        WidgetsSettingsUiState,
+        WidgetsSettingsEvent,
+        WidgetsSettingsDependencies,
+        WidgetsSettingsCollector,
+        WidgetsSettingsLocalVariables,
     >(
-    initialState = WidgetsSettingsUiState(),
-    initialLocalVariables = WidgetsSettingsLocalVariables(),
-    initializers = flows,
-) {
+        initialState = WidgetsSettingsUiState(),
+        initialLocalVariables = WidgetsSettingsLocalVariables(),
+        initializers = flows,
+    ) {
     override val dependencies = WidgetsSettingsDependencies(
         homeScreenWidgets = homeScreenWidgets,
         coroutineScope = screenModelScope,

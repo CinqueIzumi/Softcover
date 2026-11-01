@@ -55,7 +55,10 @@ internal actual fun BarcodeScannerScreenLayout(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .padding(horizontal = Spacing.gutter, vertical = Spacing.xl),
+                    .padding(
+                        horizontal = Spacing.gutter,
+                        vertical = Spacing.xl,
+                    ),
                 contentAlignment = Alignment.Center,
             ) {
                 Surface(
@@ -76,7 +79,10 @@ internal actual fun BarcodeScannerScreenLayout(
                         onIsbnSubmit = onIsbnSubmit,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = Spacing.xxl, vertical = Spacing.xxl),
+                            .padding(
+                                horizontal = Spacing.xxl,
+                                vertical = Spacing.xxl,
+                            ),
                     )
                 }
             }

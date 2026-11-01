@@ -15,6 +15,7 @@ internal enum class DesktopInstallerTarget(val assetSuffix: String) {
         /** Resolves the target for the running OS, or `null` on an unrecognised platform. */
         fun current(osName: String = System.getProperty("os.name").orEmpty()): DesktopInstallerTarget? {
             val normalized = osName.lowercase()
+
             return when {
                 normalized.contains("mac") -> MACOS
                 normalized.contains("win") -> WINDOWS

@@ -30,6 +30,7 @@ class OnWhenReadShiftedActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -49,6 +50,7 @@ class OnWhenReadShiftedActionTest {
                 9,
                 15,
             )
+
             stateFlow.value = buildBookDetailUiState().copy(readAt = readAt)
             val action = OnWhenReadShiftedAction(minutes = 30)
 

@@ -3,9 +3,9 @@ package nl.rhaydus.softcover.feature.widget.presentation.refresh
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
@@ -97,6 +97,7 @@ class RefreshSignalsTest {
                 harness.upstream.emit(Unit)
                 advanceTimeBy(debounce / 2)
             }
+
             advanceTimeBy(debounce * 2)
             runCurrent()
 
@@ -164,6 +165,7 @@ class RefreshSignalsTest {
         fun `emits again after an upstream failure once the set empties and refills`() = runTest {
             // ----- Arrange -----
             var failNext = true
+
             val harness = harness { upstream ->
                 if (failNext) {
                     failNext = false
@@ -172,6 +174,7 @@ class RefreshSignalsTest {
                     upstream
                 }
             }
+
             harness.placed.value = setOf("1")
             runCurrent()
             harness.placed.value = emptySet()

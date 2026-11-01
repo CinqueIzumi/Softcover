@@ -302,6 +302,7 @@ class StatsBookMapperTest {
                 month = 3,
                 count = 350,
             )
+
             result.filterNot { it.month == 3 }.all { it.count == 0 } shouldBe true
         }
 
@@ -648,6 +649,7 @@ class StatsBookMapperTest {
                 isLgbtq = false,
                 gender = Gender.Male,
             )
+
             val books = listOf(
                 book(authors = listOf(recurringAuthor)),
                 book(authors = listOf(recurringAuthor)),
@@ -660,6 +662,7 @@ class StatsBookMapperTest {
             // ----- Assert -----
             result.knownGenderCount shouldBe 1
             result.unknownGenderCount shouldBe 0
+
             result.genderSlices shouldBe listOf(
                 GenderSlice(
                     gender = Gender.Male,
@@ -667,17 +670,21 @@ class StatsBookMapperTest {
                     fraction = 1.0,
                 ),
             )
+
             result.bipocBreakdown shouldBe DemographicBreakdown(
                 yesCount = 1,
                 noCount = 0,
                 unknownCount = 0,
             )
+
             result.bipocBreakdown.total shouldBe 1
+
             result.lgbtqBreakdown shouldBe DemographicBreakdown(
                 yesCount = 0,
                 noCount = 1,
                 unknownCount = 0,
             )
+
             result.lgbtqBreakdown.total shouldBe 1
         }
 
@@ -725,20 +732,24 @@ class StatsBookMapperTest {
             // ----- Assert -----
             result.knownGenderCount shouldBe 5
             result.unknownGenderCount shouldBe 2
+
             result.genderSlices.first() shouldBe GenderSlice(
                 gender = Gender.Male,
                 count = 3,
                 fraction = 3.0 / 7.0,
             )
+
             result.genderSlices.last() shouldBe GenderSlice(
                 gender = Gender.Unknown,
                 count = 2,
                 fraction = 2.0 / 7.0,
             )
+
             result.genderSlices.drop(1).dropLast(1).map { it.gender to it.count }.toSet() shouldBe setOf(
                 Gender.Female to 1,
                 Gender.Other to 1,
             )
+
             result.genderSlices.sumOf { it.fraction } shouldBe (1.0 plusOrMinus 0.0001)
         }
 
@@ -782,6 +793,7 @@ class StatsBookMapperTest {
             // ----- Assert -----
             result.knownGenderCount shouldBe 1
             result.unknownGenderCount shouldBe 5
+
             result.genderSlices shouldBe listOf(
                 GenderSlice(
                     gender = Gender.Male,
@@ -794,6 +806,7 @@ class StatsBookMapperTest {
                     fraction = 5.0 / 6.0,
                 ),
             )
+
             result.genderSlices.last().gender shouldBe Gender.Unknown
         }
 
@@ -835,12 +848,15 @@ class StatsBookMapperTest {
                 noCount = 1,
                 unknownCount = 1,
             )
+
             result.bipocBreakdown.total shouldBe 3
+
             result.lgbtqBreakdown shouldBe DemographicBreakdown(
                 yesCount = 1,
                 noCount = 1,
                 unknownCount = 1,
             )
+
             result.lgbtqBreakdown.total shouldBe 3
         }
     }

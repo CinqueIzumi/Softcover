@@ -29,6 +29,7 @@ class OnBulkAddToListSheetShownActionTest {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(LibraryUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -62,6 +63,7 @@ class OnBulkAddToListSheetShownActionTest {
                 closing = true,
                 pending = CreateList,
             )
+
             stateFlow.value = LibraryUiState(
                 selectedBookIds = persistentSetOf(1),
                 chooseListsSheet = closing,

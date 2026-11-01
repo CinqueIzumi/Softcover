@@ -36,6 +36,7 @@ class OnSubmitTagDraftActionTest {
     fun setUp() {
         saveUserTagsUseCase = mockk()
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -45,16 +46,20 @@ class OnSubmitTagDraftActionTest {
 
     private fun stubDependencies(testScope: TestScope): BookDetailDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<BookDetailDependencies>(relaxed = true).also { mock ->
             every {
                 mock.saveUserTagsUseCase
             } returns saveUserTagsUseCase
+
             every {
                 mock.coroutineScope
             } returns testScope
+
             every {
                 mock.mainDispatcher
             } returns dispatcher
+
             every {
                 mock.launch(any())
             } answers { callOriginal() }
@@ -65,6 +70,7 @@ class OnSubmitTagDraftActionTest {
         every {
             this@mockk.id
         } returns id
+
         every {
             this@mockk.userBook
         } returns mockk()
@@ -76,16 +82,19 @@ class OnSubmitTagDraftActionTest {
         fun `adds the typed draft under the selected category`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
+
             val added = UserTag(
                 name = "cozy",
                 category = TagCategory.MOOD,
             )
+
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(id = 1),
                 userTags = UserTagsLoad.Loaded(persistentListOf()),
                 tagEditorInput = "  cozy ",
                 tagEditorCategory = TagCategory.MOOD,
             )
+
             coEvery {
                 saveUserTagsUseCase(
                     bookId = 1,
@@ -108,6 +117,7 @@ class OnSubmitTagDraftActionTest {
         fun `saves nothing when the draft is blank`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
+
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(id = 1),
                 tagEditorInput = "   ",
@@ -121,6 +131,7 @@ class OnSubmitTagDraftActionTest {
 
             // ----- Assert -----
             stateFlow.value.userTags shouldBe UserTagsLoad.Loading
+
             coVerify(exactly = 0) {
                 saveUserTagsUseCase(
                     any(),

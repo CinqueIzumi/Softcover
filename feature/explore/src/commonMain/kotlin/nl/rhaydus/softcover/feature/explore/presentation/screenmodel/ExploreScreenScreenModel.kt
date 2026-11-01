@@ -63,10 +63,10 @@ internal class ExploreScreenScreenModel(
     flows: List<ExploreCollector>,
     appDispatchers: AppDispatchers,
 ) : ToadScreenModel<ExploreScreenUiState, ExploreEvent, ExploreDependencies, ExploreCollector, ExploreLocalVariables>(
-    initialState = ExploreScreenUiState(),
-    initialLocalVariables = ExploreLocalVariables(),
-    initializers = flows,
-) {
+        initialState = ExploreScreenUiState(),
+        initialLocalVariables = ExploreLocalVariables(),
+        initializers = flows,
+    ) {
     override val dependencies: ExploreDependencies = ExploreDependencies(
         searchForNameUseCase = searchForNameUseCase,
         clearSearchResultsUseCase = clearSearchResultsUseCase,

@@ -85,6 +85,7 @@ class StreakMapperTest {
             // ----- Assert -----
             val running = result.running.shouldNotBeNull()
             running.value shouldBe 1.0
+
             running.suffix shouldBe StatNumberSuffix.Plural(
                 one = " day running",
                 other = " days running",
@@ -164,6 +165,7 @@ class StreakMapperTest {
                 activity = activity,
                 isLoading = true,
             )
+
             val settled = streakStripFor(activity = activity)
 
             // ----- Assert -----
@@ -186,6 +188,7 @@ class StreakMapperTest {
                 activity = activity,
                 isLoading = true,
             )
+
             val settled = streakStripFor(activity = activity)
 
             // ----- Assert -----

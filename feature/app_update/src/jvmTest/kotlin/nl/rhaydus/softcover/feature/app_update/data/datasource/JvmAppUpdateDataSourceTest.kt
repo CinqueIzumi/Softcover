@@ -49,11 +49,13 @@ class JvmAppUpdateDataSourceTest {
 
     private fun TestScope.createDataSource(): JvmAppUpdateDataSource {
         val dispatcher = StandardTestDispatcher(testScheduler)
+
         val appDispatchers = AppDispatchers(
             main = dispatcher,
             io = dispatcher,
             default = dispatcher,
         )
+
         return JvmAppUpdateDataSource(
             appVersionProvider = appVersionProvider,
             releaseSource = remoteDataSource,
@@ -258,7 +260,9 @@ class JvmAppUpdateDataSourceTest {
                 ),
                 dataSource.updateState.value,
             )
+
             advanceUntilIdle()
+
             coVerify(exactly = 1) {
                 remoteDataSource.downloadInstaller(
                     release = release,
@@ -288,6 +292,7 @@ class JvmAppUpdateDataSourceTest {
                         bytes,
                         total,
                     )
+
                     observed.add(dataSource().updateState.value)
                 }
 
@@ -370,6 +375,7 @@ class JvmAppUpdateDataSourceTest {
                 bytesDownloaded = 100,
                 totalBytes = 1_000,
             )
+
             assertEquals(
                 listOf<AppUpdateState>(
                     expectedFirst,
@@ -417,6 +423,7 @@ class JvmAppUpdateDataSourceTest {
                 bytesDownloaded = 0,
                 totalBytes = null,
             )
+
             assertEquals(
                 listOf<AppUpdateState>(
                     initial,
@@ -479,6 +486,7 @@ class JvmAppUpdateDataSourceTest {
             verify(exactly = 0) {
                 installerLauncher.launch(installer = any())
             }
+
             assertEquals(
                 AppUpdateState.Idle,
                 dataSource.updateState.value,

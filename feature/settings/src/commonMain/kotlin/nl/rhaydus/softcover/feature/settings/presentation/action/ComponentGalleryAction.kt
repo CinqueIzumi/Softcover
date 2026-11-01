@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.feature.settings.presentation.state.ComponentGallery
 import nl.rhaydus.toad.UiAction
 
 internal sealed interface ComponentGalleryAction : UiAction<
-        ComponentGalleryDependencies,
-        ComponentGalleryUiState,
-        ComponentGalleryEvent,
-        ComponentGalleryLocalVariables,
-        >
+    ComponentGalleryDependencies,
+    ComponentGalleryUiState,
+    ComponentGalleryEvent,
+    ComponentGalleryLocalVariables,
+>

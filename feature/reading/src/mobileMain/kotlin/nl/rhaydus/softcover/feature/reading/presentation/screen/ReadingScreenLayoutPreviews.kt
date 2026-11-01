@@ -37,6 +37,7 @@ private fun previewBook(
     currentSeconds: Int? = null,
 ): Book {
     val editionId = id * 10
+
     val edition = PreviewData.baseEdition.copy(
         id = editionId,
         pages = pages,
@@ -226,10 +227,12 @@ private fun ReadingScreenPreview() {
 
 private fun previewReadingActivity(): List<ReadingDayActivity> {
     val today = currentLocalDate()
+
     val firstDay = today.minus(
         20,
         DateTimeUnit.DAY,
     )
+
     val litOffsets = setOf(0, 1, 2, 3, 5, 6, 7, 8, 9, 12, 13, 16, 17, 18, 19, 20)
 
     return (0..20).map { offset ->
@@ -377,6 +380,7 @@ private fun ReadingScreenAudiobookPreview() {
         currentSeconds = 24_650,
     ).let {
         val edition = it.editions.first().copy(format = "Audiobook")
+
         it.copy(
             editions = listOf(edition),
             defaultEdition = edition,

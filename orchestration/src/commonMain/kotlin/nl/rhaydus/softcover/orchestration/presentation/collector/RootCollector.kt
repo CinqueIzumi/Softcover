@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.orchestration.presentation.state.RootUiState
 import nl.rhaydus.toad.Collector
 
 internal sealed interface RootCollector : Collector<
-        RootUiState,
-        RootEvent,
-        RootDependencies,
-        RootLocalVariables,
-        >
+    RootUiState,
+    RootEvent,
+    RootDependencies,
+    RootLocalVariables,
+>

@@ -64,12 +64,15 @@ class CurrentlyReadingWidgetModelsTest {
             every {
                 this@mockk.id
             } returns id
+
             every {
                 displayTitle
             } returns "Title $id"
+
             every {
                 authorString
             } returns "Author $id"
+
             every {
                 currentRead
             } returns read
@@ -100,6 +103,7 @@ class CurrentlyReadingWidgetModelsTest {
                 fraction = fraction,
                 widthDp = widthDp,
             )
+
             progressUris
         },
         artworkUris = { book ->
@@ -212,6 +216,7 @@ class CurrentlyReadingWidgetModelsTest {
         fun `reordering the shelf keeps the selected book shown`() = runTest {
             // ----- Arrange -----
             val shelf = MutableStateFlow(books)
+
             val flow = models(
                 shelf = shelf,
                 selectedBookId = flowOf(2),
@@ -306,11 +311,14 @@ class CurrentlyReadingWidgetModelsTest {
                     artwork = null,
                     imagesPending = true,
                 ) shouldBe text
+
                 images.cover shouldBe coverUri
+
                 images.progress shouldBe mapOf(
                     90 to progressUris,
                     140 to progressUris,
                 )
+
                 images.artwork shouldBe artwork
             }
         }
@@ -407,6 +415,7 @@ class CurrentlyReadingWidgetModelsTest {
                     ),
                 ),
             )
+
             val flow = models(shelf = shelf)
 
             flow.test {
@@ -420,6 +429,7 @@ class CurrentlyReadingWidgetModelsTest {
                         percent = 20f,
                     ),
                 )
+
                 awaitItem()
                 awaitItem()
 
@@ -434,6 +444,7 @@ class CurrentlyReadingWidgetModelsTest {
             // ----- Arrange -----
             val gate = CompletableDeferred<Uri?>()
             val selected = MutableStateFlow<Int?>(1)
+
             val flow = models(
                 shelf = flowOf(books),
                 selectedBookId = selected,
@@ -460,6 +471,7 @@ class CurrentlyReadingWidgetModelsTest {
         fun `a new set of widths re-emits the model with progress for exactly those widths`() = runTest {
             // ----- Arrange -----
             val widths = MutableStateFlow(setOf(90))
+
             val flow = models(
                 shelf = flowOf(books),
                 barWidthsDp = widths,
@@ -482,6 +494,7 @@ class CurrentlyReadingWidgetModelsTest {
         fun `the cover and artwork are produced once per shown book however often the widths change`() = runTest {
             // ----- Arrange -----
             val widths = MutableStateFlow(setOf(90))
+
             val flow = models(
                 shelf = flowOf(books),
                 selectedBookId = flowOf(2),
@@ -509,6 +522,7 @@ class CurrentlyReadingWidgetModelsTest {
         fun `a new cover height produces the cover again at that height`() = runTest {
             // ----- Arrange -----
             val heights = MutableStateFlow(200)
+
             val flow = models(
                 shelf = flowOf(books),
                 coverHeightDp = heights,

@@ -43,12 +43,14 @@ class UpdateBookRatingUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+
             coVerify(exactly = 0) {
                 booksRepository.updateBookRating(
                     book = any(),
                     rating = any(),
                 )
             }
+
             coVerify(exactly = 0) { booksRepository.cacheBook(book = any()) }
         }
 
@@ -62,6 +64,7 @@ class UpdateBookRatingUseCaseTest {
             every {
                 inputBook.userBook
             } returns userBook
+
             every {
                 userBook.rating
             } returns rating
@@ -74,12 +77,14 @@ class UpdateBookRatingUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+
             coVerify(exactly = 0) {
                 booksRepository.updateBookRating(
                     book = any(),
                     rating = any(),
                 )
             }
+
             coVerify(exactly = 0) { booksRepository.cacheBook(book = any()) }
         }
 
@@ -94,6 +99,7 @@ class UpdateBookRatingUseCaseTest {
             every {
                 inputBook.userBook
             } returns userBook
+
             every {
                 userBook.rating
             } returns 3.0
@@ -117,12 +123,14 @@ class UpdateBookRatingUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+
             coVerify(exactly = 1) {
                 booksRepository.updateBookRating(
                     book = inputBook,
                     rating = newRating,
                 )
             }
+
             coVerify(exactly = 1) { booksRepository.cacheBook(book = updatedBook) }
         }
 
@@ -137,6 +145,7 @@ class UpdateBookRatingUseCaseTest {
             every {
                 inputBook.userBook
             } returns userBook
+
             every {
                 userBook.rating
             } returns 2.0

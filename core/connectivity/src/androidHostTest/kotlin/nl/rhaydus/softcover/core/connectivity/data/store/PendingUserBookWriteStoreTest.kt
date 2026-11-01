@@ -2,9 +2,9 @@ package nl.rhaydus.softcover.core.connectivity.data.store
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import io.mockk.Called
 import io.mockk.coEvery
 import io.mockk.coJustRun
-import io.mockk.Called
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.slot
@@ -30,6 +30,7 @@ class PendingUserBookWriteStoreTest {
     fun setUp() {
         dao = mockk()
         progressHistoryLocalDataSource = mockk(relaxed = true)
+
         store = PendingUserBookWriteStore(
             dao = dao,
             progressHistoryLocalDataSource = progressHistoryLocalDataSource,
@@ -129,6 +130,7 @@ class PendingUserBookWriteStoreTest {
                 enqueuedAt = "2026-05-05T09:00:00Z",
                 actionAt = "2026-05-05T09:05:00Z",
             )
+
             val slot = slot<PendingUserBookWriteEntity>()
 
             coJustRun {
@@ -308,6 +310,7 @@ class PendingUserBookWriteStoreTest {
                 attempts = 0,
                 actionAt = "2026-06-01T10:00:00Z",
             )
+
             val entityB = pendingUserBookWriteEntity(
                 localId = 2L,
                 kind = PendingUserBookWriteKind.MARK_AS_READ.name,
@@ -334,6 +337,7 @@ class PendingUserBookWriteStoreTest {
                     payload = requireNotNull(entityB.toPendingUserBookWrite()),
                 ),
             )
+
             result[0].payload.actionAt shouldBe "2026-06-01T10:00:00Z"
             result[1].payload.actionAt shouldBe null
         }
@@ -359,6 +363,7 @@ class PendingUserBookWriteStoreTest {
 
             // ----- Assert -----
             result shouldBe emptyList()
+
             coVerify(exactly = 1) {
                 dao.delete(localId = 5L)
             }
@@ -449,6 +454,7 @@ class PendingUserBookWriteStoreTest {
             )
 
             coJustRun { dao.delete(any()) }
+
             coEvery {
                 progressHistoryLocalDataSource.delete(localId = 77L)
             } throws IllegalStateException("settle failed")

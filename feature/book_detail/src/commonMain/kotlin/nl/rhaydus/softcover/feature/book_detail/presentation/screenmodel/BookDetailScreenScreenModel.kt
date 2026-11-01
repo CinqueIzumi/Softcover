@@ -98,16 +98,16 @@ internal class BookDetailScreenScreenModel(
     flows: List<BookDetailCollector>,
     appDispatchers: AppDispatchers,
 ) : ToadScreenModel<BookDetailUiState, BookDetailEvent, BookDetailDependencies, BookDetailCollector, BookDetailLocalVariables>(
-    initialState = BookDetailUiState(
-        bookId = bookId,
-        transitionSurface = transitionSurface,
-        initialCover = initialCover,
-        scannedEditionId = initialCover?.scannedEditionId,
-        verdictSheetContext = VerdictSheetContext.FINISHED.takeIf { showVerdictSheet },
-    ).withCoverModels(),
-    initialLocalVariables = BookDetailLocalVariables(),
-    initializers = flows,
-) {
+        initialState = BookDetailUiState(
+            bookId = bookId,
+            transitionSurface = transitionSurface,
+            initialCover = initialCover,
+            scannedEditionId = initialCover?.scannedEditionId,
+            verdictSheetContext = VerdictSheetContext.FINISHED.takeIf { showVerdictSheet },
+        ).withCoverModels(),
+        initialLocalVariables = BookDetailLocalVariables(),
+        initializers = flows,
+    ) {
     override val dependencies: BookDetailDependencies = BookDetailDependencies(
         coroutineScope = screenModelScope,
         mainDispatcher = appDispatchers.main,

@@ -26,6 +26,7 @@ internal data class OnSortModeChangeAction(val mode: ExploreSortMode) : ExploreA
         scope.setState { it.copy(sortMode = mode) }
 
         val query = scope.currentState.searchText
+
         if (query.isEmpty()) return
 
         scope.currentLocalVariables.queryJob?.cancelAndJoin()

@@ -23,11 +23,10 @@ internal value class ProfileCacheDataStore(val store: DataStore<ProfileCacheEnti
 internal fun createProfileCacheDataStore(
     fileSystem: FileSystem,
     producePath: () -> Path,
-): DataStore<ProfileCacheEntity> =
-    DataStoreFactory.create(
-        storage = OkioStorage(
-            fileSystem = fileSystem,
-            serializer = ProfileCacheSerializer,
-            producePath = producePath,
-        ),
-    )
+): DataStore<ProfileCacheEntity> = DataStoreFactory.create(
+    storage = OkioStorage(
+        fileSystem = fileSystem,
+        serializer = ProfileCacheSerializer,
+        producePath = producePath,
+    ),
+)

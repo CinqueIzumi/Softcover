@@ -71,6 +71,7 @@ class ApiKeyLocalDataSourceImplTest {
         } returns null
 
         val dispatcher = UnconfinedTestDispatcher()
+
         dispatchers = AppDispatchers(
             main = dispatcher,
             io = dispatcher,
@@ -80,9 +81,11 @@ class ApiKeyLocalDataSourceImplTest {
 
     private fun stubLegacyKey(apiKey: String) {
         val entity = AppSettingsEntity(apiKey = apiKey)
+
         every {
             dataStore.data
         } returns flowOf(entity)
+
         coEvery {
             dataStore.updateData(any())
         } coAnswers {
@@ -93,13 +96,12 @@ class ApiKeyLocalDataSourceImplTest {
 
     private fun buildDataSource(
         legacySecureStorage: LegacySecureApiKeyStorage? = this.legacySecureStorage,
-    ): ApiKeyLocalDataSourceImpl =
-        ApiKeyLocalDataSourceImpl(
-            secureStorage = secureStorage,
-            appSettingsDataStore = appSettingsDataStore,
-            dispatchers = dispatchers,
-            legacySecureStorage = legacySecureStorage,
-        )
+    ): ApiKeyLocalDataSourceImpl = ApiKeyLocalDataSourceImpl(
+        secureStorage = secureStorage,
+        appSettingsDataStore = appSettingsDataStore,
+        dispatchers = dispatchers,
+        legacySecureStorage = legacySecureStorage,
+    )
 
     @Nested
     inner class Construction {
@@ -192,6 +194,7 @@ class ApiKeyLocalDataSourceImplTest {
                     "legacy-secure-key",
                 )
             }
+
             coVerify(exactly = 1) { legacySecureStorage.delete() }
         }
 
@@ -299,6 +302,7 @@ class ApiKeyLocalDataSourceImplTest {
                     any(),
                 )
             }
+
             coVerify(exactly = 0) { dataStore.updateData(any()) }
         }
 
@@ -368,6 +372,7 @@ class ApiKeyLocalDataSourceImplTest {
 
             // ----- Assert -----
             storedKey shouldBe newKey
+
             dataSource.apiKey.test {
                 awaitItem() shouldBe newKey
                 cancelAndIgnoreRemainingEvents()
@@ -386,6 +391,7 @@ class ApiKeyLocalDataSourceImplTest {
 
             // ----- Assert -----
             storedKey.shouldBeNull()
+
             dataSource.apiKey.test {
                 awaitItem() shouldBe null
                 cancelAndIgnoreRemainingEvents()
@@ -404,6 +410,7 @@ class ApiKeyLocalDataSourceImplTest {
 
             // ----- Assert -----
             storedKey.shouldBeNull()
+
             dataSource.apiKey.test {
                 awaitItem() shouldBe null
                 cancelAndIgnoreRemainingEvents()
@@ -425,6 +432,7 @@ class ApiKeyLocalDataSourceImplTest {
 
             // ----- Assert -----
             storedKey.shouldBeNull()
+
             dataSource.apiKey.test {
                 awaitItem() shouldBe null
                 cancelAndIgnoreRemainingEvents()

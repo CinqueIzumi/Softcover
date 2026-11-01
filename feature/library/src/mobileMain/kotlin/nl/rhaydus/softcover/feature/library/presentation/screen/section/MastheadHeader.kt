@@ -66,7 +66,11 @@ internal fun MastheadHeader(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = Spacing.gutter, end = Spacing.xs, top = Spacing.xs),
+            .padding(
+                start = Spacing.gutter,
+                end = Spacing.xs,
+                top = Spacing.xs,
+            ),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -88,9 +92,11 @@ internal fun MastheadHeader(
                 .layout { measurable, constraints ->
                     val placeable = measurable.measure(constraints)
                     onCollapsibleSized(placeable.height)
+
                     val visibleHeight = (placeable.height * (1f - collapseFraction()))
                         .toInt()
                         .coerceAtLeast(0)
+
                     layout(placeable.width, visibleHeight) {
                         placeable.place(
                             0,
@@ -165,6 +171,7 @@ private fun ShelfTitleCrossfade(
     modifier: Modifier = Modifier,
 ) {
     val currentPosition by rememberUpdatedState(pagePosition)
+
     val fromIndex by remember {
         derivedStateOf { floor(currentPosition()).toInt() }
     }

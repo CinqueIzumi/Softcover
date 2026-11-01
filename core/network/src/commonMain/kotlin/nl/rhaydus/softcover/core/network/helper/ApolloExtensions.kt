@@ -103,10 +103,13 @@ private suspend fun <T> retryTransientFailures(block: suspend () -> T): T {
         } catch (exception: ServerUnavailableException) {
             if (attempt >= MAX_TRANSIENT_RETRIES) throw exception
 
-            delay(retryDelayFor(
-                exception,
-                attempt,
-            ),)
+            delay(
+                retryDelayFor(
+                    exception,
+                    attempt,
+                ),
+            )
+
             attempt++
         }
     }
@@ -180,13 +183,12 @@ private suspend fun <T : Operation.Data> executeCall(
 
 // Writes are never retried here: an optimistic write that hits a transient failure is already
 // captured by the offline write queue, which owns replay. Retrying it here too would double-apply it.
-suspend fun <T : Mutation.Data> ApolloClient.safeMutation(mutation: Mutation<T>): T =
-    executeCall(
-        requireNetwork = true,
-        retryOnTransientFailure = false,
-    ) {
-        this.mutation(mutation).execute()
-    }
+suspend fun <T : Mutation.Data> ApolloClient.safeMutation(mutation: Mutation<T>): T = executeCall(
+    requireNetwork = true,
+    retryOnTransientFailure = false,
+) {
+    this.mutation(mutation).execute()
+}
 
 suspend fun <T : Query.Data> ApolloClient.safeQuery(
     query: Query<T>,

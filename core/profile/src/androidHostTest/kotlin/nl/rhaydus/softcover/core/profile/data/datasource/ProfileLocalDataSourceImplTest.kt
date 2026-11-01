@@ -33,6 +33,7 @@ class ProfileLocalDataSourceImplTest {
     @BeforeEach
     fun setUp() {
         store = mockk()
+
         dataSource = ProfileLocalDataSourceImpl(
             profileCacheDataStore = ProfileCacheDataStore(store = store),
         )
@@ -65,6 +66,7 @@ class ProfileLocalDataSourceImplTest {
             val seed = ProfileCacheEntity(
                 profile = baseProfile.copy(recentReadingDays = listOf("2026-06-17")),
             )
+
             val result = stubStore(seed)
 
             // ----- Act -----
@@ -80,6 +82,7 @@ class ProfileLocalDataSourceImplTest {
             val seed = ProfileCacheEntity(
                 profile = baseProfile.copy(recentReadingDays = listOf("2026-06-19")),
             )
+
             val result = stubStore(seed)
 
             // ----- Act -----

@@ -46,6 +46,7 @@ class ReadingActivityCollectorTest {
         observeRecentReadingActivityUseCase = mockk()
         refreshReadingActivityUseCase = mockk()
         stateFlow = MutableStateFlow(ReadingScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ReadingLocalVariables()),
@@ -55,6 +56,7 @@ class ReadingActivityCollectorTest {
         every {
             getReadingStreakEnabledAsFlowUseCase()
         } returns streakEnabledFlow
+
         every {
             observeRecentReadingActivityUseCase()
         } returns activityFlow
@@ -62,13 +64,16 @@ class ReadingActivityCollectorTest {
 
     private fun buildDependencies(testScope: TestScope): ReadingScreenDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<ReadingScreenDependencies>(relaxed = true).also { mock ->
             every {
                 mock.getReadingStreakEnabledAsFlowUseCase
             } returns getReadingStreakEnabledAsFlowUseCase
+
             every {
                 mock.observeRecentReadingActivityUseCase
             } returns observeRecentReadingActivityUseCase
+
             every {
                 mock.refreshReadingActivityUseCase
             } returns refreshReadingActivityUseCase
@@ -76,6 +81,7 @@ class ReadingActivityCollectorTest {
             every {
                 mock.coroutineScope
             } returns testScope
+
             every {
                 mock.mainDispatcher
             } returns dispatcher
@@ -103,9 +109,11 @@ class ReadingActivityCollectorTest {
             coEvery {
                 refreshReadingActivityUseCase()
             } returns Result.success(Unit)
+
             stateFlow.value = ReadingScreenUiState(isLoading = true)
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -128,9 +136,11 @@ class ReadingActivityCollectorTest {
             coEvery {
                 refreshReadingActivityUseCase()
             } returns Result.success(Unit)
+
             val activity = listOf(stubActivity(), stubActivity())
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -147,6 +157,7 @@ class ReadingActivityCollectorTest {
                 activity = activity,
                 isLoading = true,
             )
+
             stateFlow.value.streakSheet shouldBe streakSheetFor(activity = activity)
             stateFlow.value.hasLoadedReadingActivity shouldBe true
             job.cancel()
@@ -158,8 +169,10 @@ class ReadingActivityCollectorTest {
             coEvery {
                 refreshReadingActivityUseCase()
             } returns Result.success(Unit)
+
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -181,15 +194,18 @@ class ReadingActivityCollectorTest {
             coEvery {
                 refreshReadingActivityUseCase()
             } returns Result.success(Unit)
+
             val activity = listOf(stubActivity())
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
                     dependencies = dependencies,
                 )
             }
+
             streakEnabledFlow.emit(true)
             activityFlow.emit(activity)
 
@@ -198,10 +214,12 @@ class ReadingActivityCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.streakEnabled shouldBe false
+
             stateFlow.value.streakStrip shouldBe streakStripFor(
                 activity = emptyList(),
                 isLoading = true,
             )
+
             stateFlow.value.streakSheet shouldBe streakSheetFor(activity = emptyList())
             stateFlow.value.hasLoadedReadingActivity shouldBe true
             job.cancel()
@@ -213,9 +231,11 @@ class ReadingActivityCollectorTest {
             coEvery {
                 refreshReadingActivityUseCase()
             } returns Result.failure(RuntimeException("network error"))
+
             val activity = listOf(stubActivity())
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -232,6 +252,7 @@ class ReadingActivityCollectorTest {
                 activity = activity,
                 isLoading = true,
             )
+
             stateFlow.value.streakSheet shouldBe streakSheetFor(activity = activity)
             job.cancel()
         }
@@ -242,13 +263,16 @@ class ReadingActivityCollectorTest {
             coEvery {
                 refreshReadingActivityUseCase()
             } returns Result.success(Unit)
+
             val activity = listOf(
                 stubActivity(didRead = true),
                 stubActivity(didRead = false),
                 stubActivity(didRead = true),
             )
+
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -266,31 +290,33 @@ class ReadingActivityCollectorTest {
         }
 
         @Test
-        fun `resets streakSheet to the empty-activity scaffold when toggled from true to false`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                coEvery {
-                    refreshReadingActivityUseCase()
-                } returns Result.success(Unit)
-                val activity = listOf(stubActivity(didRead = true), stubActivity(didRead = false))
-                val dependencies = buildDependencies(this)
-                val collector = ReadingActivityCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-                streakEnabledFlow.emit(true)
-                activityFlow.emit(activity)
+        fun `resets streakSheet to the empty-activity scaffold when toggled from true to false`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            coEvery {
+                refreshReadingActivityUseCase()
+            } returns Result.success(Unit)
 
-                // ----- Act -----
-                streakEnabledFlow.emit(false)
+            val activity = listOf(stubActivity(didRead = true), stubActivity(didRead = false))
+            val dependencies = buildDependencies(this)
+            val collector = ReadingActivityCollector()
 
-                // ----- Assert -----
-                stateFlow.value.streakSheet.scaffold shouldBe streakSheetScaffoldFor(activity = emptyList())
-                job.cancel()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            streakEnabledFlow.emit(true)
+            activityFlow.emit(activity)
+
+            // ----- Act -----
+            streakEnabledFlow.emit(false)
+
+            // ----- Assert -----
+            stateFlow.value.streakSheet.scaffold shouldBe streakSheetScaffoldFor(activity = emptyList())
+            job.cancel()
+        }
 
         @Test
         fun `carries the state's isLoading into the strip and rows into the sheet`() = runTest(UnconfinedTestDispatcher()) {
@@ -298,10 +324,12 @@ class ReadingActivityCollectorTest {
             coEvery {
                 refreshReadingActivityUseCase()
             } returns Result.success(Unit)
+
             stateFlow.value = ReadingScreenUiState(isLoading = true)
             val activity = listOf(stubActivity(didRead = true))
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -318,6 +346,7 @@ class ReadingActivityCollectorTest {
                 activity = activity,
                 isLoading = true,
             )
+
             stateFlow.value.streakSheet.rows shouldBe streakSheetFor(activity = activity).rows
             stateFlow.value.streakSheet.rows.single().label shouldBe "Today"
             job.cancel()
@@ -329,9 +358,11 @@ class ReadingActivityCollectorTest {
             coEvery {
                 refreshReadingActivityUseCase()
             } returns Result.success(Unit)
+
             stateFlow.value = ReadingScreenUiState(isLoading = false)
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -354,6 +385,7 @@ class ReadingActivityCollectorTest {
             stateFlow.value = ReadingScreenUiState(isLoading = true)
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -369,6 +401,7 @@ class ReadingActivityCollectorTest {
                 activity = emptyList(),
                 isLoading = true,
             )
+
             stateFlow.value.streakSheet.rows.size shouldBe 0
             job.cancel()
         }

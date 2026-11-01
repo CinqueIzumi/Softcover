@@ -85,20 +85,24 @@ private fun ChipScaffold(
     modifier: Modifier,
 ) {
     val colorSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Color>()
+
     val container by animateColorAsState(
         targetValue = style.container,
         animationSpec = colorSpec,
         label = "ChipContainer",
     )
+
     val ink by animateColorAsState(
         targetValue = style.ink,
         animationSpec = colorSpec,
         label = "ChipInk",
     )
+
     val animatedStyle = style.copy(
         container = container,
         ink = ink,
     )
+
     val selectable = model.tone == ChipTone.Tonal || model.tone == ChipTone.Choice
 
     val rowModifier = modifier
@@ -275,6 +279,7 @@ private fun ChipLabel(
         fontWeight = if (model.face == ChipFace.Bold) FontWeight.Bold else style.weight,
         fontStyle = if (model.face == ChipFace.Italic) FontStyle.Italic else FontStyle.Normal,
     )
+
     val spoilerWash = (model.leading as? ChipLeading.SpoilerToggle)?.marked == true
 
     SoftcoverText(
@@ -306,6 +311,7 @@ private fun ChipTrailingSlot(
     onDismiss: () -> Unit,
 ) {
     val end = padding.calculateRightPadding(LayoutDirection.Ltr)
+
     val insets = PaddingValues(
         start = Spacing.xs,
         top = padding.calculateTopPadding(),
@@ -330,6 +336,7 @@ private fun ChipTrailingSlot(
         is ChipTrailing.Disclosure -> {
             val playMotion = playDecorativeMotion()
             val spatialSpec = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
+
             val rotation by animateFloatAsState(
                 targetValue = if (trailing.expanded) 180f else 0f,
                 animationSpec = if (playMotion) spatialSpec else snap(),

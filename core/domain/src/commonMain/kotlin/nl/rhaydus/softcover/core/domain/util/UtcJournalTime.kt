@@ -17,6 +17,7 @@ private const val MICRO_DIGITS = 6
 fun Instant.toUtcJournalTimestamp(): String {
     val utc = toLocalDateTime(TimeZone.UTC)
     val micros = utc.nanosecond / NANOS_PER_MICRO
+
     val fraction = micros.toString().padStart(
         MICRO_DIGITS,
         '0',

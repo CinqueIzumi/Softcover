@@ -40,11 +40,13 @@ class ArrangeDraftChipsCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk<LibraryDependencies>(relaxed = true).also { mock ->
             every {
                 mock.defaultDispatcher
@@ -59,12 +61,14 @@ class ArrangeDraftChipsCollectorTest {
             // ----- Arrange -----
             val wantToReadTab = LibraryTab.Status.of(UserBookStatus.WANT_TO_READ)
             val collector = ArrangeDraftChipsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
                     dependencies = dependencies,
                 )
             }
+
             stateFlow.value = LibraryUiState(
                 visibleTabs = persistentListOf(readingTab, wantToReadTab),
                 arrangeDraft = LibraryArrangeDraft(
@@ -89,12 +93,14 @@ class ArrangeDraftChipsCollectorTest {
         fun `editing the draft's sort mode recomputes which sort chip is selected`() = runTest(testDispatcher) {
             // ----- Arrange -----
             val collector = ArrangeDraftChipsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
                     dependencies = dependencies,
                 )
             }
+
             stateFlow.value = LibraryUiState(
                 visibleTabs = persistentListOf(readingTab),
                 arrangeDraft = LibraryArrangeDraft(
@@ -117,46 +123,50 @@ class ArrangeDraftChipsCollectorTest {
             val titleChip = stateFlow.value.arrangeSortChips.chips.first { it.key == "sort:TITLE" }
             titleChip.tone shouldBe ChipTone.Choice
             titleChip.selected shouldBe true
+
             titleChip.trailing shouldBe ChipTrailing.Icon(
                 icon = SoftcoverIcon.ArrowDropUp,
                 description = "Ascending",
             )
+
             stateFlow.value.arrangeSortHeader shouldBe SectionHeaderUiModel.Label(eyebrow = "Sort by · Currently Reading")
             job.cancel()
         }
 
         @Test
-        fun `unrelated state change that leaves the snapshot equal does not retrigger recompute`() =
-            runTest(testDispatcher) {
-                // ----- Arrange -----
-                val collector = ArrangeDraftChipsCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-                stateFlow.value = LibraryUiState(
-                    visibleTabs = persistentListOf(readingTab),
-                    arrangeDraft = LibraryArrangeDraft(
-                        tabId = readingTab.id,
-                        sortMode = LibrarySortMode.MANUAL,
-                        sortDirection = SortDirection.ASCENDING,
-                        gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
-                    ),
+        fun `unrelated state change that leaves the snapshot equal does not retrigger recompute`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val collector = ArrangeDraftChipsCollector()
+
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-                val layoutChipsAfterFirstEmit = stateFlow.value.arrangeLayoutChips
-                val sortChipsAfterFirstEmit = stateFlow.value.arrangeSortChips
-                val sortHeaderAfterFirstEmit = stateFlow.value.arrangeSortHeader
-
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(isArrangeSheetExpanded = true)
-
-                // ----- Assert -----
-                (stateFlow.value.arrangeLayoutChips === layoutChipsAfterFirstEmit) shouldBe true
-                (stateFlow.value.arrangeSortHeader === sortHeaderAfterFirstEmit) shouldBe true
-                (stateFlow.value.arrangeSortChips === sortChipsAfterFirstEmit) shouldBe true
-                job.cancel()
             }
+
+            stateFlow.value = LibraryUiState(
+                visibleTabs = persistentListOf(readingTab),
+                arrangeDraft = LibraryArrangeDraft(
+                    tabId = readingTab.id,
+                    sortMode = LibrarySortMode.MANUAL,
+                    sortDirection = SortDirection.ASCENDING,
+                    gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
+                ),
+            )
+
+            val layoutChipsAfterFirstEmit = stateFlow.value.arrangeLayoutChips
+            val sortChipsAfterFirstEmit = stateFlow.value.arrangeSortChips
+            val sortHeaderAfterFirstEmit = stateFlow.value.arrangeSortHeader
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(isArrangeSheetExpanded = true)
+
+            // ----- Assert -----
+            (stateFlow.value.arrangeLayoutChips === layoutChipsAfterFirstEmit) shouldBe true
+            (stateFlow.value.arrangeSortHeader === sortHeaderAfterFirstEmit) shouldBe true
+            (stateFlow.value.arrangeSortChips === sortChipsAfterFirstEmit) shouldBe true
+            job.cancel()
+        }
     }
 }

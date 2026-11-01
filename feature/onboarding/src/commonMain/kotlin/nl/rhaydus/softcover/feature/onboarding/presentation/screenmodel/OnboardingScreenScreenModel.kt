@@ -19,10 +19,10 @@ internal class OnboardingScreenScreenModel(
     dispatchers: AppDispatchers,
     initializers: List<OnboardingCollector>,
 ) : ToadScreenModel<OnboardingUiState, OnboardingEvent, OnboardingDependencies, OnboardingCollector, LocalOnboardingVariables>(
-    initializers = initializers,
-    initialState = OnboardingUiState(),
-    initialLocalVariables = LocalOnboardingVariables(),
-) {
+        initializers = initializers,
+        initialState = OnboardingUiState(),
+        initialLocalVariables = LocalOnboardingVariables(),
+    ) {
     override val dependencies: OnboardingDependencies = OnboardingDependencies(
         initializeUserIdAndBooksUseCase = initializeUserIdAndBooksUseCase,
         resetUserDataUseCase = resetUserDataUseCase,

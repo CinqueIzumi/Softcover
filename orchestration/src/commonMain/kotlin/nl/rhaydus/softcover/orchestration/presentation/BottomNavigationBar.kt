@@ -71,7 +71,10 @@ internal fun BottomFloatingBar(modifier: Modifier = Modifier) {
                         containerColor = MaterialTheme.colorScheme.inversePrimary,
                         modifier = Modifier
                             .align(Alignment.TopEnd)
-                            .offset(x = -Spacing.xs, y = Spacing.xxxs)
+                            .offset(
+                                x = -Spacing.xs,
+                                y = Spacing.xxxs,
+                            )
                             .size(10.dp),
                     )
                 }

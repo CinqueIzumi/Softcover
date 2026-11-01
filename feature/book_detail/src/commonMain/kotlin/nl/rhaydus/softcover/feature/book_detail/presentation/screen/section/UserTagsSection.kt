@@ -27,6 +27,7 @@ internal fun UserTagsSection(
 ) {
     val chips = state.userTagChips
     val opener = state.tagEditorOpenerChip
+
     val onOpenerEvent: (ChipEvent) -> Unit = { event ->
         if (event is ChipEvent.Clicked) runAction(OnOpenTagEditorAction())
     }

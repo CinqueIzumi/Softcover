@@ -29,6 +29,7 @@ class ArrangeSheetSnapshotTest {
         every {
             it.id
         } returns id
+
         every {
             it.ranked
         } returns ranked

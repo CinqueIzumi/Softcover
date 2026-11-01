@@ -5,7 +5,6 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
-import kotlin.time.Instant
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -25,6 +24,7 @@ import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import kotlin.time.Instant
 
 class QuotesSectionCollectorTest {
     private lateinit var observeBookQuotesUseCase: ObserveBookQuotesUseCase
@@ -37,15 +37,19 @@ class QuotesSectionCollectorTest {
     fun setUp() {
         storedQuotes = MutableStateFlow(emptyList())
         observeBookQuotesUseCase = mockk()
+
         every {
             observeBookQuotesUseCase(bookId = any())
         } returns storedQuotes
+
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk<BookDetailDependencies>(relaxed = true).also {
             every {
                 it.observeBookQuotesUseCase
@@ -89,19 +93,18 @@ class QuotesSectionCollectorTest {
         }
 
         @Test
-        fun `keeps the section with its empty message while a shelved book has no quotes`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                stateFlow.value = buildBookDetailUiState().copy(book = buildQuoteBook())
+        fun `keeps the section with its empty message while a shelved book has no quotes`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = buildBookDetailUiState().copy(book = buildQuoteBook())
 
-                // ----- Act -----
-                launchCollector()
+            // ----- Act -----
+            launchCollector()
 
-                // ----- Assert -----
-                val section = stateFlow.value.quotesSection.shouldNotBeNull()
-                section.quotes.size shouldBe 0
-                section.emptyMessage.shouldNotBeNull()
-            }
+            // ----- Assert -----
+            val section = stateFlow.value.quotesSection.shouldNotBeNull()
+            section.quotes.size shouldBe 0
+            section.emptyMessage.shouldNotBeNull()
+        }
 
         @Test
         fun `adds a card when a quote is stored after launch`() = runTest(UnconfinedTestDispatcher()) {

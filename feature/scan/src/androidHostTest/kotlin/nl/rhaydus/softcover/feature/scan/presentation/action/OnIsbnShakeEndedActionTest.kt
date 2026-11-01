@@ -24,6 +24,7 @@ class OnIsbnShakeEndedActionTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(ScanUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalScanVariables()),
@@ -42,6 +43,7 @@ class OnIsbnShakeEndedActionTest {
                     shaking = true,
                 ),
             )
+
             stateFlow.value = stateFlow.value.copy(isbnField = withError)
 
             // ----- Act -----

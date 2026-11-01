@@ -205,6 +205,7 @@ internal class MainActivityViewModel(
                     authenticated = false,
                 )
             }
+
             return
         }
 

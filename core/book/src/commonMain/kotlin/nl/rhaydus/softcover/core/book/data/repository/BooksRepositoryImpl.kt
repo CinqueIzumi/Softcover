@@ -629,6 +629,7 @@ internal class BooksRepositoryImpl(
                         book = optimistic,
                         status = status,
                     )
+
                     optimistic
                 }
 
@@ -652,6 +653,7 @@ internal class BooksRepositoryImpl(
         // currently-reading list until the next refresh. Falling back to [book] only when uncached.
         val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
         val optimistic = (snapshot ?: book).withRating(rating = rating)
+
         userBookCacheGate.cacheBook(
             book = optimistic,
             kind = PendingUserBookWriteKind.UPDATE_RATING,
@@ -682,6 +684,7 @@ internal class BooksRepositoryImpl(
                             book = optimistic,
                             rating = rating,
                         )
+
                         optimistic
                     }
 
@@ -715,10 +718,12 @@ internal class BooksRepositoryImpl(
         // snapshot still marked Reading, and re-caching that would resurrect the book in the
         // currently-reading list until the next refresh. Falling back to [book] only when uncached.
         val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
+
         val optimistic = (snapshot ?: book).withReview(
             review = review,
             hasSpoilers = hasSpoilers,
         )
+
         userBookCacheGate.cacheBook(
             book = optimistic,
             kind = PendingUserBookWriteKind.UPDATE_REVIEW,
@@ -752,6 +757,7 @@ internal class BooksRepositoryImpl(
                             review = review,
                             hasSpoilers = hasSpoilers,
                         )
+
                         optimistic
                     }
 
@@ -878,10 +884,12 @@ internal class BooksRepositoryImpl(
         }
 
         val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
+
         val optimistic = book.withProgress(
             newPage = newPage,
             newSeconds = newSeconds,
         )
+
         userBookCacheGate.cacheBook(
             book = optimistic,
             kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
@@ -923,6 +931,7 @@ internal class BooksRepositoryImpl(
                     book = optimistic,
                     kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
                 )
+
                 progressHistoryLocalDataSource.markSynced(localId = historyId)
             }.getOrElse { error ->
                 when (error) {
@@ -941,6 +950,7 @@ internal class BooksRepositoryImpl(
                             actionAt = readAtIso,
                             progressHistoryId = historyId,
                         )
+
                         optimistic
                     }
 
@@ -960,6 +970,7 @@ internal class BooksRepositoryImpl(
             actionAt = readAtIso,
             progressHistoryId = historyId,
         )
+
         return optimistic
     }
 
@@ -1004,6 +1015,7 @@ internal class BooksRepositoryImpl(
                             book = optimistic,
                             actionAt = actionAt,
                         )
+
                         optimistic
                     }
 
@@ -1019,6 +1031,7 @@ internal class BooksRepositoryImpl(
             book = optimistic,
             actionAt = actionAt,
         )
+
         return optimistic
     }
 

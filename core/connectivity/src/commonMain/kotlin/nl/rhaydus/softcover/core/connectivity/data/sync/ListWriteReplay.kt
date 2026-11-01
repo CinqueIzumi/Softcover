@@ -60,13 +60,16 @@ internal class ListWriteReplay(
             listId = listId,
             bookId = bookId,
         )
+
         listsLocalDataSource.cacheListBook(book = real)
     }
 
     private suspend fun replayRemoveListBook(write: PendingListWrite) {
         val listId: Int = write.listId ?: error("REMOVE_LIST_BOOK replay missing listId")
+
         val listBookId: Int =
             write.listBookId ?: error("REMOVE_LIST_BOOK replay missing listBookId")
+
         val bookId: Int = write.bookId ?: error("REMOVE_LIST_BOOK replay missing bookId")
         val editionId: Int = write.editionId ?: error("REMOVE_LIST_BOOK replay missing editionId")
 
@@ -84,8 +87,10 @@ internal class ListWriteReplay(
 
     private suspend fun replayReorderListBooks(write: PendingListWrite) {
         val listId: Int = write.listId ?: error("REORDER_LIST_BOOKS replay missing listId")
+
         val startPosition: Int =
             write.startPosition ?: error("REORDER_LIST_BOOKS replay missing startPosition")
+
         val ordered: List<Int> = write.orderedListBookIds
             ?.takeIf { it.isNotEmpty() }
             ?: error("REORDER_LIST_BOOKS replay missing orderedListBookIds")

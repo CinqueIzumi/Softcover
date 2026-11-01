@@ -18,16 +18,16 @@ internal class DocumentPageScreenModel(
     appDispatchers: AppDispatchers,
     flows: List<DocumentPageCollector>,
 ) : ToadScreenModel<
-    DocumentPageUiState,
-    DocumentPageEvent,
-    DocumentPageDependencies,
-    DocumentPageCollector,
-    DocumentPageLocalVariables,
+        DocumentPageUiState,
+        DocumentPageEvent,
+        DocumentPageDependencies,
+        DocumentPageCollector,
+        DocumentPageLocalVariables,
     >(
-    initialState = page.toInitialUiState(),
-    initialLocalVariables = DocumentPageLocalVariables(),
-    initializers = flows,
-) {
+        initialState = page.toInitialUiState(),
+        initialLocalVariables = DocumentPageLocalVariables(),
+        initializers = flows,
+    ) {
     override val dependencies = DocumentPageDependencies(
         source = source,
         mainDispatcher = appDispatchers.main,

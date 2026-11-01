@@ -27,6 +27,7 @@ internal fun SettingsSelectableRow(
     onClick: () -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
+
     val titleColor by animateColorAsState(
         targetValue = if (model.selected) {
             MaterialTheme.colorScheme.primary

@@ -51,11 +51,14 @@ class CoverModelsSnapshotTest {
                 bookId = BOOK_ID,
                 surface = SURFACE,
             )
+
             backdrop.sharedTransitionKey.shouldBeNull()
+
             hero.source shouldBe CoverSource.Remote(
                 url = COVER_URL,
                 persistEditionId = null,
             )
+
             backdrop.source shouldBe hero.source
         }
 
@@ -145,11 +148,13 @@ class CoverModelsSnapshotTest {
                 bookId = BOOK_ID,
                 surface = SURFACE,
             )
+
             result.heroRatingTransitionKey shouldBe bookTransitionKey(
                 element = BookTransitionElement.Rating,
                 bookId = BOOK_ID,
                 surface = SURFACE,
             )
+
             result.heroTitleTransitionKey.shouldNotBeNull()
         }
     }
@@ -301,6 +306,7 @@ class CoverModelsSnapshotTest {
                 bookId = BOOK_ID,
                 surface = SURFACE,
             )
+
             covers.heroRatingTransitionKey shouldBe bookTransitionKey(
                 element = BookTransitionElement.Rating,
                 bookId = BOOK_ID,
@@ -339,6 +345,7 @@ class CoverModelsSnapshotTest {
                 loadingBookDetails = false,
                 transitionSurface = SURFACE,
             )
+
             val bare = snapshot(
                 book = stubBook(),
                 loadingBookDetails = false,
@@ -363,6 +370,7 @@ class CoverModelsSnapshotTest {
                 loadingBookDetails = false,
                 displayedEdition = PreviewData.baseEdition.copy(id = 1),
             )
+
             val second = snapshot(
                 book = stubBook(),
                 loadingBookDetails = false,

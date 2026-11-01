@@ -48,6 +48,7 @@ class OnUpdateTimeProgressClickActionTest {
         updateBookProgress = mockk(relaxed = true)
         stateFlow = MutableStateFlow(buildBookDetailUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -65,6 +66,7 @@ class OnUpdateTimeProgressClickActionTest {
 
     private fun stubDependencies(testScope: TestScope): BookDetailDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<BookDetailDependencies>(relaxed = true).also { mock ->
             every {
                 mock.recordBookProgressUseCase
@@ -93,9 +95,11 @@ class OnUpdateTimeProgressClickActionTest {
                 e.audioSeconds
             } returns audioSeconds
         }
+
         every {
             book.currentEdition
         } returns edition
+
         every {
             book.id
         } returns id
@@ -115,6 +119,7 @@ class OnUpdateTimeProgressClickActionTest {
                     seconds = "5",
                 ),
             )
+
             dependencies = stubDependencies(this)
 
             val action = OnUpdateTimeProgressClickAction(
@@ -137,10 +142,12 @@ class OnUpdateTimeProgressClickActionTest {
         fun `leaves the update progress sheet open for its own dismiss`() = runTest {
             // ----- Arrange -----
             val book = stubBookWithAudioSeconds(audioSeconds = 7200)
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
                 progressSheet = openProgressSheet,
             )
+
             dependencies = stubDependencies(this)
 
             val action = OnUpdateTimeProgressClickAction(
@@ -166,6 +173,7 @@ class OnUpdateTimeProgressClickActionTest {
                 book = null,
                 progressSheet = openProgressSheet,
             )
+
             dependencies = stubDependencies(this)
 
             val action = OnUpdateTimeProgressClickAction(
@@ -182,6 +190,7 @@ class OnUpdateTimeProgressClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.progressSheet shouldBe openProgressSheet
+
             coVerify(exactly = 0) {
                 updateBookProgress(
                     any(),
@@ -230,11 +239,14 @@ class OnUpdateTimeProgressClickActionTest {
                 21,
                 0,
             )
+
             val book = stubBookWithAudioSeconds(audioSeconds = 7200)
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
                 readAt = readAt,
             )
+
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -330,6 +342,7 @@ class OnUpdateTimeProgressClickActionTest {
             val book = stubBookWithAudioSeconds(audioSeconds = 3600)
             stateFlow.value = buildBookDetailUiState().copy(book = book)
             val dependencies = stubDependencies(this)
+
             val action = OnUpdateTimeProgressClickAction(
                 hours = "-2",
                 minutes = "30",
@@ -447,6 +460,7 @@ class OnUpdateTimeProgressClickActionTest {
                 audioSeconds = 3600,
                 id = 42,
             )
+
             stateFlow.value = buildBookDetailUiState().copy(book = book)
             dependencies = stubDependencies(this)
 

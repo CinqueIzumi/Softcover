@@ -31,7 +31,11 @@ internal fun ReadingMasthead(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = Spacing.gutter, end = Spacing.gutter, top = Spacing.xl),
+            .padding(
+                start = Spacing.gutter,
+                end = Spacing.gutter,
+                top = Spacing.xl,
+            ),
     ) {
         PullToRefreshEyebrow(
             pullToRefreshState = pullToRefreshState,

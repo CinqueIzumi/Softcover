@@ -6,7 +6,6 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
-import kotlin.time.Clock
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,6 +34,7 @@ import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import kotlin.time.Clock
 
 class BookDeadlineCollectorTest {
     private lateinit var observeBookDeadlineUseCase: ObserveBookDeadlineUseCase
@@ -48,6 +48,7 @@ class BookDeadlineCollectorTest {
         deadlineFlow = MutableSharedFlow()
         observeBookDeadlineUseCase = mockk()
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -84,6 +85,7 @@ class BookDeadlineCollectorTest {
                 this@mockk.isAudiobook
             } returns false
         }
+
         val userBookRead = if (currentPage != null) {
             mockk<UserBookRead> {
                 every {
@@ -97,6 +99,7 @@ class BookDeadlineCollectorTest {
         } else {
             null
         }
+
         return mockk {
             every {
                 this@mockk.id
@@ -146,13 +149,16 @@ class BookDeadlineCollectorTest {
                 pages = 300,
                 currentPage = 0,
             )
+
             stateFlow.value = buildBookDetailUiState().copy(book = book)
+
             val deadline = buildDeadline(
                 bookId = 1,
                 initialPerDay = 10f,
             )
 
             val collector = BookDeadlineCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -169,6 +175,7 @@ class BookDeadlineCollectorTest {
                 current = 0,
                 total = 300,
             ).toDeadlineRowUiModel(dateStyle = stateFlow.value.dateStyle)
+
             stateFlow.value.deadlineRow shouldBe expected
             stateFlow.value.deadline shouldBe deadline
             job.cancel()
@@ -183,8 +190,10 @@ class BookDeadlineCollectorTest {
                 currentPage = 0,
                 paused = true,
             )
+
             stateFlow.value = buildBookDetailUiState().copy(book = book)
             val collector = BookDeadlineCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -203,33 +212,34 @@ class BookDeadlineCollectorTest {
         }
 
         @Test
-        fun `deadlineRow is null while the deadline is kept when the book has no pages`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val book = stubBook(
-                    id = 1,
-                    pages = null,
-                    currentPage = 0,
+        fun `deadlineRow is null while the deadline is kept when the book has no pages`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val book = stubBook(
+                id = 1,
+                pages = null,
+                currentPage = 0,
+            )
+
+            stateFlow.value = buildBookDetailUiState().copy(book = book)
+            val deadline = buildDeadline(bookId = 1)
+
+            val collector = BookDeadlineCollector()
+
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-                stateFlow.value = buildBookDetailUiState().copy(book = book)
-                val deadline = buildDeadline(bookId = 1)
-
-                val collector = BookDeadlineCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                deadlineFlow.emit(deadline)
-
-                // ----- Assert -----
-                stateFlow.value.deadlineRow shouldBe null
-                stateFlow.value.deadline shouldBe deadline
-                job.cancel()
             }
+
+            // ----- Act -----
+            deadlineFlow.emit(deadline)
+
+            // ----- Assert -----
+            stateFlow.value.deadlineRow shouldBe null
+            stateFlow.value.deadline shouldBe deadline
+            job.cancel()
+        }
 
         @Test
         fun `deadlineRow is null when deadline emits null`() = runTest(UnconfinedTestDispatcher()) {
@@ -239,9 +249,11 @@ class BookDeadlineCollectorTest {
                 pages = 300,
                 currentPage = 0,
             )
+
             stateFlow.value = buildBookDetailUiState().copy(book = book)
 
             val collector = BookDeadlineCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -270,6 +282,7 @@ class BookDeadlineCollectorTest {
                 pages = totalPages,
                 currentPage = 0,
             )
+
             stateFlow.value = buildBookDetailUiState().copy(book = bookBefore)
 
             val deadline = buildDeadline(
@@ -279,6 +292,7 @@ class BookDeadlineCollectorTest {
             )
 
             val collector = BookDeadlineCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -296,6 +310,7 @@ class BookDeadlineCollectorTest {
                 pages = totalPages,
                 currentPage = 150,
             )
+
             stateFlow.value = stateFlow.value.copy(book = bookAfter)
 
             // ----- Assert -----
@@ -310,6 +325,7 @@ class BookDeadlineCollectorTest {
             stateFlow.value = buildBookDetailUiState().copy(book = null)
 
             val collector = BookDeadlineCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

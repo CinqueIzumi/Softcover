@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiSt
 import nl.rhaydus.toad.UiAction
 
 internal sealed interface ReadingAction : UiAction<
-        ReadingScreenDependencies,
-        ReadingScreenUiState,
-        ReadingScreenEvent,
-        ReadingLocalVariables,
-        >
+    ReadingScreenDependencies,
+    ReadingScreenUiState,
+    ReadingScreenEvent,
+    ReadingLocalVariables,
+>

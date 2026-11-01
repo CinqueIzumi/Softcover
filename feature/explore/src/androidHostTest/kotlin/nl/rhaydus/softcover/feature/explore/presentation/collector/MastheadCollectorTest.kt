@@ -25,60 +25,64 @@ class MastheadCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(ExploreScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk(relaxed = true)
     }
 
     @Nested
     inner class OnLaunch {
         @Test
-        fun `swaps to a different masthead and disables refresh once isRefreshing turns on`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                stateFlow.value = ExploreScreenUiState(isRefreshing = false)
-                val job = launch {
-                    MastheadCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-                val idleMasthead = stateFlow.value.masthead
-                stateFlow.value.mastheadRefresh.enabled shouldBe true
+        fun `swaps to a different masthead and disables refresh once isRefreshing turns on`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = ExploreScreenUiState(isRefreshing = false)
 
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(isRefreshing = true)
-
-                // ----- Assert -----
-                stateFlow.value.masthead shouldNotBe idleMasthead
-                stateFlow.value.mastheadRefresh.enabled shouldBe false
-                job.cancel()
+            val job = launch {
+                MastheadCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            val idleMasthead = stateFlow.value.masthead
+            stateFlow.value.mastheadRefresh.enabled shouldBe true
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(isRefreshing = true)
+
+            // ----- Assert -----
+            stateFlow.value.masthead shouldNotBe idleMasthead
+            stateFlow.value.mastheadRefresh.enabled shouldBe false
+            job.cancel()
+        }
 
         @Test
-        fun `restores the idle masthead and re-enables refresh when isRefreshing flips back off`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                stateFlow.value = ExploreScreenUiState(isRefreshing = false)
-                val job = launch {
-                    MastheadCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-                val idleMasthead = stateFlow.value.masthead
-                stateFlow.value = stateFlow.value.copy(isRefreshing = true)
+        fun `restores the idle masthead and re-enables refresh when isRefreshing flips back off`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = ExploreScreenUiState(isRefreshing = false)
 
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(isRefreshing = false)
-
-                // ----- Assert -----
-                stateFlow.value.masthead shouldBe idleMasthead
-                stateFlow.value.mastheadRefresh.enabled shouldBe true
-                job.cancel()
+            val job = launch {
+                MastheadCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            val idleMasthead = stateFlow.value.masthead
+            stateFlow.value = stateFlow.value.copy(isRefreshing = true)
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(isRefreshing = false)
+
+            // ----- Assert -----
+            stateFlow.value.masthead shouldBe idleMasthead
+            stateFlow.value.mastheadRefresh.enabled shouldBe true
+            job.cancel()
+        }
     }
 }

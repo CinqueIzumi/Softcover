@@ -33,9 +33,11 @@ class WidgetTimeChangedReceiverTest {
 
     private fun intentWith(action: String?): Intent {
         val intent = mockk<Intent>()
+
         every {
             intent.action
         } returns action
+
         return intent
     }
 

@@ -70,6 +70,7 @@ class LibraryUiStateTest {
             prevBooksByTab = emptyMap(),
             prevEditionsByTab = emptyMap(),
         )
+
         return LibraryUiState(
             booksByTab = booksByTab.mapValues { (_, books) -> books.toImmutableList() }.toImmutableMap(),
             editionsByTab = editionsByTab.mapValues { (_, editions) -> editions.toImmutableList() }.toImmutableMap(),
@@ -91,6 +92,7 @@ class LibraryUiStateTest {
         fun `returns the tab's own masthead when its id is present in mastheads`() {
             // ----- Arrange -----
             val readMasthead = PageMastheadUiModel(title = "Read")
+
             val state = LibraryUiState(
                 mastheads = persistentMapOf(readTabId to readMasthead),
             )
@@ -103,6 +105,7 @@ class LibraryUiStateTest {
         fun `falls back to fallbackMasthead when the tab id is not in mastheads`() {
             // ----- Arrange -----
             val fallback = PageMastheadUiModel(title = "Fallback")
+
             val state = LibraryUiState(
                 mastheads = persistentMapOf(readTabId to PageMastheadUiModel(title = "Read")),
                 fallbackMasthead = fallback,
@@ -207,10 +210,12 @@ class LibraryUiStateTest {
                 id = 1,
                 title = "Zebra",
             )
+
             val bookA = buildBook(
                 id = 2,
                 title = "Apple",
             )
+
             val bookM = buildBook(
                 id = 3,
                 title = "Mango",
@@ -318,49 +323,49 @@ class LibraryUiStateTest {
         }
 
 
-    @Nested
-    inner class WithSelectedBookIds {
-        @Test
-        fun `sets the ids and a count matching their size together`() {
-            // ----- Arrange -----
-            val state = LibraryUiState()
+        @Nested
+        inner class WithSelectedBookIds {
+            @Test
+            fun `sets the ids and a count matching their size together`() {
+                // ----- Arrange -----
+                val state = LibraryUiState()
 
-            // ----- Act -----
-            val result = state.withSelectedBookIds(ids = setOf(3, 5, 8))
+                // ----- Act -----
+                val result = state.withSelectedBookIds(ids = setOf(3, 5, 8))
 
-            // ----- Assert -----
-            result.selectedBookIds shouldBe setOf(3, 5, 8)
-            result.selectionCount shouldBe selectionCountOf(count = 3)
+                // ----- Assert -----
+                result.selectedBookIds shouldBe setOf(3, 5, 8)
+                result.selectionCount shouldBe selectionCountOf(count = 3)
+            }
+
+            @Test
+            fun `an empty set resets the count to zero`() {
+                // ----- Arrange -----
+                val state = LibraryUiState().withSelectedBookIds(ids = setOf(1, 2))
+
+                // ----- Act -----
+                val result = state.withSelectedBookIds(ids = emptySet())
+
+                // ----- Assert -----
+                result.selectedBookIds shouldBe emptySet()
+                result.selectionCount shouldBe selectionCountOf(count = 0)
+            }
+
+            @Test
+            fun `leaves every other field untouched`() {
+                // ----- Arrange -----
+                val state = LibraryUiState(
+                    selectionMode = true,
+                    bulkActionInProgress = true,
+                )
+
+                // ----- Act -----
+                val result = state.withSelectedBookIds(ids = setOf(1))
+
+                // ----- Assert -----
+                result.selectionMode shouldBe true
+                result.bulkActionInProgress shouldBe true
+            }
         }
-
-        @Test
-        fun `an empty set resets the count to zero`() {
-            // ----- Arrange -----
-            val state = LibraryUiState().withSelectedBookIds(ids = setOf(1, 2))
-
-            // ----- Act -----
-            val result = state.withSelectedBookIds(ids = emptySet())
-
-            // ----- Assert -----
-            result.selectedBookIds shouldBe emptySet()
-            result.selectionCount shouldBe selectionCountOf(count = 0)
-        }
-
-        @Test
-        fun `leaves every other field untouched`() {
-            // ----- Arrange -----
-            val state = LibraryUiState(
-                selectionMode = true,
-                bulkActionInProgress = true,
-            )
-
-            // ----- Act -----
-            val result = state.withSelectedBookIds(ids = setOf(1))
-
-            // ----- Assert -----
-            result.selectionMode shouldBe true
-            result.bulkActionInProgress shouldBe true
-        }
-    }
     }
 }

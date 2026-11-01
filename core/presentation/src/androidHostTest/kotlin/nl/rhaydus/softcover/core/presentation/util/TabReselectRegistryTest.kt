@@ -72,6 +72,7 @@ class TabReselectRegistryTest {
             // ----- Arrange -----
             val current: suspend () -> Boolean = { true }
             val stale: suspend () -> Boolean = { false }
+
             registry.register(
                 key,
                 current,
@@ -91,6 +92,7 @@ class TabReselectRegistryTest {
         fun `the current handler is removed`() = runTest {
             // ----- Arrange -----
             val current: suspend () -> Boolean = { true }
+
             registry.register(
                 key,
                 current,

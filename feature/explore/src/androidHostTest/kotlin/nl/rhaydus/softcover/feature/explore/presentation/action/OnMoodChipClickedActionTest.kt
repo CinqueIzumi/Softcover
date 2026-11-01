@@ -41,6 +41,7 @@ class OnMoodChipClickedActionTest {
         searchByMoodUseCase = mockk()
         stateFlow = MutableStateFlow(ExploreScreenUiState())
         localVariablesFlow = MutableStateFlow(ExploreLocalVariables())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
@@ -50,6 +51,7 @@ class OnMoodChipClickedActionTest {
 
     private fun stubDependencies(testScope: TestScope): ExploreDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<ExploreDependencies>(relaxed = true).also { mock ->
             every {
                 mock.searchByMoodUseCase
@@ -100,6 +102,7 @@ class OnMoodChipClickedActionTest {
             } returns Result.success(Unit)
 
             val directStateFlow = MutableStateFlow(ExploreScreenUiState())
+
             val directScope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables> = ActionScope(
                 stateFlow = directStateFlow,
                 localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
@@ -114,6 +117,7 @@ class OnMoodChipClickedActionTest {
             stateFlow.value = ExploreScreenUiState(
                 moodChips = ChipSet(payloadByKey = persistentMapOf("mood:1" to cozy)),
             )
+
             val action = OnMoodChipClickedAction(key = "mood:1")
 
             // ----- Act -----

@@ -178,7 +178,10 @@ private fun SearchFocusRecentRow(
 
             Box(
                 modifier = Modifier
-                    .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
+                    .sizeIn(
+                        minWidth = 48.dp,
+                        minHeight = 48.dp,
+                    )
                     .pointerHandCursor()
                     .clickable(
                         role = Role.Button,

@@ -39,6 +39,7 @@ class OnFilterDraftChipToggledActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -55,6 +56,7 @@ class OnFilterDraftChipToggledActionTest {
                 tabId = tabId,
                 filters = LibraryFilters(),
             )
+
             stateFlow.value = LibraryUiState(
                 filterDraft = draft,
                 filterChipsByTab = persistentMapOf(
@@ -99,6 +101,7 @@ class OnFilterDraftChipToggledActionTest {
                 tabId = tabId,
                 filters = LibraryFilters(),
             )
+
             stateFlow.value = LibraryUiState(
                 filterDraft = draft,
                 filterChipsByTab = persistentMapOf(
@@ -123,6 +126,7 @@ class OnFilterDraftChipToggledActionTest {
                 tabId = tabId,
                 filters = LibraryFilters(formats = persistentSetOf("Hardcover")),
             )
+
             stateFlow.value = LibraryUiState(
                 filterDraft = draft,
                 filterChipsByTab = persistentMapOf(

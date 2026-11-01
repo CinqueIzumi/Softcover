@@ -11,11 +11,15 @@ internal fun planTodayNudgeFor(
     visible: Boolean,
 ): BannerUiModel? {
     progress ?: return null
+
     if (progress.isExpired) return null
+
     if (progress.unitsRemaining == 0) return null
+
     if (progress.daysRemaining <= 0L) return null
 
     val needed = ceil(progress.requiredPerDay.toDouble()).toInt()
+
     if (needed <= 0) return null
 
     val message = when (progress.unit) {

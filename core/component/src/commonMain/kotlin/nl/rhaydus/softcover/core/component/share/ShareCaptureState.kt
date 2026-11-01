@@ -9,18 +9,17 @@ import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 data class ShareCaptureState(
     val progress: ShareCaptureProgress = ShareCaptureProgress.Idle,
 ) {
-    fun reduce(event: ShareCardSheetEvent): ShareCaptureState =
-        when (event) {
-            ShareCardSheetEvent.ShareStarted -> copy(progress = ShareCaptureProgress.Sharing)
+    fun reduce(event: ShareCardSheetEvent): ShareCaptureState = when (event) {
+        ShareCardSheetEvent.ShareStarted -> copy(progress = ShareCaptureProgress.Sharing)
 
-            ShareCardSheetEvent.SaveStarted -> copy(progress = ShareCaptureProgress.Saving)
+        ShareCardSheetEvent.SaveStarted -> copy(progress = ShareCaptureProgress.Saving)
 
-            ShareCardSheetEvent.CaptureFinished -> copy(progress = ShareCaptureProgress.Idle)
+        ShareCardSheetEvent.CaptureFinished -> copy(progress = ShareCaptureProgress.Idle)
 
-            ShareCardSheetEvent.Shared,
-            ShareCardSheetEvent.Dismissed,
-            -> this
-        }
+        ShareCardSheetEvent.Shared,
+        ShareCardSheetEvent.Dismissed,
+        -> this
+    }
 }
 
 fun SheetScaffoldUiModel.withShareCapture(capture: ShareCaptureState): SheetScaffoldUiModel =

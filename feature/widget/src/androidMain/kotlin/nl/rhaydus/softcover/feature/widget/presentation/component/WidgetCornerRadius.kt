@@ -1,9 +1,9 @@
 package nl.rhaydus.softcover.feature.widget.presentation.component
 
-import android.R as AndroidR
 import android.os.Build
 import androidx.glance.GlanceModifier
 import androidx.glance.appwidget.cornerRadius
+import android.R as AndroidR
 
 internal fun widgetCornerRadius(): GlanceModifier = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
     GlanceModifier.cornerRadius(AndroidR.dimen.system_app_widget_background_radius)

@@ -77,6 +77,7 @@ class ScanScreenModelTest {
                 isbn = "9780451524935",
                 origin = IsbnOrigin.Camera,
             )
+
             screenModel.runAction(action)
             val enabledWhileResolving = screenModel.state.value.isbnField.enabled
             pending.complete(Result.success(IsbnLookupResult.InvalidIsbn))

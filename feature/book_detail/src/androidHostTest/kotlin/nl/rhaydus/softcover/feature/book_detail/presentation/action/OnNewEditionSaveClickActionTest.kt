@@ -38,6 +38,7 @@ class OnNewEditionSaveClickActionTest {
         updateBookEditionUseCase = mockk()
         stateFlow = MutableStateFlow(buildBookDetailUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -47,6 +48,7 @@ class OnNewEditionSaveClickActionTest {
 
     private fun stubDependencies(testScope: TestScope): BookDetailDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<BookDetailDependencies>(relaxed = true).also { mock ->
             every {
                 mock.updateBookEditionUseCase
@@ -99,12 +101,14 @@ class OnNewEditionSaveClickActionTest {
             val userBook = stubUserBook()
             val book = stubBook(userBook = userBook)
             val edition = stubEdition()
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
                 editions = persistentListOf(edition),
                 selectedEditionId = edition.id,
                 editionSheetRequested = true,
             )
+
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -134,11 +138,13 @@ class OnNewEditionSaveClickActionTest {
             val userBook = stubUserBook()
             val book = stubBook(userBook = userBook)
             val edition = stubEdition(id = 99)
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
                 editions = persistentListOf(edition),
                 selectedEditionId = edition.id,
             )
+
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -172,6 +178,7 @@ class OnNewEditionSaveClickActionTest {
                 book = null,
                 editionSheetRequested = true,
             )
+
             dependencies = stubDependencies(this)
 
             val action = OnNewEditionSaveClickAction()
@@ -198,6 +205,7 @@ class OnNewEditionSaveClickActionTest {
                 userBook = stubUserBook(),
                 currentEdition = null,
             )
+
             val initialState = buildBookDetailUiState().copy(
                 book = book,
                 editions = persistentListOf(stubEdition(id = 5)),
@@ -205,6 +213,7 @@ class OnNewEditionSaveClickActionTest {
                 scannedEditionId = 42,
                 editionSheetRequested = true,
             )
+
             stateFlow.value = initialState
             dependencies = stubDependencies(this)
 
@@ -218,6 +227,7 @@ class OnNewEditionSaveClickActionTest {
 
             // ----- Assert -----
             stateFlow.value shouldBe initialState
+
             coVerify(exactly = 0) {
                 updateBookEditionUseCase(
                     any(),
@@ -231,6 +241,7 @@ class OnNewEditionSaveClickActionTest {
             // ----- Arrange -----
             val userBook = stubUserBook()
             val current = stubEdition(id = 1)
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = stubBook(
                     userBook = userBook,
@@ -239,6 +250,7 @@ class OnNewEditionSaveClickActionTest {
                 editions = persistentListOf(stubEdition(id = 5)),
                 selectedEditionId = 99,
             )
+
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -270,12 +282,14 @@ class OnNewEditionSaveClickActionTest {
             // ----- Arrange -----
             val book = stubBook(userBook = null)
             val edition = stubEdition(id = 77)
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
                 editions = persistentListOf(edition),
                 selectedEditionId = edition.id,
                 editionSheetRequested = true,
             )
+
             dependencies = stubDependencies(this)
 
             val action = OnNewEditionSaveClickAction()
@@ -290,6 +304,7 @@ class OnNewEditionSaveClickActionTest {
             stateFlow.value.previewEdition shouldBe edition
             stateFlow.value.editionSheetRequested shouldBe true
             eventChannel.tryReceive().getOrNull() shouldBe null
+
             coVerify(exactly = 0) {
                 updateBookEditionUseCase(
                     any(),
@@ -303,6 +318,7 @@ class OnNewEditionSaveClickActionTest {
             // ----- Arrange -----
             val book = stubBook(userBook = null)
             val edition = stubEdition(id = 77)
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
                 editions = persistentListOf(edition),
@@ -310,6 +326,7 @@ class OnNewEditionSaveClickActionTest {
                 scannedEditionId = 42,
                 editionSheetRequested = true,
             )
+
             dependencies = stubDependencies(this)
 
             val action = OnNewEditionSaveClickAction()
@@ -330,12 +347,14 @@ class OnNewEditionSaveClickActionTest {
             val userBook = stubUserBook()
             val book = stubBook(userBook = userBook)
             val edition = stubEdition()
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
                 editions = persistentListOf(edition),
                 selectedEditionId = edition.id,
                 loadingBookDetails = false,
             )
+
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -365,12 +384,14 @@ class OnNewEditionSaveClickActionTest {
             val userBook = stubUserBook()
             val book = stubBook(userBook = userBook)
             val edition = stubEdition()
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
                 editions = persistentListOf(edition),
                 selectedEditionId = edition.id,
                 loadingBookDetails = false,
             )
+
             dependencies = stubDependencies(this)
 
             val loadingStates = mutableListOf<Boolean>()

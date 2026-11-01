@@ -25,12 +25,14 @@ class OnClearMutationFailureActionTest {
     @BeforeEach
     fun setUp() {
         dependencies = mockk(relaxed = true)
+
         stateFlow = MutableStateFlow(
             buildBookDetailUiState().copy(
                 failedMutationBookIds = persistentSetOf(1, 2),
                 failedMutationEditionIds = persistentSetOf(10, 20),
             ),
         )
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),

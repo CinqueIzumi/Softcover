@@ -101,6 +101,7 @@ class VerdictDraftReducerTest {
                     ),
                 ),
             )
+
             val edited = TextFieldValue(
                 text = "XXhello world",
                 selection = TextRange(2),
@@ -111,6 +112,7 @@ class VerdictDraftReducerTest {
 
             // ----- Assert -----
             result.review shouldBe edited
+
             result.marks shouldBe persistentListOf(
                 RichTextMark(
                     start = 8,
@@ -134,6 +136,7 @@ class VerdictDraftReducerTest {
                     ),
                 ),
             )
+
             val edited = TextFieldValue(
                 text = "llo world",
                 selection = TextRange(0),
@@ -162,11 +165,13 @@ class VerdictDraftReducerTest {
                     type = RichTextMarkType.BOLD,
                 ),
             )
+
             val model = freshModel().typed(
                 text = "hello world",
                 selection = TextRange(0),
                 marks = marks,
             )
+
             val moved = TextFieldValue(
                 text = "hello world",
                 selection = TextRange(
@@ -190,6 +195,7 @@ class VerdictDraftReducerTest {
                 text = "hello",
                 selection = TextRange(0),
             )
+
             val ranged = TextFieldValue(
                 text = "hello",
                 selection = TextRange(
@@ -197,6 +203,7 @@ class VerdictDraftReducerTest {
                     end = 3,
                 ),
             )
+
             val collapsed = TextFieldValue(
                 text = "hello",
                 selection = TextRange(2),
@@ -225,6 +232,7 @@ class VerdictDraftReducerTest {
                     ),
                 ),
             )
+
             val inside = TextFieldValue(
                 text = "hello world",
                 selection = TextRange(
@@ -266,6 +274,7 @@ class VerdictDraftReducerTest {
                     type = RichTextMarkType.BOLD,
                 ),
             )
+
             result.markChips.getValue(RichTextMarkType.BOLD).selected shouldBe true
         }
 
@@ -325,6 +334,7 @@ class VerdictDraftReducerTest {
                 )
                 .reduce(VerdictDraftEvent.RatingChanged(rating = 2.5))
                 .reduce(VerdictDraftEvent.SpoilersToggled(checked = true))
+
             val rebuilt = PreviewData.baseBook.toVerdictSheetUiModel(
                 context = VerdictSheetContext.FINISHED,
                 review = null,

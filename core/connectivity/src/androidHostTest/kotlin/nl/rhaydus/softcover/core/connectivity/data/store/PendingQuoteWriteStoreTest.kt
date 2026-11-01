@@ -26,6 +26,7 @@ class PendingQuoteWriteStoreTest {
     fun setUp() {
         dao = mockk()
         localDataSource = mockk()
+
         store = PendingQuoteWriteStore(
             dao = dao,
             localDataSource = localDataSource,

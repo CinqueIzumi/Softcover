@@ -14,10 +14,12 @@ class ChipSetTest {
                 key = "first",
                 label = "First",
             )
+
             val second = ChipUiModel(
                 key = "second",
                 label = "Second",
             )
+
             val pairs = listOf(first to "a", second to "b")
 
             // ----- Act -----
@@ -52,6 +54,7 @@ class ChipSetTest {
                 key = "known",
                 label = "Known",
             )
+
             val chipSet = listOf(chip to "payload").toChipSet()
 
             // ----- Act -----

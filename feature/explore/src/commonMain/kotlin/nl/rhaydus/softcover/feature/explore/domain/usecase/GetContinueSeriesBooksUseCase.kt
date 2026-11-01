@@ -117,6 +117,7 @@ class GetContinueSeriesBooksUseCase(
     private fun dismissedFloorsBySeries(dismissedBooks: List<DismissedSeriesBook>): Map<Int, Double> = dismissedBooks
         .mapNotNull { book ->
             val seriesId = book.seriesId ?: return@mapNotNull null
+
             val position = book.seriesPosition ?: return@mapNotNull null
 
             seriesId to position
@@ -127,8 +128,7 @@ class GetContinueSeriesBooksUseCase(
         )
         .mapValues { (_, positions) -> positions.max() }
 
-    private suspend fun fetchNextBooks(seeds: List<SeriesContinuationSeed>): List<Book> =
-        runCatchingLogged {
-            exploreRepository.fetchNextBooksInSeries(seeds = seeds)
-        }.getOrNull().orEmpty()
+    private suspend fun fetchNextBooks(seeds: List<SeriesContinuationSeed>): List<Book> = runCatchingLogged {
+        exploreRepository.fetchNextBooksInSeries(seeds = seeds)
+    }.getOrNull().orEmpty()
 }

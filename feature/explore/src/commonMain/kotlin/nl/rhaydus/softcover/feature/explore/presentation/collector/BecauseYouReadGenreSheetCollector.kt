@@ -51,23 +51,22 @@ internal class BecauseYouReadGenreSheetCollector : ExploreCollector {
 internal fun becauseYouReadGenreRowsFor(
     genre: String?,
     options: List<String>,
-): ImmutableList<SheetRowUiModel<String?>> =
-    buildList<SheetRowUiModel<String?>> {
+): ImmutableList<SheetRowUiModel<String?>> = buildList<SheetRowUiModel<String?>> {
+    add(
+        SheetRowUiModel(
+            key = null,
+            label = "Auto (most-read)",
+            selected = options.none { it == genre },
+        ),
+    )
+
+    options.forEach { option ->
         add(
             SheetRowUiModel(
-                key = null,
-                label = "Auto (most-read)",
-                selected = options.none { it == genre },
+                key = option,
+                label = option,
+                selected = option == genre,
             ),
         )
-
-        options.forEach { option ->
-            add(
-                SheetRowUiModel(
-                    key = option,
-                    label = option,
-                    selected = option == genre,
-                ),
-            )
-        }
-    }.toImmutableList()
+    }
+}.toImmutableList()

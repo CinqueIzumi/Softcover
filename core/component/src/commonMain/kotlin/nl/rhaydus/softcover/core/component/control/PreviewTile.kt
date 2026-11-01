@@ -61,6 +61,7 @@ internal fun PreviewTileFrame(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val motionScheme = MaterialTheme.motionScheme
+
     val accentColor by animateColorAsState(
         targetValue = if (selected) {
             MaterialTheme.colorScheme.primary
@@ -69,10 +70,12 @@ internal fun PreviewTileFrame(
         },
         animationSpec = motionScheme.defaultEffectsSpec<Color>(),
     )
+
     val borderWidth by animateDpAsState(
         targetValue = if (selected) 2.dp else 1.dp,
         animationSpec = motionScheme.defaultEffectsSpec<Dp>(),
     )
+
     val labelColor by animateColorAsState(
         targetValue = if (selected) {
             MaterialTheme.colorScheme.primary

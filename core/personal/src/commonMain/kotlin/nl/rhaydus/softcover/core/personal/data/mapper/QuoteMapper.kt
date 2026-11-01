@@ -82,8 +82,11 @@ internal fun newPendingQuoteEntity(
 /** Rows with no entry text, an unparsable date or no book are dropped: a quote without them cannot be shown. */
 internal fun QuoteFieldsFragment.toQuoteEntity(): QuoteEntity? {
     val bookId: Int = book_id ?: return null
+
     val text: String = entry?.takeIf { it.isNotBlank() } ?: return null
+
     val instant: Instant = runCatching { Instant.parse(action_at) }.getOrNull() ?: return null
+
     val columns: PositionColumns = positionColumns(position = quotePositionFromMetadata(metadata = metadata))
 
     return QuoteEntity(

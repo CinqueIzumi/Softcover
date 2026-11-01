@@ -29,6 +29,7 @@ class OnArrangeSortChipClickedActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -62,6 +63,7 @@ class OnArrangeSortChipClickedActionTest {
                 sortDirection = SortDirection.ASCENDING,
                 gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
             )
+
             stateFlow.value = LibraryUiState(arrangeDraft = draft)
 
             // ----- Act -----
@@ -83,6 +85,7 @@ class OnArrangeSortChipClickedActionTest {
                 sortDirection = SortDirection.DESCENDING,
                 gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
             )
+
             stateFlow.value = LibraryUiState(arrangeDraft = draft)
 
             // ----- Act -----

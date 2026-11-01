@@ -4,17 +4,17 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.core.net.toUri
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import nl.rhaydus.common.AppLog
+import nl.rhaydus.common.runCatchingCancellable
 import java.io.File
 import java.security.MessageDigest
 import java.util.Locale
 import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import nl.rhaydus.common.AppLog
-import nl.rhaydus.common.runCatchingCancellable
 
 internal class WidgetImageStore(
     private val context: Context,
@@ -92,20 +92,25 @@ internal class WidgetImageStore(
         file: File,
     ): Uri? = withContext(ioDispatcher) {
         var temp: File? = null
+
         runCatchingCancellable {
             directory.mkdirs()
+
             val created = File.createTempFile(
                 "render",
                 TEMP_SUFFIX,
                 directory,
             )
+
             temp = created
+
             val compressed = created.outputStream().use {
                 format.compress(
                     bitmap = bitmap,
                     output = it,
                 )
             }
+
             if (compressed && created.length() > 0L && created.renameTo(file)) uriOf(file) else null
         }.onFailure { error ->
             AppLog.e(
@@ -124,6 +129,7 @@ internal class WidgetImageStore(
         format: WidgetImageFormat,
     ): String {
         val digest = MessageDigest.getInstance("SHA-256").digest(key.toByteArray())
+
         val hex = digest.joinToString(separator = "") { byte ->
             String.format(
                 Locale.ROOT,

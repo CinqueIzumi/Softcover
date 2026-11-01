@@ -40,6 +40,7 @@ class OnEditionOwnedToggleActionTest {
         stateFlow = MutableStateFlow(buildBookDetailUiState())
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
@@ -49,6 +50,7 @@ class OnEditionOwnedToggleActionTest {
 
     private fun stubDependencies(testScope: TestScope): BookDetailDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<BookDetailDependencies>(relaxed = true).also { mock ->
             every {
                 mock.setEditionAsOwnedUseCase
@@ -75,6 +77,7 @@ class OnEditionOwnedToggleActionTest {
         every {
             mock.id
         } returns id
+
         every {
             mock.owned
         } returns owned
@@ -146,6 +149,7 @@ class OnEditionOwnedToggleActionTest {
                     owned = false,
                 )
             }
+
             val sentEvent = eventChannel.tryReceive().getOrNull()
             sentEvent.shouldBeInstanceOf<BookDetailEvent.MutationSucceededEvent>().feedback shouldBe null
         }
@@ -186,6 +190,7 @@ class OnEditionOwnedToggleActionTest {
                 id = 99,
                 owned = false,
             )
+
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -215,11 +220,14 @@ class OnEditionOwnedToggleActionTest {
         fun `cancels prior job for same edition id and replaces it with a new one`() = runTest {
             // ----- Arrange -----
             val editionId = 99
+
             val edition = stubEdition(
                 id = editionId,
                 owned = false,
             )
+
             val priorJob = Job()
+
             localVariablesFlow.value = BookDetailLocalVariables(
                 editionMutationJobs = mapOf(editionId to priorJob),
             )

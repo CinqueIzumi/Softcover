@@ -53,6 +53,7 @@ internal actual fun ExploreScreenLayout(
                 modifier = Modifier.padding(bottom = rememberBottomBarPadding()),
             )
         }
+
         return
     }
 

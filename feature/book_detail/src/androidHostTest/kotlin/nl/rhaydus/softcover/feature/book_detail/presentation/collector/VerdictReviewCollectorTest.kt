@@ -36,6 +36,7 @@ class VerdictReviewCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -110,6 +111,7 @@ class VerdictReviewCollectorTest {
                     rating = 0.0,
                 ),
             )
+
             launchCollector()
 
             // ----- Act -----
@@ -126,6 +128,7 @@ class VerdictReviewCollectorTest {
         fun `carries the rating, review and spoiler flag`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val reviewDocument = buildReviewDocument(text = "A gorgeous read.")
+
             val book = stubBook(
                 userBook = stubUserBook(
                     reviewDocument = reviewDocument,
@@ -133,6 +136,7 @@ class VerdictReviewCollectorTest {
                     reviewHasSpoilers = true,
                 ),
             )
+
             launchCollector()
 
             // ----- Act -----
@@ -155,6 +159,7 @@ class VerdictReviewCollectorTest {
                     rating = 3.0,
                 ),
             )
+
             launchCollector()
 
             // ----- Act -----
@@ -190,12 +195,14 @@ class VerdictReviewCollectorTest {
         fun `treats a zero rating as unrated when a review is present`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val reviewDocument = buildReviewDocument(text = "Unrated but reviewed.")
+
             val book = stubBook(
                 userBook = stubUserBook(
                     reviewDocument = reviewDocument,
                     rating = 0.0,
                 ),
             )
+
             launchCollector()
 
             // ----- Act -----
@@ -218,6 +225,7 @@ class VerdictReviewCollectorTest {
                     rating = 2.5,
                 ),
             )
+
             launchCollector()
 
             // ----- Act -----
@@ -257,6 +265,7 @@ class VerdictReviewCollectorTest {
                     ),
                 ),
             )
+
             launchCollector()
 
             // ----- Act -----

@@ -114,6 +114,7 @@ private fun ColumnChartRow(
             )
 
             val dimmed = activeIndex >= 0 && index != activeIndex
+
             val barAlpha = animateFloatAsState(
                 targetValue = if (dimmed) 0.35f else 1f,
                 animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),

@@ -41,6 +41,7 @@ class SpineColourSectionMapperTest {
                 useDynamicColor = true,
                 paletteGloss = paletteGloss,
             )
+
             val withoutDynamic = spineColourSectionFor(
                 themeMode,
                 useDynamicColor = false,

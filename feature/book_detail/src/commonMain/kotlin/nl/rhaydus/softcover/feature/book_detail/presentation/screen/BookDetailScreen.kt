@@ -66,15 +66,14 @@ class BookDetailScreen(
         // the pushed path.
         val overlayNavigator = LocalBookDetailOverlayNavigator.current ?: navigator
 
-        val screenModel: BookDetailScreenScreenModel =
-            koinScreenModel<BookDetailScreenScreenModel> {
-                parametersOf(
-                    id,
-                    initialCover,
-                    transitionSurface,
-                    showVerdictSheet,
-                )
-            }
+        val screenModel: BookDetailScreenScreenModel = koinScreenModel<BookDetailScreenScreenModel> {
+            parametersOf(
+                id,
+                initialCover,
+                transitionSurface,
+                showVerdictSheet,
+            )
+        }
 
         val state: BookDetailUiState by screenModel.state.collectAsStateWithLifecycle()
 

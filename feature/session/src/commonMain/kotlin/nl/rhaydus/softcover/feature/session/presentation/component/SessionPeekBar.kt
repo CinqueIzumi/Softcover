@@ -120,7 +120,10 @@ private fun SessionPeekBarContent(
                 .padding(horizontal = if (flush) 0.dp else Spacing.sm),
         ) {
             Row(
-                modifier = Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.xs),
+                modifier = Modifier.padding(
+                    horizontal = Spacing.sm,
+                    vertical = Spacing.xs,
+                ),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             ) {

@@ -22,6 +22,7 @@ class AndroidApolloConventionPlugin : Plugin<Project> {
                 "commonMainApi",
                 libs.library("apollo"),
             )
+
             add(
                 "commonMainApi",
                 libs.library("apollo-normalized-cache"),

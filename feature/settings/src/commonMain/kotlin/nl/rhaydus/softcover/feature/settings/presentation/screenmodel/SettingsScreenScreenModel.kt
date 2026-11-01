@@ -45,14 +45,14 @@ internal class SettingsScreenScreenModel(
     appDispatchers: AppDispatchers,
     flows: List<SettingsCollector>,
 ) : ToadScreenModel<SettingsScreenUiState, SettingsScreenEvent, SettingsScreenDependencies, SettingsCollector, SettingsLocalVariables>(
-    initialState = SettingsScreenUiState(
-        appVersionName = appVersionProvider.versionInfo.name,
-        appVersionCode = appVersionProvider.versionInfo.code,
-        widgetsSupported = homeScreenWidgets.isSupported,
-    ),
-    initialLocalVariables = SettingsLocalVariables(),
-    initializers = flows,
-) {
+        initialState = SettingsScreenUiState(
+            appVersionName = appVersionProvider.versionInfo.name,
+            appVersionCode = appVersionProvider.versionInfo.code,
+            widgetsSupported = homeScreenWidgets.isSupported,
+        ),
+        initialLocalVariables = SettingsLocalVariables(),
+        initializers = flows,
+    ) {
     override val dependencies = SettingsScreenDependencies(
         getThemeConfigurationUseCase = getThemeConfigurationUseCase,
         setBottomBarStyleUseCase = setBottomBarStyleUseCase,

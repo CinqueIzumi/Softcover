@@ -118,7 +118,10 @@ private fun ReviewCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = quoteAlpha),
                 modifier = Modifier
                     .align(Alignment.TopStart)
-                    .padding(start = Spacing.md, top = Spacing.xxs),
+                    .padding(
+                        start = Spacing.md,
+                        top = Spacing.xxs,
+                    ),
             )
 
             Column(

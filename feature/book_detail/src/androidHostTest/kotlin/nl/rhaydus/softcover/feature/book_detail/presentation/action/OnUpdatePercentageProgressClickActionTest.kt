@@ -46,6 +46,7 @@ class OnUpdatePercentageProgressClickActionTest {
         updateBookProgress = mockk(relaxed = true)
         stateFlow = MutableStateFlow(buildBookDetailUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -63,6 +64,7 @@ class OnUpdatePercentageProgressClickActionTest {
 
     private fun stubDependencies(testScope: TestScope): BookDetailDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<BookDetailDependencies>(relaxed = true).also { mock ->
             every {
                 mock.recordBookProgressUseCase
@@ -86,12 +88,15 @@ class OnUpdatePercentageProgressClickActionTest {
         every {
             this@mockk.pages
         } returns pages
+
         every {
             id
         } returns 1
+
         every {
             isAudiobook
         } returns false
+
         every {
             audioSeconds
         } returns null
@@ -101,6 +106,7 @@ class OnUpdatePercentageProgressClickActionTest {
         every {
             this@mockk.audioSeconds
         } returns audioSeconds
+
         every {
             isAudiobook
         } returns true
@@ -117,9 +123,11 @@ class OnUpdatePercentageProgressClickActionTest {
         every {
             currentEdition
         } returns edition
+
         every {
             this@mockk.defaultEdition
         } returns defaultEdition
+
         every {
             this@mockk.id
         } returns id
@@ -130,12 +138,15 @@ class OnUpdatePercentageProgressClickActionTest {
         id: Int = 42,
     ): Book = mockk {
         val edition = stubAudiobookEdition(audioSeconds = audioSeconds)
+
         every {
             currentEdition
         } returns edition
+
         every {
             defaultEdition
         } returns null
+
         every {
             this@mockk.id
         } returns id
@@ -147,10 +158,12 @@ class OnUpdatePercentageProgressClickActionTest {
         fun `leaves the update progress sheet open for its own dismiss`() = runTest {
             // ----- Arrange -----
             val book = stubBook(currentEditionPages = 300)
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
                 progressSheet = openProgressSheet,
             )
+
             dependencies = stubDependencies(this)
 
             val action = OnUpdatePercentageProgressClickAction(newPercentage = "50")
@@ -172,6 +185,7 @@ class OnUpdatePercentageProgressClickActionTest {
                 book = null,
                 progressSheet = openProgressSheet,
             )
+
             dependencies = stubDependencies(this)
 
             val action = OnUpdatePercentageProgressClickAction(newPercentage = "50")
@@ -184,6 +198,7 @@ class OnUpdatePercentageProgressClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.progressSheet shouldBe openProgressSheet
+
             coVerify(exactly = 0) {
                 updateBookProgress(
                     any(),
@@ -228,11 +243,14 @@ class OnUpdatePercentageProgressClickActionTest {
                 21,
                 0,
             )
+
             val book = stubBook(currentEditionPages = 200)
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
                 readAt = readAt,
             )
+
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -271,6 +289,7 @@ class OnUpdatePercentageProgressClickActionTest {
                 currentEditionPages = null,
                 defaultEditionPages = 400,
             )
+
             stateFlow.value = buildBookDetailUiState().copy(book = book)
             dependencies = stubDependencies(this)
 
@@ -299,6 +318,7 @@ class OnUpdatePercentageProgressClickActionTest {
                 currentEditionPages = null,
                 defaultEditionPages = null,
             )
+
             stateFlow.value = buildBookDetailUiState().copy(book = book)
             dependencies = stubDependencies(this)
 
@@ -550,6 +570,7 @@ class OnUpdatePercentageProgressClickActionTest {
                 currentEditionPages = 300,
                 id = 42,
             )
+
             stateFlow.value = buildBookDetailUiState().copy(book = book)
             dependencies = stubDependencies(this)
 

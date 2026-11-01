@@ -55,6 +55,7 @@ class RoomOpenSurvivesUpgradeTest {
         withConnection(file) { connection ->
             schema.createIn(connection)
             schema.seedOneRowPerTable(connection)
+
             connection.execSQL(
                 "INSERT INTO user_book_reads (id, userBookId, currentPage, startedAt, finishedAt) " +
                     "VALUES (2, 1, 80, '2024-02-01T00:00:00', '2024-03-01T00:00:00')",
@@ -111,6 +112,7 @@ class RoomOpenSurvivesUpgradeTest {
             (oldSchema.tableNames intersect latest.tableNames).forEach { name ->
                 val commonColumns = oldSchema.table(name).columns.map { it.name }
                     .filter { column -> latest.table(name).columns.any { it.name == column } }
+
                 val oldColumns = oldSchema.table(name).columns.map { it.name }
                 val keptIndexes = commonColumns.map { oldColumns.indexOf(it) }
                 val expected = before.getValue(name).map { row -> keptIndexes.map { row[it] } }
@@ -142,10 +144,12 @@ class RoomOpenSurvivesUpgradeTest {
         fun `every user table keeps its rows after the production builder upgrades to the latest version`() {
             // ----- Arrange -----
             val file = databaseFile()
+
             writeOldDatabase(
                 file,
                 schema52,
             )
+
             val before = snapshotsOf(
                 file,
                 schema52,
@@ -166,6 +170,7 @@ class RoomOpenSurvivesUpgradeTest {
         fun `the seeded tables cover the user data that must not be lost`() {
             // ----- Arrange -----
             val file = databaseFile()
+
             writeOldDatabase(
                 file,
                 schema52,
@@ -192,6 +197,7 @@ class RoomOpenSurvivesUpgradeTest {
         fun `both reads of a user book survive`() {
             // ----- Arrange -----
             val file = databaseFile()
+
             writeOldDatabase(
                 file,
                 schema52,
@@ -214,6 +220,7 @@ class RoomOpenSurvivesUpgradeTest {
         fun `the schema Room leaves behind is the exported latest schema without reading_log_entries`() {
             // ----- Arrange -----
             val file = databaseFile()
+
             writeOldDatabase(
                 file,
                 schema52,
@@ -230,11 +237,14 @@ class RoomOpenSurvivesUpgradeTest {
         fun `a database already on the latest version reopens with its rows intact`() {
             // ----- Arrange -----
             val file = databaseFile()
+
             writeOldDatabase(
                 file,
                 schema52,
             )
+
             openThroughProductionBuilder(file)
+
             val afterFirstOpen = snapshotsOf(
                 file,
                 latest,
@@ -259,10 +269,12 @@ class RoomOpenSurvivesUpgradeTest {
         fun `every user table keeps its rows through the whole chain to the latest version`() {
             // ----- Arrange -----
             val file = databaseFile()
+
             writeOldDatabase(
                 file,
                 schema42,
             )
+
             val before = snapshotsOf(
                 file,
                 schema42,
@@ -283,6 +295,7 @@ class RoomOpenSurvivesUpgradeTest {
         fun `both reads of a user book survive the chain`() {
             // ----- Arrange -----
             val file = databaseFile()
+
             writeOldDatabase(
                 file,
                 schema42,
@@ -301,6 +314,7 @@ class RoomOpenSurvivesUpgradeTest {
         fun `the schema Room leaves behind is the exported latest schema`() {
             // ----- Arrange -----
             val file = databaseFile()
+
             writeOldDatabase(
                 file,
                 schema42,
@@ -322,10 +336,12 @@ class RoomOpenSurvivesUpgradeTest {
         fun `every surviving user table keeps its rows when book_highlights is dropped`() {
             // ----- Arrange -----
             val file = databaseFile()
+
             writeOldDatabase(
                 file,
                 schema55,
             )
+
             val before = snapshotsOf(
                 file,
                 schema55,
@@ -346,6 +362,7 @@ class RoomOpenSurvivesUpgradeTest {
         fun `the schema Room leaves behind is the exported latest schema`() {
             // ----- Arrange -----
             val file = databaseFile()
+
             writeOldDatabase(
                 file,
                 schema55,

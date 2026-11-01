@@ -51,6 +51,7 @@ internal fun EmptyCurrentlyReadingScreen(
     // Mirrors CoverModelsCollector's own trendingBooks.firstOrNull(): the tile model is built there.
     val trendingBook = trendingBooks.firstOrNull()
     val showAdaptive = pickUpNext.isEmpty.not() || trendingTile != null
+
     val onPickUpNextEvent = rememberPrefetchingBookCardEventHandler(
         set = pickUpNext,
     ) { event, book ->
@@ -75,7 +76,10 @@ internal fun EmptyCurrentlyReadingScreen(
             } else {
                 Modifier
                     .fillMaxSize()
-                    .padding(horizontal = Spacing.gutter, vertical = Spacing.xl)
+                    .padding(
+                        horizontal = Spacing.gutter,
+                        vertical = Spacing.xl,
+                    )
             },
             onEvent = { event ->
                 when (event) {

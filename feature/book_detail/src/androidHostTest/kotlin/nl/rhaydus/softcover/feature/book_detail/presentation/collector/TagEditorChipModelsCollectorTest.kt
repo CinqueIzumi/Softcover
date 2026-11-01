@@ -30,6 +30,7 @@ class TagEditorChipModelsCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -42,28 +43,28 @@ class TagEditorChipModelsCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `produces one category chip per editable category with only the current one selected`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val collector = TagEditorChipModelsCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+        fun `produces one category chip per editable category with only the current one selected`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = TagEditorChipModelsCollector()
 
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(tagEditorCategory = TagCategory.MOOD)
-
-                // ----- Assert -----
-                val chips = stateFlow.value.tagEditorCategoryChips
-                chips.map { it.key } shouldBe EDITABLE_CATEGORIES.map { it.name }
-                chips.map { it.label } shouldBe EDITABLE_CATEGORIES.map { it.label }
-                chips.count { it.selected } shouldBe 1
-                chips.single { it.selected }.key shouldBe TagCategory.MOOD.name
-                job.cancel()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(tagEditorCategory = TagCategory.MOOD)
+
+            // ----- Assert -----
+            val chips = stateFlow.value.tagEditorCategoryChips
+            chips.map { it.key } shouldBe EDITABLE_CATEGORIES.map { it.name }
+            chips.map { it.label } shouldBe EDITABLE_CATEGORIES.map { it.label }
+            chips.count { it.selected } shouldBe 1
+            chips.single { it.selected }.key shouldBe TagCategory.MOOD.name
+            job.cancel()
+        }
 
         @Test
         fun `tagSuggestionChips mirror the suggestions`() = runTest(UnconfinedTestDispatcher()) {
@@ -78,7 +79,9 @@ class TagEditorChipModelsCollectorTest {
                     category = TagCategory.MOOD,
                 ),
             )
+
             val collector = TagEditorChipModelsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -104,11 +107,14 @@ class TagEditorChipModelsCollectorTest {
                     name = "Fantasy",
                     category = TagCategory.GENRE,
                 )
+
                 val moodFantasy = UserTag(
                     name = "Fantasy",
                     category = TagCategory.MOOD,
                 )
+
                 val collector = TagEditorChipModelsCollector()
+
                 val job = launch {
                     collector.onLaunch(
                         scope = scope,

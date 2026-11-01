@@ -174,12 +174,14 @@ private fun String.toMarkdownSpans(): ImmutableList<MarkdownSpan> {
                 code = code,
             ),
         )
+
         buffer.clear()
     }
 
     while (index < length) {
         val isBoldMarker = code.not() && index + 1 < length && this[index] == '*' && this[index + 1] == '*'
         val isItalicMarker = code.not() && (this[index] == '*' || isUnderscoreMarker(index))
+
         val linkMatch = if (code.not() && this[index] == '[') LINK_REGEX.matchAt(
             this,
             index,

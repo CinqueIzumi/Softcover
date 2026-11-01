@@ -41,6 +41,7 @@ class VerdictSheetCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(ReadingScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ReadingLocalVariables()),
@@ -154,6 +155,7 @@ class VerdictSheetCollectorTest {
                     ),
                 ),
             )
+
             val book = bookReviewing(reviewDocument = reviewDocument)
             launchCollector()
 
@@ -175,9 +177,11 @@ class VerdictSheetCollectorTest {
             val cover = cover()
             launchCollector()
             stateFlow.value = stateFlow.value.copy(verdictPromptBook = book)
+
             val edited = stateFlow.value.verdictSheet.shouldNotBeNull()
                 .reduce(event = VerdictDraftEvent.RatingChanged(rating = 4.0))
                 .reduce(event = VerdictDraftEvent.SpoilersToggled(checked = true))
+
             stateFlow.value = stateFlow.value.copy(verdictSheet = edited)
 
             // ----- Act -----
@@ -187,6 +191,7 @@ class VerdictSheetCollectorTest {
             val sheet = stateFlow.value.verdictSheet.shouldNotBeNull()
             sheet.rating shouldBe 4.0
             sheet.spoilers.checked shouldBe true
+
             sheet.scaffold shouldBe book.toVerdictSheetUiModel(
                 context = VerdictSheetContext.FINISHED,
                 review = null,
@@ -200,10 +205,12 @@ class VerdictSheetCollectorTest {
             val book = PreviewData.baseBook
             launchCollector()
             stateFlow.value = stateFlow.value.copy(verdictPromptBook = book)
+
             stateFlow.value = stateFlow.value.copy(
                 verdictSheet = stateFlow.value.verdictSheet.shouldNotBeNull()
                     .reduce(event = VerdictDraftEvent.RatingChanged(rating = 4.0)),
             )
+
             stateFlow.value = stateFlow.value.copy(verdictPromptBook = null)
 
             // ----- Act -----

@@ -39,11 +39,13 @@ class FeaturedCardCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(ExploreScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk<ExploreDependencies>(relaxed = true)
     }
 
@@ -68,51 +70,49 @@ class FeaturedCardCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `shows a masked stand-in under the current header while the release loads`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val job = launch {
-                    FeaturedCardCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(
-                    featuredUpcomingRelease = null,
-                    loadingFeaturedUpcomingRelease = true,
-                    featuredHeader = header,
+        fun `shows a masked stand-in under the current header while the release loads`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val job = launch {
+                FeaturedCardCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-
-                // ----- Assert -----
-                val card = stateFlow.value.featuredCard.shouldNotBeNull()
-                card.isLoading shouldBe true
-                card.header shouldBe header
-                job.cancel()
             }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                featuredUpcomingRelease = null,
+                loadingFeaturedUpcomingRelease = true,
+                featuredHeader = header,
+            )
+
+            // ----- Assert -----
+            val card = stateFlow.value.featuredCard.shouldNotBeNull()
+            card.isLoading shouldBe true
+            card.header shouldBe header
+            job.cancel()
+        }
 
         @Test
-        fun `collapses the card once the release resolved with nothing to feature`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val job = launch {
-                    FeaturedCardCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(
-                    featuredUpcomingRelease = null,
-                    loadingFeaturedUpcomingRelease = false,
+        fun `collapses the card once the release resolved with nothing to feature`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val job = launch {
+                FeaturedCardCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-
-                // ----- Assert -----
-                stateFlow.value.featuredCard.shouldBeNull()
-                job.cancel()
             }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                featuredUpcomingRelease = null,
+                loadingFeaturedUpcomingRelease = false,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.featuredCard.shouldBeNull()
+            job.cancel()
+        }
 
         @Test
         fun `builds the real card from the release, cover, badge and header`() = runTest(UnconfinedTestDispatcher()) {
@@ -123,6 +123,7 @@ class FeaturedCardCollectorTest {
                     dependencies = dependencies,
                 )
             }
+
             val cover = mockk<CoverUiModel>()
 
             // ----- Act -----
@@ -145,28 +146,27 @@ class FeaturedCardCollectorTest {
         }
 
         @Test
-        fun `keeps the real card when a release is present even while still flagged loading`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val job = launch {
-                    FeaturedCardCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(
-                    featuredUpcomingRelease = book(title = "Piranesi"),
-                    loadingFeaturedUpcomingRelease = true,
+        fun `keeps the real card when a release is present even while still flagged loading`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val job = launch {
+                FeaturedCardCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-
-                // ----- Assert -----
-                val card = stateFlow.value.featuredCard.shouldNotBeNull()
-                card.isLoading shouldBe false
-                card.title shouldBe "Piranesi"
-                job.cancel()
             }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                featuredUpcomingRelease = book(title = "Piranesi"),
+                loadingFeaturedUpcomingRelease = true,
+            )
+
+            // ----- Assert -----
+            val card = stateFlow.value.featuredCard.shouldNotBeNull()
+            card.isLoading shouldBe false
+            card.title shouldBe "Piranesi"
+            job.cancel()
+        }
 
         @Test
         fun `fills in the cover once it arrives after the release`() = runTest(UnconfinedTestDispatcher()) {
@@ -177,10 +177,12 @@ class FeaturedCardCollectorTest {
                     dependencies = dependencies,
                 )
             }
+
             stateFlow.value = stateFlow.value.copy(
                 featuredUpcomingRelease = book(),
                 loadingFeaturedUpcomingRelease = false,
             )
+
             val before = stateFlow.value.featuredCard.shouldNotBeNull().cover
             val cover = mockk<CoverUiModel>()
 
@@ -200,12 +202,14 @@ class FeaturedCardCollectorTest {
                 featuredUpcomingRelease = book(),
                 loadingFeaturedUpcomingRelease = false,
             )
+
             val job = launch {
                 FeaturedCardCollector().onLaunch(
                     scope = scope,
                     dependencies = dependencies,
                 )
             }
+
             val cardAfterFirstEmit = stateFlow.value.featuredCard.shouldNotBeNull()
 
             // ----- Act -----

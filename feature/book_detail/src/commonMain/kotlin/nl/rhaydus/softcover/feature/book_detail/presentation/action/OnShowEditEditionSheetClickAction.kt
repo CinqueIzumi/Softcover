@@ -15,6 +15,7 @@ internal class OnShowEditEditionSheetClickAction : BookDetailAction {
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
         val bookId = scope.currentState.book?.id ?: return
+
         val alreadyLoaded = scope.currentLocalVariables.editionsLoadedForBookId == bookId
 
         scope.setState {
@@ -37,6 +38,7 @@ internal class OnShowEditEditionSheetClickAction : BookDetailAction {
             dependencies.getEditionsByBookIdUseCase(bookId = bookId)
                 .onSuccess { editions ->
                     scope.setLocalVariables { it.copy(editionsLoadedForBookId = bookId) }
+
                     scope.setState {
                         it.copy(
                             editions = editions.toImmutableList(),

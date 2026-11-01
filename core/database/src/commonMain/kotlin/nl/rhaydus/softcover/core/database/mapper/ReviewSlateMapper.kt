@@ -15,45 +15,51 @@ private val reviewJson: Json = Json { ignoreUnknownKeys = true }
  * the resulting [List]/[Map] tree through its `Any` scalar adapter. An empty paragraph still emits a
  * single empty text node so the block stays well-formed.
  */
-fun reviewSlateFromDocument(document: ReviewDocument): List<Map<String, Any?>> =
-    document.paragraphs.map { paragraph ->
-        val children: List<Map<String, Any?>> = paragraph.runs
-            .ifEmpty { listOf(ReviewRun(text = "")) }
-            .map { run ->
-                buildMap {
-                    put(
-                        "object",
-                        "text",
-                    )
-                    put(
-                        "text",
-                        run.text,
-                    )
+fun reviewSlateFromDocument(document: ReviewDocument): List<Map<String, Any?>> = document.paragraphs.map { paragraph ->
+    val children: List<Map<String, Any?>> = paragraph.runs
+        .ifEmpty { listOf(ReviewRun(text = "")) }
+        .map { run ->
+            buildMap {
+                put(
+                    "object",
+                    "text",
+                )
 
-                    if (run.bold) put(
+                put(
+                    "text",
+                    run.text,
+                )
+
+                if (run.bold) {
+                    put(
                         "bold",
                         true,
                     )
+                }
 
-                    if (run.italic) put(
+                if (run.italic) {
+                    put(
                         "italic",
                         true,
                     )
+                }
 
-                    if (run.spoiler) put(
+                if (run.spoiler) {
+                    put(
                         "spoiler",
                         true,
                     )
                 }
             }
+        }
 
-        mapOf(
-            "data" to emptyMap<String, Any?>(),
-            "type" to "paragraph",
-            "object" to "block",
-            "children" to children,
-        )
-    }
+    mapOf(
+        "data" to emptyMap<String, Any?>(),
+        "type" to "paragraph",
+        "object" to "block",
+        "children" to children,
+    )
+}
 
 /**
  * Parse the `review_slate` value into a [ReviewDocument]. The field arrives as Apollo's default `jsonb`
@@ -91,27 +97,26 @@ private fun blocksFrom(slate: Any?): List<*>? = when (slate) {
     else -> null
 }
 
-private fun runsFrom(children: List<*>): List<ReviewRun> =
-    children.flatMap { child ->
-        val map = child as? Map<*, *> ?: return@flatMap emptyList()
+private fun runsFrom(children: List<*>): List<ReviewRun> = children.flatMap { child ->
+    val map = child as? Map<*, *> ?: return@flatMap emptyList()
 
-        val text = map["text"] as? String
+    val text = map["text"] as? String
 
-        if (text != null) {
-            listOf(
-                ReviewRun(
-                    text = text,
-                    bold = map["bold"] as? Boolean ?: false,
-                    italic = map["italic"] as? Boolean ?: false,
-                    spoiler = map["spoiler"] as? Boolean ?: false,
-                ),
-            )
-        } else {
-            val nested = (map["children"] as? List<*>).orEmpty()
+    if (text != null) {
+        listOf(
+            ReviewRun(
+                text = text,
+                bold = map["bold"] as? Boolean ?: false,
+                italic = map["italic"] as? Boolean ?: false,
+                spoiler = map["spoiler"] as? Boolean ?: false,
+            ),
+        )
+    } else {
+        val nested = (map["children"] as? List<*>).orEmpty()
 
-            runsFrom(children = nested)
-        }
+        runsFrom(children = nested)
     }
+}
 
 /** Serialise a [ReviewDocument] for durable storage (Room cache, offline write queue). */
 fun ReviewDocument.toJson(): String = reviewJson.encodeToString(
@@ -121,7 +126,11 @@ fun ReviewDocument.toJson(): String = reviewJson.encodeToString(
 
 /** Restore a [ReviewDocument] persisted via [toJson]; `null` when the stored JSON is absent or invalid. */
 fun reviewDocumentFromJson(json: String?): ReviewDocument? = json
-    ?.let { runCatching { reviewJson.decodeFromString(
-        ReviewDocument.serializer(),
-        it,
-    ) }.getOrNull() }
+    ?.let {
+        runCatching {
+            reviewJson.decodeFromString(
+                ReviewDocument.serializer(),
+                it,
+            )
+        }.getOrNull()
+    }

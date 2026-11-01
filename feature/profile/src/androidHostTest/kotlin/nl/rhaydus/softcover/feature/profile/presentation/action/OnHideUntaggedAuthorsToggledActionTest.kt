@@ -32,6 +32,7 @@ class OnHideUntaggedAuthorsToggledActionTest {
         setHideUntaggedAuthorsUseCase = mockk()
         stateFlow = MutableStateFlow(ProfileUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalProfileVariables()),
@@ -41,6 +42,7 @@ class OnHideUntaggedAuthorsToggledActionTest {
 
     private fun stubDependencies(testScope: TestScope): ProfileDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<ProfileDependencies>(relaxed = true).also { mock ->
             every {
                 mock.setHideUntaggedAuthorsUseCase

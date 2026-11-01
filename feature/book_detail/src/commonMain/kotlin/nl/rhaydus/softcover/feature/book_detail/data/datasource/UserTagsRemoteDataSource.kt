@@ -89,14 +89,13 @@ internal class UserTagsRemoteDataSourceImpl(
                 )
             }
 
-    private suspend fun fetchAllTagRows(userId: Int): List<FindUserTagVocabularyQuery.Data.Tag> =
-        fetchAllPages { limit, offset ->
-            apolloClient.safeQuery(
-                query = FindUserTagVocabularyQuery(
-                    userId = userId,
-                    limit = limit,
-                    offset = offset,
-                ),
-            ).tags
-        }
+    private suspend fun fetchAllTagRows(userId: Int): List<FindUserTagVocabularyQuery.Data.Tag> = fetchAllPages { limit, offset ->
+        apolloClient.safeQuery(
+            query = FindUserTagVocabularyQuery(
+                userId = userId,
+                limit = limit,
+                offset = offset,
+            ),
+        ).tags
+    }
 }

@@ -31,6 +31,7 @@ internal fun List<StatsBook>.toBooksByYear(currentYear: Int): List<YearCount> {
 
     forEach { book ->
         val year = book.finishDate?.year ?: return@forEach
+
         countsByYear[year] = (countsByYear[year] ?: 0) + 1
     }
 
@@ -48,6 +49,7 @@ internal fun List<StatsBook>.toPagesByYear(currentYear: Int): List<YearCount> {
 
     forEach { book ->
         val year = book.finishDate?.year ?: return@forEach
+
         pagesByYear[year] = (pagesByYear[year] ?: 0) + book.pages
     }
 
@@ -109,6 +111,7 @@ internal fun List<StatsBook>.toRatingHalfStarBuckets(): List<Int> {
 
     forEach { book ->
         val rating = book.rating ?: return@forEach
+
         val index = ((rating - RATING_BUCKET_FLOOR) / RATING_BUCKET_STEP)
             .roundToInt()
             .coerceIn(
@@ -186,9 +189,11 @@ internal fun List<StatsBook>.toAuthorDemographics(): AuthorDemographics {
     val authors = flatMap { it.authors }.distinctBy { it.id }
 
     val totalAuthors = authors.size
+
     val genderCounts = authors
         .groupingBy { it.gender }
         .eachCount()
+
     val unknownGenderCount = genderCounts[Gender.Unknown] ?: 0
     val knownGenderCount = totalAuthors - unknownGenderCount
 
@@ -204,6 +209,7 @@ internal fun List<StatsBook>.toAuthorDemographics(): AuthorDemographics {
                 fraction = count.toDouble() / totalAuthors,
             )
         }
+
     val genderSlices = if (unknownGenderCount > 0) {
         knownGenderSlices +
             GenderSlice(

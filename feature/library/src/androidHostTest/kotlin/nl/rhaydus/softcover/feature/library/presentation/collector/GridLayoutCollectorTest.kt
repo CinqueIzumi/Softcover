@@ -32,6 +32,7 @@ class GridLayoutCollectorTest {
         gridLayoutFlow = MutableSharedFlow()
         getLibraryGridLayoutAsFlowUseCase = mockk()
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -55,6 +56,7 @@ class GridLayoutCollectorTest {
         fun `updates gridLayout to the latest value when flow emits multiple times`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = GridLayoutCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

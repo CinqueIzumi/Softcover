@@ -23,6 +23,7 @@ fun CreateListSheet(
     val latestOnDismissRequest by rememberUpdatedState(onDismissRequest)
     val latestOnListCreated by rememberUpdatedState(onListCreated)
     val reportsCreation = onListCreated != null
+
     val callbacks = remember(reportsCreation) {
         CreateListCallbacks(
             onDismissRequest = { latestOnDismissRequest() },

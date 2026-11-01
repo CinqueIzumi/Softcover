@@ -42,6 +42,7 @@ class FetchBookReviewsActionTest {
         getTopBookReviewsUseCase = mockk()
         stateFlow = MutableStateFlow(buildBookDetailUiState())
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
@@ -51,6 +52,7 @@ class FetchBookReviewsActionTest {
 
     private fun stubDependencies(testScope: TestScope): BookDetailDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<BookDetailDependencies>(relaxed = true).also { mock ->
             every {
                 mock.getTopBookReviewsUseCase
@@ -100,6 +102,7 @@ class FetchBookReviewsActionTest {
             dependencies = stubDependencies(this)
 
             var reviewsAtInvocation: List<BookReviewUiModel>? = null
+
             coEvery {
                 getTopBookReviewsUseCase(bookId = 42)
             } coAnswers {

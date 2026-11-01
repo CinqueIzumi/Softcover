@@ -25,40 +25,44 @@ class RecentSearchChipsCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(ExploreScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk<ExploreDependencies>(relaxed = true)
     }
 
     @Nested
     inner class OnLaunch {
         @Test
-        fun `sets recentSearchChips with chips and payloads from previousSearchQueries`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val collector = RecentSearchChipsCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+        fun `sets recentSearchChips with chips and payloads from previousSearchQueries`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = RecentSearchChipsCollector()
 
-                // ----- Act -----
-                stateFlow.value = ExploreScreenUiState(previousSearchQueries = persistentListOf("kotlin", "android"))
-
-                // ----- Assert -----
-                stateFlow.value.recentSearchChips.chips.map { it.key } shouldBe
-                    listOf("recent:kotlin", "recent:android")
-                stateFlow.value.recentSearchChips.payloadByKey shouldBe mapOf(
-                    "recent:kotlin" to "kotlin",
-                    "recent:android" to "android",
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-                job.cancel()
             }
+
+            // ----- Act -----
+            stateFlow.value = ExploreScreenUiState(previousSearchQueries = persistentListOf("kotlin", "android"))
+
+            // ----- Assert -----
+            stateFlow.value.recentSearchChips.chips.map { it.key } shouldBe
+                listOf("recent:kotlin", "recent:android")
+
+            stateFlow.value.recentSearchChips.payloadByKey shouldBe mapOf(
+                "recent:kotlin" to "kotlin",
+                "recent:android" to "android",
+            )
+
+            job.cancel()
+        }
 
         @Test
         fun `unrelated state change that leaves previousSearchQueries equal does not retrigger recompute`() =
@@ -66,12 +70,14 @@ class RecentSearchChipsCollectorTest {
                 // ----- Arrange -----
                 stateFlow.value = ExploreScreenUiState(previousSearchQueries = persistentListOf("kotlin"))
                 val collector = RecentSearchChipsCollector()
+
                 val job = launch {
                     collector.onLaunch(
                         scope = scope,
                         dependencies = dependencies,
                     )
                 }
+
                 val chipSetAfterFirstEmit = stateFlow.value.recentSearchChips
 
                 // ----- Act -----

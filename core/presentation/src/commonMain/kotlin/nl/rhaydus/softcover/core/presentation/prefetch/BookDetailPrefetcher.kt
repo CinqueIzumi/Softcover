@@ -32,6 +32,7 @@ class BookDetailPrefetcher internal constructor(
     fun prefetch(bookId: Int) {
         scope.launch {
             val isNew = mutex.withLock { prefetched.add(bookId) }
+
             if (isNew.not()) return@launch
 
             fetchBookByIdUseCase(id = bookId).onFailure { error ->

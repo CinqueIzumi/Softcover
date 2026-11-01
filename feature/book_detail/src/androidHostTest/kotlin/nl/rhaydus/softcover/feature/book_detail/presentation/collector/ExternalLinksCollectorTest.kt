@@ -31,11 +31,13 @@ class ExternalLinksCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk(relaxed = true)
     }
 
@@ -63,6 +65,7 @@ class ExternalLinksCollectorTest {
         fun `externalLinks is built from the displayed edition ISBN`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = ExternalLinksCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -84,12 +87,14 @@ class ExternalLinksCollectorTest {
         fun `externalLinks clears when the new edition has no ISBN`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = ExternalLinksCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
                     dependencies = dependencies,
                 )
             }
+
             stateFlow.value = buildBookDetailUiState().copy(
                 previewEdition = buildEdition(id = 1).copy(isbn13 = "9780306406157"),
             )

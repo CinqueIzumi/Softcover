@@ -33,6 +33,7 @@ class OnClearSearchActionTest {
         clearSearchResultsUseCase = mockk()
         stateFlow = MutableStateFlow(ExploreScreenUiState())
         localVariablesFlow = MutableStateFlow(ExploreLocalVariables())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
@@ -56,6 +57,7 @@ class OnClearSearchActionTest {
         fun `leaves search entirely, dropping chrome, query, mood filter and in-flight fetch`() = runTest {
             // ----- Arrange -----
             val queryJob = Job()
+
             stateFlow.value = stateFlow.value.copy(
                 searchFocused = true,
                 isSortMenuExpanded = true,
@@ -68,6 +70,7 @@ class OnClearSearchActionTest {
                     bookCount = 10,
                 ),
             )
+
             localVariablesFlow.value = ExploreLocalVariables(
                 queryJob = queryJob,
                 searchResultsPage = 3,

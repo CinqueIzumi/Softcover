@@ -40,11 +40,13 @@ class OnRemoveBookClickActionTest {
         stateFlow = MutableStateFlow(buildBookDetailUiState())
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
             eventChannel = eventChannel,
         )
+
         dependencies = mockk<BookDetailDependencies>(relaxed = true).also { mock ->
             every {
                 mock.undoableBookRemover
@@ -99,6 +101,7 @@ class OnRemoveBookClickActionTest {
         fun `on success switches to THE_BOOK lens and clears the user book and read`() = runTest {
             // ----- Arrange -----
             val book = buildBook(id = 42)
+
             stateFlow.value = buildBookDetailUiState().copy(
                 selectedLens = BookDetailLens.YOURS,
                 book = book,
@@ -149,6 +152,7 @@ class OnRemoveBookClickActionTest {
         fun `on failure marks the book as failed and keeps lens and user book`() = runTest {
             // ----- Arrange -----
             val book = buildBook(id = 42)
+
             stateFlow.value = buildBookDetailUiState().copy(
                 selectedLens = BookDetailLens.YOURS,
                 book = book,
@@ -177,6 +181,7 @@ class OnRemoveBookClickActionTest {
             // ----- Arrange -----
             val book = buildBook(id = 42)
             val priorJob = Job()
+
             localVariablesFlow.value = BookDetailLocalVariables(
                 bookMutationJobs = mapOf(42 to priorJob),
             )
@@ -202,6 +207,7 @@ class OnRemoveBookClickActionTest {
             // ----- Arrange -----
             val book = buildBook(id = 42)
             val otherJob = Job()
+
             localVariablesFlow.value = BookDetailLocalVariables(
                 bookMutationJobs = mapOf(7 to otherJob),
             )

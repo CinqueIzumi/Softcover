@@ -35,6 +35,7 @@ class TagSuggestionsCollectorTest {
         observeUserTagVocabularyUseCase = mockk()
         vocabularyFlow = MutableStateFlow(emptyList())
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -72,6 +73,7 @@ class TagSuggestionsCollectorTest {
             vocabularyFlow.value = listOf(fantasy, horror)
 
             val collector = TagSuggestionsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -97,13 +99,16 @@ class TagSuggestionsCollectorTest {
                 name = "Fantasy",
                 category = TagCategory.GENRE,
             )
+
             val moodTag = stubTag(
                 name = "Cozy",
                 category = TagCategory.MOOD,
             )
+
             vocabularyFlow.value = listOf(genreTag, moodTag)
 
             val collector = TagSuggestionsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -129,6 +134,7 @@ class TagSuggestionsCollectorTest {
             vocabularyFlow.value = listOf(fantasy)
 
             val collector = TagSuggestionsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -155,6 +161,7 @@ class TagSuggestionsCollectorTest {
             vocabularyFlow.value = listOf(fantasy)
 
             val collector = TagSuggestionsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

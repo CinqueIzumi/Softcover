@@ -28,6 +28,7 @@ internal class VerdictReviewCollector : BookDetailCollector {
             .distinctUntilChanged()
             .collectLatest { userBook ->
                 val rating = userBook?.rating?.takeIf { it > 0.0 }
+
                 val review = userBook?.reviewDocument
                     ?.takeUnless { it.isBlank() }
                     ?.toRichTextUiModel(variant = RichTextVariant.Verdict)

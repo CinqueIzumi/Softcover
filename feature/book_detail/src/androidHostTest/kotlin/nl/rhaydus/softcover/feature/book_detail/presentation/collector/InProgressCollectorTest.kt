@@ -34,11 +34,13 @@ class InProgressCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk(relaxed = true)
     }
 
@@ -101,6 +103,7 @@ class InProgressCollectorTest {
                     paused = true,
                 ),
             )
+
             val collector = InProgressCollector()
 
             // ----- Act -----
@@ -122,6 +125,7 @@ class InProgressCollectorTest {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState().copy(book = stubBook(progress = 10f))
             val collector = InProgressCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

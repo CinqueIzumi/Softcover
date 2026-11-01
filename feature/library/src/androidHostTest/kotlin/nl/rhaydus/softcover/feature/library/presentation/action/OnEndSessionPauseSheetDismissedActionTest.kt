@@ -42,11 +42,13 @@ class OnEndSessionPauseSheetDismissedActionTest {
         activeSessionController = mockk(relaxed = true)
         pauseBookUseCase = mockk(relaxed = true)
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk<LibraryDependencies>(relaxed = true).also { mock ->
             every {
                 mock.activeSessionController
@@ -70,6 +72,7 @@ class OnEndSessionPauseSheetDismissedActionTest {
         fun `a confirmed pause stops the session and pauses the books`() = runTest {
             // ----- Arrange -----
             val book = buildBook(id = 1)
+
             stateFlow.value = LibraryUiState(
                 booksByTab = persistentMapOf(tabKey to persistentListOf(book)),
                 activeSessionBookId = 1,
@@ -100,6 +103,7 @@ class OnEndSessionPauseSheetDismissedActionTest {
         fun `a dismissal without a confirmed pause neither stops the session nor pauses`() = runTest {
             // ----- Arrange -----
             val book = buildBook(id = 1)
+
             stateFlow.value = LibraryUiState(
                 booksByTab = persistentMapOf(tabKey to persistentListOf(book)),
                 endSessionPauseBookIds = persistentSetOf(1),

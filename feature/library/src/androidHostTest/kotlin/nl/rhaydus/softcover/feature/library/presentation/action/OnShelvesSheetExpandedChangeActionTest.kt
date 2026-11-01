@@ -28,6 +28,7 @@ class OnShelvesSheetExpandedChangeActionTest {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(LibraryUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -61,6 +62,7 @@ class OnShelvesSheetExpandedChangeActionTest {
                 closing = true,
                 pending = ManageShelves,
             )
+
             stateFlow.value = LibraryUiState(shelvesSheet = closing)
 
             // ----- Act -----

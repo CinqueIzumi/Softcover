@@ -33,6 +33,7 @@ internal fun SettingsRowGroup(
                 }
             }
         }
+
         scope.content()
     }
 }

@@ -31,10 +31,12 @@ fun ProgressBar(
     isLoading: Boolean = false,
 ) {
     val valueChange = MaterialTheme.motion.valueChange
+
     val target = fraction.coerceIn(
         minimumValue = 0f,
         maximumValue = 1f,
     )
+
     val animatedFraction = remember { Animatable(initialValue = target) }
     var wasLoading by remember { mutableStateOf(isLoading) }
 

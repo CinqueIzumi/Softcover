@@ -61,10 +61,9 @@ private val ALSO_READING_STAND_IN_TEMPLATE = BookCardUiModel(
     isLoading = true,
 )
 
-internal val ALSO_READING_STAND_IN_CARDS: ImmutableList<BookCardUiModel> =
-    List(ALSO_READING_STAND_IN_COUNT) { index ->
-        ALSO_READING_STAND_IN_TEMPLATE.copy(key = BookCardKey.Book(bookId = -(index + 1)))
-    }.toImmutableList()
+internal val ALSO_READING_STAND_IN_CARDS: ImmutableList<BookCardUiModel> = List(ALSO_READING_STAND_IN_COUNT) { index ->
+    ALSO_READING_STAND_IN_TEMPLATE.copy(key = BookCardKey.Book(bookId = -(index + 1)))
+}.toImmutableList()
 
 private val PICK_UP_NEXT_STAND_IN_TEMPLATE = BookCardUiModel(
     key = BookCardKey.Book(bookId = -1),
@@ -82,10 +81,9 @@ private val PICK_UP_NEXT_STAND_IN_TEMPLATE = BookCardUiModel(
     isLoading = true,
 )
 
-internal val PICK_UP_NEXT_STAND_IN_CARDS: ImmutableList<BookCardUiModel> =
-    List(PICK_UP_NEXT_TILE_COUNT) { index ->
-        PICK_UP_NEXT_STAND_IN_TEMPLATE.copy(key = BookCardKey.Book(bookId = -(index + 1)))
-    }.toImmutableList()
+internal val PICK_UP_NEXT_STAND_IN_CARDS: ImmutableList<BookCardUiModel> = List(PICK_UP_NEXT_TILE_COUNT) { index ->
+    PICK_UP_NEXT_STAND_IN_TEMPLATE.copy(key = BookCardKey.Book(bookId = -(index + 1)))
+}.toImmutableList()
 
 private val FEATURED_STAND_IN_EDITION = BookEdition(
     id = -1,

@@ -22,6 +22,7 @@ class SheetChromeTest {
         fun `dismiss closes the sheet when it can be dismissed`() {
             // ----- Arrange -----
             var closes = 0
+
             val chrome = chrome(
                 canDismiss = true,
                 close = { closes++ },
@@ -38,6 +39,7 @@ class SheetChromeTest {
         fun `dismiss does nothing when the sheet cannot be dismissed`() {
             // ----- Arrange -----
             var closes = 0
+
             val chrome = chrome(
                 canDismiss = false,
                 close = { closes++ },

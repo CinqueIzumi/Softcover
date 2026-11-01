@@ -94,6 +94,7 @@ class LibrarySortOptionsTest {
                 listId = 1,
                 listName = "TBR",
             )
+
             val state = LibraryUiState(
                 customLists = persistentListOf(
                     buildBookList(
@@ -126,6 +127,7 @@ class LibrarySortOptionsTest {
                 listId = 1,
                 listName = "Favorites",
             )
+
             val state = LibraryUiState(
                 customLists = persistentListOf(
                     buildBookList(
@@ -159,6 +161,7 @@ class LibrarySortOptionsTest {
                 listId = 99,
                 listName = "Unknown",
             )
+
             val state = LibraryUiState(customLists = persistentListOf())
 
             // ----- Act -----
@@ -184,6 +187,7 @@ class LibrarySortOptionsTest {
                 listId = 1,
                 listName = "TBR",
             )
+
             val state = LibraryUiState(
                 customLists = persistentListOf(
                     buildBookList(
@@ -416,6 +420,7 @@ class LibrarySortOptionsTest {
         fun `book on a different tab's list does not trigger content gating for this tab`() {
             // ----- Arrange -----
             val otherTab = LibraryTab.Status.of(UserBookStatus.READ)
+
             val state = LibraryUiState(
                 booksByTab = persistentMapOf(
                     tab.id to persistentListOf(),

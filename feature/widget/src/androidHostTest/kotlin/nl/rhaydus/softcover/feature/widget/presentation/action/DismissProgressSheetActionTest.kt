@@ -32,6 +32,7 @@ class DismissProgressSheetActionTest {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(UpdateProgressUiState())
         localVariablesFlow = MutableStateFlow(UpdateProgressLocalVariables())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
@@ -73,6 +74,7 @@ class DismissProgressSheetActionTest {
             verify(exactly = 1) {
                 dependencies.openVerdict(7)
             }
+
             eventChannel.tryReceive().getOrNull() shouldBe UpdateProgressEvent.Finished
         }
 
@@ -97,15 +99,18 @@ class DismissProgressSheetActionTest {
         fun `waits for the in-flight write before sending Finished`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val gate = CompletableDeferred<Unit>()
+
             localVariablesFlow.value = UpdateProgressLocalVariables(
                 mutationJob = launch { gate.await() },
             )
+
             val dismiss = launch {
                 DismissProgressSheetAction.execute(
                     dependencies = dependencies,
                     scope = scope,
                 )
             }
+
             val beforeWriteEnds = eventChannel.tryReceive().getOrNull()
 
             // ----- Act -----

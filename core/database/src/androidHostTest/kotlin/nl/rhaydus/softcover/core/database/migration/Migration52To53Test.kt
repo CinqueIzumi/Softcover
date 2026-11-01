@@ -102,6 +102,7 @@ class Migration52To53Test {
 
             val survivors = schema52.tableNames - "reading_log_entries"
             val columnsBefore = survivors.associateWith { connection.columnNames(it) }
+
             val rowsBefore = survivors.associateWith { table ->
                 connection.snapshot(
                     table,
@@ -114,8 +115,10 @@ class Migration52To53Test {
 
             // ----- Assert -----
             connection.userTables() shouldBe schema53.tableNames
+
             survivors.forEach { table ->
                 connection.columnNames(table) shouldBe columnsBefore.getValue(table)
+
                 connection.snapshot(
                     table,
                     columnsBefore.getValue(table),

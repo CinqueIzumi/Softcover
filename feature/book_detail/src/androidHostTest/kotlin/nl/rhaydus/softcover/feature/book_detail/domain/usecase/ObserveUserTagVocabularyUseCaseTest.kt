@@ -25,6 +25,7 @@ class ObserveUserTagVocabularyUseCaseTest {
     fun setUp() {
         userTagVocabularyRepository = mockk()
         getUserIdUseCase = mockk()
+
         useCase = ObserveUserTagVocabularyUseCase(
             userTagVocabularyRepository = userTagVocabularyRepository,
             getUserIdUseCase = getUserIdUseCase,

@@ -34,6 +34,7 @@ class ThemeConfigurationCollectorTest {
         themeConfigFlow = MutableSharedFlow()
         getThemeConfigurationUseCase = mockk()
         stateFlow = MutableStateFlow(SettingsScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(SettingsLocalVariables()),
@@ -57,6 +58,7 @@ class ThemeConfigurationCollectorTest {
         fun `carries the emitted configuration into the theme state`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = ThemeConfigurationCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -80,30 +82,30 @@ class ThemeConfigurationCollectorTest {
         }
 
         @Test
-        fun `steps the spine section back when Dim arrives with dynamic colour still on`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val collector = ThemeConfigurationCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+        fun `steps the spine section back when Dim arrives with dynamic colour still on`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = ThemeConfigurationCollector()
 
-                // ----- Act -----
-                themeConfigFlow.emit(
-                    ThemeConfiguration(
-                        themeMode = ThemeMode.DIM,
-                        colorPalette = ColorPalette.SEA,
-                        useDynamicColor = true,
-                    ),
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-
-                // ----- Assert -----
-                stateFlow.value.spineColourSection.interactive shouldBe false
-                stateFlow.value.paletteChoices.none { it.enabled } shouldBe true
-                job.cancel()
             }
+
+            // ----- Act -----
+            themeConfigFlow.emit(
+                ThemeConfiguration(
+                    themeMode = ThemeMode.DIM,
+                    colorPalette = ColorPalette.SEA,
+                    useDynamicColor = true,
+                ),
+            )
+
+            // ----- Assert -----
+            stateFlow.value.spineColourSection.interactive shouldBe false
+            stateFlow.value.paletteChoices.none { it.enabled } shouldBe true
+            job.cancel()
+        }
     }
 }

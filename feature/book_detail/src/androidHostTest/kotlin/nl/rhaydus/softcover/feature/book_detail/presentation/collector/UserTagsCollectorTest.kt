@@ -36,6 +36,7 @@ class UserTagsCollectorTest {
     fun setUp() {
         getUserTagsUseCase = mockk()
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -53,6 +54,7 @@ class UserTagsCollectorTest {
         every {
             this@mockk.id
         } returns id
+
         every {
             this@mockk.userBook
         } returns mockk<UserBook>()
@@ -62,6 +64,7 @@ class UserTagsCollectorTest {
         every {
             this@mockk.id
         } returns id
+
         every {
             this@mockk.userBook
         } returns null
@@ -73,6 +76,7 @@ class UserTagsCollectorTest {
         fun `loads userTags when book is shelved`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = stubShelvedBook(id = 10)
+
             val tags = listOf(
                 UserTag(
                     name = "fantasy",
@@ -85,6 +89,7 @@ class UserTagsCollectorTest {
             } returns Result.success(tags)
 
             val collector = UserTagsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -105,6 +110,7 @@ class UserTagsCollectorTest {
             // ----- Arrange -----
             val book = stubUnshelvedBook(id = 5)
             val collector = UserTagsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -130,6 +136,7 @@ class UserTagsCollectorTest {
             } returns Result.failure(RuntimeException("network error"))
 
             val collector = UserTagsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -150,12 +157,14 @@ class UserTagsCollectorTest {
             // ----- Arrange -----
             val bookA = stubShelvedBook(id = 1)
             val bookB = stubShelvedBook(id = 2)
+
             val tagsA = listOf(
                 UserTag(
                     name = "horror",
                     category = TagCategory.GENRE,
                 ),
             )
+
             val tagsB = listOf(
                 UserTag(
                     name = "comedy",
@@ -166,11 +175,13 @@ class UserTagsCollectorTest {
             coEvery {
                 getUserTagsUseCase(bookId = 1)
             } returns Result.success(tagsA)
+
             coEvery {
                 getUserTagsUseCase(bookId = 2)
             } returns Result.success(tagsB)
 
             val collector = UserTagsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -193,6 +204,7 @@ class UserTagsCollectorTest {
         fun `keeps the loaded userTags when the book goes away`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = stubShelvedBook(id = 1)
+
             val tags = listOf(
                 UserTag(
                     name = "romance",
@@ -205,6 +217,7 @@ class UserTagsCollectorTest {
             } returns Result.success(tags)
 
             val collector = UserTagsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

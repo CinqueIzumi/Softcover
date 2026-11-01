@@ -16,6 +16,7 @@ class BookTransitionKeysTest {
         fun `the key matches the one built from the book id`() {
             // ----- Arrange -----
             val book = mockk<Book>()
+
             every {
                 book.id
             } returns 42
@@ -38,6 +39,7 @@ class BookTransitionKeysTest {
         fun `without a surface the key has no surface suffix`() {
             // ----- Arrange -----
             val book = mockk<Book>()
+
             every {
                 book.id
             } returns 7

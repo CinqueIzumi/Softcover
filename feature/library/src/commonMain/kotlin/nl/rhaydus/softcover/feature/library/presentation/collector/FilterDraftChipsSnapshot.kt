@@ -33,6 +33,7 @@ internal data class FilterDraftChipsSnapshot(
 ) {
     fun compute(): LibraryFilterSheetSelection? {
         val draft = draft ?: return null
+
         val chips = filterChipsByTab[draft.tabId] ?: LibraryFilterChips()
 
         val previewState = LibraryUiState(

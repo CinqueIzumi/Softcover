@@ -15,9 +15,11 @@ internal data object OnMarkAsReadAction : UpdateProgressAction {
         scope: ActionScope<UpdateProgressUiState, UpdateProgressEvent, UpdateProgressLocalVariables>,
     ) {
         val book = scope.currentState.bookToUpdate ?: return
+
         val actionAt = scope.currentState.readAt.toActionAt()
 
         scope.currentLocalVariables.mutationJob?.cancel()
+
         scope.setLocalVariables {
             it.copy(
                 finishedBookId = null,
@@ -36,10 +38,10 @@ internal data object OnMarkAsReadAction : UpdateProgressAction {
                     }
                 }
                 .onFailure { error ->
-                scope.setLocalVariables { it.copy(writeFailed = true) }
+                    scope.setLocalVariables { it.copy(writeFailed = true) }
 
-                AppLog.e("$error")
-            }
+                    AppLog.e("$error")
+                }
         }
 
         scope.setLocalVariables { it.copy(mutationJob = job) }

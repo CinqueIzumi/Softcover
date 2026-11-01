@@ -35,6 +35,7 @@ class ReadingLifeShareCardCollectorTest {
     fun setUp() {
         stateFlow = MutableStateFlow(ProfileUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalProfileVariables()),
@@ -58,22 +59,20 @@ class ReadingLifeShareCardCollectorTest {
     private fun requestedState(
         shareSheet: SheetSession<ShareCardSheetUiModel, Nothing> = SheetSession.Closed,
         shareCapture: ShareCaptureState = ShareCaptureState(),
-    ): ProfileUiState =
-        ProfileUiState(
-            readingLife = buildShareReadingLife(),
-            userProfileData = buildShareProfile(),
-            isShareSheetRequested = true,
-            shareSheet = shareSheet,
-            shareCapture = shareCapture,
-        )
+    ): ProfileUiState = ProfileUiState(
+        readingLife = buildShareReadingLife(),
+        userProfileData = buildShareProfile(),
+        isShareSheetRequested = true,
+        shareSheet = shareSheet,
+        shareCapture = shareCapture,
+    )
 
-    private fun TestScope.launchCollector(): Job =
-        launch {
-            ReadingLifeShareCardCollector().onLaunch(
-                scope = scope,
-                dependencies = mockk<ProfileDependencies>(relaxed = true),
-            )
-        }
+    private fun TestScope.launchCollector(): Job = launch {
+        ReadingLifeShareCardCollector().onLaunch(
+            scope = scope,
+            dependencies = mockk<ProfileDependencies>(relaxed = true),
+        )
+    }
 
     @Nested
     inner class OnLaunch {
@@ -129,6 +128,7 @@ class ReadingLifeShareCardCollectorTest {
                 readingLife = buildShareReadingLife(),
                 userProfileData = buildShareProfile(),
             )
+
             val job = launchCollector()
 
             // ----- Act -----
@@ -232,6 +232,7 @@ class ReadingLifeShareCardCollectorTest {
                 userProfileData = buildShareProfile(),
                 shareSheet = openSheet(closing = true),
             )
+
             val job = launchCollector()
 
             // ----- Act -----

@@ -69,6 +69,7 @@ internal class CoverZoomState {
             MIN_SCALE,
             MAX_SCALE,
         )
+
         scale = newScale
 
         offset = clampCoverOffset(

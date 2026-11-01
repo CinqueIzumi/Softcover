@@ -2,9 +2,9 @@ package nl.rhaydus.softcover.feature.widget.presentation.util
 
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import io.kotest.matchers.ints.shouldBeLessThanOrEqual
 import io.kotest.matchers.ints.shouldBeInRange
 import io.kotest.matchers.ints.shouldBeLessThan
+import io.kotest.matchers.ints.shouldBeLessThanOrEqual
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -142,6 +142,7 @@ class WidgetBookLayoutTest {
                 width = 180.dp,
                 height = 110.dp,
             )
+
             val fixedRowsDp = 68
             val lineDp = 20
             val authorDp = 16
@@ -151,10 +152,12 @@ class WidgetBookLayoutTest {
                 size = size,
                 fixedRowsDp = fixedRowsDp,
             )
+
             val showsAuthor = sideShowsAuthor(
                 size = size,
                 fixedRowsDp = fixedRowsDp,
             )
+
             val author = if (showsAuthor) authorDp else 0
 
             // ----- Assert -----
@@ -279,6 +282,7 @@ class WidgetBookLayoutTest {
                 width = 110.dp,
                 height = 150.dp,
             )
+
             val tall = DpSize(
                 width = 110.dp,
                 height = 300.dp,
@@ -309,6 +313,7 @@ class WidgetBookLayoutTest {
                 width = 500.dp,
                 height = 300.dp,
             )
+
             val narrow = DpSize(
                 width = 110.dp,
                 height = 200.dp,

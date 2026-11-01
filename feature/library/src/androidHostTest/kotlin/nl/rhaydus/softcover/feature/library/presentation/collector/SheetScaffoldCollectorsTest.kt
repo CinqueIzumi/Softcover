@@ -53,11 +53,13 @@ class SheetScaffoldCollectorsTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk(relaxed = true)
     }
 
@@ -147,6 +149,7 @@ class SheetScaffoldCollectorsTest {
         fun `publishes an unchecked titles toggle for a cover-only grid draft`() = runTest(testDispatcher) {
             // ----- Arrange -----
             launchCollector(ArrangeSheetCollector())
+
             val gridDraft = LibraryArrangeDraft(
                 tabId = LibraryTab.All.id,
                 sortMode = LibrarySortMode.TITLE,
@@ -165,12 +168,14 @@ class SheetScaffoldCollectorsTest {
         fun `clears the titles toggle when the draft switches to a list layout`() = runTest(testDispatcher) {
             // ----- Arrange -----
             launchCollector(ArrangeSheetCollector())
+
             val gridDraft = LibraryArrangeDraft(
                 tabId = LibraryTab.All.id,
                 sortMode = LibrarySortMode.TITLE,
                 sortDirection = SortDirection.ASCENDING,
                 gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY,
             )
+
             stateFlow.value = LibraryUiState(arrangeDraft = gridDraft)
 
             // ----- Act -----
@@ -186,6 +191,7 @@ class SheetScaffoldCollectorsTest {
         fun `publishes make ordered for the selected unranked list`() = runTest(testDispatcher) {
             // ----- Arrange -----
             launchCollector(ArrangeSheetCollector())
+
             val unranked = BookList(
                 id = 3,
                 name = "Faves",
@@ -208,6 +214,7 @@ class SheetScaffoldCollectorsTest {
         fun `clears make ordered once the selected list becomes ranked`() = runTest(testDispatcher) {
             // ----- Arrange -----
             launchCollector(ArrangeSheetCollector())
+
             val unranked = BookList(
                 id = 3,
                 name = "Faves",
@@ -215,6 +222,7 @@ class SheetScaffoldCollectorsTest {
                 ranked = false,
                 books = emptyList(),
             )
+
             stateFlow.value = LibraryUiState(
                 selectedTabId = LibraryTab.CustomList.idFor(listId = 3),
                 customLists = persistentListOf(unranked),
@@ -247,6 +255,7 @@ class SheetScaffoldCollectorsTest {
                 bookCount = 3,
                 inProgress = true,
             )
+
             stateFlow.value.bulkRemoveSheet.isClosing shouldBe false
         }
 
@@ -257,6 +266,7 @@ class SheetScaffoldCollectorsTest {
                 selectedBookIds = persistentSetOf(1),
                 isBulkRemoveSheetRequested = true,
             )
+
             launchCollector(BulkRemoveSheetCollector())
 
             // ----- Act -----
@@ -273,89 +283,90 @@ class SheetScaffoldCollectorsTest {
         }
 
         @Test
-        fun `leaves a closed session closed however the selection changes without a request`() =
-            runTest(testDispatcher) {
-                // ----- Arrange -----
-                launchCollector(BulkRemoveSheetCollector())
+        fun `leaves a closed session closed however the selection changes without a request`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            launchCollector(BulkRemoveSheetCollector())
 
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(
-                    selectedBookIds = persistentSetOf(1, 2),
-                    bulkActionInProgress = true,
-                )
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                selectedBookIds = persistentSetOf(1, 2),
+                bulkActionInProgress = true,
+            )
 
-                // ----- Assert -----
-                stateFlow.value.bulkRemoveSheet shouldBe SheetSession.Closed
-            }
-
-        @Test
-        fun `withdrawing the request asks the sheet to close and leaves the content as it was`() =
-            runTest(testDispatcher) {
-                // ----- Arrange -----
-                stateFlow.value = LibraryUiState(
-                    selectedBookIds = persistentSetOf(1, 2),
-                    bulkActionInProgress = true,
-                    isBulkRemoveSheetRequested = true,
-                )
-                launchCollector(BulkRemoveSheetCollector())
-
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(isBulkRemoveSheetRequested = false)
-
-                // ----- Assert -----
-                stateFlow.value.bulkRemoveSheet.isClosing shouldBe true
-                stateFlow.value.bulkRemoveSheet.modelOrNull shouldBe bulkRemoveSheetScaffoldFor(
-                    bookCount = 2,
-                    inProgress = true,
-                ).requestingClose()
-            }
+            // ----- Assert -----
+            stateFlow.value.bulkRemoveSheet shouldBe SheetSession.Closed
+        }
 
         @Test
-        fun `emptying the selection while the request is withdrawn keeps the headline frozen`() =
-            runTest(testDispatcher) {
-                // ----- Arrange -----
-                stateFlow.value = LibraryUiState(
-                    selectedBookIds = persistentSetOf(1, 2, 3),
-                    bulkActionInProgress = true,
-                    isBulkRemoveSheetRequested = true,
-                )
-                launchCollector(BulkRemoveSheetCollector())
+        fun `withdrawing the request asks the sheet to close and leaves the content as it was`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(
+                selectedBookIds = persistentSetOf(1, 2),
+                bulkActionInProgress = true,
+                isBulkRemoveSheetRequested = true,
+            )
 
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(
-                    selectedBookIds = persistentSetOf(),
-                    bulkActionInProgress = false,
-                    isBulkRemoveSheetRequested = false,
-                )
+            launchCollector(BulkRemoveSheetCollector())
 
-                // ----- Assert -----
-                val sheet = stateFlow.value.bulkRemoveSheet.modelOrNull.shouldNotBeNull()
-                sheet.header.shouldNotBeNull().section.headlineText shouldBe "Remove 3 books?"
-            }
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(isBulkRemoveSheetRequested = false)
+
+            // ----- Assert -----
+            stateFlow.value.bulkRemoveSheet.isClosing shouldBe true
+
+            stateFlow.value.bulkRemoveSheet.modelOrNull shouldBe bulkRemoveSheetScaffoldFor(
+                bookCount = 2,
+                inProgress = true,
+            ).requestingClose()
+        }
 
         @Test
-        fun `requesting again after a close rebuilds the sheet from the current selection`() =
-            runTest(testDispatcher) {
-                // ----- Arrange -----
-                stateFlow.value = LibraryUiState(
-                    selectedBookIds = persistentSetOf(1),
-                    bulkRemoveSheet = openBulkRemoveSession(
-                        closing = true,
-                        bookCount = 3,
-                    ),
-                )
-                launchCollector(BulkRemoveSheetCollector())
+        fun `emptying the selection while the request is withdrawn keeps the headline frozen`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(
+                selectedBookIds = persistentSetOf(1, 2, 3),
+                bulkActionInProgress = true,
+                isBulkRemoveSheetRequested = true,
+            )
 
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(isBulkRemoveSheetRequested = true)
+            launchCollector(BulkRemoveSheetCollector())
 
-                // ----- Assert -----
-                stateFlow.value.bulkRemoveSheet.isClosing shouldBe false
-                stateFlow.value.bulkRemoveSheet.modelOrNull shouldBe bulkRemoveSheetScaffoldFor(
-                    bookCount = 1,
-                    inProgress = false,
-                )
-            }
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                selectedBookIds = persistentSetOf(),
+                bulkActionInProgress = false,
+                isBulkRemoveSheetRequested = false,
+            )
+
+            // ----- Assert -----
+            val sheet = stateFlow.value.bulkRemoveSheet.modelOrNull.shouldNotBeNull()
+            sheet.header.shouldNotBeNull().section.headlineText shouldBe "Remove 3 books?"
+        }
+
+        @Test
+        fun `requesting again after a close rebuilds the sheet from the current selection`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(
+                selectedBookIds = persistentSetOf(1),
+                bulkRemoveSheet = openBulkRemoveSession(
+                    closing = true,
+                    bookCount = 3,
+                ),
+            )
+
+            launchCollector(BulkRemoveSheetCollector())
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(isBulkRemoveSheetRequested = true)
+
+            // ----- Assert -----
+            stateFlow.value.bulkRemoveSheet.isClosing shouldBe false
+
+            stateFlow.value.bulkRemoveSheet.modelOrNull shouldBe bulkRemoveSheetScaffoldFor(
+                bookCount = 1,
+                inProgress = false,
+            )
+        }
     }
 
     @Nested
@@ -383,6 +394,7 @@ class SheetScaffoldCollectorsTest {
                 selectedTabId = LibraryTab.CustomList.idFor(listId = 2),
                 tabStatsByTab = tabStatsByTab.toImmutableMap(),
             )
+
             launchCollector(ShelvesSheetCollector())
 
             // ----- Act -----
@@ -390,11 +402,13 @@ class SheetScaffoldCollectorsTest {
 
             // ----- Assert -----
             val group = stateFlow.value.shelvesSheet.modelOrNull.shouldNotBeNull().group
+
             group.rows shouldBe shelvesSheetRowsFor(
                 visibleTabs = tabs,
                 selectedTabId = LibraryTab.CustomList.idFor(listId = 2),
                 tabStatsByTab = tabStatsByTab,
             )
+
             group.rows.map { it.selected } shouldBe listOf(false, true)
             stateFlow.value.shelvesSheet.isClosing shouldBe false
         }
@@ -407,6 +421,7 @@ class SheetScaffoldCollectorsTest {
                 selectedTabId = LibraryTab.All.id,
                 isShelvesSheetRequested = true,
             )
+
             launchCollector(ShelvesSheetCollector())
 
             // ----- Act -----
@@ -433,53 +448,55 @@ class SheetScaffoldCollectorsTest {
         }
 
         @Test
-        fun `withdrawing the request asks the sheet to close and keeps its rows and pending intent`() =
-            runTest(testDispatcher) {
-                // ----- Arrange -----
-                stateFlow.value = LibraryUiState(
-                    visibleTabs = tabs.toImmutableList(),
-                    selectedTabId = LibraryTab.All.id,
-                    isShelvesSheetRequested = true,
-                )
-                launchCollector(ShelvesSheetCollector())
-                val rowsBefore = stateFlow.value.shelvesSheet.modelOrNull.shouldNotBeNull().group.rows
+        fun `withdrawing the request asks the sheet to close and keeps its rows and pending intent`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(
+                visibleTabs = tabs.toImmutableList(),
+                selectedTabId = LibraryTab.All.id,
+                isShelvesSheetRequested = true,
+            )
 
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(
-                    shelvesSheet = stateFlow.value.shelvesSheet.requestClose(pending = ManageShelves),
-                    isShelvesSheetRequested = false,
-                )
-                stateFlow.value = stateFlow.value.copy(visibleTabs = tabs.take(1).toImmutableList())
+            launchCollector(ShelvesSheetCollector())
+            val rowsBefore = stateFlow.value.shelvesSheet.modelOrNull.shouldNotBeNull().group.rows
 
-                // ----- Assert -----
-                stateFlow.value.shelvesSheet.isClosing shouldBe true
-                stateFlow.value.shelvesSheet.dismissed() shouldBe ManageShelves
-                stateFlow.value.shelvesSheet.modelOrNull.shouldNotBeNull().group.rows shouldBe rowsBefore
-            }
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                shelvesSheet = stateFlow.value.shelvesSheet.requestClose(pending = ManageShelves),
+                isShelvesSheetRequested = false,
+            )
+
+            stateFlow.value = stateFlow.value.copy(visibleTabs = tabs.take(1).toImmutableList())
+
+            // ----- Assert -----
+            stateFlow.value.shelvesSheet.isClosing shouldBe true
+            stateFlow.value.shelvesSheet.dismissed() shouldBe ManageShelves
+            stateFlow.value.shelvesSheet.modelOrNull.shouldNotBeNull().group.rows shouldBe rowsBefore
+        }
 
         @Test
-        fun `requesting again after a close replaces the closing session and drops its pending intent`() =
-            runTest(testDispatcher) {
-                // ----- Arrange -----
-                stateFlow.value = LibraryUiState(
-                    visibleTabs = tabs.toImmutableList(),
-                    selectedTabId = LibraryTab.All.id,
-                    shelvesSheet = openShelvesSession(
-                        closing = true,
-                        pending = ManageShelves,
-                    ),
-                )
-                launchCollector(ShelvesSheetCollector())
+        fun `requesting again after a close replaces the closing session and drops its pending intent`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(
+                visibleTabs = tabs.toImmutableList(),
+                selectedTabId = LibraryTab.All.id,
+                shelvesSheet = openShelvesSession(
+                    closing = true,
+                    pending = ManageShelves,
+                ),
+            )
 
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(isShelvesSheetRequested = true)
+            launchCollector(ShelvesSheetCollector())
 
-                // ----- Assert -----
-                stateFlow.value.shelvesSheet.isClosing shouldBe false
-                stateFlow.value.shelvesSheet.dismissed().shouldBeNull()
-                stateFlow.value.shelvesSheet.modelOrNull.shouldNotBeNull().group.rows.map { it.key } shouldBe
-                    tabs.map { it.id }
-            }
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(isShelvesSheetRequested = true)
+
+            // ----- Assert -----
+            stateFlow.value.shelvesSheet.isClosing shouldBe false
+            stateFlow.value.shelvesSheet.dismissed().shouldBeNull()
+
+            stateFlow.value.shelvesSheet.modelOrNull.shouldNotBeNull().group.rows.map { it.key } shouldBe
+                tabs.map { it.id }
+        }
 
         @Test
         fun `rows do not dismiss the sheet themselves so the host can run the pick first`() = runTest(testDispatcher) {

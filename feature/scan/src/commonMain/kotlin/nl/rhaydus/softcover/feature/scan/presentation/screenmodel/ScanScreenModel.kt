@@ -19,13 +19,13 @@ internal class ScanScreenModel(
     prefilledIsbn: String? = null,
     startInManualEntry: Boolean = false,
 ) : ToadScreenModel<ScanUiState, ScanEvent, ScanDependencies, ScanCollector, LocalScanVariables>(
-    initializers = flows,
-    initialState = ScanUiState().seededWith(
-        prefilledIsbn = prefilledIsbn,
-        startInManualEntry = startInManualEntry,
-    ),
-    initialLocalVariables = LocalScanVariables(),
-) {
+        initializers = flows,
+        initialState = ScanUiState().seededWith(
+            prefilledIsbn = prefilledIsbn,
+            startInManualEntry = startInManualEntry,
+        ),
+        initialLocalVariables = LocalScanVariables(),
+    ) {
     override val dependencies: ScanDependencies = ScanDependencies(
         resolveBookByIsbnUseCase = resolveBookByIsbnUseCase,
         addBookByIsbnUseCase = addBookByIsbnUseCase,

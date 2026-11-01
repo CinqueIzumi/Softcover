@@ -145,6 +145,7 @@ class SearchRemoteDataSourceImplTest {
             every {
                 row.book
             } returns null
+
             return row
         }
 
@@ -196,6 +197,7 @@ class SearchRemoteDataSourceImplTest {
             every {
                 row.book
             } returns null
+
             return row
         }
 
@@ -245,11 +247,13 @@ class SearchRemoteDataSourceImplTest {
         fun `orders queriedBooks by the id order of the search result`() = runTest {
             // ----- Arrange -----
             val ids = listOf(3, 1, 2)
+
             stubIdsQuery(
                 name = "dune",
                 page = 1,
                 ids = ids,
             )
+
             stubBooksQuery(
                 ids = ids,
                 books = listOf(1, 2, 3).map { id -> stubBookEntry(book = stubBook(id = id)) },
@@ -297,10 +301,13 @@ class SearchRemoteDataSourceImplTest {
                 page = 1,
                 ids = listOf(10, null, 20),
             )
+
             val entryWithoutFragment = mockk<GetBooksByIdsQuery.Data.Book>()
+
             every {
                 with(GetBooksByIdsQuery.Data.Book.Companion) { entryWithoutFragment.bookDetailFragment() }
             } returns null
+
             stubBooksQuery(
                 ids = listOf(10, 20),
                 books = listOf(stubBookEntry(book = stubBook(id = 10)), entryWithoutFragment),
@@ -321,11 +328,13 @@ class SearchRemoteDataSourceImplTest {
         fun `sets queriedBooksHasMore true when the raw id count reaches the page size`() = runTest {
             // ----- Arrange -----
             val ids = List(SEARCH_RESULTS_PAGE_SIZE) { it + 1 }
+
             stubIdsQuery(
                 name = "epic",
                 page = 1,
                 ids = ids,
             )
+
             stubBooksQuery(
                 ids = ids,
                 books = ids.map { id -> stubBookEntry(book = stubBook(id = id)) },
@@ -371,21 +380,25 @@ class SearchRemoteDataSourceImplTest {
                 page = 1,
                 ids = listOf(1, 2),
             )
+
             stubBooksQuery(
                 ids = listOf(1, 2),
                 books = listOf(1, 2).map { id -> stubBookEntry(book = stubBook(id = id)) },
             )
+
             dataSource.searchForName(
                 name = "series",
                 userId = 1,
                 sortMode = ExploreSortMode.RELEVANCE,
                 page = 1,
             )
+
             stubIdsQuery(
                 name = "series",
                 page = 2,
                 ids = listOf(2, 3),
             )
+
             stubBooksQuery(
                 ids = listOf(2, 3),
                 books = listOf(2, 3).map { id -> stubBookEntry(book = stubBook(id = id)) },
@@ -411,16 +424,19 @@ class SearchRemoteDataSourceImplTest {
                 page = 1,
                 ids = listOf(1),
             )
+
             stubBooksQuery(
                 ids = listOf(1),
                 books = listOf(stubBookEntry(book = stubBook(id = 1))),
             )
+
             dataSource.searchForName(
                 name = "series",
                 userId = 1,
                 sortMode = ExploreSortMode.RELEVANCE,
                 page = 1,
             )
+
             stubIdsQuery(
                 name = "series",
                 page = 2,
@@ -447,21 +463,25 @@ class SearchRemoteDataSourceImplTest {
                 page = 1,
                 ids = listOf(1),
             )
+
             stubBooksQuery(
                 ids = listOf(1),
                 books = listOf(stubBookEntry(book = stubBook(id = 1))),
             )
+
             dataSource.searchForName(
                 name = "first",
                 userId = 1,
                 sortMode = ExploreSortMode.RELEVANCE,
                 page = 1,
             )
+
             stubIdsQuery(
                 name = "second",
                 page = 1,
                 ids = listOf(2),
             )
+
             stubBooksQuery(
                 ids = listOf(2),
                 books = listOf(stubBookEntry(book = stubBook(id = 2))),
@@ -491,16 +511,19 @@ class SearchRemoteDataSourceImplTest {
                 page = 1,
                 ids = listOf(1),
             )
+
             stubBooksQuery(
                 ids = listOf(1),
                 books = listOf(stubBookEntry(book = stubBook(id = 1))),
             )
+
             dataSource.searchForName(
                 name = "first",
                 userId = 1,
                 sortMode = ExploreSortMode.RELEVANCE,
                 page = 1,
             )
+
             stubIdsQuery(
                 name = "nothing",
                 page = 1,
@@ -533,6 +556,7 @@ class SearchRemoteDataSourceImplTest {
         fun `dedupes books that appear across multiple taggable_counts rows`() = runTest {
             // ----- Arrange -----
             val book1 = stubBook(id = 1)
+
             stubMoodQuery(
                 mood = mood,
                 page = 1,
@@ -553,6 +577,7 @@ class SearchRemoteDataSourceImplTest {
         fun `reports hasMore true from the raw row count even when dedupe shrinks the page below the limit`() = runTest {
             // ----- Arrange -----
             val rows = List(MOOD_BOOKS_LIMIT) { index -> stubMoodBookRow(book = stubBook(id = index % 3)) }
+
             stubMoodQuery(
                 mood = mood,
                 page = 1,
@@ -596,10 +621,12 @@ class SearchRemoteDataSourceImplTest {
                 page = 1,
                 rows = listOf(stubMoodBookRow(stubBook(id = 1)), stubMoodBookRow(stubBook(id = 2))),
             )
+
             dataSource.searchByMood(
                 mood = mood,
                 page = 1,
             )
+
             stubMoodQuery(
                 mood = mood,
                 page = 2,
@@ -624,10 +651,12 @@ class SearchRemoteDataSourceImplTest {
                 page = 1,
                 rows = listOf(stubMoodBookRow(book = stubBook(id = 1))),
             )
+
             dataSource.searchByMood(
                 mood = mood,
                 page = 1,
             )
+
             stubMoodQuery(
                 mood = mood,
                 page = 1,
@@ -656,6 +685,7 @@ class SearchRemoteDataSourceImplTest {
                 page = 1,
                 rows = listOf(stubMoodBookRow(book = stubBook(id = 1))),
             )
+
             dataSource.searchByMood(
                 mood = mood,
                 page = 1,
@@ -684,10 +714,12 @@ class SearchRemoteDataSourceImplTest {
                 page = 1,
                 rows = listOf(stubMoodBookRow(book = stubBook(id = 1))),
             )
+
             dataSource.searchByMood(
                 mood = mood,
                 page = 1,
             )
+
             stubMoodQuery(
                 mood = mood,
                 page = 1,
@@ -711,6 +743,7 @@ class SearchRemoteDataSourceImplTest {
         fun `dedupes books across rows and excludes rows whose book is null`() = runTest {
             // ----- Arrange -----
             val book1 = stubBook(id = 1)
+
             stubGenreQuery(
                 genre = "Fantasy",
                 limit = 50,
@@ -739,11 +772,13 @@ class SearchRemoteDataSourceImplTest {
                 slug = "cozy",
                 bookCount = 12,
             )
+
             stubMoodQuery(
                 mood = mood,
                 page = 1,
                 rows = listOf(stubMoodBookRow(book = stubBook(id = 1))),
             )
+
             dataSource.searchByMood(
                 mood = mood,
                 page = 1,

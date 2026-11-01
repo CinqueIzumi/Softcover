@@ -14,13 +14,12 @@ class StreakStripTest {
         day,
     )
 
-    private fun buildActivity(vararg didRead: Boolean): List<ReadingDayActivity> =
-        didRead.mapIndexed { index, read ->
-            ReadingDayActivity(
-                date = date(1 + index),
-                didRead = read,
-            )
-        }
+    private fun buildActivity(vararg didRead: Boolean): List<ReadingDayActivity> = didRead.mapIndexed { index, read ->
+        ReadingDayActivity(
+            date = date(1 + index),
+            didRead = read,
+        )
+    }
 
     @Nested
     inner class CurrentStreakLength {

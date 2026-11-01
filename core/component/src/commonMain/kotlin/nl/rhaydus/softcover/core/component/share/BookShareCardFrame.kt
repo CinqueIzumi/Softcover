@@ -153,7 +153,10 @@ internal fun BookShareCardFrame(
                         model = cover,
                         modifier = when (format) {
                             ShareCardFormat.Story -> Modifier
-                                .weight(1f, fill = false)
+                                .weight(
+                                    1f,
+                                    fill = false,
+                                )
                                 .widthIn(max = 200.dp)
 
                             ShareCardFormat.FullText -> Modifier.width(200.dp)

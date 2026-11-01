@@ -14,6 +14,7 @@ object VersionComparator {
     ): Boolean {
         val candidateParts = parse(candidate)
         val currentParts = parse(current)
+
         val segments = maxOf(
             candidateParts.size,
             currentParts.size,
@@ -36,6 +37,7 @@ object VersionComparator {
     ): Boolean {
         val aParts = parse(a)
         val bParts = parse(b)
+
         val segments = maxOf(
             aParts.size,
             bParts.size,

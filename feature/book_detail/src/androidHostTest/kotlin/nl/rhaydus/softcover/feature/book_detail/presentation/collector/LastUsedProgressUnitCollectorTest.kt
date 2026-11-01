@@ -34,6 +34,7 @@ class LastUsedProgressUnitCollectorTest {
         progressUnitFlow = MutableSharedFlow()
         getLastUsedProgressUnitAsFlowUseCase = mockk()
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -57,6 +58,7 @@ class LastUsedProgressUnitCollectorTest {
         fun `updates selectedProgressSheetTab when flow emits ProgressUnit TIME`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = LastUsedProgressUnitCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -76,6 +78,7 @@ class LastUsedProgressUnitCollectorTest {
         fun `updates selectedProgressSheetTab when flow emits ProgressUnit PAGE`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = LastUsedProgressUnitCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -95,6 +98,7 @@ class LastUsedProgressUnitCollectorTest {
         fun `updates selectedProgressSheetTab when flow emits ProgressUnit PERCENTAGE`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = LastUsedProgressUnitCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

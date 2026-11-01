@@ -18,6 +18,7 @@ class RefreshUserProfileDataUseCaseTest {
     fun setUp() {
         refreshReadingActivityUseCase = mockk()
         refreshUserProfileStatsUseCase = mockk()
+
         useCase = RefreshUserProfileDataUseCase(
             refreshReadingActivityUseCase = refreshReadingActivityUseCase,
             refreshUserProfileStatsUseCase = refreshUserProfileStatsUseCase,
@@ -32,6 +33,7 @@ class RefreshUserProfileDataUseCaseTest {
             coEvery {
                 refreshReadingActivityUseCase()
             } returns Result.success(Unit)
+
             coEvery {
                 refreshUserProfileStatsUseCase()
             } returns Result.success(Unit)
@@ -53,6 +55,7 @@ class RefreshUserProfileDataUseCaseTest {
             coEvery {
                 refreshReadingActivityUseCase()
             } returns Result.failure(exception)
+
             coEvery {
                 refreshUserProfileStatsUseCase()
             } returns Result.success(Unit)
@@ -75,6 +78,7 @@ class RefreshUserProfileDataUseCaseTest {
             coEvery {
                 refreshReadingActivityUseCase()
             } returns Result.success(Unit)
+
             coEvery {
                 refreshUserProfileStatsUseCase()
             } returns Result.failure(exception)
@@ -98,6 +102,7 @@ class RefreshUserProfileDataUseCaseTest {
             coEvery {
                 refreshReadingActivityUseCase()
             } returns Result.failure(activityException)
+
             coEvery {
                 refreshUserProfileStatsUseCase()
             } returns Result.failure(statsException)

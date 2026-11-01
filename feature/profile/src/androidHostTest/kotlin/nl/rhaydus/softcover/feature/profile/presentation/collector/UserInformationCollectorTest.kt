@@ -40,6 +40,7 @@ class UserInformationCollectorTest {
         refreshUserProfileDataUseCase = mockk()
         stateFlow = MutableStateFlow(ProfileUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalProfileVariables()),
@@ -53,6 +54,7 @@ class UserInformationCollectorTest {
 
     private fun stubDependencies(testScope: TestScope): ProfileDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<ProfileDependencies>(relaxed = true).also { mock ->
             every {
                 mock.observeUserProfileDataUseCase
@@ -95,8 +97,10 @@ class UserInformationCollectorTest {
             coEvery {
                 refreshUserProfileDataUseCase()
             } returns Result.success(Unit)
+
             val dependencies = stubDependencies(this)
             val initializer = UserInformationCollector()
+
             val job = launch {
                 initializer.onLaunch(
                     scope = scope,
@@ -118,9 +122,11 @@ class UserInformationCollectorTest {
             coEvery {
                 refreshUserProfileDataUseCase()
             } returns Result.success(Unit)
+
             val profileData = buildProfileData()
             val dependencies = stubDependencies(this)
             val initializer = UserInformationCollector()
+
             val job = launch {
                 initializer.onLaunch(
                     scope = scope,
@@ -144,8 +150,10 @@ class UserInformationCollectorTest {
             coEvery {
                 refreshUserProfileDataUseCase()
             } returns Result.success(Unit)
+
             val dependencies = stubDependencies(this)
             val initializer = UserInformationCollector()
+
             val job = launch {
                 initializer.onLaunch(
                     scope = scope,
@@ -168,9 +176,11 @@ class UserInformationCollectorTest {
             coEvery {
                 refreshUserProfileDataUseCase()
             } returns Result.failure(RuntimeException("refresh error"))
+
             val profileData = buildProfileData()
             val dependencies = stubDependencies(this)
             val initializer = UserInformationCollector()
+
             val job = launch {
                 initializer.onLaunch(
                     scope = scope,

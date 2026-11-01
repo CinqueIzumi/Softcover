@@ -36,7 +36,7 @@ class PersistedLibraryVisibilityCollectorTest {
         LibraryVisibilitySettingsUiState,
         LibraryVisibilitySettingsEvent,
         LibraryVisibilitySettingsLocalVariables,
-        >
+    >
     private lateinit var statusCodesFlow: MutableSharedFlow<Set<Int>>
     private lateinit var listIdsFlow: MutableSharedFlow<Set<Int>>
     private lateinit var tabOrderFlow: MutableSharedFlow<List<String>>
@@ -50,6 +50,7 @@ class PersistedLibraryVisibilityCollectorTest {
         getEnabledListIdsAsFlowUseCase = mockk()
         getLibraryTabOrderAsFlowUseCase = mockk()
         stateFlow = MutableStateFlow(LibraryVisibilitySettingsUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryVisibilitySettingsLocalVariables()),
@@ -90,6 +91,7 @@ class PersistedLibraryVisibilityCollectorTest {
             // ----- Arrange -----
             val readId = LibraryTab.Status.idFor(status = UserBookStatus.READ)
             val collector = PersistedLibraryVisibilityCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -122,6 +124,7 @@ class PersistedLibraryVisibilityCollectorTest {
             val readId = LibraryTab.Status.idFor(status = UserBookStatus.READ)
             val wantId = LibraryTab.Status.idFor(status = UserBookStatus.WANT_TO_READ)
             val collector = PersistedLibraryVisibilityCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

@@ -38,7 +38,10 @@ internal fun ActiveSearchContent(
             onBookClick = onBookClick,
         ) { onSearchResultEvent ->
             Row(
-                modifier = Modifier.padding(horizontal = Spacing.gutter, vertical = Spacing.sm),
+                modifier = Modifier.padding(
+                    horizontal = Spacing.gutter,
+                    vertical = Spacing.sm,
+                ),
             ) {
                 SortChip(
                     state = state,

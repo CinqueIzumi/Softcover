@@ -56,9 +56,11 @@ class DocumentPageContentCollectorTest {
     fun setUp() {
         snapshotFlow = MutableSharedFlow()
         source = mockk()
+
         stateFlow = MutableStateFlow(
             DocumentPage.WHATS_NEW.toInitialUiState().copy(loadFailureMessage = LOAD_FAILURE_MESSAGE),
         )
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(DocumentPageLocalVariables()),
@@ -83,6 +85,7 @@ class DocumentPageContentCollectorTest {
             // ----- Arrange -----
             val sections = persistentListOf(sectionOf("one"), sectionOf("two"))
             val collector = DocumentPageContentCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -100,74 +103,76 @@ class DocumentPageContentCollectorTest {
         }
 
         @Test
-        fun `an empty snapshot loads into an empty section list instead of the loading stand-ins`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val collector = DocumentPageContentCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+        fun `an empty snapshot loads into an empty section list instead of the loading stand-ins`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = DocumentPageContentCollector()
 
-                // ----- Act -----
-                snapshotFlow.emit(TEST_SNAPSHOT)
-
-                // ----- Assert -----
-                stateFlow.value.sections shouldBe emptyList()
-                stateFlow.value.isLoading shouldBe false
-                job.cancel()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            // ----- Act -----
+            snapshotFlow.emit(TEST_SNAPSHOT)
+
+            // ----- Assert -----
+            stateFlow.value.sections shouldBe emptyList()
+            stateFlow.value.isLoading shouldBe false
+            job.cancel()
+        }
 
         @Test
-        fun `sets lastUpdatedText to the formatted long date when fetchedAtEpochMillis is present`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val expected = Instant.fromEpochMilliseconds(TEST_SNAPSHOT.fetchedAtEpochMillis.shouldNotBeNull())
-                    .toLocalDateTime(TimeZone.currentSystemDefault())
-                    .date
-                    .formatLongDate()
-                val collector = DocumentPageContentCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+        fun `sets lastUpdatedText to the formatted long date when fetchedAtEpochMillis is present`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val expected = Instant.fromEpochMilliseconds(TEST_SNAPSHOT.fetchedAtEpochMillis.shouldNotBeNull())
+                .toLocalDateTime(TimeZone.currentSystemDefault())
+                .date
+                .formatLongDate()
 
-                // ----- Act -----
-                snapshotFlow.emit(TEST_SNAPSHOT)
+            val collector = DocumentPageContentCollector()
 
-                // ----- Assert -----
-                stateFlow.value.lastUpdatedText shouldBe expected
-                job.cancel()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            // ----- Act -----
+            snapshotFlow.emit(TEST_SNAPSHOT)
+
+            // ----- Assert -----
+            stateFlow.value.lastUpdatedText shouldBe expected
+            job.cancel()
+        }
 
         @Test
-        fun `lastUpdatedText is null when the snapshot has no fetchedAtEpochMillis`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val collector = DocumentPageContentCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+        fun `lastUpdatedText is null when the snapshot has no fetchedAtEpochMillis`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = DocumentPageContentCollector()
 
-                // ----- Act -----
-                snapshotFlow.emit(TEST_SNAPSHOT.copy(fetchedAtEpochMillis = null))
-
-                // ----- Assert -----
-                stateFlow.value.lastUpdatedText shouldBe null
-                job.cancel()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            // ----- Act -----
+            snapshotFlow.emit(TEST_SNAPSHOT.copy(fetchedAtEpochMillis = null))
+
+            // ----- Assert -----
+            stateFlow.value.lastUpdatedText shouldBe null
+            job.cancel()
+        }
 
         @Test
         fun `isBundled follows the snapshot flag`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = DocumentPageContentCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -192,6 +197,7 @@ class DocumentPageContentCollectorTest {
             // ----- Arrange -----
             val second = persistentListOf(sectionOf("two"))
             val collector = DocumentPageContentCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

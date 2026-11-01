@@ -8,11 +8,11 @@ import nl.rhaydus.softcover.core.domain.model.JournalEventType
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
-import java.util.TimeZone
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import java.util.TimeZone
 
 class LibraryStatsTest {
     private lateinit var originalZone: TimeZone
@@ -266,6 +266,7 @@ class LibraryStatsTest {
         fun `the latest finishedAt wins over an older lastReadDate, journal, and createdAt`() {
             // ----- Arrange -----
             val journals = listOf(buildFinishedJournal("2019-06-01T00:00:00"))
+
             val book = buildBook(
                 userBook = buildUserBook(
                     journals = journals,
@@ -286,6 +287,7 @@ class LibraryStatsTest {
         fun `lastReadDate is used when finishedAt is null`() {
             // ----- Arrange -----
             val journals = listOf(buildFinishedJournal("2019-06-01T00:00:00"))
+
             val book = buildBook(
                 userBook = buildUserBook(
                     journals = journals,
@@ -372,6 +374,7 @@ class LibraryStatsTest {
         fun `createdAt at UTC year-end evening falls back to the next local year`() {
             // ----- Arrange -----
             TimeZone.setDefault(TimeZone.getTimeZone("Europe/Amsterdam"))
+
             val book = buildBook(
                 userBook = buildUserBook(
                     journals = emptyList(),
@@ -390,6 +393,7 @@ class LibraryStatsTest {
         fun `finishedAt is a plain date and is not shifted by the device zone`() {
             // ----- Arrange -----
             TimeZone.setDefault(TimeZone.getTimeZone("Pacific/Pago_Pago"))
+
             val book = buildBook(
                 userBook = buildUserBook(reads = listOf(buildUserBookRead(finishedAt = "2026-01-01"))),
             )

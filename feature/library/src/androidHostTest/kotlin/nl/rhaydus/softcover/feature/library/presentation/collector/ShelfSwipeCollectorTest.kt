@@ -31,6 +31,7 @@ class ShelfSwipeCollectorTest {
         shelfSwipeFlow = MutableSharedFlow()
         getShelfSwipeEnabledAsFlowUseCase = mockk()
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -54,6 +55,7 @@ class ShelfSwipeCollectorTest {
         fun `updates shelfSwipeEnabled to the latest value when flow emits multiple times`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = ShelfSwipeCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

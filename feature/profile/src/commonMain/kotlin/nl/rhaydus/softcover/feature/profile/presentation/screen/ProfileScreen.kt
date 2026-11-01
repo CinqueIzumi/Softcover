@@ -99,6 +99,7 @@ private fun rememberRecentlyLovedEventHandler(
     ) { event, entry ->
         if (event is BookCardEvent.Clicked) {
             val loved = entry.loved
+
             val destination = ScreenDestination.BookDetail(
                 id = loved.bookId,
                 initialCover = entry.libraryBook?.let { BookInitialCover.fromBook(it) }

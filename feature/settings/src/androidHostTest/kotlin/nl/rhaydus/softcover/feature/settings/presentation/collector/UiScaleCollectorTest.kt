@@ -32,6 +32,7 @@ class UiScaleCollectorTest {
         uiScaleFlow = MutableSharedFlow()
         getUiScaleAsFlowUseCase = mockk()
         stateFlow = MutableStateFlow(SettingsScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(SettingsLocalVariables()),
@@ -55,6 +56,7 @@ class UiScaleCollectorTest {
         fun `updates uiScale to the latest value when flow emits multiple times`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = UiScaleCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

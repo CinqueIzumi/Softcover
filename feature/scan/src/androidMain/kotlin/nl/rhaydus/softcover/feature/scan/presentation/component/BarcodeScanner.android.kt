@@ -34,7 +34,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.google.mlkit.vision.barcode.BarcodeScanner as MlKitBarcodeScanner
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
@@ -46,6 +45,7 @@ import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
+import com.google.mlkit.vision.barcode.BarcodeScanner as MlKitBarcodeScanner
 
 /**
  * Android implementation: a CameraX barcode-scanning surface backed by the bundled ML Kit model
@@ -159,7 +159,10 @@ actual fun BarcodeScanner(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = Spacing.xl, vertical = Spacing.xxxl),
+                .padding(
+                    horizontal = Spacing.xl,
+                    vertical = Spacing.xxxl,
+                ),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             SoftcoverText(
@@ -216,6 +219,7 @@ private fun scanFrame(
     scanner.process(inputImage)
         .addOnSuccessListener { barcodes ->
             val isbn = barcodes.firstNotNullOfOrNull { it.rawValue } ?: return@addOnSuccessListener
+
             val isFirstDetection = hasEmitted.compareAndSet(
                 false,
                 true,

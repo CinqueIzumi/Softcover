@@ -54,6 +54,7 @@ internal class EditionSheetCollector : BookDetailCollector {
 
                 scope.setState {
                     val sheet = it.editionSheet
+
                     val model = if (bookTitle == null || currentEdition == null) {
                         null
                     } else {

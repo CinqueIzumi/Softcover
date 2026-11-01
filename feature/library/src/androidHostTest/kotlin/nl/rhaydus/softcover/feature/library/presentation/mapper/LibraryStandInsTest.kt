@@ -97,18 +97,18 @@ class LibraryStandInsTest {
             compactCards.forEach { card ->
                 card.variant.shouldBeInstanceOf<BookCardVariant.Row>().size shouldBe BookCardVariant.Row.Size.Compact
             }
+
             largeCards.forEach { card ->
                 card.variant.shouldBeInstanceOf<BookCardVariant.Row>().size shouldBe BookCardVariant.Row.Size.Large
             }
         }
     }
 
-    private fun BookCardUiModel.standInCover(): CoverUiModel? =
-        when (val variant = variant) {
-            is BookCardVariant.Column -> variant.cover?.model
+    private fun BookCardUiModel.standInCover(): CoverUiModel? = when (val variant = variant) {
+        is BookCardVariant.Column -> variant.cover?.model
 
-            is BookCardVariant.CoverOnly -> variant.cover.model
+        is BookCardVariant.CoverOnly -> variant.cover.model
 
-            is BookCardVariant.Row -> variant.lead?.shouldBeInstanceOf<BookCardLead.Cover>()?.cover?.model
-        }
+        is BookCardVariant.Row -> variant.lead?.shouldBeInstanceOf<BookCardLead.Cover>()?.cover?.model
+    }
 }

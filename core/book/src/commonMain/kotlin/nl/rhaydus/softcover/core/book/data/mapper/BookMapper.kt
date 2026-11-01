@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.core.book.data.mapper
 
-import kotlin.math.roundToInt
 import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.database.mapper.reviewDocumentFromSlate
 import nl.rhaydus.softcover.core.domain.model.Author
@@ -26,12 +25,13 @@ import nl.rhaydus.softcover.fragment.ReadingJournalFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment.Book.Companion.bookListFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment.Edition.Companion.editionFragment
+import nl.rhaydus.softcover.fragment.UserBookFragment.User_book_read.Companion.userBookReadFragment
+import nl.rhaydus.softcover.fragment.UserBookReadFragment
+import kotlin.math.roundToInt
 import nl.rhaydus.softcover.fragment.UserBookFragment.Progress_updated_journal.Companion.readingJournalFragment as progressUpdatedJournalFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment.Status_stopped_journal.Companion.readingJournalFragment as statusStoppedJournalFragment
-import nl.rhaydus.softcover.fragment.UserBookFragment.User_book_read.Companion.userBookReadFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment.User_book_read_finished_journal.Companion.readingJournalFragment as userBookReadFinishedJournalFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment.User_book_read_started_journal.Companion.readingJournalFragment as userBookReadStartedJournalFragment
-import nl.rhaydus.softcover.fragment.UserBookReadFragment
 
 private val WhitespaceRun = Regex("\\s+")
 
@@ -85,6 +85,7 @@ internal fun EditionDetailFragment.toBookEdition(): BookEdition {
             id = author.id,
         )
     }
+
     return (this as EditionFragment).toBookEdition(authors = authors)
 }
 
@@ -98,12 +99,15 @@ private fun UserBookFragment.toUserBook(): UserBook {
         progress_updated_journal.mapNotNullTo(this) {
             it.progressUpdatedJournalFragment()?.toReadingJournal()
         }
+
         user_book_read_started_journal.mapNotNullTo(this) {
             it.userBookReadStartedJournalFragment()?.toReadingJournal()
         }
+
         user_book_read_finished_journal.mapNotNullTo(this) {
             it.userBookReadFinishedJournalFragment()?.toReadingJournal()
         }
+
         status_stopped_journal.mapNotNullTo(this) {
             it.statusStoppedJournalFragment()?.toReadingJournal()
         }
@@ -197,22 +201,22 @@ private fun BookListFragment.canonicalIdOrNull(): Int? {
 private fun BookListFragment.roundedRating(): Double =
     ((rating ?: 0.0) * 10).roundToInt() / 10.0
 
-private fun BookListFragment.tags(): List<Tag> =
-    taggable_counts.mapNotNull { taggableCount ->
-        val tag = taggableCount.tag ?: return@mapNotNull null
+private fun BookListFragment.tags(): List<Tag> = taggable_counts.mapNotNull { taggableCount ->
+    val tag = taggableCount.tag ?: return@mapNotNull null
 
-        Tag(
-            id = tag.id.toInt(),
-            name = tag.tag,
-            category = TagCategory.fromApiString(tag.tag_category.category),
-            count = taggableCount.count,
-        )
-    }
+    Tag(
+        id = tag.id.toInt(),
+        name = tag.tag,
+        category = TagCategory.fromApiString(tag.tag_category.category),
+        count = taggableCount.count,
+    )
+}
 
 internal fun UserBookFragment.toBook(): Book? {
     val listFragment = book.bookListFragment() ?: return null
 
     val bookAuthors = listFragment.authors()
+
     val selectedEdition = edition?.editionFragment()
         ?.toBookEdition(authors = bookAuthors)
         ?.copy(bookId = listFragment.id)
@@ -245,9 +249,11 @@ internal fun UserBookFragment.toBook(): Book? {
 fun BookDetailFragment.toBook(): Book? {
     val listFragment: BookListFragment = this
     val bookAuthors = listFragment.authors()
+
     val defaultEdition = default_cover_edition?.editionFragment()
         ?.toBookEdition(authors = bookAuthors)
         ?.copy(bookId = listFragment.id)
+
     val editions = listOfNotNull(defaultEdition)
 
     return Book(

@@ -29,13 +29,14 @@ class GalleryThemeConfigurationCollectorTest {
         ComponentGalleryUiState,
         ComponentGalleryEvent,
         ComponentGalleryLocalVariables,
-        >
+    >
     private lateinit var themeConfigFlow: MutableSharedFlow<ThemeConfiguration>
 
     @BeforeEach
     fun setUp() {
         themeConfigFlow = MutableSharedFlow()
         stateFlow = MutableStateFlow(ComponentGalleryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ComponentGalleryLocalVariables()),
@@ -43,6 +44,7 @@ class GalleryThemeConfigurationCollectorTest {
         )
 
         val useCase = mockk<GetThemeConfigurationUseCase>()
+
         every {
             useCase()
         } returns themeConfigFlow
@@ -60,6 +62,7 @@ class GalleryThemeConfigurationCollectorTest {
         fun `follows the app palette when there is no override`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = GalleryThemeConfigurationCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -77,26 +80,26 @@ class GalleryThemeConfigurationCollectorTest {
         }
 
         @Test
-        fun `keeps the override as the resolved palette while tracking the app palette`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                stateFlow.value = ComponentGalleryUiState(paletteOverride = ColorPalette.INK)
-                val collector = GalleryThemeConfigurationCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+        fun `keeps the override as the resolved palette while tracking the app palette`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = ComponentGalleryUiState(paletteOverride = ColorPalette.INK)
+            val collector = GalleryThemeConfigurationCollector()
 
-                // ----- Act -----
-                themeConfigFlow.emit(ThemeConfiguration(colorPalette = ColorPalette.SEA))
-
-                // ----- Assert -----
-                stateFlow.value.currentPalette shouldBe ColorPalette.SEA.toSpinePalette()
-                stateFlow.value.resolvedPalette shouldBe ColorPalette.INK.toSpinePalette()
-                stateFlow.value.paletteOverride shouldBe ColorPalette.INK
-                job.cancel()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            // ----- Act -----
+            themeConfigFlow.emit(ThemeConfiguration(colorPalette = ColorPalette.SEA))
+
+            // ----- Assert -----
+            stateFlow.value.currentPalette shouldBe ColorPalette.SEA.toSpinePalette()
+            stateFlow.value.resolvedPalette shouldBe ColorPalette.INK.toSpinePalette()
+            stateFlow.value.paletteOverride shouldBe ColorPalette.INK
+            job.cancel()
+        }
     }
 }

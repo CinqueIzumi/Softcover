@@ -7,21 +7,21 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.WindowPlacement as ComposeWindowPlacement
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.rememberWindowState
-import kotlin.math.roundToInt
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
-import org.koin.compose.koinInject
 import nl.rhaydus.common.runCatchingCancellable
 import nl.rhaydus.softcover.core.domain.model.DesktopWindowState
-import nl.rhaydus.softcover.core.domain.model.WindowPlacement as DomainWindowPlacement
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDesktopWindowStateAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetDesktopWindowStateUseCase
+import org.koin.compose.koinInject
+import kotlin.math.roundToInt
+import androidx.compose.ui.window.WindowPlacement as ComposeWindowPlacement
+import nl.rhaydus.softcover.core.domain.model.WindowPlacement as DomainWindowPlacement
 
 // Writes are coalesced so a live drag-resize/move doesn't hammer the DataStore on every frame.
 private const val WINDOW_STATE_SAVE_DEBOUNCE_MS = 400L
@@ -81,6 +81,7 @@ fun rememberPersistedWindowState(): WindowState {
                         y = if (specified) position.y.value.roundToInt() else null,
                         placement = DomainWindowPlacement.FLOATING,
                     )
+
                     setDesktopWindowState(lastFloating)
                 } else {
                     setDesktopWindowState(lastFloating.copy(placement = placement.toDomain()))

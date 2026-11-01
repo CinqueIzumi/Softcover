@@ -36,6 +36,7 @@ class OnApplyArrangeActionTest {
         setLibrarySortUseCase = mockk(relaxed = true)
         setLibraryGridLayoutUseCase = mockk(relaxed = true)
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -43,16 +44,15 @@ class OnApplyArrangeActionTest {
         )
     }
 
-    private fun stubDependencies(): LibraryDependencies =
-        mockk<LibraryDependencies>(relaxed = true).also { mock ->
-            every {
-                mock.setLibrarySortUseCase
-            } returns setLibrarySortUseCase
+    private fun stubDependencies(): LibraryDependencies = mockk<LibraryDependencies>(relaxed = true).also { mock ->
+        every {
+            mock.setLibrarySortUseCase
+        } returns setLibrarySortUseCase
 
-            every {
-                mock.setLibraryGridLayoutUseCase
-            } returns setLibraryGridLayoutUseCase
-        }
+        every {
+            mock.setLibraryGridLayoutUseCase
+        } returns setLibraryGridLayoutUseCase
+    }
 
     @Nested
     inner class Execute {
@@ -134,91 +134,89 @@ class OnApplyArrangeActionTest {
         }
 
         @Test
-        fun `sort use case failure is swallowed and does not prevent the layout use case call`() =
-            runTest {
-                // ----- Arrange -----
-                stateFlow.value = LibraryUiState(
-                    arrangeDraft = LibraryArrangeDraft(
-                        tabId = tabId,
-                        sortMode = LibrarySortMode.TITLE,
-                        sortDirection = SortDirection.ASCENDING,
-                        gridLayout = LibraryGridLayout.GRID_THREE_COLUMNS,
-                    ),
+        fun `sort use case failure is swallowed and does not prevent the layout use case call`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(
+                arrangeDraft = LibraryArrangeDraft(
+                    tabId = tabId,
+                    sortMode = LibrarySortMode.TITLE,
+                    sortDirection = SortDirection.ASCENDING,
+                    gridLayout = LibraryGridLayout.GRID_THREE_COLUMNS,
+                ),
+            )
+
+            coEvery {
+                setLibrarySortUseCase(
+                    tabId = any(),
+                    mode = any(),
+                    direction = any(),
                 )
+            } returns Result.failure(RuntimeException("sort write failed"))
 
-                coEvery {
-                    setLibrarySortUseCase(
-                        tabId = any(),
-                        mode = any(),
-                        direction = any(),
-                    )
-                } returns Result.failure(RuntimeException("sort write failed"))
+            coEvery {
+                setLibraryGridLayoutUseCase(newLayout = any())
+            } returns Result.success(Unit)
 
-                coEvery {
-                    setLibraryGridLayoutUseCase(newLayout = any())
-                } returns Result.success(Unit)
+            // ----- Act -----
+            // No exception propagates out of execute() — the failure is logged, not rethrown or
+            // rolled back.
+            OnApplyArrangeAction().execute(
+                dependencies = stubDependencies(),
+                scope = scope,
+            )
 
-                // ----- Act -----
-                // No exception propagates out of execute() — the failure is logged, not rethrown or
-                // rolled back.
-                OnApplyArrangeAction().execute(
-                    dependencies = stubDependencies(),
-                    scope = scope,
-                )
-
-                // ----- Assert -----
-                coVerify(exactly = 1) {
-                    setLibraryGridLayoutUseCase(newLayout = LibraryGridLayout.GRID_THREE_COLUMNS)
-                }
-
-                stateFlow.value.isRearranging shouldBe false
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                setLibraryGridLayoutUseCase(newLayout = LibraryGridLayout.GRID_THREE_COLUMNS)
             }
+
+            stateFlow.value.isRearranging shouldBe false
+        }
 
         @Test
-        fun `layout use case failure is swallowed and does not undo the already-applied sort`() =
-            runTest {
-                // ----- Arrange -----
-                stateFlow.value = LibraryUiState(
-                    arrangeDraft = LibraryArrangeDraft(
-                        tabId = tabId,
-                        sortMode = LibrarySortMode.AUTHOR,
-                        sortDirection = SortDirection.ASCENDING,
-                        gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY,
-                    ),
+        fun `layout use case failure is swallowed and does not undo the already-applied sort`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(
+                arrangeDraft = LibraryArrangeDraft(
+                    tabId = tabId,
+                    sortMode = LibrarySortMode.AUTHOR,
+                    sortDirection = SortDirection.ASCENDING,
+                    gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY,
+                ),
+            )
+
+            coEvery {
+                setLibrarySortUseCase(
+                    tabId = any(),
+                    mode = any(),
+                    direction = any(),
                 )
+            } returns Result.success(Unit)
 
-                coEvery {
-                    setLibrarySortUseCase(
-                        tabId = any(),
-                        mode = any(),
-                        direction = any(),
-                    )
-                } returns Result.success(Unit)
+            coEvery {
+                setLibraryGridLayoutUseCase(newLayout = any())
+            } returns Result.failure(RuntimeException("layout write failed"))
 
-                coEvery {
-                    setLibraryGridLayoutUseCase(newLayout = any())
-                } returns Result.failure(RuntimeException("layout write failed"))
+            // ----- Act -----
+            // No exception propagates out of execute() and no compensating call is made — a
+            // partial commit (sort applied, layout write failed) is the intended behavior.
+            OnApplyArrangeAction().execute(
+                dependencies = stubDependencies(),
+                scope = scope,
+            )
 
-                // ----- Act -----
-                // No exception propagates out of execute() and no compensating call is made — a
-                // partial commit (sort applied, layout write failed) is the intended behavior.
-                OnApplyArrangeAction().execute(
-                    dependencies = stubDependencies(),
-                    scope = scope,
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                setLibrarySortUseCase(
+                    tabId = tabId,
+                    mode = LibrarySortMode.AUTHOR,
+                    direction = SortDirection.ASCENDING,
                 )
-
-                // ----- Assert -----
-                coVerify(exactly = 1) {
-                    setLibrarySortUseCase(
-                        tabId = tabId,
-                        mode = LibrarySortMode.AUTHOR,
-                        direction = SortDirection.ASCENDING,
-                    )
-                }
-
-                coVerify(exactly = 1) {
-                    setLibraryGridLayoutUseCase(newLayout = LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY)
-                }
             }
+
+            coVerify(exactly = 1) {
+                setLibraryGridLayoutUseCase(newLayout = LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY)
+            }
+        }
     }
 }

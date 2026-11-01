@@ -217,7 +217,10 @@ private fun FirstIntroScreen(
             style = MaterialTheme.editorialTypography.quoteGlyph.copy(fontSize = 340.sp),
             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
             modifier = Modifier
-                .offset(x = -Spacing.lg, y = 96.dp)
+                .offset(
+                    x = -Spacing.lg,
+                    y = 96.dp,
+                )
                 .clearAndSetSemantics {},
         )
 

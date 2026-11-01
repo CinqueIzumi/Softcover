@@ -33,6 +33,7 @@ fun Badge(
     modifier: Modifier = Modifier,
 ) {
     val scheme = MaterialTheme.colorScheme
+
     val (container, content) = when (model.tone) {
         BadgeTone.Primary -> scheme.primary to scheme.onPrimary
         BadgeTone.PrimaryContainer -> scheme.primaryContainer to scheme.onPrimaryContainer
@@ -41,6 +42,7 @@ fun Badge(
         BadgeTone.Neutral -> scheme.surfaceContainerHigh to scheme.onSurfaceVariant
         BadgeTone.Scrim -> Color.Black.copy(alpha = 0.55f) to Color.White
     }
+
     val padding = when (model.size) {
         BadgeSize.Compact -> PaddingValues(
             horizontal = Spacing.xxs,
@@ -52,6 +54,7 @@ fun Badge(
             vertical = Spacing.xxs,
         )
     }
+
     val style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold)
 
     Surface(

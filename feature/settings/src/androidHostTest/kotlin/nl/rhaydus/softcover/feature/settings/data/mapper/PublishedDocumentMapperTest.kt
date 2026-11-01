@@ -16,6 +16,7 @@ class PublishedDocumentMapperTest {
         fun `maps entity markdown and timestamp into a cache-sourced document`() {
             // ----- Arrange -----
             val markdown = "# Title\n\nBody text"
+
             val entity = PublishedDocumentEntity(
                 key = "roadmap",
                 markdown = markdown,
@@ -28,6 +29,7 @@ class PublishedDocumentMapperTest {
             // ----- Assert -----
             document.source shouldBe PublishedDocumentSource.CACHE
             document.fetchedAtEpochMillis shouldBe 12345L
+
             document.blocks shouldBe persistentListOf(
                 MarkdownBlock.Paragraph(spans = persistentListOf(MarkdownSpan(text = "Body text"))),
             )
@@ -47,6 +49,7 @@ class PublishedDocumentMapperTest {
             // ----- Assert -----
             document.source shouldBe PublishedDocumentSource.BUNDLED
             document.fetchedAtEpochMillis shouldBe null
+
             document.blocks shouldBe persistentListOf(
                 MarkdownBlock.Paragraph(spans = persistentListOf(MarkdownSpan(text = "Body text"))),
             )

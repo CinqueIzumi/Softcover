@@ -13,9 +13,9 @@ import androidx.glance.LocalSize
 import androidx.glance.action.Action
 import androidx.glance.action.actionParametersOf
 import androidx.glance.action.clickable
+import androidx.glance.appwidget.CircularProgressIndicator
 import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.action.actionStartActivity
-import androidx.glance.appwidget.CircularProgressIndicator
 import androidx.glance.appwidget.appWidgetBackground
 import androidx.glance.background
 import androidx.glance.layout.Alignment

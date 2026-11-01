@@ -63,11 +63,13 @@ class BookCardModelsCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(ExploreScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk<ExploreDependencies>(relaxed = true)
     }
 
@@ -139,43 +141,46 @@ class BookCardModelsCollectorTest {
             // ----- Assert -----
             stateFlow.value.trending.cards.map { it.key } shouldBe
                 listOf(BookCardKey.Book(bookId = 1))
+
             stateFlow.value.becauseYouRead.cards.map { it.key } shouldBe
                 listOf(BookCardKey.Book(bookId = 2))
+
             stateFlow.value.upNext.cards.map { it.key } shouldBe
                 listOf(BookCardKey.Book(bookId = 3))
+
             columnOf(stateFlow.value.becauseYouRead.cards.single()).text.byline shouldBe "By Ann"
             columnOf(stateFlow.value.upNext.cards.single()).hasMenu shouldBe true
             job.cancel()
         }
 
         @Test
-        fun `resolves each card key back to its book through the set it came from`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val job = launch {
-                    BookCardModelsCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-                val trendingBook = book(id = 1)
-                val upNextBook = book(id = 3)
-                val searched = book(id = 5)
-
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(
-                    trendingBooks = persistentListOf(trendingBook),
-                    continueSeriesBooks = persistentListOf(upNextBook),
-                    queriedBooks = persistentListOf(searched),
+        fun `resolves each card key back to its book through the set it came from`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val job = launch {
+                BookCardModelsCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-
-                // ----- Assert -----
-                stateFlow.value.trending[BookCardKey.Book(bookId = 1)] shouldBe trendingBook
-                stateFlow.value.upNext[BookCardKey.Book(bookId = 3)] shouldBe upNextBook
-                stateFlow.value.searchResults[BookCardKey.Book(bookId = 5)] shouldBe searched
-                stateFlow.value.trending[BookCardKey.Book(bookId = 3)].shouldBeNull()
-                job.cancel()
             }
+
+            val trendingBook = book(id = 1)
+            val upNextBook = book(id = 3)
+            val searched = book(id = 5)
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                trendingBooks = persistentListOf(trendingBook),
+                continueSeriesBooks = persistentListOf(upNextBook),
+                queriedBooks = persistentListOf(searched),
+            )
+
+            // ----- Assert -----
+            stateFlow.value.trending[BookCardKey.Book(bookId = 1)] shouldBe trendingBook
+            stateFlow.value.upNext[BookCardKey.Book(bookId = 3)] shouldBe upNextBook
+            stateFlow.value.searchResults[BookCardKey.Book(bookId = 5)] shouldBe searched
+            stateFlow.value.trending[BookCardKey.Book(bookId = 3)].shouldBeNull()
+            job.cancel()
+        }
 
         @Test
         fun `builds each rail's cover from the book with that rail's transition surface key`() = runTest(UnconfinedTestDispatcher()) {
@@ -186,6 +191,7 @@ class BookCardModelsCollectorTest {
                     dependencies = dependencies,
                 )
             }
+
             val shared = book(id = 1)
 
             // ----- Act -----
@@ -202,50 +208,54 @@ class BookCardModelsCollectorTest {
                     shareTransition = true,
                     transitionSurface = SURFACE_TRENDING,
                 )
+
             columnOf(stateFlow.value.becauseYouRead.cards.single()).cover.shouldNotBeNull().model shouldBe
                 shared.toCoverUiModel(
                     variant = CoverVariant.Raised,
                     shareTransition = true,
                     transitionSurface = SURFACE_BECAUSE_YOU_READ,
                 )
+
             columnOf(stateFlow.value.upNext.cards.single()).cover.shouldNotBeNull().model shouldBe
                 shared.toCoverUiModel(
                     variant = CoverVariant.Raised,
                     shareTransition = true,
                     transitionSurface = SURFACE_UP_NEXT,
                 )
+
             job.cancel()
         }
 
         @Test
-        fun `stamps the shared unreleased overlay onto a book in every rail it appears in`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val job = launch {
-                    BookCardModelsCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(
-                    trendingBooks = persistentListOf(
-                        book(id = 1),
-                        book(id = 2),
-                    ),
-                    continueSeriesBooks = persistentListOf(book(id = 1)),
-                    unreleasedCoverOverlays = persistentMapOf(1 to overlay),
+        fun `stamps the shared unreleased overlay onto a book in every rail it appears in`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val job = launch {
+                BookCardModelsCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-
-                // ----- Assert -----
-                val trending = stateFlow.value.trending.cards
-                columnOf(trending[0]).cover.shouldNotBeNull().badge shouldBe overlay
-                columnOf(trending[1]).cover.shouldNotBeNull().badge.shouldBeNull()
-                columnOf(stateFlow.value.upNext.cards.single()).cover.shouldNotBeNull().badge shouldBe
-                    overlay
-                job.cancel()
             }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                trendingBooks = persistentListOf(
+                    book(id = 1),
+                    book(id = 2),
+                ),
+                continueSeriesBooks = persistentListOf(book(id = 1)),
+                unreleasedCoverOverlays = persistentMapOf(1 to overlay),
+            )
+
+            // ----- Assert -----
+            val trending = stateFlow.value.trending.cards
+            columnOf(trending[0]).cover.shouldNotBeNull().badge shouldBe overlay
+            columnOf(trending[1]).cover.shouldNotBeNull().badge.shouldBeNull()
+
+            columnOf(stateFlow.value.upNext.cards.single()).cover.shouldNotBeNull().badge shouldBe
+                overlay
+
+            job.cancel()
+        }
 
         @Test
         fun `emits railStandInCount loading stand-ins per rail while its books are empty and loading`() =
@@ -278,6 +288,7 @@ class BookCardModelsCollectorTest {
                     cards.all { it.isLoading } shouldBe true
                     cards.map { it.key }.distinct() shouldHaveSize railStandInCount
                 }
+
                 job.cancel()
             }
 
@@ -309,26 +320,25 @@ class BookCardModelsCollectorTest {
         }
 
         @Test
-        fun `keeps real cards when books are present even while still loading`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val job = launch {
-                    BookCardModelsCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(
-                    trendingBooks = persistentListOf(book(id = 1)),
-                    loadingTrendingBooks = true,
+        fun `keeps real cards when books are present even while still loading`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val job = launch {
+                BookCardModelsCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-
-                // ----- Assert -----
-                stateFlow.value.trending.cards.map { it.key } shouldBe listOf(BookCardKey.Book(bookId = 1))
-                job.cancel()
             }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                trendingBooks = persistentListOf(book(id = 1)),
+                loadingTrendingBooks = true,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.trending.cards.map { it.key } shouldBe listOf(BookCardKey.Book(bookId = 1))
+            job.cancel()
+        }
 
         @Test
         fun `emits six loading search stand-ins while a search is loading with no results on screen`() =
@@ -356,31 +366,32 @@ class BookCardModelsCollectorTest {
             }
 
         @Test
-        fun `keeps the mapped search cards instead of stand-ins while a refresh is loading`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val job = launch {
-                    BookCardModelsCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(
-                    queriedBooks = persistentListOf(book(id = 1), book(id = 2)),
-                    isLoading = true,
+        fun `keeps the mapped search cards instead of stand-ins while a refresh is loading`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val job = launch {
+                BookCardModelsCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-
-                // ----- Assert -----
-                val cards = stateFlow.value.searchResults.cards
-                cards.map { it.key } shouldBe listOf(
-                    BookCardKey.Book(bookId = 1),
-                    BookCardKey.Book(bookId = 2),
-                )
-                cards.none { it.isLoading } shouldBe true
-                job.cancel()
             }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                queriedBooks = persistentListOf(book(id = 1), book(id = 2)),
+                isLoading = true,
+            )
+
+            // ----- Assert -----
+            val cards = stateFlow.value.searchResults.cards
+
+            cards.map { it.key } shouldBe listOf(
+                BookCardKey.Book(bookId = 1),
+                BookCardKey.Book(bookId = 2),
+            )
+
+            cards.none { it.isLoading } shouldBe true
+            job.cancel()
+        }
 
         @Test
         fun `emits the mapped search cards when not loading`() = runTest(UnconfinedTestDispatcher()) {
@@ -411,12 +422,14 @@ class BookCardModelsCollectorTest {
             stateFlow.value = stateFlow.value.copy(
                 trendingBooks = persistentListOf(book(id = 1)),
             )
+
             val job = launch {
                 BookCardModelsCollector().onLaunch(
                     scope = scope,
                     dependencies = dependencies,
                 )
             }
+
             val cardsAfterFirstEmit = stateFlow.value.trending.cards
 
             // ----- Act -----
@@ -428,54 +441,59 @@ class BookCardModelsCollectorTest {
         }
 
         @Test
-        fun `builds search result cards in source order, each with its own book's cover`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val job = launch {
-                    BookCardModelsCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-                val first = book(id = 1)
-                val second = book(id = 2)
-
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(
-                    queriedBooks = persistentListOf(
-                        first,
-                        second,
-                    ),
+        fun `builds search result cards in source order, each with its own book's cover`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val job = launch {
+                BookCardModelsCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-
-                // ----- Assert -----
-                val cards = stateFlow.value.searchResults.cards
-                cards.map { it.key } shouldBe listOf(
-                    BookCardKey.Book(bookId = 1),
-                    BookCardKey.Book(bookId = 2),
-                )
-                val firstRow = cards[0].variant.shouldBeInstanceOf<BookCardVariant.Row>()
-                val secondRow = cards[1].variant.shouldBeInstanceOf<BookCardVariant.Row>()
-                firstRow.lead shouldBe BookCardLead.Cover(
-                    cover = BookCardCover(
-                        model = first.toCoverUiModel(
-                            variant = CoverVariant.Flat,
-                            shareTransition = true,
-                            transitionSurface = null,
-                        ),
-                    ),
-                )
-                secondRow.lead shouldBe BookCardLead.Cover(
-                    cover = BookCardCover(
-                        model = second.toCoverUiModel(
-                            variant = CoverVariant.Flat,
-                            shareTransition = true,
-                            transitionSurface = null,
-                        ),
-                    ),
-                )
-                job.cancel()
             }
+
+            val first = book(id = 1)
+            val second = book(id = 2)
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                queriedBooks = persistentListOf(
+                    first,
+                    second,
+                ),
+            )
+
+            // ----- Assert -----
+            val cards = stateFlow.value.searchResults.cards
+
+            cards.map { it.key } shouldBe listOf(
+                BookCardKey.Book(bookId = 1),
+                BookCardKey.Book(bookId = 2),
+            )
+
+            val firstRow = cards[0].variant.shouldBeInstanceOf<BookCardVariant.Row>()
+            val secondRow = cards[1].variant.shouldBeInstanceOf<BookCardVariant.Row>()
+
+            firstRow.lead shouldBe BookCardLead.Cover(
+                cover = BookCardCover(
+                    model = first.toCoverUiModel(
+                        variant = CoverVariant.Flat,
+                        shareTransition = true,
+                        transitionSurface = null,
+                    ),
+                ),
+            )
+
+            secondRow.lead shouldBe BookCardLead.Cover(
+                cover = BookCardCover(
+                    model = second.toCoverUiModel(
+                        variant = CoverVariant.Flat,
+                        shareTransition = true,
+                        transitionSurface = null,
+                    ),
+                ),
+            )
+
+            job.cancel()
+        }
     }
 
     @Nested
@@ -504,47 +522,52 @@ class BookCardModelsCollectorTest {
             .map { it.transitionKey }
 
         @Test
-        fun `each rail's title key carries that rail's surface, matching its cover key surface`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val job = launch {
-                    BookCardModelsCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-                val shared = book(id = 1)
-
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(
-                    trendingBooks = persistentListOf(shared),
-                    becauseYouReadBooks = persistentListOf(shared),
-                    continueSeriesBooks = persistentListOf(shared),
+        fun `each rail's title key carries that rail's surface, matching its cover key surface`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val job = launch {
+                BookCardModelsCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-
-                // ----- Assert -----
-                val trending = columnOf(stateFlow.value.trending.cards.single())
-                val becauseYouRead = columnOf(stateFlow.value.becauseYouRead.cards.single())
-                val upNext = columnOf(stateFlow.value.upNext.cards.single())
-                trending.text.titleTransitionKey shouldBe titleKey(
-                    bookId = 1,
-                    surface = SURFACE_TRENDING,
-                )
-                becauseYouRead.text.titleTransitionKey shouldBe titleKey(
-                    bookId = 1,
-                    surface = SURFACE_BECAUSE_YOU_READ,
-                )
-                upNext.text.titleTransitionKey shouldBe titleKey(
-                    bookId = 1,
-                    surface = SURFACE_UP_NEXT,
-                )
-                trending.cover.shouldNotBeNull().model.sharedTransitionKey shouldBe bookTransitionKey(
-                    element = BookTransitionElement.Cover,
-                    bookId = 1,
-                    surface = SURFACE_TRENDING,
-                )
-                job.cancel()
             }
+
+            val shared = book(id = 1)
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                trendingBooks = persistentListOf(shared),
+                becauseYouReadBooks = persistentListOf(shared),
+                continueSeriesBooks = persistentListOf(shared),
+            )
+
+            // ----- Assert -----
+            val trending = columnOf(stateFlow.value.trending.cards.single())
+            val becauseYouRead = columnOf(stateFlow.value.becauseYouRead.cards.single())
+            val upNext = columnOf(stateFlow.value.upNext.cards.single())
+
+            trending.text.titleTransitionKey shouldBe titleKey(
+                bookId = 1,
+                surface = SURFACE_TRENDING,
+            )
+
+            becauseYouRead.text.titleTransitionKey shouldBe titleKey(
+                bookId = 1,
+                surface = SURFACE_BECAUSE_YOU_READ,
+            )
+
+            upNext.text.titleTransitionKey shouldBe titleKey(
+                bookId = 1,
+                surface = SURFACE_UP_NEXT,
+            )
+
+            trending.cover.shouldNotBeNull().model.sharedTransitionKey shouldBe bookTransitionKey(
+                element = BookTransitionElement.Cover,
+                bookId = 1,
+                surface = SURFACE_TRENDING,
+            )
+
+            job.cancel()
+        }
 
         @Test
         fun `one book on three rails gets three distinct title keys`() = runTest(UnconfinedTestDispatcher()) {
@@ -555,6 +578,7 @@ class BookCardModelsCollectorTest {
                     dependencies = dependencies,
                 )
             }
+
             val shared = book(id = 1)
 
             // ----- Act -----
@@ -570,6 +594,7 @@ class BookCardModelsCollectorTest {
                 columnOf(stateFlow.value.becauseYouRead.cards.single()).text.titleTransitionKey,
                 columnOf(stateFlow.value.upNext.cards.single()).text.titleTransitionKey,
             )
+
             keys.toSet() shouldHaveSize 3
             job.cancel()
         }
@@ -601,6 +626,7 @@ class BookCardModelsCollectorTest {
                     surface = SURFACE_TRENDING,
                 ),
             )
+
             job.cancel()
         }
 
@@ -627,17 +653,21 @@ class BookCardModelsCollectorTest {
             // ----- Assert -----
             val row = stateFlow.value.searchResults.cards.single().variant
                 .shouldBeInstanceOf<BookCardVariant.Row>()
+
             row.text.titleTransitionKey shouldBe titleKey(
                 bookId = 5,
                 surface = null,
             )
+
             val ratings = row.text.supportingLines.flatten().filterIsInstance<BookCardLinePart.Rating>()
+
             ratings.map { it.transitionKey } shouldBe listOf(
                 ratingKey(
                     bookId = 5,
                     surface = null,
                 ),
             )
+
             job.cancel()
         }
     }
@@ -704,50 +734,49 @@ class BookCardModelsCollectorTest {
         }
 
         @Test
-        fun `is visible and not loading once books exist even while loading continues`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val job = launchCollector()
+        fun `is visible and not loading once books exist even while loading continues`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val job = launchCollector()
 
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(
-                    becauseYouReadGenre = "Horror",
-                    loadingBecauseYouReadBooks = true,
-                    becauseYouReadBooks = persistentListOf(book(id = 1)),
-                )
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                becauseYouReadGenre = "Horror",
+                loadingBecauseYouReadBooks = true,
+                becauseYouReadBooks = persistentListOf(book(id = 1)),
+            )
 
-                // ----- Assert -----
-                val control = stateFlow.value.becauseYouReadGenreControl
-                control.visible shouldBe true
-                control.isLoading shouldBe false
-                job.cancel()
-            }
+            // ----- Assert -----
+            val control = stateFlow.value.becauseYouReadGenreControl
+            control.visible shouldBe true
+            control.isLoading shouldBe false
+            job.cancel()
+        }
 
         @Test
-        fun `keeps the label, options and sheet state the sheet collector wrote`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                stateFlow.value = stateFlow.value.copy(
-                    becauseYouReadGenreControl = stateFlow.value.becauseYouReadGenreControl.copy(
-                        label = "GENRE · HORROR",
-                        hasOptions = true,
-                        sheetVisible = true,
-                    ),
-                )
-                val job = launchCollector()
+        fun `keeps the label, options and sheet state the sheet collector wrote`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = stateFlow.value.copy(
+                becauseYouReadGenreControl = stateFlow.value.becauseYouReadGenreControl.copy(
+                    label = "GENRE · HORROR",
+                    hasOptions = true,
+                    sheetVisible = true,
+                ),
+            )
 
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(
-                    becauseYouReadGenre = "Horror",
-                    becauseYouReadBooks = persistentListOf(book(id = 1)),
-                )
+            val job = launchCollector()
 
-                // ----- Assert -----
-                val control = stateFlow.value.becauseYouReadGenreControl
-                control.label shouldBe "GENRE · HORROR"
-                control.hasOptions shouldBe true
-                control.sheetVisible shouldBe true
-                job.cancel()
-            }
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                becauseYouReadGenre = "Horror",
+                becauseYouReadBooks = persistentListOf(book(id = 1)),
+            )
+
+            // ----- Assert -----
+            val control = stateFlow.value.becauseYouReadGenreControl
+            control.label shouldBe "GENRE · HORROR"
+            control.hasOptions shouldBe true
+            control.sheetVisible shouldBe true
+            job.cancel()
+        }
     }
 }

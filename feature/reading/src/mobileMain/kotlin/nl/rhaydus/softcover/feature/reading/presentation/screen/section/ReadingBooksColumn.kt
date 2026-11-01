@@ -90,7 +90,10 @@ internal fun ReadingBooksColumn(
                         coordinator = entry,
                         index = index,
                     )
-                        .markAsReadSlide(controller, bookId),
+                        .markAsReadSlide(
+                            controller,
+                            bookId,
+                        ),
                 )
             }
         }

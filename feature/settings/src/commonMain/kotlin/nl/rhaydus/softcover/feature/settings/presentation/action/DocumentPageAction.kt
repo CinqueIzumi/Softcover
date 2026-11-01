@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.feature.settings.presentation.state.DocumentPageUiSt
 import nl.rhaydus.toad.UiAction
 
 internal sealed interface DocumentPageAction : UiAction<
-        DocumentPageDependencies,
-        DocumentPageUiState,
-        DocumentPageEvent,
-        DocumentPageLocalVariables,
-        >
+    DocumentPageDependencies,
+    DocumentPageUiState,
+    DocumentPageEvent,
+    DocumentPageLocalVariables,
+>

@@ -30,6 +30,7 @@ class OnApplyFiltersActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -43,6 +44,7 @@ class OnApplyFiltersActionTest {
         fun `no-op when filterDraft is null`() = runTest {
             // ----- Arrange -----
             val existing = LibraryFilters(formats = persistentSetOf("ebook"))
+
             stateFlow.value = LibraryUiState(
                 filtersByTab = persistentMapOf(tabId to existing),
                 filterDraft = null,
@@ -62,11 +64,14 @@ class OnApplyFiltersActionTest {
         fun `replaces the tab's entry with the draft filters and leaves other tabs alone`() = runTest {
             // ----- Arrange -----
             val previous = LibraryFilters(formats = persistentSetOf("paperback"))
+
             val draft = LibraryFilters(
                 formats = persistentSetOf("ebook"),
                 owned = true,
             )
+
             val otherFilters = LibraryFilters(releaseYears = persistentSetOf(2020))
+
             stateFlow.value = LibraryUiState(
                 filtersByTab = persistentMapOf(
                     tabId to previous,
@@ -96,6 +101,7 @@ class OnApplyFiltersActionTest {
             // ----- Arrange -----
             val ownFilters = LibraryFilters(formats = persistentSetOf("ebook"))
             val otherFilters = LibraryFilters(releaseYears = persistentSetOf(2020))
+
             stateFlow.value = LibraryUiState(
                 filtersByTab = persistentMapOf(
                     tabId to ownFilters,

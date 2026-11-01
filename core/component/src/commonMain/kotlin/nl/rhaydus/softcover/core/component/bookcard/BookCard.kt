@@ -166,10 +166,12 @@ internal fun Modifier.bookCardInteraction(
     val selection = decorations.selection
 
     val haptics = LocalHaptics.current
+
     val semantics = bookCardSemantics(
         interactive = interactive,
         selection = selection,
     )
+
     val press = if (interactive) {
         Modifier.pressScaleCombinedClickable(
             role = semantics.role,

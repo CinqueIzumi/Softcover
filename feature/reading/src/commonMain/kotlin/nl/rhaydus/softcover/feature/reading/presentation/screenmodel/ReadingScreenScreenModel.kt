@@ -57,10 +57,10 @@ internal class ReadingScreenScreenModel(
     appDispatchers: AppDispatchers,
     flows: List<ReadingCollector>,
 ) : ToadScreenModel<ReadingScreenUiState, ReadingScreenEvent, ReadingScreenDependencies, ReadingCollector, ReadingLocalVariables>(
-    initialState = ReadingScreenUiState(),
-    initialLocalVariables = ReadingLocalVariables(),
-    initializers = flows,
-) {
+        initialState = ReadingScreenUiState(),
+        initialLocalVariables = ReadingLocalVariables(),
+        initializers = flows,
+    ) {
     override val dependencies = ReadingScreenDependencies(
         coroutineScope = screenModelScope,
         mainDispatcher = appDispatchers.main,

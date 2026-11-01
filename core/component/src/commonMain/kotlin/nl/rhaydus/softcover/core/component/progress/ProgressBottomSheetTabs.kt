@@ -171,6 +171,7 @@ private fun ColumnScope.SteppedNumberContent(
 
     fun stepBy(delta: Int) {
         val stepped = parsed + delta
+
         val next = if (max != null) stepped.coerceIn(
             0,
             max,
@@ -219,6 +220,7 @@ private fun ColumnScope.SteppedNumberContent(
                             text = "",
                             selection = newValue.selection,
                         )
+
                         return@HeroStatNumberField
                     }
 
@@ -249,7 +251,10 @@ private fun ColumnScope.SteppedNumberContent(
             if (unitSymbol != null) {
                 SoftcoverText(
                     text = unitSymbol,
-                    modifier = Modifier.padding(start = Spacing.xs, bottom = Spacing.xs),
+                    modifier = Modifier.padding(
+                        start = Spacing.xs,
+                        bottom = Spacing.xs,
+                    ),
                     style = MaterialTheme.editorialTypography.headlineMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

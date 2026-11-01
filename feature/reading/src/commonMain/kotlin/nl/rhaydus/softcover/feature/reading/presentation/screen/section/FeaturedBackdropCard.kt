@@ -67,6 +67,7 @@ internal fun FeaturedBackdropCard(
     isLoading: Boolean = false,
 ) {
     val isInspection = LocalInspectionMode.current
+
     // The backdrop never renders through Cover (component-contract.md's note on
     // rememberCoverImageRequest) — it needs Crop + blur with no shimmer and no coverless rung.
     val backdropRequest = if (backdropCover != null) {
@@ -74,6 +75,7 @@ internal fun FeaturedBackdropCard(
     } else {
         null
     }
+
     val foreground = MaterialTheme.colorScheme.onSurface
     val veil = MaterialTheme.colorScheme.surfaceContainerHigh
     val lightVeilLift = if (veil.luminance() > 0.5f) 0.15f else 0f

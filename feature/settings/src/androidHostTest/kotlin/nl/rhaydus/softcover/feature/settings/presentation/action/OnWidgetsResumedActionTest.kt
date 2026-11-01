@@ -26,11 +26,13 @@ class OnWidgetsResumedActionTest {
     fun setUp() {
         widgets = FakeHomeScreenWidgets()
         stateFlow = MutableStateFlow(WidgetsSettingsUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(WidgetsSettingsLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk<WidgetsSettingsDependencies>(relaxed = true).also { mock ->
             every {
                 mock.homeScreenWidgets

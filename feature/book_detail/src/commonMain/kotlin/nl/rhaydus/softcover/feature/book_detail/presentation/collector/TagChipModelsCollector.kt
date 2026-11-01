@@ -50,6 +50,7 @@ internal class TagChipModelsCollector : BookDetailCollector {
             .distinctUntilChanged()
             .collectLatest { snapshot ->
                 val userTagChips = snapshot.userTags.map { it.toChipUiModel() }
+
                 val communityTagGroups = snapshot.communityTags.toTagCategoryChipGroups(
                     revealedTagKeys = snapshot.revealedTagKeys,
                 )

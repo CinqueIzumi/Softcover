@@ -161,6 +161,7 @@ class RichTextMapperTest {
         fun `a paragraph with no runs survives both directions`() {
             // ----- Arrange -----
             val domainDocument = ReviewDocument(paragraphs = listOf(ReviewParagraph(runs = emptyList())))
+
             val uiModel = RichTextUiModel(
                 paragraphs = persistentListOf(RichTextParagraph(runs = persistentListOf())),
             )
@@ -209,10 +210,12 @@ class RichTextMapperTest {
                 text = "bold",
                 bold = true,
             )
+
             runs[1] shouldBe RichTextRun(
                 text = "italic",
                 italic = true,
             )
+
             runs[2] shouldBe RichTextRun(
                 text = "spoiler",
                 spoiler = true,
@@ -251,10 +254,12 @@ class RichTextMapperTest {
                 text = "bold",
                 bold = true,
             )
+
             runs[1] shouldBe ReviewRun(
                 text = "italic",
                 italic = true,
             )
+
             runs[2] shouldBe ReviewRun(
                 text = "spoiler",
                 spoiler = true,

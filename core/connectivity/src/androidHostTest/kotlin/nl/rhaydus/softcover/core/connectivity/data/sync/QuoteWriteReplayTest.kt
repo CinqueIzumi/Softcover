@@ -28,6 +28,7 @@ class QuoteWriteReplayTest {
     fun setUp() {
         remoteDataSource = mockk()
         localDataSource = mockk()
+
         replay = QuoteWriteReplay(
             remoteDataSource = remoteDataSource,
             localDataSource = localDataSource,
@@ -131,6 +132,7 @@ class QuoteWriteReplayTest {
                     remoteId = 901L,
                 )
             }
+
             coVerify(exactly = 0) { remoteDataSource.getQuotes(bookId = any()) }
         }
 
@@ -212,6 +214,7 @@ class QuoteWriteReplayTest {
             result shouldBe ReplayOutcome.SYNCED
 
             coVerify(exactly = 0) { remoteDataSource.insertQuote(entity = any()) }
+
             coVerify(exactly = 1) {
                 localDataSource.markSynced(
                     localId = LOCAL_ID,

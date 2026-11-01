@@ -34,11 +34,13 @@ class MastheadCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(ReadingScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ReadingLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk<ReadingScreenDependencies>(relaxed = true)
     }
 
@@ -118,6 +120,7 @@ class MastheadCollectorTest {
                 stubBook(userBookRead = stubUserBookRead(progress = 40f)),
                 stubBook(userBookRead = stubUserBookRead(progress = 80f)),
             )
+
             stateFlow.value = ReadingScreenUiState(
                 books = books.toImmutableList(),
                 hasLoadedBooks = true,
@@ -130,6 +133,7 @@ class MastheadCollectorTest {
             stateFlow.value.masthead.shouldNotBeNull().subtitle shouldBe PageMastheadSubtitle.Text(
                 "2 books on the go · 60% through, on average",
             )
+
             job.cancel()
         }
 
@@ -140,6 +144,7 @@ class MastheadCollectorTest {
                 stubBook(userBookRead = null),
                 stubBook(userBookRead = stubUserBookRead(progress = 45f)),
             )
+
             stateFlow.value = ReadingScreenUiState(
                 books = books.toImmutableList(),
                 hasLoadedBooks = true,
@@ -152,6 +157,7 @@ class MastheadCollectorTest {
             stateFlow.value.masthead.shouldNotBeNull().subtitle shouldBe PageMastheadSubtitle.Text(
                 "2 books on the go · 45% through, on average",
             )
+
             job.cancel()
         }
 
@@ -162,6 +168,7 @@ class MastheadCollectorTest {
                 books = persistentListOf(),
                 hasLoadedBooks = true,
             )
+
             val job = launchCollector(this)
 
             // ----- Act -----
@@ -209,6 +216,7 @@ class MastheadCollectorTest {
                 hasLoadedBooks = true,
                 isRefreshing = false,
             )
+
             val job = launchCollector(this)
             val idleEyebrow = stateFlow.value.masthead.shouldNotBeNull().eyebrow
 

@@ -37,6 +37,7 @@ class OnReorderListBooksActionTest {
         reorderListBooksUseCase = mockk(relaxed = true)
         stateFlow = MutableStateFlow(LibraryUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -51,12 +52,11 @@ class OnReorderListBooksActionTest {
         unmockkObject(SnackBarManager)
     }
 
-    private fun stubDependencies(): LibraryDependencies =
-        mockk<LibraryDependencies>(relaxed = true).also { mock ->
-            every {
-                mock.reorderListBooksUseCase
-            } returns reorderListBooksUseCase
-        }
+    private fun stubDependencies(): LibraryDependencies = mockk<LibraryDependencies>(relaxed = true).also { mock ->
+        every {
+            mock.reorderListBooksUseCase
+        } returns reorderListBooksUseCase
+    }
 
     @Nested
     inner class Execute {
@@ -66,6 +66,7 @@ class OnReorderListBooksActionTest {
             val listId = 42
             val startPosition = 0
             val bookIds = listOf(10, 20, 30)
+
             val action = OnReorderListBooksAction(
                 listId = listId,
                 startPosition = startPosition,
@@ -130,6 +131,7 @@ class OnReorderListBooksActionTest {
             // ----- Arrange -----
             val listId = 7
             val listName = "Reading 2026"
+
             val action = OnReorderListBooksAction(
                 listId = listId,
                 startPosition = 0,
@@ -176,43 +178,42 @@ class OnReorderListBooksActionTest {
         }
 
         @Test
-        fun `shows snackbar without list name when use case fails and list is absent from state`() =
-            runTest {
-                // ----- Arrange -----
-                val action = OnReorderListBooksAction(
-                    listId = 99,
-                    startPosition = 0,
-                    orderedListBookIds = listOf(5, 6),
+        fun `shows snackbar without list name when use case fails and list is absent from state`() = runTest {
+            // ----- Arrange -----
+            val action = OnReorderListBooksAction(
+                listId = 99,
+                startPosition = 0,
+                orderedListBookIds = listOf(5, 6),
+            )
+
+            coEvery {
+                reorderListBooksUseCase(
+                    listId = any(),
+                    startPosition = any(),
+                    orderedListBookIds = any(),
                 )
+            } returns Result.failure(RuntimeException("not found"))
 
-                coEvery {
-                    reorderListBooksUseCase(
-                        listId = any(),
-                        startPosition = any(),
-                        orderedListBookIds = any(),
-                    )
-                } returns Result.failure(RuntimeException("not found"))
+            every {
+                SnackBarManager.showSnackbar(title = any())
+            } returns Unit
 
-                every {
-                    SnackBarManager.showSnackbar(title = any())
-                } returns Unit
+            // ----- Act -----
+            action.execute(
+                dependencies = stubDependencies(),
+                scope = scope,
+            )
 
-                // ----- Act -----
-                action.execute(
-                    dependencies = stubDependencies(),
-                    scope = scope,
+            // ----- Assert -----
+            verify {
+                SnackBarManager.showSnackbar(
+                    title = match { title ->
+                        title.contains("Couldn't save the new order").and(
+                            title.contains("in \"").not(),
+                        )
+                    },
                 )
-
-                // ----- Assert -----
-                verify {
-                    SnackBarManager.showSnackbar(
-                        title = match { title ->
-                            title.contains("Couldn't save the new order").and(
-                                title.contains("in \"").not(),
-                            )
-                        },
-                    )
-                }
             }
+        }
     }
 }

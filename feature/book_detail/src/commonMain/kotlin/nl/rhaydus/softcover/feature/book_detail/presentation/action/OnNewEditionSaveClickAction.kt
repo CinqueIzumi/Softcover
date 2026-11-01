@@ -15,6 +15,7 @@ internal class OnNewEditionSaveClickAction : BookDetailAction {
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
         val state = scope.currentState
+
         val currentEdition = state.displayedEdition ?: return
 
         val edition = selectedEditionFor(

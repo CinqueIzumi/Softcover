@@ -38,6 +38,7 @@ fun <K> ToggleRow(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
+
     val wash by animateColorAsState(
         targetValue = if (isPressed) {
             MaterialTheme.colorScheme.surfaceContainer

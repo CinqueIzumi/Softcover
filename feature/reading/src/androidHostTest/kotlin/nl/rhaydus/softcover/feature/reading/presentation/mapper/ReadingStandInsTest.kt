@@ -13,14 +13,13 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class ReadingStandInsTest {
-    private fun BookCardUiModel.standInCover(): CoverUiModel =
-        when (val variant = variant) {
-            is BookCardVariant.Column -> variant.cover.shouldNotBeNull().model
+    private fun BookCardUiModel.standInCover(): CoverUiModel = when (val variant = variant) {
+        is BookCardVariant.Column -> variant.cover.shouldNotBeNull().model
 
-            is BookCardVariant.CoverOnly -> variant.cover.model
+        is BookCardVariant.CoverOnly -> variant.cover.model
 
-            is BookCardVariant.Row -> variant.lead.shouldBeInstanceOf<BookCardLead.Cover>().cover.model
-        }
+        is BookCardVariant.Row -> variant.lead.shouldBeInstanceOf<BookCardLead.Cover>().cover.model
+    }
 
     @Nested
     inner class StandInCards {
@@ -34,6 +33,7 @@ class ReadingStandInsTest {
 
             // ----- Assert -----
             cards.shouldNotBeEmpty()
+
             covers.forEach { cover ->
                 cover.isLoading shouldBe true
                 cover.source.shouldBeNull()
@@ -50,6 +50,7 @@ class ReadingStandInsTest {
 
             // ----- Assert -----
             cards.shouldNotBeEmpty()
+
             covers.forEach { cover ->
                 cover.isLoading shouldBe true
                 cover.source.shouldBeNull()

@@ -137,7 +137,12 @@ private fun TwoColumnProfile(
                 .width(320.dp)
                 .fillMaxHeight()
                 .verticalScroll(rememberScrollState())
-                .padding(start = Spacing.gutter, end = Spacing.gutter, top = Spacing.xs, bottom = Spacing.xl),
+                .padding(
+                    start = Spacing.gutter,
+                    end = Spacing.gutter,
+                    top = Spacing.xs,
+                    bottom = Spacing.xl,
+                ),
         ) {
             ProfileIdentity(
                 state = state,
@@ -167,7 +172,12 @@ private fun TwoColumnProfile(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(scrollState)
-                    .padding(start = Spacing.gutter, end = Spacing.gutter, top = Spacing.xs, bottom = Spacing.xl),
+                    .padding(
+                        start = Spacing.gutter,
+                        end = Spacing.gutter,
+                        top = Spacing.xs,
+                        bottom = Spacing.xl,
+                    ),
             ) {
                 Column(modifier = Modifier.widthIn(max = 640.dp)) {
                     ProfileReadingLife(
@@ -205,7 +215,10 @@ private fun SingleColumnProfile(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(scrollState)
-                .padding(horizontal = Spacing.gutter, vertical = Spacing.xs),
+                .padding(
+                    horizontal = Spacing.gutter,
+                    vertical = Spacing.xs,
+                ),
         ) {
             ProfileIdentity(
                 state = state,

@@ -7,16 +7,16 @@ import nl.rhaydus.toad.ToadScreenModel
 class ShareCardDebugScreenModel(
     appDispatchers: AppDispatchers,
 ) : ToadScreenModel<
-    ShareCardDebugUiState,
-    ShareCardDebugEvent,
-    ShareCardDebugDependencies,
-    ShareCardDebugCollector,
-    ShareCardDebugLocalVariables,
+        ShareCardDebugUiState,
+        ShareCardDebugEvent,
+        ShareCardDebugDependencies,
+        ShareCardDebugCollector,
+        ShareCardDebugLocalVariables,
     >(
-    initialState = ShareCardDebugUiState(),
-    initialLocalVariables = ShareCardDebugLocalVariables(),
-    initializers = emptyList(),
-) {
+        initialState = ShareCardDebugUiState(),
+        initialLocalVariables = ShareCardDebugLocalVariables(),
+        initializers = emptyList(),
+    ) {
     override val dependencies = ShareCardDebugDependencies(
         mainDispatcher = appDispatchers.main,
         coroutineScope = screenModelScope,

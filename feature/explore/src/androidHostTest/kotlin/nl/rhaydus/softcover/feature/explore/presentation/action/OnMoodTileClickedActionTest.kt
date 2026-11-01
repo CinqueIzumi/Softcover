@@ -48,6 +48,7 @@ class OnMoodTileClickedActionTest {
         searchByMoodUseCase = mockk()
         stateFlow = MutableStateFlow(ExploreScreenUiState())
         localVariablesFlow = MutableStateFlow(ExploreLocalVariables())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
@@ -57,6 +58,7 @@ class OnMoodTileClickedActionTest {
 
     private fun stubDependencies(testScope: TestScope): ExploreDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<ExploreDependencies>(relaxed = true).also { mock ->
             every {
                 mock.searchByMoodUseCase

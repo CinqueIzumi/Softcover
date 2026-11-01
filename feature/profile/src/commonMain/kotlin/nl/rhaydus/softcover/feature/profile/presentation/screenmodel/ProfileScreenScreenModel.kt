@@ -27,10 +27,10 @@ internal class ProfileScreenScreenModel(
     dispatchers: AppDispatchers,
     initializers: List<ProfileCollector>,
 ) : ToadScreenModel<ProfileUiState, ProfileEvent, ProfileDependencies, ProfileCollector, LocalProfileVariables>(
-    initializers = initializers,
-    initialState = ProfileUiState(),
-    initialLocalVariables = LocalProfileVariables(),
-) {
+        initializers = initializers,
+        initialState = ProfileUiState(),
+        initialLocalVariables = LocalProfileVariables(),
+    ) {
     override val dependencies: ProfileDependencies = ProfileDependencies(
         observeUserProfileDataUseCase = observeUserProfileDataUseCase,
         observeReadingLifeUseCase = observeReadingLifeUseCase,

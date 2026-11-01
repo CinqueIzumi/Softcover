@@ -69,6 +69,7 @@ class UndoableBookRemoverTest {
         every {
             SnackBarManager.snackBarState
         } returns MutableStateFlow(hostState)
+
         every {
             SnackBarManager.showSnackbar(
                 title = any(),
@@ -141,6 +142,7 @@ class UndoableBookRemoverTest {
 
             // ----- Assert -----
             result.isFailure.shouldBeTrue()
+
             verify(exactly = 1) {
                 SnackBarManager.showSnackbar(
                     title = "Couldn't remove 1 book. Try again.",
@@ -185,6 +187,7 @@ class UndoableBookRemoverTest {
 
             // ----- Assert -----
             result.isSuccess.shouldBeTrue()
+
             coVerify(exactly = 0) {
                 hostState.showSnackbar(
                     message = any(),
@@ -294,6 +297,7 @@ class UndoableBookRemoverTest {
             coEvery {
                 stageBookRemovalUseCase(books = books)
             } returns Result.success(staged)
+
             coEvery {
                 commitBookRemovalUseCase(staged = staged)
             } returns Result.success(emptyList())
@@ -305,6 +309,7 @@ class UndoableBookRemoverTest {
             // ----- Assert -----
             coVerify(exactly = 1) { commitBookRemovalUseCase(staged = staged) }
             coVerify(exactly = 0) { undoBookRemovalUseCase(staged = any()) }
+
             verify(exactly = 0) {
                 SnackBarManager.showSnackbar(
                     title = any(),
@@ -322,6 +327,7 @@ class UndoableBookRemoverTest {
             coEvery {
                 stageBookRemovalUseCase(books = books)
             } returns Result.success(staged)
+
             coEvery {
                 commitBookRemovalUseCase(staged = staged)
             } returns Result.success(books.take(2))
@@ -348,6 +354,7 @@ class UndoableBookRemoverTest {
             coEvery {
                 stageBookRemovalUseCase(books = books)
             } returns Result.success(staged)
+
             coEvery {
                 commitBookRemovalUseCase(staged = staged)
             } returns Result.success(books.take(1))

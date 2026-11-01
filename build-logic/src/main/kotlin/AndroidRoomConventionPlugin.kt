@@ -38,6 +38,7 @@ class AndroidRoomConventionPlugin : Plugin<Project> {
                 "commonMainApi",
                 libs.library("room-runtime"),
             )
+
             // Bundled SQLite driver — KMP Room ships no platform driver of its own, so every target
             // opens the database through `BundledSQLiteDriver` (wired in `SoftcoverDatabase.build`).
             add(

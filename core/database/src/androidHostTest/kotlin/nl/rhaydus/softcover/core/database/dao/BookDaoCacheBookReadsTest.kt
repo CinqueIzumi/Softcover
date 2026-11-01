@@ -34,6 +34,7 @@ class BookDaoCacheBookReadsTest {
             builder = Room.inMemoryDatabaseBuilder(context = context),
             queryContext = testDispatcher,
         )
+
         dao = database.bookDao()
     }
 
@@ -133,11 +134,13 @@ class BookDaoCacheBookReadsTest {
         @Test
         fun `replacing reads 1 and 2 with reads 2 and 3 leaves exactly 2 and 3`() = runTest(testDispatcher) {
             // ----- Arrange -----
-            dao.cacheBook(book = book(
-                id = 1,
-                userBookId = 10,
-                reads = listOf(read(id = 1), read(id = 2)),
-            ),)
+            dao.cacheBook(
+                book = book(
+                    id = 1,
+                    userBookId = 10,
+                    reads = listOf(read(id = 1), read(id = 2)),
+                ),
+            )
 
             // ----- Act -----
             replaceReads(
@@ -152,11 +155,13 @@ class BookDaoCacheBookReadsTest {
         @Test
         fun `replacing with no reads removes every stored read`() = runTest(testDispatcher) {
             // ----- Arrange -----
-            dao.cacheBook(book = book(
-                id = 1,
-                userBookId = 10,
-                reads = listOf(read(id = 1), read(id = 2)),
-            ),)
+            dao.cacheBook(
+                book = book(
+                    id = 1,
+                    userBookId = 10,
+                    reads = listOf(read(id = 1), read(id = 2)),
+                ),
+            )
 
             // ----- Act -----
             replaceReads(
@@ -171,14 +176,16 @@ class BookDaoCacheBookReadsTest {
         @Test
         fun `a kept read takes the new values`() = runTest(testDispatcher) {
             // ----- Arrange -----
-            dao.cacheBook(book = book(
-                id = 1,
-                userBookId = 10,
-                reads = listOf(read(
-                    id = 2,
-                    currentPage = 10,
-                ),),
-            ),)
+            dao.cacheBook(
+                book = book(
+                    id = 1,
+                    userBookId = 10,
+                    reads = listOf(read(
+                        id = 2,
+                        currentPage = 10,
+                    ),),
+                ),
+            )
 
             // ----- Act -----
             replaceReads(
@@ -198,16 +205,21 @@ class BookDaoCacheBookReadsTest {
         @Test
         fun `another user book's reads are untouched`() = runTest(testDispatcher) {
             // ----- Arrange -----
-            dao.cacheBook(book = book(
-                id = 1,
-                userBookId = 10,
-                reads = listOf(read(id = 1), read(id = 2)),
-            ),)
-            dao.cacheBook(book = book(
-                id = 2,
-                userBookId = 20,
-                reads = listOf(read(id = 7), read(id = 8)),
-            ),)
+            dao.cacheBook(
+                book = book(
+                    id = 1,
+                    userBookId = 10,
+                    reads = listOf(read(id = 1), read(id = 2)),
+                ),
+            )
+
+            dao.cacheBook(
+                book = book(
+                    id = 2,
+                    userBookId = 20,
+                    reads = listOf(read(id = 7), read(id = 8)),
+                ),
+            )
 
             // ----- Act -----
             replaceReads(

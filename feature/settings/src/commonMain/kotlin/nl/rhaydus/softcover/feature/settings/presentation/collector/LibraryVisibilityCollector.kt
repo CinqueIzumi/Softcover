@@ -11,4 +11,4 @@ internal sealed interface LibraryVisibilityCollector : Collector<
     LibraryVisibilitySettingsEvent,
     LibraryVisibilitySettingsDependencies,
     LibraryVisibilitySettingsLocalVariables,
-    >
+>

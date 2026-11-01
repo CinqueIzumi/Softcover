@@ -3,12 +3,12 @@ package nl.rhaydus.softcover.feature.widget.domain.usecase
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.runCurrent
-import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveRecentFetchedAtUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingFetchedAtUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveUpcomingFetchedAtUseCase
@@ -74,9 +74,11 @@ class ObserveTrendingFeedFetchingUseCaseTest {
             every {
                 observeTrendingFetchedAt(period = TrendingPeriod.Week)
             } returns flowOf(fetchedAt)
+
             val job = backgroundScope.launch {
                 tracker.track(week) { awaitCancellation() }
             }
+
             runCurrent()
 
             // ----- Act -----
@@ -93,6 +95,7 @@ class ObserveTrendingFeedFetchingUseCaseTest {
             every {
                 observeTrendingFetchedAt(period = TrendingPeriod.Week)
             } returns flowOf(null)
+
             tracker.track(week) { Result.failure(IllegalStateException("down")) }
 
             // ----- Act -----
@@ -108,6 +111,7 @@ class ObserveTrendingFeedFetchingUseCaseTest {
             every {
                 observeTrendingFetchedAt(any())
             } returns flowOf(null)
+
             every {
                 observeRecentFetchedAt(window = RecentWindow.Month)
             } returns flowOf(fetchedAt)
@@ -125,6 +129,7 @@ class ObserveTrendingFeedFetchingUseCaseTest {
             every {
                 observeTrendingFetchedAt(any())
             } returns flowOf(null)
+
             every {
                 observeUpcomingFetchedAt(window = UpcomingWindow.Year)
             } returns flowOf(fetchedAt)

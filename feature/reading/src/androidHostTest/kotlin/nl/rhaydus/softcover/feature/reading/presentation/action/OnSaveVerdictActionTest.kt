@@ -41,6 +41,7 @@ class OnSaveVerdictActionTest {
     fun setUp() {
         saveBookVerdictUseCase = mockk()
         stateFlow = MutableStateFlow(ReadingScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ReadingLocalVariables()),
@@ -74,9 +75,11 @@ class OnSaveVerdictActionTest {
         fun `saves draft rating and spoilers, flags no failure and sends VerdictSavedEvent`() = runTest {
             // ----- Arrange -----
             val book = stubBook()
+
             val draft = sheet()
                 .reduce(event = VerdictDraftEvent.RatingChanged(rating = 3.0))
                 .reduce(event = VerdictDraftEvent.SpoilersToggled(checked = true))
+
             stateFlow.value = ReadingScreenUiState(verdictSheet = draft)
 
             coEvery {
@@ -103,6 +106,7 @@ class OnSaveVerdictActionTest {
                     hasSpoilers = true,
                 )
             }
+
             stateFlow.value.failedMutationBookIds.contains(42) shouldBe false
             val sentEvent = eventChannel.tryReceive().getOrNull()
             sentEvent.shouldBeInstanceOf<ReadingScreenEvent.VerdictSavedEvent>()
@@ -112,6 +116,7 @@ class OnSaveVerdictActionTest {
         fun `saves the review text typed into the draft`() = runTest {
             // ----- Arrange -----
             val book = stubBook()
+
             val draft = sheet().reduce(
                 event = VerdictDraftEvent.ReviewEdited(
                     value = TextFieldValue(
@@ -120,6 +125,7 @@ class OnSaveVerdictActionTest {
                     ),
                 ),
             )
+
             stateFlow.value = ReadingScreenUiState(verdictSheet = draft)
             val savedReview = slot<ReviewDocument>()
 
@@ -146,6 +152,7 @@ class OnSaveVerdictActionTest {
         fun `saves a null rating when the draft has none`() = runTest {
             // ----- Arrange -----
             val book = stubBook()
+
             stateFlow.value = ReadingScreenUiState(
                 verdictSheet = sheet().reduce(event = VerdictDraftEvent.RatingChanged(rating = null)),
             )
@@ -180,6 +187,7 @@ class OnSaveVerdictActionTest {
         fun `flags the book as failed and sends no event when the use case fails`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 42)
+
             stateFlow.value = ReadingScreenUiState(
                 verdictSheet = sheet().reduce(event = VerdictDraftEvent.RatingChanged(rating = 4.5)),
             )
@@ -225,6 +233,7 @@ class OnSaveVerdictActionTest {
                     any(),
                 )
             }
+
             stateFlow.value.failedMutationBookIds.contains(42) shouldBe false
             eventChannel.tryReceive().getOrNull() shouldBe null
         }

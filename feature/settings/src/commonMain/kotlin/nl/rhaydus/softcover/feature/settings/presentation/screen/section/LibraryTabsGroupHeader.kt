@@ -57,10 +57,12 @@ private fun LibraryTabsGroupSubhead() {
 
     val annotatedText = buildAnnotatedString {
         append("Drag to reorder. Shelves and lists share one row. A ")
+
         appendInlineContent(
             id = LIST_DOT_INLINE_CONTENT_ID,
             alternateText = "•",
         )
+
         append(" marks a list.")
     }
 

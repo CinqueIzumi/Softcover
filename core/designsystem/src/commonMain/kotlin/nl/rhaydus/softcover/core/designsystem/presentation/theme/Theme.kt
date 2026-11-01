@@ -189,6 +189,7 @@ fun SoftcoverTheme(
             darkTheme = brightness.isDark,
         )
     }
+
     val colorScheme = dynamicScheme
         ?: softcoverColorScheme(
             brightness = brightness,

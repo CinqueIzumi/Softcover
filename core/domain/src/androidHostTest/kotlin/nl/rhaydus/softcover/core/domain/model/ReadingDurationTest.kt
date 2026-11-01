@@ -106,6 +106,7 @@ class ReadingDurationTest {
             val startedAt = Instant.fromEpochMilliseconds(500L)
             val openPauseStart = Instant.fromEpochMilliseconds(5_200L)
             val now = Instant.fromEpochMilliseconds(10_700L)
+
             val session = ReadingSession(
                 id = 1L,
                 bookId = 10,

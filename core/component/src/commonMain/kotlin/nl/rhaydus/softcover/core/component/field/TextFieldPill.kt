@@ -49,12 +49,15 @@ internal fun PillTextField(
         TextFieldPillSize.Compact -> 42.dp
         TextFieldPillSize.Regular -> 48.dp
     }
+
     val horizontalPadding = Spacing.sm
     val iconSize = if (variant.size == TextFieldPillSize.Compact) 18.dp else 20.dp
+
     val textStyle = when (variant.size) {
         TextFieldPillSize.Compact -> MaterialTheme.typography.bodyMedium
         TextFieldPillSize.Regular -> MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium)
     }
+
     val container = when (variant.size) {
         TextFieldPillSize.Compact -> MaterialTheme.colorScheme.surfaceContainer
         TextFieldPillSize.Regular -> MaterialTheme.colorScheme.surfaceContainerHigh

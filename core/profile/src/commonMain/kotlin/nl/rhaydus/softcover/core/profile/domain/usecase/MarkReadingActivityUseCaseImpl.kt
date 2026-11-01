@@ -24,6 +24,7 @@ internal class MarkReadingActivityUseCaseImpl(
         // other failure is logged — both guaranteed by runCatchingLogged.
         runCatchingLogged(context = "Failed to mark active reading date for $actionAt") {
             val today = clock.todayIn(timeZone)
+
             val date = minOf(
                 actionAt?.let { Instant.parse(it).toLocalDateTime(timeZone).date } ?: today,
                 today,

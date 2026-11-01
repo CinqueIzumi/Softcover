@@ -59,6 +59,7 @@ internal fun ColumnReadout(
             val placeable = measurable.measure(
                 Constraints(maxWidth = rowWidth.toInt().coerceAtLeast(0)),
             )
+
             val x = ((centerX ?: lastCenterX) - placeable.width / 2f)
                 .coerceIn(
                     0f,

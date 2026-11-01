@@ -8,6 +8,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
  */
 internal fun Book.statusChangeEditionId(requestedEditionId: Int?): Int? {
     val shelvedBook = userBook
+
     return when {
         shelvedBook != null -> shelvedBook.editionId
         else -> requestedEditionId ?: currentEdition?.id

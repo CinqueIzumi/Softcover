@@ -30,6 +30,7 @@ class OnProgressMinutesSteppedActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -100,6 +101,7 @@ class OnProgressMinutesSteppedActionTest {
                 book = bookAt(currentSeconds = 3725),
                 progressTimeDraft = draftWithMinutes("0"),
             )
+
             val action = OnProgressMinutesSteppedAction(delta = -1)
 
             // ----- Act -----
@@ -119,6 +121,7 @@ class OnProgressMinutesSteppedActionTest {
                 book = bookAt(currentSeconds = 3725),
                 progressTimeDraft = draftWithMinutes("59"),
             )
+
             val action = OnProgressMinutesSteppedAction(delta = 1)
 
             // ----- Act -----
@@ -138,6 +141,7 @@ class OnProgressMinutesSteppedActionTest {
                 book = bookAt(currentSeconds = 3725),
                 progressTimeDraft = draftWithMinutes(""),
             )
+
             val action = OnProgressMinutesSteppedAction(delta = 1)
 
             // ----- Act -----
@@ -157,6 +161,7 @@ class OnProgressMinutesSteppedActionTest {
                 book = bookAt(currentSeconds = 3725),
                 progressTimeDraft = draftWithMinutes("40").copy(forSeconds = 100),
             )
+
             val action = OnProgressMinutesSteppedAction(delta = 1)
 
             // ----- Act -----

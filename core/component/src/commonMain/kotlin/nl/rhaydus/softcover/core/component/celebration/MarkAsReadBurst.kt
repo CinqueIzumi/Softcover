@@ -72,6 +72,7 @@ fun MarkAsReadBurst(
         if (playMotion.not()) return@LaunchedEffect
 
         progress.snapTo(targetValue = 0f)
+
         progress.animateTo(
             targetValue = 1f,
             animationSpec = celebration,
@@ -82,12 +83,14 @@ fun MarkAsReadBurst(
 
     Canvas(modifier = modifier) {
         val current = progress.value
+
         if (current == 0f) return@Canvas
 
         val centre = Offset(
             x = size.width / 2f,
             y = size.height / 2f,
         )
+
         val maxRadius = min(
             a = size.width,
             b = size.height,

@@ -33,16 +33,21 @@ class OfflineStateCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(ExploreScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         val offlineCopy = mockk<OfflineCopy>()
+
         coEvery {
             offlineCopy.emptyState()
         } returns emptyState
+
         dependencies = mockk(relaxed = true)
+
         every {
             dependencies.offlineCopy
         } returns offlineCopy

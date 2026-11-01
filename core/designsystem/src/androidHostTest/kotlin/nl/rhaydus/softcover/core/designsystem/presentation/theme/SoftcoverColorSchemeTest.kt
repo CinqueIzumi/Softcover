@@ -36,6 +36,7 @@ class SoftcoverColorSchemeTest {
                             backgroundName = "background",
                             minimumRatio = 4.5,
                         )
+
                         assertPairPasses(
                             palette = palette,
                             brightness = brightness,
@@ -45,6 +46,7 @@ class SoftcoverColorSchemeTest {
                             backgroundName = "background",
                             minimumRatio = 4.5,
                         )
+
                         assertPairPasses(
                             palette = palette,
                             brightness = brightness,
@@ -54,6 +56,7 @@ class SoftcoverColorSchemeTest {
                             backgroundName = "background",
                             minimumRatio = 4.5,
                         )
+
                         assertPairPasses(
                             palette = palette,
                             brightness = brightness,
@@ -63,6 +66,7 @@ class SoftcoverColorSchemeTest {
                             backgroundName = "background",
                             minimumRatio = 4.5,
                         )
+
                         assertPairPasses(
                             palette = palette,
                             brightness = brightness,
@@ -72,6 +76,7 @@ class SoftcoverColorSchemeTest {
                             backgroundName = "primary",
                             minimumRatio = 4.5,
                         )
+
                         assertPairPasses(
                             palette = palette,
                             brightness = brightness,
@@ -81,6 +86,7 @@ class SoftcoverColorSchemeTest {
                             backgroundName = "primaryContainer",
                             minimumRatio = 4.5,
                         )
+
                         assertPairPasses(
                             palette = palette,
                             brightness = brightness,
@@ -90,6 +96,7 @@ class SoftcoverColorSchemeTest {
                             backgroundName = "tertiaryContainer",
                             minimumRatio = 4.5,
                         )
+
                         assertPairPasses(
                             palette = palette,
                             brightness = brightness,
@@ -99,6 +106,7 @@ class SoftcoverColorSchemeTest {
                             backgroundName = "surfaceContainerHigh",
                             minimumRatio = 4.5,
                         )
+
                         assertPairPasses(
                             palette = palette,
                             brightness = brightness,
@@ -108,6 +116,7 @@ class SoftcoverColorSchemeTest {
                             backgroundName = "background",
                             minimumRatio = 3.0,
                         )
+
                         if (brightness == SchemeBrightness.DIM) {
                             assertPairPasses(
                                 palette = palette,
@@ -118,6 +127,7 @@ class SoftcoverColorSchemeTest {
                                 backgroundName = "background",
                                 minimumRatio = 7.0,
                             )
+
                             assertPairPasses(
                                 palette = palette,
                                 brightness = brightness,
@@ -219,6 +229,7 @@ class SoftcoverColorSchemeTest {
  */
 private fun linearizeChannel(channel: Float): Double {
     val c = channel.toDouble()
+
     return if (c <= 0.03928) c / 12.92 else Math.pow(
         (c + 0.055) / 1.055,
         2.4,
@@ -240,13 +251,16 @@ private fun contrastRatio(
 ): Double {
     val luminanceA = relativeLuminance(a)
     val luminanceB = relativeLuminance(b)
+
     val higher = maxOf(
         luminanceA,
         luminanceB,
     )
+
     val lower = minOf(
         luminanceA,
         luminanceB,
     )
+
     return (higher + 0.05) / (lower + 0.05)
 }

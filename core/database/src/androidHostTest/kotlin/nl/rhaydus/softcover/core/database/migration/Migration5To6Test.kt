@@ -91,6 +91,7 @@ class Migration5To6Test {
                 1,
                 name,
             )
+
             return stmt.step()
         } finally {
             stmt.close()
@@ -107,6 +108,7 @@ class Migration5To6Test {
                 1,
                 name,
             )
+
             return stmt.step()
         } finally {
             stmt.close()
@@ -390,6 +392,7 @@ class Migration5To6Test {
                 )
                 """.trimIndent(),
             )
+
             connection.execSQL(
                 """
                 INSERT INTO books (

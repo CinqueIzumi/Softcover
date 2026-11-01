@@ -71,6 +71,7 @@ class LibraryFilterChipsBuilderTest {
             // ----- Assert -----
             chips.formatChips.chips.map { it.key } shouldBe
                 listOf("format:hardcover", "format:ebook", "format:audiobook")
+
             chips.formatChips["format:hardcover"] shouldBe LibraryFilterValue.Format(value = "hardcover")
         }
 
@@ -192,6 +193,7 @@ class LibraryFilterChipsBuilderTest {
             // ----- Assert -----
             val allChips = chips.ownershipChips.chips + chips.formatChips.chips + chips.releaseYearChips.chips +
                 chips.readYearChips.chips + chips.tagChips.chips + chips.ratingChips.chips
+
             allChips.map { it.selected } shouldBe allChips.map { false }
         }
     }

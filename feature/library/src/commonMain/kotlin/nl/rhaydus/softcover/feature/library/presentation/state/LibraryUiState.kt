@@ -270,11 +270,10 @@ internal data class LibraryUiState(
 
     val isChooseListsSheetRequested: Boolean = false,
 ) : UiState {
-    fun sortModeFor(tabId: String): LibrarySortMode =
-        resolveSortMode(
-            sortModeByTab = sortModeByTab,
-            tabId = tabId,
-        )
+    fun sortModeFor(tabId: String): LibrarySortMode = resolveSortMode(
+        sortModeByTab = sortModeByTab,
+        tabId = tabId,
+    )
 
     fun sortDirectionFor(tabId: String): SortDirection =
         sortDirectionByTab[tabId] ?: sortModeFor(tabId = tabId).defaultDirection
@@ -327,11 +326,10 @@ internal data class LibraryUiState(
     fun displayEditionsFor(tabId: String): List<BookEdition>? =
         if (tabId in editionsByTab) displayEditionsByTab[tabId] else null
 
-    fun tabStatsFor(tabId: String): LibraryTabStats =
-        tabStatsByTab[tabId] ?: LibraryTabStats(
-            itemCount = 0,
-            totalPages = 0,
-        )
+    fun tabStatsFor(tabId: String): LibraryTabStats = tabStatsByTab[tabId] ?: LibraryTabStats(
+        itemCount = 0,
+        totalPages = 0,
+    )
 
     fun mastheadFor(tabId: String?): PageMastheadUiModel = tabId?.let(mastheads::get) ?: fallbackMasthead
 
@@ -354,8 +352,7 @@ internal data class LibraryUiState(
 }
 
 /** The only writer of [LibraryUiState.selectedBookIds]; keeps [LibraryUiState.selectionCount] in the same transition. */
-internal fun LibraryUiState.withSelectedBookIds(ids: Set<Int>): LibraryUiState =
-    copy(
-        selectedBookIds = ids.toImmutableSet(),
-        selectionCount = selectionCountOf(count = ids.size),
-    )
+internal fun LibraryUiState.withSelectedBookIds(ids: Set<Int>): LibraryUiState = copy(
+    selectedBookIds = ids.toImmutableSet(),
+    selectionCount = selectionCountOf(count = ids.size),
+)

@@ -45,12 +45,14 @@ fun PillButton(
     modifier: Modifier = Modifier,
 ) {
     val scheme = MaterialTheme.colorScheme
+
     val container = when (model.tone) {
         PillButtonTone.Tonal, PillButtonTone.Accent -> scheme.surfaceContainerHigh
         PillButtonTone.Filled -> scheme.primary
         PillButtonTone.Outlined -> Color.Transparent
         PillButtonTone.Quiet -> scheme.surfaceContainer
     }
+
     val ink = when (model.tone) {
         PillButtonTone.Tonal -> scheme.onSurface
         PillButtonTone.Accent -> scheme.primary
@@ -58,12 +60,16 @@ fun PillButton(
         PillButtonTone.Outlined -> scheme.onSurface
         PillButtonTone.Quiet -> scheme.onSurfaceVariant
     }
+
     val iconTint = if (model.tone == PillButtonTone.Outlined) scheme.primary else ink
+
     val height = when (model.size) {
         PillButtonSize.Regular -> 38.dp
         PillButtonSize.Large -> 44.dp
     }
+
     val isIconOnly = model.content is PillButtonContent.IconOnly
+
     val pillModifier = modifier
         .minimumInteractiveComponentSize()
         .pillButtonInteraction(

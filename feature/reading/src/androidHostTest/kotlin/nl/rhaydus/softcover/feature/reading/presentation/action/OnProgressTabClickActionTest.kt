@@ -28,6 +28,7 @@ class OnProgressTabClickActionTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(ReadingScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ReadingLocalVariables()),
@@ -42,9 +43,11 @@ class OnProgressTabClickActionTest {
             every {
                 mock.coroutineScope
             } returns testScope
+
             every {
                 mock.mainDispatcher
             } returns dispatcher
+
             every {
                 mock.launch(any())
             } answers { callOriginal() }
@@ -68,6 +71,7 @@ class OnProgressTabClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.progressSheetTab shouldBe ProgressSheetTab.PAGE
+
             coVerify {
                 dependencies.setLastUsedProgressUnitUseCase(unit = ProgressUnit.PAGE)
             }

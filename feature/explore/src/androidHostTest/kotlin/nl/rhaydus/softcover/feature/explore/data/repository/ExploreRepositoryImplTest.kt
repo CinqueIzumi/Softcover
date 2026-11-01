@@ -64,6 +64,7 @@ class ExploreRepositoryImplTest {
                 genre = genre,
                 limit = limit,
             )
+
             val secondResult = repository.fetchBooksByGenre(
                 genre = genre,
                 limit = limit,
@@ -72,6 +73,7 @@ class ExploreRepositoryImplTest {
             // ----- Assert -----
             firstResult shouldBe expectedBooks
             secondResult shouldBe expectedBooks
+
             coVerify(exactly = 1) {
                 searchRemoteDataSource.fetchBooksByGenre(
                     genre = genre,
@@ -95,6 +97,7 @@ class ExploreRepositoryImplTest {
                     limit = limit,
                 )
             } returns fantasyBooks
+
             coEvery {
                 searchRemoteDataSource.fetchBooksByGenre(
                     genre = horrorGenre,
@@ -107,6 +110,7 @@ class ExploreRepositoryImplTest {
                 genre = fantasyGenre,
                 limit = limit,
             )
+
             val horrorResult = repository.fetchBooksByGenre(
                 genre = horrorGenre,
                 limit = limit,
@@ -115,12 +119,14 @@ class ExploreRepositoryImplTest {
             // ----- Assert -----
             fantasyResult shouldBe fantasyBooks
             horrorResult shouldBe horrorBooks
+
             coVerify(exactly = 1) {
                 searchRemoteDataSource.fetchBooksByGenre(
                     genre = fantasyGenre,
                     limit = limit,
                 )
             }
+
             coVerify(exactly = 1) {
                 searchRemoteDataSource.fetchBooksByGenre(
                     genre = horrorGenre,
@@ -143,6 +149,7 @@ class ExploreRepositoryImplTest {
                     limit = limit,
                 )
             } returns fantasyBooks
+
             coEvery {
                 searchRemoteDataSource.fetchBooksByGenre(
                     genre = horrorGenre,
@@ -155,12 +162,14 @@ class ExploreRepositoryImplTest {
                 genre = fantasyGenre,
                 limit = limit,
             )
+
             val horrorFailure = runCatching {
                 repository.fetchBooksByGenre(
                     genre = horrorGenre,
                     limit = limit,
                 )
             }
+
             val fantasyResult = repository.fetchBooksByGenre(
                 genre = fantasyGenre,
                 limit = limit,
@@ -169,6 +178,7 @@ class ExploreRepositoryImplTest {
             // ----- Assert -----
             horrorFailure.isFailure shouldBe true
             fantasyResult shouldBe fantasyBooks
+
             coVerify(exactly = 1) {
                 searchRemoteDataSource.fetchBooksByGenre(
                     genre = fantasyGenre,
@@ -203,6 +213,7 @@ class ExploreRepositoryImplTest {
                     limit = 50,
                 )
             } returns expectedBooks
+
             repository.fetchBooksByGenre(
                 genre = "Fantasy",
                 limit = 50,
@@ -224,6 +235,7 @@ class ExploreRepositoryImplTest {
                     limit = 50,
                 )
             } returns listOf(stubBook())
+
             repository.fetchBooksByGenre(
                 genre = "Fantasy",
                 limit = 50,
@@ -243,6 +255,7 @@ class ExploreRepositoryImplTest {
         fun `two calls hit remote exactly once and both return the same value`() = runTest {
             // ----- Arrange -----
             val expectedBook = stubBook()
+
             coEvery {
                 searchRemoteDataSource.fetchFeaturedUpcomingRelease()
             } returns expectedBook
@@ -278,6 +291,7 @@ class ExploreRepositoryImplTest {
         fun `a failed fetch is not cached and the next call retries`() = runTest {
             // ----- Arrange -----
             val expectedBook = stubBook()
+
             coEvery {
                 searchRemoteDataSource.fetchFeaturedUpcomingRelease()
             } throws RuntimeException("boom") andThen expectedBook
@@ -299,6 +313,7 @@ class ExploreRepositoryImplTest {
         fun `two calls return the same list and remote is hit exactly once`() = runTest {
             // ----- Arrange -----
             val expectedMoodTags = listOf<MoodTag>(mockk())
+
             coEvery {
                 searchRemoteDataSource.fetchMoodTags(limit = any())
             } returns expectedMoodTags
@@ -317,6 +332,7 @@ class ExploreRepositoryImplTest {
         fun `a failed fetch is not cached and the next call retries`() = runTest {
             // ----- Arrange -----
             val expectedMoodTags = listOf<MoodTag>(mockk())
+
             coEvery {
                 searchRemoteDataSource.fetchMoodTags(limit = any())
             } throws RuntimeException("boom") andThen expectedMoodTags
@@ -346,6 +362,7 @@ class ExploreRepositoryImplTest {
                 seriesId = 7,
                 seriesPosition = 2.0,
             )
+
             val entitySlot = slot<DismissedContinueSeriesBookEntity>()
 
             // ----- Act -----
@@ -355,6 +372,7 @@ class ExploreRepositoryImplTest {
             coVerify {
                 dismissedContinueSeriesLocalDataSource.dismissBook(entity = capture(entitySlot))
             }
+
             entitySlot.captured shouldBe DismissedContinueSeriesBookEntity(
                 bookId = book.bookId,
                 bookTitle = book.title,
@@ -407,6 +425,7 @@ class ExploreRepositoryImplTest {
                         seriesPosition = 2.0,
                     ),
                 )
+
                 awaitComplete()
             }
         }
@@ -446,6 +465,7 @@ class ExploreRepositoryImplTest {
                         bookCount = null,
                     ),
                 )
+
                 awaitComplete()
             }
         }

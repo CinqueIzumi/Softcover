@@ -44,9 +44,10 @@ class Migration31To32Test {
             )
             """.trimIndent(),
         )
+
         conn.execSQL(
             "CREATE UNIQUE INDEX index_pending_progress_updates_userBookId_kind " +
-                    "ON pending_progress_updates(userBookId, kind)",
+                "ON pending_progress_updates(userBookId, kind)",
         )
     }
 
@@ -60,6 +61,7 @@ class Migration31To32Test {
                 1,
                 name,
             )
+
             return stmt.step()
         } finally {
             stmt.close()
@@ -76,6 +78,7 @@ class Migration31To32Test {
                 1,
                 name,
             )
+
             return stmt.step()
         } finally {
             stmt.close()
@@ -147,6 +150,7 @@ class Migration31To32Test {
                 VALUES ('PROGRESS', 10, 20, 30, 100, 4.0)
                 """.trimIndent(),
             )
+
             connection.execSQL(
                 """
                 INSERT INTO pending_progress_updates (kind, userBookId, userBookReadId, bookId, progressPages, rating)
@@ -191,6 +195,7 @@ class Migration31To32Test {
             connection.execSQL(
                 "INSERT INTO pending_progress_updates (kind, userBookId, userBookReadId, bookId) VALUES ('PROGRESS', 1, 2, 3)",
             )
+
             connection.execSQL(
                 "INSERT INTO pending_progress_updates (kind, userBookId, userBookReadId, bookId) VALUES ('FINISH', 4, 5, 6)",
             )

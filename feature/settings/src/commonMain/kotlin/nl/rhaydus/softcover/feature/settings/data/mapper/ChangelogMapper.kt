@@ -44,6 +44,7 @@ internal fun PublishedDocument.toChangelog(): Changelog {
             body += block
         }
     }
+
     closeEntry()
 
     return Changelog(
@@ -55,10 +56,12 @@ internal fun PublishedDocument.toChangelog(): Changelog {
 
 private fun MarkdownBlock.Heading.toEntryHeading(): EntryHeading? {
     val text = spans.joinToString(separator = "") { it.text }
+
     val version = text.substringBefore(
         delimiter = VERSION_SEPARATOR,
         missingDelimiterValue = "",
     ).trim()
+
     val headline = text.substringAfter(
         delimiter = VERSION_SEPARATOR,
         missingDelimiterValue = "",

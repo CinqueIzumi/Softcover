@@ -139,6 +139,7 @@ class ChangelogPageSourceTest {
                 name = "v3.2.0-rc1",
                 code = 1,
             )
+
             val entry = TEST_ENTRY.copy(version = "3.2")
 
             // ----- Act -----

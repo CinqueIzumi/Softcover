@@ -106,6 +106,7 @@ internal class ExportedSchema private constructor(
             val file = File(
                 "schemas/nl.rhaydus.softcover.core.database.SoftcoverDatabase/$version.json",
             )
+
             val database = Json.parseToJsonElement(file.readText())
                 .jsonObject.getValue("database").jsonObject
 

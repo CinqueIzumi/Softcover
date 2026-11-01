@@ -25,6 +25,7 @@ class OnUpdatePercentageProgressClickActionTest {
     @BeforeEach
     fun setUp() {
         recordBookProgress = mockk(relaxed = true)
+
         coEvery {
             recordBookProgress(
                 book = any(),
@@ -33,7 +34,9 @@ class OnUpdatePercentageProgressClickActionTest {
                 actionAt = any(),
             )
         } returns Result.success(null)
+
         stateFlow = MutableStateFlow(UpdateProgressUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(UpdateProgressLocalVariables()),
@@ -49,6 +52,7 @@ class OnUpdatePercentageProgressClickActionTest {
             val book = stubPagedBook(pages = 300)
             stateFlow.value = UpdateProgressUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
+
             every {
                 dependencies.recordBookProgress
             } returns recordBookProgress
@@ -76,6 +80,7 @@ class OnUpdatePercentageProgressClickActionTest {
             val book = stubAudiobook(audioSeconds = 7200)
             stateFlow.value = UpdateProgressUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
+
             every {
                 dependencies.recordBookProgress
             } returns recordBookProgress
@@ -103,6 +108,7 @@ class OnUpdatePercentageProgressClickActionTest {
             val book = stubPagedBook(pages = 200)
             stateFlow.value = UpdateProgressUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
+
             every {
                 dependencies.recordBookProgress
             } returns recordBookProgress
@@ -130,6 +136,7 @@ class OnUpdatePercentageProgressClickActionTest {
             val book = stubAudiobook(audioSeconds = 3600)
             stateFlow.value = UpdateProgressUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
+
             every {
                 dependencies.recordBookProgress
             } returns recordBookProgress
@@ -155,6 +162,7 @@ class OnUpdatePercentageProgressClickActionTest {
         fun `records nothing when there is no book to update`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
+
             every {
                 dependencies.recordBookProgress
             } returns recordBookProgress
@@ -174,6 +182,7 @@ class OnUpdatePercentageProgressClickActionTest {
                     actionAt = any(),
                 )
             }
+
             stateFlow.value.bookToUpdate.shouldBeNull()
         }
     }

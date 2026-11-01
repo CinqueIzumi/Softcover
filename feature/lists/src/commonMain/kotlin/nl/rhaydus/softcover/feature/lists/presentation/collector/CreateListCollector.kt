@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.feature.lists.presentation.state.LocalCreateListVari
 import nl.rhaydus.toad.Collector
 
 internal sealed interface CreateListCollector : Collector<
-        CreateListUiState,
-        CreateListEvent,
-        CreateListDependencies,
-        LocalCreateListVariables,
-        >
+    CreateListUiState,
+    CreateListEvent,
+    CreateListDependencies,
+    LocalCreateListVariables,
+>

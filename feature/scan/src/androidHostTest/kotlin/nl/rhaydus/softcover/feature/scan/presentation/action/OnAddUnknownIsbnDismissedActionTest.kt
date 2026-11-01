@@ -50,6 +50,7 @@ class OnAddUnknownIsbnDismissedActionTest {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(ScanUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalScanVariables()),
@@ -66,6 +67,7 @@ class OnAddUnknownIsbnDismissedActionTest {
                 unknownIsbn = "9780451524935",
                 unknownIsbnSheet = openSession(closing = true),
             )
+
             val action = OnAddUnknownIsbnDismissedAction()
 
             // ----- Act -----
@@ -104,6 +106,7 @@ class OnAddUnknownIsbnDismissedActionTest {
                 unknownIsbnSheet = openSession(),
                 isAddingBook = true,
             )
+
             stateFlow.value = addingState
             val action = OnAddUnknownIsbnDismissedAction()
 
@@ -122,6 +125,7 @@ class OnAddUnknownIsbnDismissedActionTest {
         fun `hands back the pending resolved scan as BookResolvedEvent and closes the session`() = runTest {
             // ----- Arrange -----
             val book = PreviewData.baseBook
+
             stateFlow.value = ScanUiState(
                 unknownIsbnSheet = openSession(
                     closing = true,
@@ -131,6 +135,7 @@ class OnAddUnknownIsbnDismissedActionTest {
                     ),
                 ),
             )
+
             val action = OnAddUnknownIsbnDismissedAction()
 
             // ----- Act -----
@@ -161,6 +166,7 @@ class OnAddUnknownIsbnDismissedActionTest {
                 ),
                 isAddingBook = true,
             )
+
             stateFlow.value = resolving
             val action = OnAddUnknownIsbnDismissedAction()
 
@@ -184,6 +190,7 @@ class OnAddUnknownIsbnDismissedActionTest {
                 unknownIsbnSheet = openSession(),
                 isImportPending = true,
             )
+
             val action = OnAddUnknownIsbnDismissedAction()
 
             // ----- Act -----
@@ -195,5 +202,5 @@ class OnAddUnknownIsbnDismissedActionTest {
             // ----- Assert -----
             stateFlow.value.isImportPending shouldBe false
         }
-}
+    }
 }

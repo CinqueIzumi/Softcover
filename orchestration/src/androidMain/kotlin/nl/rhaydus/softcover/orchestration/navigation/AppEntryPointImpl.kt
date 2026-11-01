@@ -18,12 +18,11 @@ internal class AppEntryPointImpl : AppEntryPoint {
     override fun intent(
         context: Context,
         request: ExternalNavigationRequest,
-    ): Intent =
-        Intent(
-            context,
-            MainActivity::class.java,
-        )
-            .setAction(Intent.ACTION_VIEW)
-            .setData(request.toUriString().toUri())
-            .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+    ): Intent = Intent(
+        context,
+        MainActivity::class.java,
+    )
+        .setAction(Intent.ACTION_VIEW)
+        .setData(request.toUriString().toUri())
+        .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
 }

@@ -48,6 +48,7 @@ class ProgressSheetCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -64,6 +65,7 @@ class ProgressSheetCollectorTest {
             // ----- Arrange -----
             val book = PreviewData.baseBook
             val collector = ProgressSheetCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -89,6 +91,7 @@ class ProgressSheetCollectorTest {
         fun `a book alone does not open the sheet`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = ProgressSheetCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -108,6 +111,7 @@ class ProgressSheetCollectorTest {
         fun `a request without a book does not open the sheet`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = ProgressSheetCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -127,6 +131,7 @@ class ProgressSheetCollectorTest {
         fun `clearing the request requests close on the open session`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = ProgressSheetCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -152,6 +157,7 @@ class ProgressSheetCollectorTest {
         fun `book going null while requested requests close on the open session`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = ProgressSheetCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -179,6 +185,7 @@ class ProgressSheetCollectorTest {
             val closingModel = ProgressSheetUiModel.previews.values.first().requestingClose()
             stateFlow.value = buildBookDetailUiState().copy(progressSheet = SheetSession.Open(model = closingModel))
             val collector = ProgressSheetCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -204,6 +211,7 @@ class ProgressSheetCollectorTest {
         fun `a model update keeps the open sheet open`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = ProgressSheetCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -229,6 +237,7 @@ class ProgressSheetCollectorTest {
             // ----- Arrange -----
             val book = PreviewData.baseBook
             val collector = ProgressSheetCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -240,6 +249,7 @@ class ProgressSheetCollectorTest {
                 book = book,
                 progressSheetRequested = true,
             )
+
             stateFlow.value.progressSheet.modelOrNull?.tabs?.selected shouldBe ProgressSheetTab.PAGE
 
             // ----- Act -----
@@ -257,11 +267,14 @@ class ProgressSheetCollectorTest {
                 readingFormat = ReadingFormat.Audio,
                 audioSeconds = 7200,
             )
+
             val book = PreviewData.baseBook.copy(
                 editions = persistentListOf(audioEdition),
                 defaultEdition = audioEdition,
             )
+
             val collector = ProgressSheetCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -299,11 +312,14 @@ class ProgressSheetCollectorTest {
                 readingFormat = ReadingFormat.Audio,
                 audioSeconds = 7200,
             )
+
             val book = PreviewData.baseBook.copy(
                 editions = persistentListOf(audioEdition),
                 defaultEdition = audioEdition,
             )
+
             val collector = ProgressSheetCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -337,6 +353,7 @@ class ProgressSheetCollectorTest {
         fun `a backdate shows the picked time on the whenRead row and selects its chip`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = ProgressSheetCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -364,6 +381,7 @@ class ProgressSheetCollectorTest {
         fun `resetting the backdate returns the whenRead row to just now`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = ProgressSheetCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

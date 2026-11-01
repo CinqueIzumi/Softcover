@@ -26,6 +26,7 @@ fun SelectionMark(
 ) {
     val scheme = MaterialTheme.colorScheme
     val motionScheme = MaterialTheme.motionScheme
+
     val container by animateColorAsState(
         targetValue = when {
             selected -> scheme.primary

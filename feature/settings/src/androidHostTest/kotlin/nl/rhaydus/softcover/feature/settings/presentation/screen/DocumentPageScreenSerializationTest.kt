@@ -23,6 +23,7 @@ class DocumentPageScreenSerializationTest {
                     it.writeObject(screen)
                 }
             }.toByteArray()
+
             val restored = ObjectInputStream(ByteArrayInputStream(bytes)).use {
                 it.readObject()
             }

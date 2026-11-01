@@ -17,11 +17,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import kotlin.math.roundToInt
 import nl.rhaydus.designsystem.modifier.skeletonMask
 import nl.rhaydus.designsystem.theme.Corners
 import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.designsystem.theme.motion
+import kotlin.math.roundToInt
 
 @Composable
 fun RankedBars(

@@ -26,11 +26,13 @@ class BecauseYouReadGenreSheetCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(ExploreScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk(relaxed = true)
     }
 
@@ -133,6 +135,7 @@ class BecauseYouReadGenreSheetCollectorTest {
                 becauseYouReadGenre = "Romance",
                 becauseYouReadGenreOptions = persistentListOf("Romance", "Horror"),
             )
+
             val collector = BecauseYouReadGenreSheetCollector()
 
             // ----- Act -----
@@ -155,7 +158,9 @@ class BecauseYouReadGenreSheetCollectorTest {
                 becauseYouReadGenre = "Romance",
                 becauseYouReadGenreOptions = persistentListOf("Romance", "Horror"),
             )
+
             val collector = BecauseYouReadGenreSheetCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -178,6 +183,7 @@ class BecauseYouReadGenreSheetCollectorTest {
                 becauseYouReadGenre = "Horror",
                 becauseYouReadGenreOptions = persistentListOf("Horror"),
             )
+
             val collector = BecauseYouReadGenreSheetCollector()
 
             // ----- Act -----
@@ -221,12 +227,14 @@ class BecauseYouReadGenreSheetCollectorTest {
             // ----- Arrange -----
             stateFlow.value = ExploreScreenUiState(becauseYouReadGenre = "Romance")
             val collector = BecauseYouReadGenreSheetCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
                     dependencies = dependencies,
                 )
             }
+
             stateFlow.value = stateFlow.value.copy(
                 becauseYouReadGenreControl = stateFlow.value.becauseYouReadGenreControl.copy(sheetVisible = true),
             )

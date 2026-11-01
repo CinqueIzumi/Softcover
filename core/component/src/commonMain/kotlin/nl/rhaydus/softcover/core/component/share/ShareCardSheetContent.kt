@@ -57,6 +57,7 @@ fun ShareCardSheetContent(
         config = softcoverShareCardCaptureConfig,
         ioDispatcher = LocalShareCardIoDispatcher.current,
     )
+
     val coroutineScope = rememberCoroutineScope()
     val currentOnEvent by rememberUpdatedState(onEvent)
     val haptics = LocalHaptics.current

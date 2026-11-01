@@ -35,28 +35,34 @@ fun Toggle(
     val size = if (filled) 44.dp else 38.dp
     val iconSize = if (filled) 24.dp else 20.dp
     val shape = if (filled) Corners.md else Corners.pill
+
     val targetContainer = when {
         filled.not() -> Color.Transparent
         model.checked -> scheme.primary
         else -> scheme.surfaceContainerHigh
     }
+
     val targetTint = when {
         filled && model.checked -> scheme.onPrimary
         filled -> scheme.primary
         model.checked -> scheme.primary
         else -> scheme.outline
     }
+
     val colorSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Color>()
+
     val container by animateColorAsState(
         targetValue = targetContainer,
         animationSpec = colorSpec,
         label = "IconToggleContainer",
     )
+
     val tint by animateColorAsState(
         targetValue = targetTint,
         animationSpec = colorSpec,
         label = "IconToggleTint",
     )
+
     val motionScheme = MaterialTheme.motionScheme
 
     DesktopTooltip(text = model.description) {

@@ -52,6 +52,7 @@ class RenderStagesTest {
         fun `stops after the first settled model without collecting later emissions`() = runTest {
             // ----- Arrange -----
             val emitted = mutableListOf<String>()
+
             val upstream = flow {
                 listOf("a", "b!", "c", "d!").forEach {
                     emitted.add(it)

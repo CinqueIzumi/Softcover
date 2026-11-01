@@ -64,6 +64,7 @@ class Migration35To36Test {
             )
             """.trimIndent(),
         )
+
         conn.execSQL("CREATE INDEX index_user_books_bookId ON user_books(bookId)")
         conn.execSQL("CREATE INDEX index_user_books_statusCode ON user_books(statusCode)")
 
@@ -89,9 +90,10 @@ class Migration35To36Test {
             )
             """.trimIndent(),
         )
+
         conn.execSQL(
             "CREATE UNIQUE INDEX index_pending_user_book_writes_userBookId_kind " +
-                    "ON pending_user_book_writes(userBookId, kind)",
+                "ON pending_user_book_writes(userBookId, kind)",
         )
     }
 
@@ -120,6 +122,7 @@ class Migration35To36Test {
                 1,
                 name,
             )
+
             return stmt.step()
         } finally {
             stmt.close()
@@ -255,6 +258,7 @@ class Migration35To36Test {
         fun `user_books row reviewSlateJson is NULL for migrated rows`() {
             // ----- Arrange -----
             connection.execSQL("INSERT INTO books (id, title) VALUES (1, 'Dune')")
+
             connection.execSQL(
                 """
                 INSERT INTO user_books (
@@ -285,6 +289,7 @@ class Migration35To36Test {
         fun `user_books non-review fields are preserved after migration`() {
             // ----- Arrange -----
             connection.execSQL("INSERT INTO books (id, title) VALUES (1, 'Dune')")
+
             connection.execSQL(
                 """
                 INSERT INTO user_books (

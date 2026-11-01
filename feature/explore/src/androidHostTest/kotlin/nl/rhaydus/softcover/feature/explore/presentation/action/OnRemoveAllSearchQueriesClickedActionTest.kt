@@ -30,6 +30,7 @@ class OnRemoveAllSearchQueriesClickedActionTest {
     fun setUp() {
         removeAllSearchQueriesUseCase = mockk()
         stateFlow = MutableStateFlow(ExploreScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
@@ -39,6 +40,7 @@ class OnRemoveAllSearchQueriesClickedActionTest {
 
     private fun stubDependencies(testScope: TestScope): ExploreDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<ExploreDependencies>(relaxed = true).also { mock ->
             every {
                 mock.removeAllSearchQueriesUseCase

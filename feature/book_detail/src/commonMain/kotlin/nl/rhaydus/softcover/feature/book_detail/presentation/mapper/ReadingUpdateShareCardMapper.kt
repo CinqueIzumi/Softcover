@@ -48,6 +48,7 @@ internal fun Book.toReadingUpdateShareCardUiModel(
 
     val resolvedAvatarUrl = avatarUrl?.takeIf { it.isNotBlank() }
     val resolvedAuthor = authors.firstOrNull()?.name.orEmpty()
+
     val resolvedTags = userTags
         .filterNot { it.spoiler }
         .map { tag ->
@@ -118,6 +119,7 @@ private fun buildProgressLabel(
         0,
         100,
     )
+
     val position = userBookRead.toPositionText(
         edition = edition,
         totalPages = edition.pages ?: 0,

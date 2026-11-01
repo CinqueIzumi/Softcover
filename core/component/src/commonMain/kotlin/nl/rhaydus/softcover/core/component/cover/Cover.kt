@@ -84,6 +84,7 @@ fun Cover(
     val contentDescription = coverlessFallback?.let { "Cover of $it" }
 
     val shape = model.variant.shape()
+
     val imageModifier = if (model.variant.elevation() > 0.dp) {
         Modifier
             .shadow(
@@ -139,14 +140,17 @@ private fun CoverImage(
 ) {
     var settled by remember { mutableStateOf<Painter?>(null) }
     val previous = remember(request) { settled }
+
     val painter = rememberAsyncImagePainter(
         model = request,
         placeholder = previous,
         contentScale = ContentScale.Fit,
     )
+
     val state by painter.state.collectAsState()
 
     val context = LocalPlatformContext.current
+
     val inMemory = remember(request) {
         val cache = SingletonImageLoader.get(context).memoryCache
         val key = request.memoryCacheKey?.let { MemoryCache.Key(it) }
@@ -168,12 +172,15 @@ private fun CoverImage(
 
     val loaded = (state as? AsyncImagePainter.State.Success)?.painter ?: previous
     val intrinsic = loaded?.intrinsicSize
+
     val ratio = if (intrinsic != null && intrinsic.isSpecified && intrinsic.height > 0f) {
         intrinsic.width / intrinsic.height
     } else {
         COVER_ASPECT_RATIO
     }
+
     val loadingState = state as? AsyncImagePainter.State.Loading
+
     val hasNothingToShow = state is AsyncImagePainter.State.Empty ||
         (loadingState != null && loadingState.painter == null)
 
@@ -358,6 +365,7 @@ private fun persistFromDiskCache(
 ) {
     coroutineScope.launch {
         val diskCache = imageLoader.diskCache ?: return@launch
+
         val snapshot = diskCache.openSnapshot(url) ?: return@launch
 
         snapshot.use {

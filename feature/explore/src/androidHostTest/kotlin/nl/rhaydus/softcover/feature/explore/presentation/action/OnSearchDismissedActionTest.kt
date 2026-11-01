@@ -27,6 +27,7 @@ class OnSearchDismissedActionTest {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(ExploreScreenUiState())
         localVariablesFlow = MutableStateFlow(ExploreLocalVariables())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
@@ -40,6 +41,7 @@ class OnSearchDismissedActionTest {
         fun `unfocuses and closes the sort menu while keeping the query and its results`() = runTest {
             // ----- Arrange -----
             val existingBooks: List<Book> = listOf(mockk())
+
             stateFlow.value = stateFlow.value.copy(
                 searchFocused = true,
                 isSortMenuExpanded = true,

@@ -226,6 +226,7 @@ internal fun GeneralBookInfoSection(
                 val editionUnknown = isLoading && heroEdition == null
                 val authorName = heroEdition?.authors.orEmpty()
                 val showReleased = releaseYear != null && releaseYear > 0 && unreleasedBadge == null
+
                 val bylineText = if (editionUnknown) {
                     null
                 } else {

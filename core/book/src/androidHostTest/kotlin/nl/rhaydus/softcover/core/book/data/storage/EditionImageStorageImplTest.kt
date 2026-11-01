@@ -47,6 +47,7 @@ class EditionImageStorageImplTest {
         fun `overwrites an existing file for the same edition`() {
             // ----- Arrange -----
             val editionId = 12
+
             storage.write(
                 editionId = editionId,
                 bytes = byteArrayOf(1),
@@ -69,6 +70,7 @@ class EditionImageStorageImplTest {
         fun `removes the file at the given path when it exists`() {
             // ----- Arrange -----
             val editionId = 20
+
             val path = storage.write(
                 editionId = editionId,
                 bytes = byteArrayOf(7, 8),
@@ -88,6 +90,7 @@ class EditionImageStorageImplTest {
                 tempDir,
                 "edition_images",
             )
+
             val missingPath = File(
                 imagesDir,
                 "999",

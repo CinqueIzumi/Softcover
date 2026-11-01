@@ -258,7 +258,7 @@ private fun VerdictScoreAndCaption(
                 (
                     fadeIn(animationSpec = effectsSpec) +
                         slideInVertically(animationSpec = spatialSpec) { height -> height / 4 }
-                    ).togetherWith(fadeOut(animationSpec = effectsSpec))
+                ).togetherWith(fadeOut(animationSpec = effectsSpec))
             },
             label = "VerdictScoreCaption",
         ) { animatedScore ->
@@ -314,6 +314,7 @@ private fun buildEditorAnnotatedString(
             0,
             text.length,
         )
+
         val end = mark.end.coerceIn(
             start,
             text.length,

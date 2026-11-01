@@ -144,6 +144,7 @@ internal fun BookDetailOverlays(
     }
 
     val tagEditorSheet = state.tagEditorSheet
+
     if (state.showTagEditorSheet && tagEditorSheet != null) {
         TagEditorBottomSheet(
             model = tagEditorSheet,
@@ -197,6 +198,7 @@ internal fun BookDetailOverlays(
 
     val verdictBook = state.book
     val verdictSheet = state.verdictSheet
+
     if (state.verdictSheetContext != null && verdictBook != null && verdictSheet != null) {
         VerdictSheet(
             model = verdictSheet,
@@ -215,6 +217,7 @@ internal fun BookDetailOverlays(
     }
 
     val editionSheet = state.editionSheet.modelOrNull
+
     if (editionSheet != null) {
         EditionBottomSheetSelector(
             model = editionSheet,
@@ -241,6 +244,7 @@ internal fun BookDetailOverlays(
     }
 
     val deadlinePickerDate = state.deadlinePickerDate
+
     if (deadlinePickerDate != null) {
         RhaydusDatePickerDialog(
             initialDate = deadlinePickerDate,

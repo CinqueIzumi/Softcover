@@ -11,6 +11,7 @@ private val SelectedDayKey = longPreferencesKey("quote_selected_day")
 
 internal fun Preferences.toQuoteSelection(): QuoteSelection? {
     val quoteId = this[SelectedKeyKey] ?: return null
+
     val day = this[SelectedDayKey] ?: return null
 
     return QuoteSelection(

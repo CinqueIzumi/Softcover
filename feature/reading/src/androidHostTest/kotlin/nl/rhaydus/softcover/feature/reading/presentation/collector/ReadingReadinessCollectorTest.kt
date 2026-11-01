@@ -41,11 +41,13 @@ class ReadingReadinessCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(ReadingScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ReadingLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk<ReadingScreenDependencies>(relaxed = true)
     }
 
@@ -221,18 +223,17 @@ class ReadingReadinessCollectorTest {
         }
 
         @Test
-        fun `stays loading while the featured progress is still the loading stand-in`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                stateFlow.value = readyState().copy(featuredProgress = FeaturedProgressUiModel.Loading)
+        fun `stays loading while the featured progress is still the loading stand-in`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = readyState().copy(featuredProgress = FeaturedProgressUiModel.Loading)
 
-                // ----- Act -----
-                val job = launchCollector(this)
+            // ----- Act -----
+            val job = launchCollector(this)
 
-                // ----- Assert -----
-                stateFlow.value.isLoading shouldBe true
-                job.cancel()
-            }
+            // ----- Assert -----
+            stateFlow.value.isLoading shouldBe true
+            job.cancel()
+        }
 
         @Test
         fun `stays loading while an also-reading card is still loading`() = runTest(UnconfinedTestDispatcher()) {
@@ -365,22 +366,22 @@ class ReadingReadinessCollectorTest {
         }
 
         @Test
-        fun `clears exactly once and does not re-arm when the state changes afterwards`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                stateFlow.value = readyState()
-                val job = launchCollector(this)
+        fun `clears exactly once and does not re-arm when the state changes afterwards`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = readyState()
+            val job = launchCollector(this)
 
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(
-                    isLoading = true,
-                    masthead = null,
-                )
-                stateFlow.value = stateFlow.value.copy(masthead = masthead())
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                isLoading = true,
+                masthead = null,
+            )
 
-                // ----- Assert -----
-                job.isCompleted shouldBe true
-                stateFlow.value.isLoading shouldBe true
-            }
+            stateFlow.value = stateFlow.value.copy(masthead = masthead())
+
+            // ----- Assert -----
+            job.isCompleted shouldBe true
+            stateFlow.value.isLoading shouldBe true
+        }
     }
 }

@@ -45,6 +45,7 @@ class DismissedSuggestionsCollectorTest {
         getDismissedContinueSeriesBooksUseCase = mockk()
         getDismissedContinueSeriesUseCase = mockk()
         stateFlow = MutableStateFlow(HiddenSuggestionsUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(HiddenSuggestionsLocalVariables()),
@@ -54,6 +55,7 @@ class DismissedSuggestionsCollectorTest {
         every {
             getDismissedContinueSeriesBooksUseCase()
         } returns dismissedBooksFlow
+
         every {
             getDismissedContinueSeriesUseCase()
         } returns dismissedSeriesFlow
@@ -62,6 +64,7 @@ class DismissedSuggestionsCollectorTest {
             every {
                 mock.getDismissedContinueSeriesBooksUseCase
             } returns getDismissedContinueSeriesBooksUseCase
+
             every {
                 mock.getDismissedContinueSeriesUseCase
             } returns getDismissedContinueSeriesUseCase
@@ -101,6 +104,7 @@ class DismissedSuggestionsCollectorTest {
             // ----- Arrange -----
             val book = stubDismissedBook(bookId = 1)
             val collector = DismissedSuggestionsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -125,6 +129,7 @@ class DismissedSuggestionsCollectorTest {
             // ----- Arrange -----
             val series = stubDismissedSeries(seriesId = 1)
             val collector = DismissedSuggestionsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -146,29 +151,29 @@ class DismissedSuggestionsCollectorTest {
         }
 
         @Test
-        fun `settles both groups to no cards and a zero count when both lists are empty`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val collector = DismissedSuggestionsCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+        fun `settles both groups to no cards and a zero count when both lists are empty`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = DismissedSuggestionsCollector()
 
-                // ----- Act -----
-                dismissedBooksFlow.emit(emptyList())
-                dismissedSeriesFlow.emit(emptyList())
-
-                // ----- Assert -----
-                stateFlow.value.hiddenBooks.cards.shouldBeEmpty()
-                stateFlow.value.hiddenSeries.cards.shouldBeEmpty()
-                stateFlow.value.isLoading shouldBe false
-                stateFlow.value.hiddenBooksGroupHeader.count shouldBe "0"
-                stateFlow.value.hiddenSeriesGroupHeader.count shouldBe "0"
-                job.cancel()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            // ----- Act -----
+            dismissedBooksFlow.emit(emptyList())
+            dismissedSeriesFlow.emit(emptyList())
+
+            // ----- Assert -----
+            stateFlow.value.hiddenBooks.cards.shouldBeEmpty()
+            stateFlow.value.hiddenSeries.cards.shouldBeEmpty()
+            stateFlow.value.isLoading shouldBe false
+            stateFlow.value.hiddenBooksGroupHeader.count shouldBe "0"
+            stateFlow.value.hiddenSeriesGroupHeader.count shouldBe "0"
+            job.cancel()
+        }
 
         @Test
         fun `clears loading and sets each group header count to its list size after the first combined emission`() =
@@ -177,6 +182,7 @@ class DismissedSuggestionsCollectorTest {
                 val books = listOf(stubDismissedBook(bookId = 1), stubDismissedBook(bookId = 2), stubDismissedBook(bookId = 3))
                 val series = listOf(stubDismissedSeries(seriesId = 1), stubDismissedSeries(seriesId = 2))
                 val collector = DismissedSuggestionsCollector()
+
                 val job = launch {
                     collector.onLaunch(
                         scope = scope,
@@ -203,6 +209,7 @@ class DismissedSuggestionsCollectorTest {
             // ----- Arrange -----
             val initial = stateFlow.value
             val collector = DismissedSuggestionsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -222,12 +229,14 @@ class DismissedSuggestionsCollectorTest {
         fun `a later series emission updates only the series group`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = DismissedSuggestionsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
                     dependencies = dependencies,
                 )
             }
+
             dismissedBooksFlow.emit(listOf(stubDismissedBook(bookId = 1)))
             dismissedSeriesFlow.emit(emptyList())
 
@@ -237,8 +246,10 @@ class DismissedSuggestionsCollectorTest {
             // ----- Assert -----
             stateFlow.value.hiddenBooks.cards.map { it.key } shouldBe listOf(BookCardKey.Book(bookId = 1))
             stateFlow.value.hiddenBooksGroupHeader.count shouldBe "1"
+
             stateFlow.value.hiddenSeries.cards.map { it.key } shouldBe
                 listOf(BookCardKey.Series(seriesId = 7), BookCardKey.Series(seriesId = 8))
+
             stateFlow.value.hiddenSeriesGroupHeader.count shouldBe "2"
             job.cancel()
         }
@@ -247,12 +258,14 @@ class DismissedSuggestionsCollectorTest {
         fun `a later book emission updates only the books group`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = DismissedSuggestionsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
                     dependencies = dependencies,
                 )
             }
+
             dismissedBooksFlow.emit(emptyList())
             dismissedSeriesFlow.emit(listOf(stubDismissedSeries(seriesId = 4)))
 
@@ -262,8 +275,10 @@ class DismissedSuggestionsCollectorTest {
             // ----- Assert -----
             stateFlow.value.hiddenSeries.cards.map { it.key } shouldBe listOf(BookCardKey.Series(seriesId = 4))
             stateFlow.value.hiddenSeriesGroupHeader.count shouldBe "1"
+
             stateFlow.value.hiddenBooks.cards.map { it.key } shouldBe
                 listOf(BookCardKey.Book(bookId = 5), BookCardKey.Book(bookId = 6))
+
             stateFlow.value.hiddenBooksGroupHeader.count shouldBe "2"
             job.cancel()
         }

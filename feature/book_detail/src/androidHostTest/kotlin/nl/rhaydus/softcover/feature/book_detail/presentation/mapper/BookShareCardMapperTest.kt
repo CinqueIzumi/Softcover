@@ -231,6 +231,7 @@ class BookShareCardMapperTest {
                 rating = 4.0,
                 userBook = stubUserBook(rating = 3.0),
             )
+
             val edition = stubEdition(
                 releaseYear = 2019,
                 pages = 640,
@@ -253,6 +254,7 @@ class BookShareCardMapperTest {
                 rating = 0.0,
                 releaseYear = -1,
             )
+
             val edition = stubEdition(
                 releaseYear = -1,
                 pages = 0,
@@ -339,6 +341,7 @@ class BookShareCardMapperTest {
                 rating = 0.0,
                 defaultEdition = stubEdition(pages = 100),
             )
+
             val edition = stubEdition(
                 pages = 640,
                 releaseYear = 2019,
@@ -379,6 +382,7 @@ class BookShareCardMapperTest {
                 rating = 0.0,
                 releaseYear = 2020,
             )
+
             val edition = stubEdition(
                 releaseYear = -1,
                 pages = null,
@@ -401,6 +405,7 @@ class BookShareCardMapperTest {
                 rating = 0.0,
                 releaseYear = -1,
             )
+
             val edition = stubEdition(
                 releaseYear = -1,
                 pages = null,
@@ -429,8 +434,10 @@ class BookShareCardMapperTest {
                 tempDir,
                 "cover.jpg",
             )
+
             localFile.writeText("img")
             val book = stubBook(coverUrl = "https://book.cover/img.jpg")
+
             val edition = stubEdition(
                 localImagePath = localFile.path,
                 url = "https://edition.cover/img.jpg",
@@ -472,10 +479,12 @@ class BookShareCardMapperTest {
         fun `an imageless chosen edition falls back to the default edition's image`() {
             // ----- Arrange -----
             val defaultEdition = stubEdition(url = "https://default.cover/img.jpg")
+
             val book = stubBook(
                 coverUrl = "https://book.cover/img.jpg",
                 defaultEdition = defaultEdition,
             )
+
             val edition = stubEdition()
 
             // ----- Act -----
@@ -532,6 +541,7 @@ class BookShareCardMapperTest {
                 title = "Test Book",
                 coverUrl = "",
             )
+
             val edition = stubEdition()
 
             // ----- Act -----

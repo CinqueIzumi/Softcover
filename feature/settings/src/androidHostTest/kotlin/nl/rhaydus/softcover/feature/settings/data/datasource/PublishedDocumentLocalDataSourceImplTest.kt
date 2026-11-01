@@ -76,6 +76,7 @@ class PublishedDocumentLocalDataSourceImplTest {
             every {
                 dao.observeDocument(key = PublishedDocumentKey.ROADMAP.storageKey)
             } returns flowOf(stubEntity(markdown = "roadmap row"))
+
             every {
                 dao.observeDocument(key = PublishedDocumentKey.CHANGELOG.storageKey)
             } returns flowOf(null)
@@ -100,6 +101,7 @@ class PublishedDocumentLocalDataSourceImplTest {
             coEvery {
                 dao.getFetchedAtEpochMillis(key = PublishedDocumentKey.ROADMAP.storageKey)
             } returns 111L
+
             coEvery {
                 dao.getFetchedAtEpochMillis(key = PublishedDocumentKey.CHANGELOG.storageKey)
             } returns 222L
@@ -166,6 +168,7 @@ class PublishedDocumentLocalDataSourceImplTest {
                 markdown = markdown,
                 fetchedAtEpochMillis = 1L,
             )
+
             dataSource.cacheDocument(
                 key = PublishedDocumentKey.CHANGELOG,
                 markdown = markdown,
@@ -182,6 +185,7 @@ class PublishedDocumentLocalDataSourceImplTest {
                     ),
                 )
             }
+
             coVerify(exactly = 1) {
                 dao.upsert(
                     entity = PublishedDocumentEntity(

@@ -9,25 +9,24 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class PendingUserBookWriteMapperTest {
-    private fun write(kind: PendingUserBookWriteKind = PendingUserBookWriteKind.UPDATE_REVIEW) =
-        PendingUserBookWrite(
-            kind = kind,
-            userBookId = 1,
-            userBookReadId = 2,
-            bookId = 3,
-            editionId = 4,
-            progressPages = 50,
-            progressSeconds = 60,
-            startedAt = "2026-01-01",
-            finishedAt = "2026-01-02",
-            rating = 4.5,
-            reviewSlateJson = "[{}]",
-            reviewHasSpoilers = true,
-            enqueuedAt = "2026-01-03T00:00:00Z",
-            actionAt = "2026-01-04T00:00:00Z",
-            progressHistoryId = 7L,
-            statusCode = 3,
-        )
+    private fun write(kind: PendingUserBookWriteKind = PendingUserBookWriteKind.UPDATE_REVIEW) = PendingUserBookWrite(
+        kind = kind,
+        userBookId = 1,
+        userBookReadId = 2,
+        bookId = 3,
+        editionId = 4,
+        progressPages = 50,
+        progressSeconds = 60,
+        startedAt = "2026-01-01",
+        finishedAt = "2026-01-02",
+        rating = 4.5,
+        reviewSlateJson = "[{}]",
+        reviewHasSpoilers = true,
+        enqueuedAt = "2026-01-03T00:00:00Z",
+        actionAt = "2026-01-04T00:00:00Z",
+        progressHistoryId = 7L,
+        statusCode = 3,
+    )
 
     private fun entity(kind: String = "UPDATE_REVIEW") = PendingUserBookWriteEntity(
         kind = kind,

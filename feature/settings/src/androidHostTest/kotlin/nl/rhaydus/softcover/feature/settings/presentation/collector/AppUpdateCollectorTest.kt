@@ -33,6 +33,7 @@ class AppUpdateCollectorTest {
         updateStateFlow = MutableSharedFlow()
         observeAppUpdateStateUseCase = mockk()
         stateFlow = MutableStateFlow(SettingsScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(SettingsLocalVariables()),
@@ -56,6 +57,7 @@ class AppUpdateCollectorTest {
         fun `follows the latest state across a download lifecycle`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = AppUpdateCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -65,10 +67,14 @@ class AppUpdateCollectorTest {
 
             // ----- Act -----
             updateStateFlow.emit(AppUpdateState.Available)
-            updateStateFlow.emit(AppUpdateState.Downloading(
-                bytesDownloaded = 10L,
-                totalBytes = 100L,
-            ),)
+
+            updateStateFlow.emit(
+                AppUpdateState.Downloading(
+                    bytesDownloaded = 10L,
+                    totalBytes = 100L,
+                ),
+            )
+
             updateStateFlow.emit(AppUpdateState.Failed)
 
             // ----- Assert -----

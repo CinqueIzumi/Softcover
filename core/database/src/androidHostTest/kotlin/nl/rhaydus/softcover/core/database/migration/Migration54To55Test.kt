@@ -98,12 +98,14 @@ class Migration54To55Test {
         fun `every v54 table keeps identical rows and columns`() {
             // ----- Arrange -----
             val tables = schema54.tables
+
             val rowsBefore = tables.associate { table ->
                 table.name to connection.snapshot(
                     table.name,
                     table.columns.map { it.name },
                 )
             }
+
             val columnsBefore = tables.associate { it.name to connection.columnNames(it.name) }
             tables.forEach { rowsBefore.getValue(it.name).size shouldBe 1 }
 
@@ -116,6 +118,7 @@ class Migration54To55Test {
                     table.name,
                     table.columns.map { it.name },
                 ) shouldBe rowsBefore.getValue(table.name)
+
                 connection.columnNames(table.name) shouldBe columnsBefore.getValue(table.name)
             }
         }

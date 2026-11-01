@@ -23,12 +23,14 @@ internal data class OnUpdatePercentageProgressClickAction(
         val actionAt = scope.currentState.readAt.toActionAt()
 
         val newPercentageValue: Double = newPercentage.toDoubleOrNull() ?: 0.0
+
         val fraction = (newPercentageValue / 100.0).coerceIn(
             0.0,
             1.0,
         )
 
         val edition = bookToUpdate.currentEdition ?: return
+
         val isAudiobook = edition.isAudiobook
 
         val newPage: Int? = if (isAudiobook) {

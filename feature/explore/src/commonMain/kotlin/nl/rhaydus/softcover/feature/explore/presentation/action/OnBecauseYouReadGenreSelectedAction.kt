@@ -46,6 +46,7 @@ internal data class OnBecauseYouReadGenreSelectedAction(val genre: String?) : Ex
         scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>,
     ) {
         val target = genre ?: scope.currentState.becauseYouReadGenreOptions.firstOrNull()
+
         if (target == scope.currentState.becauseYouReadGenre) return
 
         scope.setState {

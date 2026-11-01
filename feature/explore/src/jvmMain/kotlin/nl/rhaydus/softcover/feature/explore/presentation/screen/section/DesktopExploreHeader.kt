@@ -27,7 +27,11 @@ internal fun DesktopExploreHeader(
 ) {
     PageMasthead(
         model = masthead,
-        modifier = Modifier.padding(start = Spacing.xl, end = Spacing.sm, top = Spacing.md),
+        modifier = Modifier.padding(
+            start = Spacing.xl,
+            end = Spacing.sm,
+            top = Spacing.md,
+        ),
     ) {
         MastheadRefreshAction(
             model = refresh,

@@ -94,6 +94,7 @@ private fun <K> SidebarRow(
     val variant = model.variant
     val isSelected = (variant as? SidebarRowVariant.Destination)?.selected ?: false
     val rowRole = if (variant is SidebarRowVariant.Destination) Role.Tab else Role.Button
+
     val onLongClick: (() -> Unit)? = if (variant is SidebarRowVariant.Destination && variant.longPressable) {
         {
             haptics.threshold()
@@ -104,11 +105,13 @@ private fun <K> SidebarRow(
     }
 
     val motionScheme = MaterialTheme.motionScheme
+
     val container by animateColorAsState(
         targetValue = if (isSelected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent,
         animationSpec = motionScheme.defaultEffectsSpec(),
         label = "SidebarRowContainer",
     )
+
     val content by animateColorAsState(
         targetValue = if (isSelected) {
             MaterialTheme.colorScheme.onSecondaryContainer

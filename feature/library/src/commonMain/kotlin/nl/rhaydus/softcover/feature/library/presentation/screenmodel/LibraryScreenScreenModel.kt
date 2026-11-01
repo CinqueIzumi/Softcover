@@ -65,10 +65,10 @@ internal class LibraryScreenScreenModel(
     appDispatchers: AppDispatchers,
     flows: List<LibraryCollector>,
 ) : ToadScreenModel<LibraryUiState, LibraryEvent, LibraryDependencies, LibraryCollector, LibraryLocalVariables>(
-    initialState = LibraryUiState(),
-    initialLocalVariables = LibraryLocalVariables(),
-    initializers = flows,
-) {
+        initialState = LibraryUiState(),
+        initialLocalVariables = LibraryLocalVariables(),
+        initializers = flows,
+    ) {
     override val dependencies = LibraryDependencies(
         getSortedAllUserBooksUseCase = getSortedAllUserBooksUseCase,
         getSortedBooksByStatusUseCase = getSortedBooksByStatusUseCase,

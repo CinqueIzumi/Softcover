@@ -25,9 +25,11 @@ class MarkBookAsReadUseCaseTest {
     fun setUp() {
         repository = mockk()
         markReadingActivityUseCase = mockk()
+
         coEvery {
             markReadingActivityUseCase(any())
         } returns Unit
+
         useCase = MarkBookAsReadUseCase(
             repository = repository,
             markReadingActivityUseCase = markReadingActivityUseCase,
@@ -71,12 +73,14 @@ class MarkBookAsReadUseCaseTest {
             // ----- Assert -----
             result.isSuccess shouldBe true
             result.getOrNull() shouldBe ShelfMutationOutcome.Applied
+
             coVerify(exactly = 1) {
                 repository.markBookAsRead(
                     book = inputBook,
                     editionId = null,
                 )
             }
+
             coVerify(exactly = 1) { repository.cacheBook(book = updatedBook) }
             coVerify(exactly = 1) { markReadingActivityUseCase(any()) }
         }
@@ -120,6 +124,7 @@ class MarkBookAsReadUseCaseTest {
                     editionId = editionId,
                 )
             }
+
             coVerify(exactly = 1) { markReadingActivityUseCase(any()) }
         }
 
@@ -168,6 +173,7 @@ class MarkBookAsReadUseCaseTest {
                     actionAt = actionAt,
                 )
             }
+
             coVerify(exactly = 1) { markReadingActivityUseCase(actionAt) }
         }
 
@@ -345,12 +351,14 @@ class MarkBookAsReadUseCaseTest {
 
             // ----- Assert -----
             result.getOrNull() shouldBe ShelfMutationOutcome.NoChange
+
             coVerify(exactly = 0) {
                 repository.markBookAsRead(
                     any(),
                     any(),
                 )
             }
+
             coVerify(exactly = 0) { repository.cacheBook(any()) }
             coVerify(exactly = 0) { markReadingActivityUseCase(any()) }
         }

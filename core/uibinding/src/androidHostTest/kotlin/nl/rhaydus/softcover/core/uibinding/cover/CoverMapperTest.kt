@@ -96,6 +96,7 @@ class CoverMapperTest {
                 variant = CoverVariant.Shelf,
                 shareTransition = true,
             )
+
             val second = subject.toCoverUiModel(
                 variant = CoverVariant.Shelf,
                 shareTransition = true,
@@ -117,6 +118,7 @@ class CoverMapperTest {
                 shareTransition = true,
                 transitionSurface = "rail",
             )
+
             val grid = subject.toCoverUiModel(
                 variant = CoverVariant.Shelf,
                 shareTransition = true,
@@ -165,6 +167,7 @@ class CoverMapperTest {
                 url = "https://example.com/c.jpg",
                 persistEditionId = null,
             )
+
             result.coverlessTitle shouldBe "Dune"
             result.variant shouldBe CoverVariant.Raised
         }
@@ -195,6 +198,7 @@ class CoverMapperTest {
         fun `a null edition resolves from the default edition`() {
             // ----- Arrange -----
             val subject: BookEdition? = null
+
             val defaultEdition = edition(
                 id = 3,
                 url = "https://example.com/default.jpg",

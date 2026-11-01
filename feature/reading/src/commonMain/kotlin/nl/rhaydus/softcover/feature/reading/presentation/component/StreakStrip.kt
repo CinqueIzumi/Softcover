@@ -216,6 +216,7 @@ private fun StreakStripSheetRow(row: StreakDayRowUiModel) {
 
 private fun previewActivity(litOffsets: Set<Int>): List<ReadingDayActivity> {
     val today = currentLocalDate()
+
     val firstDay = today.minus(
         20,
         DateTimeUnit.DAY,

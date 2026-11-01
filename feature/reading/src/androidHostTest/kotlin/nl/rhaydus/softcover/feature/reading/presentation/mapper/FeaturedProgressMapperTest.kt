@@ -249,6 +249,7 @@ class FeaturedProgressMapperTest {
                 id = 77,
                 owned = true,
             )
+
             val subject = book(
                 defaultEdition = edition(pages = 320),
                 editions = listOf(owned),
@@ -269,6 +270,7 @@ class FeaturedProgressMapperTest {
                 id = 77,
                 owned = true,
             )
+
             val subject = book(
                 defaultEdition = edition(pages = 320),
                 editions = listOf(owned),

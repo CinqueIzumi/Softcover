@@ -30,11 +30,13 @@ class LensToggleCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk(relaxed = true)
     }
 
@@ -65,6 +67,7 @@ class LensToggleCollectorTest {
                 selectedLens = BookDetailLens.THE_BOOK,
                 yoursEnabled = false,
             )
+
             job.cancel()
         }
 
@@ -87,6 +90,7 @@ class LensToggleCollectorTest {
                 selectedLens = BookDetailLens.THE_BOOK,
                 yoursEnabled = false,
             )
+
             job.cancel()
         }
 
@@ -109,6 +113,7 @@ class LensToggleCollectorTest {
                 selectedLens = BookDetailLens.THE_BOOK,
                 yoursEnabled = true,
             )
+
             job.cancel()
         }
 
@@ -119,6 +124,7 @@ class LensToggleCollectorTest {
                 book = stubBook(userBook = mockk()),
                 selectedLens = BookDetailLens.YOURS,
             )
+
             val collector = LensToggleCollector()
 
             // ----- Act -----

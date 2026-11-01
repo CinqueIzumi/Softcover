@@ -31,6 +31,7 @@ class OnOpenDeadlinePickerActionTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -40,6 +41,7 @@ class OnOpenDeadlinePickerActionTest {
 
     private fun stubDependencies(testScope: TestScope): BookDetailDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<BookDetailDependencies>(relaxed = true).also { mock ->
             every {
                 mock.coroutineScope
@@ -75,10 +77,13 @@ class OnOpenDeadlinePickerActionTest {
                 9,
                 30,
             )
+
             dependencies = stubDependencies(this)
+
             every {
                 dependencies.observeCurrentDateUseCase()
             } returns flowOf(today)
+
             val action = OnOpenDeadlinePickerAction()
 
             // ----- Act -----
@@ -99,6 +104,7 @@ class OnOpenDeadlinePickerActionTest {
                 12,
                 24,
             )
+
             stateFlow.value = buildBookDetailUiState().copy(
                 deadline = BookDeadline(
                     bookId = 1,
@@ -112,7 +118,9 @@ class OnOpenDeadlinePickerActionTest {
                     unit = DeadlineUnit.PAGES,
                 ),
             )
+
             dependencies = stubDependencies(this)
+
             every {
                 dependencies.observeCurrentDateUseCase()
             } returns flowOf(
@@ -122,6 +130,7 @@ class OnOpenDeadlinePickerActionTest {
                     30,
                 ),
             )
+
             val action = OnOpenDeadlinePickerAction()
 
             // ----- Act -----
@@ -138,9 +147,11 @@ class OnOpenDeadlinePickerActionTest {
         fun `leaves the picker closed when today cannot be resolved and there is no deadline`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
+
             every {
                 dependencies.observeCurrentDateUseCase()
             } returns emptyFlow()
+
             val action = OnOpenDeadlinePickerAction()
 
             // ----- Act -----

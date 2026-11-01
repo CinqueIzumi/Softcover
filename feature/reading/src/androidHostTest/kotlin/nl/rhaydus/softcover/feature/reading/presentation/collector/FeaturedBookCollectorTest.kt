@@ -31,21 +31,25 @@ class FeaturedBookCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(ReadingScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ReadingLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk<ReadingScreenDependencies>(relaxed = true)
     }
 
     private fun stubBook(progress: Float): Book {
         val read = mockk<UserBookRead>(relaxed = true)
+
         every {
             read.progress
         } returns progress
 
         val book = mockk<Book>(relaxed = true)
+
         every {
             book.currentRead
         } returns read
@@ -99,6 +103,7 @@ class FeaturedBookCollectorTest {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(books = persistentListOf(stubBook(progress = 40f)))
             val collector = FeaturedBookCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -122,9 +127,11 @@ class FeaturedBookCollectorTest {
             title: String,
         ): Book {
             val book = mockk<Book>(relaxed = true)
+
             every {
                 book.id
             } returns id
+
             every {
                 book.title
             } returns title
@@ -163,6 +170,7 @@ class FeaturedBookCollectorTest {
                     title = "Second",
                 ),),
             )
+
             val collector = FeaturedBookCollector()
 
             // ----- Act -----
@@ -183,11 +191,15 @@ class FeaturedBookCollectorTest {
         @Test
         fun `updates when the featured book changes`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = ReadingScreenUiState(books = persistentListOf(namedBook(
-                id = 1,
-                title = "Old",
-            ),),)
+            stateFlow.value = ReadingScreenUiState(
+                books = persistentListOf(namedBook(
+                    id = 1,
+                    title = "Old",
+                ),),
+            )
+
             val collector = FeaturedBookCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -196,10 +208,12 @@ class FeaturedBookCollectorTest {
             }
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(books = persistentListOf(namedBook(
-                id = 2,
-                title = "New",
-            ),),)
+            stateFlow.value = stateFlow.value.copy(
+                books = persistentListOf(namedBook(
+                    id = 2,
+                    title = "New",
+                ),),
+            )
 
             // ----- Assert -----
             val model = stateFlow.value.featuredBookModel.shouldNotBeNull()
@@ -211,11 +225,15 @@ class FeaturedBookCollectorTest {
         @Test
         fun `clears when the featured book goes away`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = ReadingScreenUiState(books = persistentListOf(namedBook(
-                id = 1,
-                title = "Only",
-            ),),)
+            stateFlow.value = ReadingScreenUiState(
+                books = persistentListOf(namedBook(
+                    id = 1,
+                    title = "Only",
+                ),),
+            )
+
             val collector = FeaturedBookCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

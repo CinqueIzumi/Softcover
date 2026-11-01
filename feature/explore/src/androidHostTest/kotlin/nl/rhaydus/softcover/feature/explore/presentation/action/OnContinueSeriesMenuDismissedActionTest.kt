@@ -55,6 +55,7 @@ class OnContinueSeriesMenuDismissedActionTest {
         dismissBookUseCase = mockk()
         dismissSeriesUseCase = mockk()
         dependencies = mockk(relaxed = true)
+
         every {
             dependencies.dismissContinueSeriesBookUseCase
         } returns dismissBookUseCase
@@ -76,12 +77,15 @@ class OnContinueSeriesMenuDismissedActionTest {
                 bookCount = any(),
             )
         } returns Result.failure(IllegalStateException("stop"))
+
         stateFlow = MutableStateFlow(ExploreScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         mockkObject(SnackBarManager)
     }
 
@@ -276,6 +280,7 @@ class OnContinueSeriesMenuDismissedActionTest {
 
             // ----- Assert -----
             coVerify(exactly = 0) { dismissBookUseCase(book = any()) }
+
             coVerify(exactly = 0) {
                 dismissSeriesUseCase(
                     seriesId = any(),

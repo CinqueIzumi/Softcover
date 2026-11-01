@@ -26,6 +26,7 @@ internal class OnQuotePositionChangedAction(
 
         scope.setState { state ->
             val draft = state.quoteDraft ?: return@setState state
+
             val sanitized = when (book.resolvedQuoteTab(draft)) {
                 QuotePositionTab.PAGE -> sanitizedQuoteNumber(
                     text = text,

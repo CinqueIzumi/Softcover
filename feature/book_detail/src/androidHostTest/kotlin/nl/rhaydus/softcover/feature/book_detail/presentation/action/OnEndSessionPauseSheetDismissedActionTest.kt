@@ -40,6 +40,7 @@ class OnEndSessionPauseSheetDismissedActionTest {
     fun setUp() {
         pauseBookUseCase = mockk()
         activeSessionController = mockk(relaxed = true)
+
         book = mockk<Book>().also { mock ->
             every {
                 mock.id
@@ -53,7 +54,9 @@ class OnEndSessionPauseSheetDismissedActionTest {
                 mock.currentEdition
             } returns null
         }
+
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -167,6 +170,7 @@ class OnEndSessionPauseSheetDismissedActionTest {
             verify(exactly = 0) {
                 activeSessionController.stop()
             }
+
             coVerify(exactly = 0) {
                 pauseBookUseCase(
                     book = any(),

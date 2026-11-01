@@ -2,11 +2,11 @@ package nl.rhaydus.softcover.core.domain.util
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
-import java.util.TimeZone
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import java.util.TimeZone
 
 class LocalDateOfTest {
     private lateinit var originalZone: TimeZone

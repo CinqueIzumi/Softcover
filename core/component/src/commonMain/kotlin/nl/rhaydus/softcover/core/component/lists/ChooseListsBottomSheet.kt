@@ -181,6 +181,7 @@ private fun ChooseListsRow(
                 transitionSpec = {
                     val fadeIn = fadeIn(animationSpec = motionScheme.defaultEffectsSpec())
                     val fadeOut = fadeOut(animationSpec = motionScheme.defaultEffectsSpec())
+
                     val sizeTransform = SizeTransform(clip = false) { _, _ ->
                         motionScheme.defaultSpatialSpec()
                     }
@@ -267,7 +268,10 @@ private fun PartialBookmarkMark() {
 
     Box(
         modifier = Modifier
-            .size(width = 19.dp, height = 23.dp)
+            .size(
+                width = 19.dp,
+                height = 23.dp,
+            )
             .border(
                 width = 2.4.dp,
                 color = primary,

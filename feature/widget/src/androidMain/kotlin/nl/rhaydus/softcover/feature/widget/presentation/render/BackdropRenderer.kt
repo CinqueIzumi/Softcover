@@ -42,6 +42,7 @@ internal suspend fun renderBackdrop(
 
     Canvas(opaque).apply {
         drawColor(Color.WHITE)
+
         drawBitmap(
             fitted,
             0f,

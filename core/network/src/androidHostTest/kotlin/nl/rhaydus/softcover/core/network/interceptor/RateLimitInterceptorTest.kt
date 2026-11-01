@@ -89,10 +89,12 @@ class RateLimitInterceptorTest {
                 type = fakeFieldType,
             ).build()
         }
+
         val rootField = CompiledField.Builder(
             name = "query",
             type = fakeFieldType,
         ).selections(rootSelections).build()
+
         val operation = mockk<Operation<FakeOperationData>>()
 
         every {
@@ -168,19 +170,18 @@ class RateLimitInterceptorTest {
         ),
     )
 
-    private fun tooManyRequestsResponse(headers: List<HttpHeader>): ApolloResponse<GetUserBookListsQuery.Data> =
-        ApolloResponse.Builder(
-            baseRequest.operation,
-            uuid4(),
-        )
-            .exception(
-                ApolloHttpException(
-                    statusCode = HTTP_TOO_MANY_REQUESTS,
-                    headers = headers,
-                    body = null,
-                    message = "Too Many Requests",
-                ),
-            ).build()
+    private fun tooManyRequestsResponse(headers: List<HttpHeader>): ApolloResponse<GetUserBookListsQuery.Data> = ApolloResponse.Builder(
+        baseRequest.operation,
+        uuid4(),
+    )
+        .exception(
+            ApolloHttpException(
+                statusCode = HTTP_TOO_MANY_REQUESTS,
+                headers = headers,
+                body = null,
+                message = "Too Many Requests",
+            ),
+        ).build()
 
     /**
      * Raises the ceiling to [ceiling] via a response carrying only `X-Ratelimit-Limit`, then advances
@@ -215,39 +216,43 @@ class RateLimitInterceptorTest {
     @Nested
     inner class Intercept {
         @Test
-        fun `tokens refill up to but never beyond the fallback ceiling before any server response arrives`() =
-            runTest {
-                // ----- Arrange -----
-                val interceptor = buildInterceptor(
-                    fallbackBucketSize = 3,
-                    refillTokensPerSecond = 1.0,
-                    scheduler = testScheduler,
-                )
-                interceptor.intercept(
-                    baseRequest,
-                    chain,
-                ).collect {} // cold-start credit: 2 -> 1
-                advanceTimeBy(10.seconds)
+        fun `tokens refill up to but never beyond the fallback ceiling before any server response arrives`() = runTest {
+            // ----- Arrange -----
+            val interceptor = buildInterceptor(
+                fallbackBucketSize = 3,
+                refillTokensPerSecond = 1.0,
+                scheduler = testScheduler,
+            )
 
-                // ----- Act -----
-                interceptor.intercept(
-                    baseRequest,
-                    chain,
-                ).collect {} // refill caps at fallbackBucketSize=3
-                interceptor.intercept(
-                    baseRequest,
-                    chain,
-                ).collect {}
-                val timeAfterTheTwoCappedTokens = testScheduler.currentTime
-                interceptor.intercept(
-                    baseRequest,
-                    chain,
-                ).collect {}
+            interceptor.intercept(
+                baseRequest,
+                chain,
+            ).collect {} // cold-start credit: 2 -> 1
 
-                // ----- Assert -----
-                timeAfterTheTwoCappedTokens shouldBe 10_000L
-                testScheduler.currentTime shouldBe 11_000L
-            }
+            advanceTimeBy(10.seconds)
+
+            // ----- Act -----
+            interceptor.intercept(
+                baseRequest,
+                chain,
+            ).collect {} // refill caps at fallbackBucketSize=3
+
+            interceptor.intercept(
+                baseRequest,
+                chain,
+            ).collect {}
+
+            val timeAfterTheTwoCappedTokens = testScheduler.currentTime
+
+            interceptor.intercept(
+                baseRequest,
+                chain,
+            ).collect {}
+
+            // ----- Assert -----
+            timeAfterTheTwoCappedTokens shouldBe 10_000L
+            testScheduler.currentTime shouldBe 11_000L
+        }
 
         @Test
         fun `concurrent acquirers are serialised without losing or double-granting tokens`() = runTest {
@@ -257,6 +262,7 @@ class RateLimitInterceptorTest {
                 refillTokensPerSecond = 1.0,
                 scheduler = testScheduler,
             )
+
             val completionTimes = mutableListOf<Long>()
 
             // ----- Act -----
@@ -266,9 +272,11 @@ class RateLimitInterceptorTest {
                         baseRequest,
                         chain,
                     ).collect {}
+
                     completionTimes += testScheduler.currentTime
                 }
             }
+
             advanceUntilIdle()
             jobs.forEach { it.join() }
 
@@ -287,11 +295,14 @@ class RateLimitInterceptorTest {
                 refillTokensPerSecond = 1.0,
                 scheduler = testScheduler,
             )
+
             seedCeilingAndSaturate(
                 interceptor,
                 ceiling = 5,
             )
+
             val baselineTime = testScheduler.currentTime
+
             val clearAndApply = requestWithRootFields(
                 "clear",
                 "apply",
@@ -303,11 +314,14 @@ class RateLimitInterceptorTest {
                 clearAndApply,
                 chain,
             ).collect {}
+
             interceptor.intercept(
                 clearAndApply,
                 chain,
             ).collect {}
+
             val timeAfterTwoTwoCostCalls = testScheduler.currentTime
+
             interceptor.intercept(
                 clearAndApply,
                 chain,
@@ -326,15 +340,19 @@ class RateLimitInterceptorTest {
                 refillTokensPerSecond = 1.0,
                 scheduler = testScheduler,
             )
+
             seedCeilingAndSaturate(
                 interceptor,
                 ceiling = 4,
             )
+
             val baselineTime = testScheduler.currentTime
+
             val twoRootFields = requestWithRootFields(
                 "clear",
                 "apply",
             )
+
             val oneRootField = requestWithRootFields("books")
 
             // ----- Act -----
@@ -342,11 +360,14 @@ class RateLimitInterceptorTest {
                 twoRootFields,
                 chain,
             ).collect {}
+
             interceptor.intercept(
                 oneRootField,
                 chain,
             ).collect {}
+
             val timeAfterBudgetExhausted = testScheduler.currentTime
+
             interceptor.intercept(
                 oneRootField,
                 chain,
@@ -365,16 +386,20 @@ class RateLimitInterceptorTest {
                 refillTokensPerSecond = 1.0,
                 scheduler = testScheduler,
             )
+
             every {
                 chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
             } returns flowOf(tooManyRequestsResponse(rateLimitHeaders(limit = 5)))
+
             interceptor.intercept(
                 baseRequest,
                 chain,
             ).collect {} // zeroes credit, adopts a ceiling of 5
+
             every {
                 chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
             } returns emptyFlow()
+
             val twoRootFields = requestWithRootFields(
                 "clear",
                 "apply",
@@ -399,11 +424,14 @@ class RateLimitInterceptorTest {
                 refillTokensPerSecond = 1.0,
                 scheduler = testScheduler,
             )
+
             seedCeilingAndSaturate(
                 interceptor,
                 ceiling = 4,
             )
+
             val baselineTime = testScheduler.currentTime
+
             val typenameAndOneRealField = requestWithRootFields(
                 "__typename",
                 "books",
@@ -415,15 +443,19 @@ class RateLimitInterceptorTest {
                 typenameAndOneRealField,
                 chain,
             ).collect {}
+
             interceptor.intercept(
                 typenameAndOneRealField,
                 chain,
             ).collect {}
+
             interceptor.intercept(
                 typenameAndOneRealField,
                 chain,
             ).collect {}
+
             val timeAfterThreeSingleCostCalls = testScheduler.currentTime
+
             interceptor.intercept(
                 typenameAndOneRealField,
                 chain,
@@ -435,37 +467,39 @@ class RateLimitInterceptorTest {
         }
 
         @Test
-        fun `a cost above the ceiling is clamped to the ceiling, dropping the reserve rather than hanging`() =
-            runTest {
-                // ----- Arrange -----
-                val interceptor = buildInterceptor(
-                    fallbackBucketSize = 10,
-                    refillTokensPerSecond = 1.0,
-                    scheduler = testScheduler,
-                )
-                seedCeilingAndSaturate(
-                    interceptor,
-                    ceiling = 2,
-                )
-                val fiveRootFields = requestWithRootFields(
-                    "a",
-                    "b",
-                    "c",
-                    "d",
-                    "e",
-                )
-                val timeAfterSeeding = testScheduler.currentTime
+        fun `a cost above the ceiling is clamped to the ceiling, dropping the reserve rather than hanging`() = runTest {
+            // ----- Arrange -----
+            val interceptor = buildInterceptor(
+                fallbackBucketSize = 10,
+                refillTokensPerSecond = 1.0,
+                scheduler = testScheduler,
+            )
 
-                // ----- Act -----
-                // clamped cost is 2, exactly the ceiling, so this proceeds immediately
-                interceptor.intercept(
-                    fiveRootFields,
-                    chain,
-                ).collect {}
+            seedCeilingAndSaturate(
+                interceptor,
+                ceiling = 2,
+            )
 
-                // ----- Assert -----
-                testScheduler.currentTime shouldBe timeAfterSeeding
-            }
+            val fiveRootFields = requestWithRootFields(
+                "a",
+                "b",
+                "c",
+                "d",
+                "e",
+            )
+
+            val timeAfterSeeding = testScheduler.currentTime
+
+            // ----- Act -----
+            // clamped cost is 2, exactly the ceiling, so this proceeds immediately
+            interceptor.intercept(
+                fiveRootFields,
+                chain,
+            ).collect {}
+
+            // ----- Assert -----
+            testScheduler.currentTime shouldBe timeAfterSeeding
+        }
 
         @Test
         fun `an operation with no billable root fields still costs at least one token`() = runTest {
@@ -475,12 +509,15 @@ class RateLimitInterceptorTest {
                 refillTokensPerSecond = 1.0,
                 scheduler = testScheduler,
             )
+
             seedCeilingAndSaturate(
                 interceptor,
                 ceiling = 2,
             )
+
             val baselineTime = testScheduler.currentTime
             val typenameOnly = requestWithRootFields("__typename")
+
             interceptor.intercept(
                 typenameOnly,
                 chain,
@@ -508,6 +545,7 @@ class RateLimitInterceptorTest {
                 refillTokensPerSecond = 1.0,
                 scheduler = testScheduler,
             )
+
             seedCeilingAndSaturate(
                 interceptor,
                 ceiling = 20,
@@ -521,13 +559,16 @@ class RateLimitInterceptorTest {
                     remaining = 4,
                 ),
             )
+
             interceptor.intercept(
                 baseRequest,
                 chain,
             ).collect {} // adopts remaining=4, overwriting the 20
+
             every {
                 chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
             } returns emptyFlow()
+
             val timeAfterAdoption = testScheduler.currentTime
 
             // ----- Act -----
@@ -538,7 +579,9 @@ class RateLimitInterceptorTest {
                     chain,
                 ).collect {}
             }
+
             val timeAfterThreeMoreSingleCostCalls = testScheduler.currentTime
+
             interceptor.intercept(
                 baseRequest,
                 chain,
@@ -550,126 +593,138 @@ class RateLimitInterceptorTest {
         }
 
         @Test
-        fun `a higher remaining does not raise the estimate while another request is still outstanding`() =
-            runTest {
-                // ----- Arrange -----
-                val interceptor = buildInterceptor(
-                    fallbackBucketSize = 10,
-                    refillTokensPerSecond = 1.0,
-                    scheduler = testScheduler,
-                )
-                seedCeilingAndSaturate(
-                    interceptor,
-                    ceiling = 4,
-                )
-                val baselineTime = testScheduler.currentTime
+        fun `a higher remaining does not raise the estimate while another request is still outstanding`() = runTest {
+            // ----- Arrange -----
+            val interceptor = buildInterceptor(
+                fallbackBucketSize = 10,
+                refillTokensPerSecond = 1.0,
+                scheduler = testScheduler,
+            )
 
-                // Both responses report remaining=3 — higher than the local estimate will be once both
-                // requests below have each spent a token (4 - 1 - 1 = 2) — but neither must raise it,
-                // since a second request is still outstanding when the first response is adopted.
-                val responseA = flow {
-                    delay(1.seconds)
-                    emit(
-                        successResponseWith(
-                            limit = 4,
-                            remaining = 3,
-                        ),
-                    )
-                }
-                val responseB = flow {
-                    delay(10.seconds)
-                    emit(
-                        successResponseWith(
-                            limit = 4,
-                            remaining = 3,
-                        ),
-                    )
-                }
-                every {
-                    chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
-                } returnsMany listOf(responseA, responseB)
+            seedCeilingAndSaturate(
+                interceptor,
+                ceiling = 4,
+            )
 
-                // ----- Act -----
-                // both acquire instantly (avail 4 -> 2) and go in flight together
-                val jobA = launch {
-                    interceptor.intercept(
-                        baseRequest,
-                        chain,
-                    ).collect {}
-                }
-                val jobB = launch {
-                    interceptor.intercept(
-                        baseRequest,
-                        chain,
-                    ).collect {}
-                }
-                runCurrent()
-                advanceTimeBy(1.seconds)
-                runCurrent() // responseA lands and is adopted while B is still outstanding (inFlight == 2)
+            val baselineTime = testScheduler.currentTime
 
-                every {
-                    chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
-                } returns emptyFlow()
+            // Both responses report remaining=3 — higher than the local estimate will be once both
+            // requests below have each spent a token (4 - 1 - 1 = 2) — but neither must raise it,
+            // since a second request is still outstanding when the first response is adopted.
+            val responseA = flow {
+                delay(1.seconds)
 
-                // ----- Act -----
-                // 2 cost-1 probes: only 1 passes free if availableTokens stayed at 2, not 3
-                interceptor.intercept(
-                    baseRequest,
-                    chain,
-                ).collect {}
-                val timeAfterOneProbe = testScheduler.currentTime
-                interceptor.intercept(
-                    baseRequest,
-                    chain,
-                ).collect {}
-
-                // ----- Assert -----
-                timeAfterOneProbe shouldBe baselineTime + 1_000L
-                testScheduler.currentTime shouldBe baselineTime + 2_000L
-
-                jobB.cancel()
-                jobA.join()
-            }
-
-        @Test
-        fun `a higher remaining raises the estimate when no other request is outstanding, unblocking cold start`() =
-            runTest {
-                // ----- Arrange -----
-                val interceptor = buildInterceptor(
-                    fallbackBucketSize = 10,
-                    refillTokensPerSecond = 1.0,
-                    scheduler = testScheduler,
-                )
-                every {
-                    chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
-                } returns flowOf(
+                emit(
                     successResponseWith(
-                        limit = 10,
-                        remaining = 8,
+                        limit = 4,
+                        remaining = 3,
                     ),
                 )
-                // Cold start: exactly one request can go before any response arrives. It is also the
-                // only one outstanding, so its response's higher remaining=8 must be trusted upward.
-                interceptor.intercept(
-                    baseRequest,
-                    chain,
-                ).collect {}
-                every {
-                    chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
-                } returns emptyFlow()
-                val baselineTime = testScheduler.currentTime
-
-                // ----- Act -----
-                // a follow-up request must proceed without waiting for refill, proving
-                // availableTokens rose to 8, not the pre-adoption 1
-                interceptor.intercept(
-                    baseRequest,
-                    chain,
-                ).collect {}
-
-                // ----- Assert -----
-                testScheduler.currentTime shouldBe baselineTime
             }
+
+            val responseB = flow {
+                delay(10.seconds)
+
+                emit(
+                    successResponseWith(
+                        limit = 4,
+                        remaining = 3,
+                    ),
+                )
+            }
+
+            every {
+                chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
+            } returnsMany listOf(responseA, responseB)
+
+            // ----- Act -----
+            // both acquire instantly (avail 4 -> 2) and go in flight together
+            val jobA = launch {
+                interceptor.intercept(
+                    baseRequest,
+                    chain,
+                ).collect {}
+            }
+
+            val jobB = launch {
+                interceptor.intercept(
+                    baseRequest,
+                    chain,
+                ).collect {}
+            }
+
+            runCurrent()
+            advanceTimeBy(1.seconds)
+            runCurrent() // responseA lands and is adopted while B is still outstanding (inFlight == 2)
+
+            every {
+                chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
+            } returns emptyFlow()
+
+            // ----- Act -----
+            // 2 cost-1 probes: only 1 passes free if availableTokens stayed at 2, not 3
+            interceptor.intercept(
+                baseRequest,
+                chain,
+            ).collect {}
+
+            val timeAfterOneProbe = testScheduler.currentTime
+
+            interceptor.intercept(
+                baseRequest,
+                chain,
+            ).collect {}
+
+            // ----- Assert -----
+            timeAfterOneProbe shouldBe baselineTime + 1_000L
+            testScheduler.currentTime shouldBe baselineTime + 2_000L
+
+            jobB.cancel()
+            jobA.join()
+        }
+
+        @Test
+        fun `a higher remaining raises the estimate when no other request is outstanding, unblocking cold start`() = runTest {
+            // ----- Arrange -----
+            val interceptor = buildInterceptor(
+                fallbackBucketSize = 10,
+                refillTokensPerSecond = 1.0,
+                scheduler = testScheduler,
+            )
+
+            every {
+                chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
+            } returns flowOf(
+                successResponseWith(
+                    limit = 10,
+                    remaining = 8,
+                ),
+            )
+
+            // Cold start: exactly one request can go before any response arrives. It is also the
+            // only one outstanding, so its response's higher remaining=8 must be trusted upward.
+            interceptor.intercept(
+                baseRequest,
+                chain,
+            ).collect {}
+
+            every {
+                chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
+            } returns emptyFlow()
+
+            val baselineTime = testScheduler.currentTime
+
+            // ----- Act -----
+            // a follow-up request must proceed without waiting for refill, proving
+            // availableTokens rose to 8, not the pre-adoption 1
+            interceptor.intercept(
+                baseRequest,
+                chain,
+            ).collect {}
+
+            // ----- Assert -----
+            testScheduler.currentTime shouldBe baselineTime
+        }
 
         @Test
         fun `a lower remaining is adopted even while another request is still outstanding`() = runTest {
@@ -679,14 +734,17 @@ class RateLimitInterceptorTest {
                 refillTokensPerSecond = 1.0,
                 scheduler = testScheduler,
             )
+
             seedCeilingAndSaturate(
                 interceptor,
                 ceiling = 8,
             )
+
             val baselineTime = testScheduler.currentTime
 
             val responseA = flow {
                 delay(1.seconds)
+
                 emit(
                     successResponseWith(
                         limit = 8,
@@ -694,8 +752,10 @@ class RateLimitInterceptorTest {
                     ),
                 )
             }
+
             val responseB = flow {
                 delay(10.seconds)
+
                 emit(
                     successResponseWith(
                         limit = 8,
@@ -703,6 +763,7 @@ class RateLimitInterceptorTest {
                     ),
                 )
             }
+
             every {
                 chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
             } returnsMany listOf(responseA, responseB)
@@ -715,12 +776,14 @@ class RateLimitInterceptorTest {
                     chain,
                 ).collect {}
             }
+
             val jobB = launch {
                 interceptor.intercept(
                     baseRequest,
                     chain,
                 ).collect {}
             }
+
             runCurrent()
             advanceTimeBy(1.seconds)
             runCurrent() // responseA lands and lowers availableTokens to 1 while B is still outstanding
@@ -744,139 +807,150 @@ class RateLimitInterceptorTest {
         }
 
         @Test
-        fun `inFlight is decremented even when the response flow fails, so upward adoption still works afterward`() =
-            runTest {
-                // ----- Arrange -----
-                val interceptor = buildInterceptor(
-                    fallbackBucketSize = 10,
-                    refillTokensPerSecond = 1.0,
-                    scheduler = testScheduler,
-                )
-                seedCeilingAndSaturate(
-                    interceptor,
-                    ceiling = 4,
-                )
-                val baselineTime = testScheduler.currentTime
+        fun `inFlight is decremented even when the response flow fails, so upward adoption still works afterward`() = runTest {
+            // ----- Arrange -----
+            val interceptor = buildInterceptor(
+                fallbackBucketSize = 10,
+                refillTokensPerSecond = 1.0,
+                scheduler = testScheduler,
+            )
 
-                val failingResponse = flow<ApolloResponse<GetUserBookListsQuery.Data>> {
-                    throw RuntimeException("network error")
-                }
-                every {
-                    chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
-                } returns failingResponse
+            seedCeilingAndSaturate(
+                interceptor,
+                ceiling = 4,
+            )
 
-                // ----- Act -----
-                // the response flow fails; inFlight must still be decremented back to 0
-                runCatching {
-                    interceptor.intercept(
-                        baseRequest,
-                        chain,
-                    ).collect {}
-                }
+            val baselineTime = testScheduler.currentTime
 
-                // ----- Act -----
-                // a solo request with a higher reported remaining must still be trusted
-                // upward; if the earlier failure had leaked inFlight, this would wrongly stay
-                // untrusted
-                every {
-                    chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
-                } returns flowOf(
-                    successResponseWith(
-                        limit = 4,
-                        remaining = 4,
-                    ),
-                )
-                interceptor.intercept(
-                    baseRequest,
-                    chain,
-                ).collect {}
-                every {
-                    chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
-                } returns emptyFlow()
-
-                // ----- Act -----
-                // two more cost-1 probes: only possible free if availableTokens rose to 4
-                interceptor.intercept(
-                    baseRequest,
-                    chain,
-                ).collect {}
-                interceptor.intercept(
-                    baseRequest,
-                    chain,
-                ).collect {}
-
-                // ----- Assert -----
-                // nothing above ever needed to wait
-                testScheduler.currentTime shouldBe baselineTime
+            val failingResponse = flow<ApolloResponse<GetUserBookListsQuery.Data>> {
+                throw RuntimeException("network error")
             }
+
+            every {
+                chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
+            } returns failingResponse
+
+            // ----- Act -----
+            // the response flow fails; inFlight must still be decremented back to 0
+            runCatching {
+                interceptor.intercept(
+                    baseRequest,
+                    chain,
+                ).collect {}
+            }
+
+            // ----- Act -----
+            // a solo request with a higher reported remaining must still be trusted
+            // upward; if the earlier failure had leaked inFlight, this would wrongly stay
+            // untrusted
+            every {
+                chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
+            } returns flowOf(
+                successResponseWith(
+                    limit = 4,
+                    remaining = 4,
+                ),
+            )
+
+            interceptor.intercept(
+                baseRequest,
+                chain,
+            ).collect {}
+
+            every {
+                chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
+            } returns emptyFlow()
+
+            // ----- Act -----
+            // two more cost-1 probes: only possible free if availableTokens rose to 4
+            interceptor.intercept(
+                baseRequest,
+                chain,
+            ).collect {}
+
+            interceptor.intercept(
+                baseRequest,
+                chain,
+            ).collect {}
+
+            // ----- Assert -----
+            // nothing above ever needed to wait
+            testScheduler.currentTime shouldBe baselineTime
+        }
 
         @Test
-        fun `inFlight is decremented even when the response flow is cancelled, so upward adoption still works afterward`() =
-            runTest {
-                // ----- Arrange -----
-                val interceptor = buildInterceptor(
-                    fallbackBucketSize = 10,
-                    refillTokensPerSecond = 1.0,
-                    scheduler = testScheduler,
-                )
-                seedCeilingAndSaturate(
-                    interceptor,
-                    ceiling = 4,
-                )
-                val baselineTime = testScheduler.currentTime
+        fun `inFlight is decremented even when the response flow is cancelled, so upward adoption still works afterward`() = runTest {
+            // ----- Arrange -----
+            val interceptor = buildInterceptor(
+                fallbackBucketSize = 10,
+                refillTokensPerSecond = 1.0,
+                scheduler = testScheduler,
+            )
 
-                val neverCompletingResponse = flow<ApolloResponse<GetUserBookListsQuery.Data>> {
-                    delay(100_000.seconds) // never arrives before the job below is cancelled
-                }
-                every {
-                    chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
-                } returns neverCompletingResponse
+            seedCeilingAndSaturate(
+                interceptor,
+                ceiling = 4,
+            )
 
-                // ----- Act -----
-                // acquire a token and go in flight, then cancel before any response arrives
-                val job = launch {
-                    interceptor.intercept(
-                        baseRequest,
-                        chain,
-                    ).collect {}
-                }
-                runCurrent()
-                job.cancelAndJoin()
+            val baselineTime = testScheduler.currentTime
 
-                // ----- Act -----
-                // a solo request with a higher reported remaining must still be trusted
-                // upward; if cancellation had leaked inFlight, this would wrongly stay untrusted
-                every {
-                    chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
-                } returns flowOf(
-                    successResponseWith(
-                        limit = 4,
-                        remaining = 4,
-                    ),
-                )
-                interceptor.intercept(
-                    baseRequest,
-                    chain,
-                ).collect {}
-                every {
-                    chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
-                } returns emptyFlow()
-
-                // ----- Act -----
-                // two more cost-1 probes: only possible free if availableTokens rose to 4
-                interceptor.intercept(
-                    baseRequest,
-                    chain,
-                ).collect {}
-                interceptor.intercept(
-                    baseRequest,
-                    chain,
-                ).collect {}
-
-                // ----- Assert -----
-                // nothing above ever needed to wait
-                testScheduler.currentTime shouldBe baselineTime
+            val neverCompletingResponse = flow<ApolloResponse<GetUserBookListsQuery.Data>> {
+                delay(100_000.seconds) // never arrives before the job below is cancelled
             }
+
+            every {
+                chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
+            } returns neverCompletingResponse
+
+            // ----- Act -----
+            // acquire a token and go in flight, then cancel before any response arrives
+            val job = launch {
+                interceptor.intercept(
+                    baseRequest,
+                    chain,
+                ).collect {}
+            }
+
+            runCurrent()
+            job.cancelAndJoin()
+
+            // ----- Act -----
+            // a solo request with a higher reported remaining must still be trusted
+            // upward; if cancellation had leaked inFlight, this would wrongly stay untrusted
+            every {
+                chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
+            } returns flowOf(
+                successResponseWith(
+                    limit = 4,
+                    remaining = 4,
+                ),
+            )
+
+            interceptor.intercept(
+                baseRequest,
+                chain,
+            ).collect {}
+
+            every {
+                chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
+            } returns emptyFlow()
+
+            // ----- Act -----
+            // two more cost-1 probes: only possible free if availableTokens rose to 4
+            interceptor.intercept(
+                baseRequest,
+                chain,
+            ).collect {}
+
+            interceptor.intercept(
+                baseRequest,
+                chain,
+            ).collect {}
+
+            // ----- Assert -----
+            // nothing above ever needed to wait
+            testScheduler.currentTime shouldBe baselineTime
+        }
 
         @Test
         fun `adoption raises the ceiling so refill can accumulate beyond the fallback size`() = runTest {
@@ -886,16 +960,20 @@ class RateLimitInterceptorTest {
                 refillTokensPerSecond = 1.0,
                 scheduler = testScheduler,
             )
+
             every {
                 chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
             } returns flowOf(successResponseWithHeaders(rateLimitHeaders(limit = 10)))
+
             interceptor.intercept(
                 baseRequest,
                 chain,
             ).collect {} // raises the ceiling to 10
+
             every {
                 chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
             } returns emptyFlow()
+
             advanceTimeBy(20.seconds)
 
             // ----- Act -----
@@ -906,7 +984,9 @@ class RateLimitInterceptorTest {
                     chain,
                 ).collect {}
             }
+
             val timeAfterNineFreeCalls = testScheduler.currentTime
+
             interceptor.intercept(
                 baseRequest,
                 chain,
@@ -925,10 +1005,12 @@ class RateLimitInterceptorTest {
                 refillTokensPerSecond = 1.0,
                 scheduler = testScheduler,
             )
+
             seedCeilingAndSaturate(
                 interceptor,
                 ceiling = 9,
             ) // headroom so only a hold could delay the next call
+
             val baselineTime = testScheduler.currentTime
 
             every {
@@ -940,10 +1022,12 @@ class RateLimitInterceptorTest {
                     retryAfterSeconds = 5,
                 ),
             )
+
             interceptor.intercept(
                 baseRequest,
                 chain,
             ).collect {} // 200 with Retry-After: 5 — must not hold
+
             every {
                 chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
             } returns emptyFlow()
@@ -967,10 +1051,12 @@ class RateLimitInterceptorTest {
                 refillTokensPerSecond = 1.0,
                 scheduler = testScheduler,
             )
+
             seedCeilingAndSaturate(
                 interceptor,
                 ceiling = 10,
             )
+
             val baselineTime = testScheduler.currentTime
 
             every {
@@ -981,10 +1067,12 @@ class RateLimitInterceptorTest {
                     remaining = 8,
                 ),
             )
+
             interceptor.intercept(
                 baseRequest,
                 chain,
             ).collect {} // 429, no Retry-After: zeroes credit, sets no hold
+
             every {
                 chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
             } returns emptyFlow()
@@ -1008,6 +1096,7 @@ class RateLimitInterceptorTest {
                 refillTokensPerSecond = 5.0,
                 scheduler = testScheduler,
             )
+
             every {
                 chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
             } returns flowOf(
@@ -1024,6 +1113,7 @@ class RateLimitInterceptorTest {
                 baseRequest,
                 chain,
             ).collect {}
+
             every {
                 chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
             } returns emptyFlow()
@@ -1047,10 +1137,12 @@ class RateLimitInterceptorTest {
                 refillTokensPerSecond = 1.0,
                 scheduler = testScheduler,
             )
+
             seedCeilingAndSaturate(
                 interceptor,
                 ceiling = 10,
             )
+
             val baselineTime = testScheduler.currentTime
 
             every {
@@ -1061,11 +1153,13 @@ class RateLimitInterceptorTest {
                     remaining = 1,
                 ),
             )
+
             // This is the exact scenario that produced the real 429: the server reports one token left.
             interceptor.intercept(
                 baseRequest,
                 chain,
             ).collect {}
+
             every {
                 chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
             } returns emptyFlow()
@@ -1081,38 +1175,40 @@ class RateLimitInterceptorTest {
         }
 
         @Test
-        fun `a ceiling of one still lets a cost-1 request complete instead of hanging on an unsatisfiable reserve`() =
-            runTest {
-                // ----- Arrange -----
-                val interceptor = buildInterceptor(
-                    fallbackBucketSize = 10,
-                    refillTokensPerSecond = 1.0,
-                    scheduler = testScheduler,
-                )
-                every {
-                    chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
-                } returns flowOf(tooManyRequestsResponse(rateLimitHeaders(limit = 1)))
-                // Cold-start credit covers this one; the response then drops the ceiling to 1 and zeroes credit.
-                interceptor.intercept(
-                    baseRequest,
-                    chain,
-                ).collect {}
-                every {
-                    chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
-                } returns emptyFlow()
+        fun `a ceiling of one still lets a cost-1 request complete instead of hanging on an unsatisfiable reserve`() = runTest {
+            // ----- Arrange -----
+            val interceptor = buildInterceptor(
+                fallbackBucketSize = 10,
+                refillTokensPerSecond = 1.0,
+                scheduler = testScheduler,
+            )
 
-                // ----- Act -----
-                // cost(1) + RESERVED_TOKENS(1) can never fit under a ceiling of 1, so the reserve
-                // must be dropped, or this would wait forever
-                interceptor.intercept(
-                    baseRequest,
-                    chain,
-                ).collect {}
+            every {
+                chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
+            } returns flowOf(tooManyRequestsResponse(rateLimitHeaders(limit = 1)))
 
-                // ----- Assert -----
-                // it completes, not just "is delayed"
-                testScheduler.currentTime shouldBe 1_000L
-            }
+            // Cold-start credit covers this one; the response then drops the ceiling to 1 and zeroes credit.
+            interceptor.intercept(
+                baseRequest,
+                chain,
+            ).collect {}
+
+            every {
+                chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
+            } returns emptyFlow()
+
+            // ----- Act -----
+            // cost(1) + RESERVED_TOKENS(1) can never fit under a ceiling of 1, so the reserve
+            // must be dropped, or this would wait forever
+            interceptor.intercept(
+                baseRequest,
+                chain,
+            ).collect {}
+
+            // ----- Assert -----
+            // it completes, not just "is delayed"
+            testScheduler.currentTime shouldBe 1_000L
+        }
 
         @Test
         fun `a server-reported limit of 0 still lets a cost-1 request complete instead of hanging`() = runTest {
@@ -1122,15 +1218,18 @@ class RateLimitInterceptorTest {
                 refillTokensPerSecond = 1.0,
                 scheduler = testScheduler,
             )
+
             every {
                 chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
             } returns flowOf(tooManyRequestsResponse(rateLimitHeaders(limit = 0)))
+
             // Cold-start credit covers this one; the response then floors the ceiling at 1 (not 0) and
             // zeroes credit — a ceiling of 0 would leave refill unable to reach even a 1-token cost.
             interceptor.intercept(
                 baseRequest,
                 chain,
             ).collect {}
+
             every {
                 chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
             } returns emptyFlow()
@@ -1163,6 +1262,7 @@ class RateLimitInterceptorTest {
                     baseRequest,
                     chain,
                 ).collect {}
+
                 val timeAfterOneFreeCall = testScheduler.currentTime
 
                 // ----- Act -----

@@ -15,10 +15,10 @@ internal class FocusModeScreenModel(
     dispatchers: AppDispatchers,
     flows: List<FocusModeCollector>,
 ) : ToadScreenModel<FocusModeUiState, FocusModeEvent, FocusModeDependencies, FocusModeCollector, LocalFocusModeVariables>(
-    initializers = flows,
-    initialState = FocusModeUiState(),
-    initialLocalVariables = LocalFocusModeVariables(),
-) {
+        initializers = flows,
+        initialState = FocusModeUiState(),
+        initialLocalVariables = LocalFocusModeVariables(),
+    ) {
     override val dependencies: FocusModeDependencies = FocusModeDependencies(
         activeSessionController = activeSessionController,
         coroutineScope = screenModelScope,

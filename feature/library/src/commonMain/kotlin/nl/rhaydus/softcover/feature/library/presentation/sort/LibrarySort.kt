@@ -18,6 +18,7 @@ private inline fun <T, K : Comparable<K>> List<T>.sortedByCachedKey(
     // `selector` returns a non-null K, so the key cache needs no nullable slots — which is what let the
     // previous array-of-nulls version reach for `!!` and two unchecked casts to undo its own erasure.
     val keys = ArrayList<K>(size)
+
     for (item in this) {
         keys += selector(item)
     }
@@ -26,6 +27,7 @@ private inline fun <T, K : Comparable<K>> List<T>.sortedByCachedKey(
     indices.sortWith(Comparator { a, b -> keys[a].compareTo(keys[b]) })
 
     val result = ArrayList<T>(size)
+
     for (index in indices) {
         result.add(this[index])
     }
@@ -52,11 +54,13 @@ internal fun List<BookEdition>.applyEditionSort(
         LibrarySortMode.TITLE -> sortedByCachedKey { it.title.orEmpty().lowercase() }
         LibrarySortMode.AUTHOR -> sortedByCachedKey { it.firstAuthor() }
         LibrarySortMode.PAGE_COUNT -> sortedByCachedKey { it.pages ?: 0 }
-        LibrarySortMode.RELEASE_DATE -> sortedByCachedKey { it.releaseDate ?: LocalDate(
-            9999,
-            12,
-            31,
-        ) }
+        LibrarySortMode.RELEASE_DATE -> sortedByCachedKey {
+            it.releaseDate ?: LocalDate(
+                9999,
+                12,
+                31,
+            )
+        }
         LibrarySortMode.DATE_ADDED -> sortedByCachedKey {
             addedAtByEditionId[it.id] ?: MISSING_ADDED_AT_SENTINEL
         }
@@ -66,7 +70,7 @@ internal fun List<BookEdition>.applyEditionSort(
         LibrarySortMode.DEADLINE_URGENCY,
         LibrarySortMode.MANUAL,
         LibrarySortMode.ORDER,
-            -> return this
+        -> return this
     }
 
     return if (direction == SortDirection.ASCENDING) ascending else ascending.asReversed()

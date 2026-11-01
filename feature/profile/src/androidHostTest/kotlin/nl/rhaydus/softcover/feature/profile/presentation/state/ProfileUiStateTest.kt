@@ -39,6 +39,7 @@ class ProfileUiStateTest {
                     unknownCount = 0,
                 ),
             )
+
             val state = ProfileUiState(
                 readingLife = readingLifeWith(demographics),
                 hideUntaggedAuthors = false,
@@ -67,6 +68,7 @@ class ProfileUiStateTest {
                     unknownCount = 0,
                 ),
             )
+
             val state = ProfileUiState(
                 readingLife = readingLifeWith(demographics),
                 hideUntaggedAuthors = false,
@@ -95,6 +97,7 @@ class ProfileUiStateTest {
                     unknownCount = 0,
                 ),
             )
+
             val state = ProfileUiState(
                 readingLife = readingLifeWith(demographics),
                 hideUntaggedAuthors = true,
@@ -148,6 +151,7 @@ class ProfileUiStateTest {
                 ratingStars = 5.0,
                 monthLabel = "May",
             )
+
             val state = ProfileUiState(readingLife = readingLifeLoving(listOf(loved)))
 
             // ----- Act -----

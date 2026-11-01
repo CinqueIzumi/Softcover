@@ -20,6 +20,7 @@ internal fun recordProgress(
     val actionAt = scope.currentState.readAt.toActionAt()
 
     scope.currentLocalVariables.mutationJob?.cancel()
+
     scope.setLocalVariables {
         it.copy(
             finishedBookId = null,
@@ -40,10 +41,10 @@ internal fun recordProgress(
                 }
             }
             .onFailure { error ->
-            scope.setLocalVariables { it.copy(writeFailed = true) }
+                scope.setLocalVariables { it.copy(writeFailed = true) }
 
-            AppLog.e("$error")
-        }
+                AppLog.e("$error")
+            }
     }
 
     scope.setLocalVariables { it.copy(mutationJob = job) }

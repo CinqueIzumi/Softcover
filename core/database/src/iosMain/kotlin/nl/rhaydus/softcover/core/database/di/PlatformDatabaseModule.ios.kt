@@ -20,9 +20,8 @@ actual val platformDatabaseModule: Module = module {
     }
 }
 
-private fun documentsDirectory(): String =
-    NSSearchPathForDirectoriesInDomains(
-        directory = NSDocumentDirectory,
-        domainMask = NSUserDomainMask,
-        expandTilde = true,
-    ).first() as String
+private fun documentsDirectory(): String = NSSearchPathForDirectoriesInDomains(
+    directory = NSDocumentDirectory,
+    domainMask = NSUserDomainMask,
+    expandTilde = true,
+).first() as String

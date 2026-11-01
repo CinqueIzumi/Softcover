@@ -162,8 +162,10 @@ private fun RollStatNumber(
         targetState = if (model.isLoading) 0.0 else model.value,
         transitionSpec = {
             val direction = if (targetState >= initialState) 1 else -1
+
             val enter = slideInVertically(animationSpec = motionScheme.defaultSpatialSpec()) { it * direction } +
                 fadeIn(animationSpec = motionScheme.defaultEffectsSpec())
+
             val exit = slideOutVertically(animationSpec = motionScheme.defaultSpatialSpec()) { -it * direction } +
                 fadeOut(animationSpec = motionScheme.defaultEffectsSpec())
 

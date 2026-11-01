@@ -157,6 +157,7 @@ internal actual fun SettingsScreenLayout(
                         target = SettingsMenuRowTarget.SubPage(onClick = navigateToAppearanceSettings),
                     )
                 }
+
                 DividedRow {
                     SettingsMenuRow(
                         title = "Library tabs",
@@ -165,6 +166,7 @@ internal actual fun SettingsScreenLayout(
                         target = SettingsMenuRowTarget.SubPage(onClick = navigateToLibraryVisibility),
                     )
                 }
+
                 if (state.widgetsSupported) {
                     DividedRow {
                         SettingsMenuRow(
@@ -175,6 +177,7 @@ internal actual fun SettingsScreenLayout(
                         )
                     }
                 }
+
                 DividedRow {
                     SettingsMenuRow(
                         title = "Hidden suggestions",
@@ -200,6 +203,7 @@ internal actual fun SettingsScreenLayout(
                         target = SettingsMenuRowTarget.SubPage(onClick = navigateToAbout),
                     )
                 }
+
                 DividedRow {
                     SettingsMenuRow(
                         title = "What's new",
@@ -208,6 +212,7 @@ internal actual fun SettingsScreenLayout(
                         target = SettingsMenuRowTarget.SubPage(onClick = navigateToWhatsNew),
                     )
                 }
+
                 DividedRow {
                     SettingsMenuRow(
                         title = "Roadmap",

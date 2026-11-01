@@ -93,6 +93,7 @@ internal class MarkAsReadController(
         val targetId = slidingBookId ?: return
 
         slideProgress.snapTo(targetValue = 0f)
+
         slideProgress.animateTo(
             targetValue = 1f,
             animationSpec = slideSpec,
@@ -117,12 +118,11 @@ internal class MarkAsReadController(
 internal fun Modifier.markAsReadSlide(
     controller: MarkAsReadController,
     bookId: Int,
-): Modifier =
-    if (bookId == controller.slidingBookId) {
-        graphicsLayer {
-            translationY = controller.slideProgress.value * controller.slideDistancePx
-            alpha = 1f - controller.slideProgress.value
-        }
-    } else {
-        this
+): Modifier = if (bookId == controller.slidingBookId) {
+    graphicsLayer {
+        translationY = controller.slideProgress.value * controller.slideDistancePx
+        alpha = 1f - controller.slideProgress.value
     }
+} else {
+    this
+}

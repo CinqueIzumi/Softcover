@@ -38,6 +38,7 @@ class DeadlineProgressTest {
                 4,
                 20,
             )
+
             val deadline = buildDeadline(
                 deadlineDate = LocalDate(
                     2026,
@@ -71,6 +72,7 @@ class DeadlineProgressTest {
                 4,
                 20,
             )
+
             val deadline = buildDeadline(
                 deadlineDate = LocalDate(
                     2026,
@@ -104,6 +106,7 @@ class DeadlineProgressTest {
                 4,
                 20,
             )
+
             val deadline = buildDeadline(
                 deadlineDate = LocalDate(
                     2026,
@@ -137,6 +140,7 @@ class DeadlineProgressTest {
                 4,
                 20,
             )
+
             val deadline = buildDeadline(
                 deadlineDate = LocalDate(
                     2026,
@@ -171,6 +175,7 @@ class DeadlineProgressTest {
                 4,
                 20,
             )
+
             val deadline = buildDeadline(
                 deadlineDate = LocalDate(
                     2026,
@@ -202,6 +207,7 @@ class DeadlineProgressTest {
                 4,
                 20,
             )
+
             // Initial was 10/day; now behind — need more than 10/day
             val deadline = buildDeadline(
                 deadlineDate = LocalDate(
@@ -235,6 +241,7 @@ class DeadlineProgressTest {
                 4,
                 20,
             )
+
             val deadline = buildDeadline(
                 deadlineDate = LocalDate(
                     2026,
@@ -267,6 +274,7 @@ class DeadlineProgressTest {
                 4,
                 20,
             )
+
             val deadline = buildDeadline(
                 deadlineDate = LocalDate(
                     2026,
@@ -303,6 +311,7 @@ class DeadlineProgressTest {
                 4,
                 20,
             )
+
             val deadline = buildDeadline(
                 deadlineDate = LocalDate(
                     2026,
@@ -334,6 +343,7 @@ class DeadlineProgressTest {
                 4,
                 20,
             )
+
             val deadline = buildDeadline(
                 deadlineDate = LocalDate(
                     2026,
@@ -366,6 +376,7 @@ class DeadlineProgressTest {
                 4,
                 20,
             )
+
             val deadline = buildDeadline(
                 deadlineDate = LocalDate(
                     2026,
@@ -399,6 +410,7 @@ class DeadlineProgressTest {
                 4,
                 20,
             )
+
             val deadline = buildDeadline(
                 deadlineDate = LocalDate(
                     2026,

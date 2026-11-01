@@ -67,7 +67,10 @@ internal actual fun FocusModeScreenLayout(
                     .fillMaxWidth()
                     .widthIn(max = 440.dp)
                     .verticalScroll(scrollState)
-                    .padding(horizontal = Spacing.gutter, vertical = Spacing.xxxl),
+                    .padding(
+                        horizontal = Spacing.gutter,
+                        vertical = Spacing.xxxl,
+                    ),
             )
 
             DesktopVerticalScrollbar(

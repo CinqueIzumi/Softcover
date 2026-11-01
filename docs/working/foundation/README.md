@@ -15,33 +15,23 @@ filed before step 4. Every step boundary leaves both builds green. Sibling files
 
 ## Now
 
-- **State:** steps 1-3 and step 4 waves 1-3 are done, and so is wave 4 box 1 (F68: `RhaydusMorphingButton`
-  in `designsystem-core`, foundation `d310a3a`, Softcover `fcf93c084`). The same commits make
-  `RhaydusIconResource` `@Immutable` (its `Custom(Painter)` variant is gone; nav icons come from
-  `navIconFor` in `orchestration/.../NavDestinations.kt`), so icon-taking foundation buttons are skippable.
-  The ktlint `indent` sweep prerequisite is built: `rhaydusKtLintEngine()` (`ktlint-rules`) adds ktlint's
-  standard `IndentationRule`, force-enabled through `editorConfigOverride` so a tree's
-  `ktlint_standard = disabled` cannot switch it off; `RhaydusKtLintEngineTest` covers it. The new
-  `ExpressionOnEqualsLineRule` (`rhaydus:expression-on-equals-line`) joins a multi-line right-hand side onto
-  its `=` line (properties, expression bodies, named args, assignments, default params, accessors); the
-  foundation is reformatted by it and `ExpressionOnEqualsLineRuleTest` covers it.
-- **Next:** Softcover's `ktlintFormat` sweep (which also clears the pending `statement-paragraph` /
-  `multi-arg-wrapping` hits), then the F65 suppression audit, then the step 4 "Docs and memory" box plus
-  marking F66 as split. Step 5's pointer box moves Softcover's `README.md` foundation line and the managed
-  `CLAUDE.md` block (re-run `rhaydus-adopt`) from 0.3.2 to 0.4.0.
-- **Open questions:** the formatter wraps a call inside an `if` condition into a glommed
-  `if (foo(` … `)) {`. The sweep must hoist such calls into a named `val`, as the foundation's
-  `SnackBarManager` / `CheckDocBudgetsTask` now do. The user's Medium_Phone pass is pending and does not
-  block step 4. It covers the widget repaint on a time-zone change, the Explore, Reading mark-as-read swipe
-  and Settings rows, the deadline date picker and skeleton loading states, the count-up and chart motion,
-  and the nav icons (bars, rail, sidebar) after the `navIconFor` change.
-- **Verification:** foundation `ktlintFormat` converges and `check` is green, including
-  `RhaydusKtLintEngineTest` (4 tests) and `ExpressionOnEqualsLineRuleTest`. Both review rounds' findings are
-  fixed. Softcover `ktlintCheck` still fails until the sweep; the sweep also clears its 68 dangling-`=` sites.
-- **Uncommitted:** in the foundation, the indent rule and `ExpressionOnEqualsLineRule` (new `ktlint-rules`
-  files, about 20 reformatted sources, docs). In Softcover, the two F68 close-out fixes (staged), the `.editorconfig` comment and this
-  tracker doc. Not pushed: the foundation since `398f68c`, Softcover since `68dd22e4e`; push the
-  foundation first.
+- **State:** steps 1-3 and step 4 waves 1-3 are done, plus wave 4 box 1 (F68), the ktlint prerequisites
+  (foundation `08c6a86` + `de57ab2`, Softcover `17bcc1421`) and Softcover's `ktlintFormat` sweep under the
+  `indent` and `expression-on-equals-line` rules (935 files). The sweep converged in one pass; the one glommed
+  `if (isRangeMarked(` site (`RichTextEditing.kt`) is hoisted into `val rangeMarked`, and the
+  `if (run.x) put(` sites in `ReviewSlateMapper.kt` are braced.
+- **Next:** the F65 suppression audit. After it, in sequence: the step 4 "Docs and memory" box plus marking F66
+  as split, and step 5 (pointer box moves Softcover's `README.md` foundation line and the managed `CLAUDE.md`
+  block from 0.3.2 to 0.4.0).
+- **Open questions:** none. The user's Medium_Phone pass is pending and does not block step 4. It covers the
+  widget repaint on a time-zone change, the Explore, Reading mark-as-read swipe and Settings rows, the deadline
+  date picker and skeleton loading states, the count-up and chart motion, and the nav icons (bars, rail,
+  sidebar) after the `navIconFor` change.
+- **Verification:** Softcover `styleCheck` and `compileKotlinJvm` are green after the sweep. The reviewer found
+  no behaviour change, no stacked closers and no dangling `=` before a multi-line call (the single-call
+  `val userBookEntry =` / `mockk<...>()` wrap in `BooksRemoteDataSourceImplTest` stays; the rule allows it).
+- **Uncommitted:** the sweep (935 Kotlin files) and this tracker doc. Not pushed: the foundation since
+  `398f68c`, Softcover since `68dd22e4e`; push the foundation first.
 
 ## How to run a step
 

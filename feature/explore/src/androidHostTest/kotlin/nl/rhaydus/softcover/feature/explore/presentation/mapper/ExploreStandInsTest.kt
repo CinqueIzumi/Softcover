@@ -13,20 +13,19 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class ExploreStandInsTest {
-    private fun BookCardUiModel.standInCover(): CoverUiModel =
-        when (val variant = variant) {
-            is BookCardVariant.Column -> variant.cover.shouldNotBeNull().model
+    private fun BookCardUiModel.standInCover(): CoverUiModel = when (val variant = variant) {
+        is BookCardVariant.Column -> variant.cover.shouldNotBeNull().model
 
-            is BookCardVariant.CoverOnly -> variant.cover.model
+        is BookCardVariant.CoverOnly -> variant.cover.model
 
-            is BookCardVariant.Row -> when (val lead = variant.lead) {
-                is BookCardLead.Cover -> lead.cover.model
+        is BookCardVariant.Row -> when (val lead = variant.lead) {
+            is BookCardLead.Cover -> lead.cover.model
 
-                is BookCardLead.SeriesStack -> lead.front
+            is BookCardLead.SeriesStack -> lead.front
 
-                else -> error("Unexpected stand-in lead $lead")
-            }
+            else -> error("Unexpected stand-in lead $lead")
         }
+    }
 
     private val standInLists: Map<String, ImmutableList<BookCardUiModel>> = mapOf(
         "trending" to TRENDING_STAND_IN_CARDS,
@@ -47,6 +46,7 @@ class ExploreStandInsTest {
             // ----- Act & Assert -----
             lists.forEach { cards ->
                 cards.shouldNotBeEmpty()
+
                 cards.forEach { card ->
                     val cover = card.standInCover()
 

@@ -30,15 +30,18 @@ class RefreshReadingActivityUseCase(
         activityRefreshGate.runOnce {
             val userId = getUserIdUseCase().getOrThrow()
             val today = clock.todayIn(timeZone)
+
             val windowStart = today.minus(
                 READING_ACTIVITY_WINDOW_DAYS - 1,
                 DateTimeUnit.DAY,
             )
+
             val (streakDays, recentReadingDays) = collectProfileDays(
                 userId = userId,
                 today = today,
                 windowStart = windowStart,
             )
+
             val readingStreak = computeStreak(
                 days = streakDays,
                 today = today,
@@ -92,6 +95,7 @@ class RefreshReadingActivityUseCase(
         today: LocalDate,
     ): Boolean {
         val oldest = days.min()
+
         val firstMissing = firstMissingDayWalkingBack(
             days = days,
             today = today,
@@ -129,6 +133,7 @@ class RefreshReadingActivityUseCase(
 
         while (cursor in days) {
             streak++
+
             cursor = cursor.minus(
                 1,
                 DateTimeUnit.DAY,

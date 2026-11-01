@@ -56,6 +56,7 @@ fun SectionHeader(
             model = model,
             modifier = modifier,
         )
+
         return
     }
 

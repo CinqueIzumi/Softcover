@@ -32,15 +32,19 @@ class QuotesRefreshCollectorTest {
     @BeforeEach
     fun setUp() {
         refreshBookQuotesUseCase = mockk()
+
         coEvery {
             refreshBookQuotesUseCase(bookId = any())
         } returns Result.success(Unit)
+
         stateFlow = MutableStateFlow(buildBookDetailUiState(bookId = 7))
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk<BookDetailDependencies>(relaxed = true).also {
             every {
                 it.refreshBookQuotesUseCase
@@ -60,22 +64,21 @@ class QuotesRefreshCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `refreshes the book's quotes when a shelved book shows the Yours lens`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                stateFlow.value = buildBookDetailUiState(bookId = 7).copy(
-                    book = buildQuoteBook(),
-                    selectedLens = BookDetailLens.YOURS,
-                )
+        fun `refreshes the book's quotes when a shelved book shows the Yours lens`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = buildBookDetailUiState(bookId = 7).copy(
+                book = buildQuoteBook(),
+                selectedLens = BookDetailLens.YOURS,
+            )
 
-                // ----- Act -----
-                launchCollector()
+            // ----- Act -----
+            launchCollector()
 
-                // ----- Assert -----
-                coVerify(exactly = 1) {
-                    refreshBookQuotesUseCase(bookId = 7)
-                }
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                refreshBookQuotesUseCase(bookId = 7)
             }
+        }
 
         @Test
         fun `waits while the book lens is showing`() = runTest(UnconfinedTestDispatcher()) {
@@ -118,6 +121,7 @@ class QuotesRefreshCollectorTest {
                 book = buildQuoteBook(),
                 selectedLens = BookDetailLens.THE_BOOK,
             )
+
             launchCollector()
 
             // ----- Act -----
@@ -130,23 +134,23 @@ class QuotesRefreshCollectorTest {
         }
 
         @Test
-        fun `does not refresh again when the reader returns to the Yours lens`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                stateFlow.value = buildBookDetailUiState(bookId = 7).copy(
-                    book = buildQuoteBook(),
-                    selectedLens = BookDetailLens.YOURS,
-                )
-                launchCollector()
-                stateFlow.value = stateFlow.value.copy(selectedLens = BookDetailLens.THE_BOOK)
+        fun `does not refresh again when the reader returns to the Yours lens`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = buildBookDetailUiState(bookId = 7).copy(
+                book = buildQuoteBook(),
+                selectedLens = BookDetailLens.YOURS,
+            )
 
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(selectedLens = BookDetailLens.YOURS)
+            launchCollector()
+            stateFlow.value = stateFlow.value.copy(selectedLens = BookDetailLens.THE_BOOK)
 
-                // ----- Assert -----
-                coVerify(exactly = 1) {
-                    refreshBookQuotesUseCase(bookId = 7)
-                }
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(selectedLens = BookDetailLens.YOURS)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                refreshBookQuotesUseCase(bookId = 7)
             }
+        }
     }
 }

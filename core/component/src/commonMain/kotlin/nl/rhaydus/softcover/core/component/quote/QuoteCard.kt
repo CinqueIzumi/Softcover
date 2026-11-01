@@ -53,7 +53,10 @@ fun QuoteCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = glyphAlpha),
                 modifier = Modifier
                     .align(Alignment.TopStart)
-                    .padding(start = Spacing.md, top = Spacing.xxs),
+                    .padding(
+                        start = Spacing.md,
+                        top = Spacing.xxs,
+                    ),
             )
 
             Column(

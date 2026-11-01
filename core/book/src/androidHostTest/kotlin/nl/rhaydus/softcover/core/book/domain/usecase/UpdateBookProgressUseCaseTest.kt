@@ -22,9 +22,11 @@ class UpdateBookProgressUseCaseTest {
     fun setUp() {
         repository = mockk()
         markReadingActivityUseCase = mockk()
+
         coEvery {
             markReadingActivityUseCase(any())
         } returns Unit
+
         useCase = UpdateBookProgressUseCase(
             repository = repository,
             markReadingActivityUseCase = markReadingActivityUseCase,
@@ -59,12 +61,14 @@ class UpdateBookProgressUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+
             coVerify(exactly = 1) {
                 repository.updateBookProgress(
                     book = inputBook,
                     newPage = newPage,
                 )
             }
+
             coVerify(exactly = 1) { repository.cacheBook(book = updatedBook) }
             coVerify(exactly = 1) { markReadingActivityUseCase(any()) }
         }
@@ -98,6 +102,7 @@ class UpdateBookProgressUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+
             coVerify(exactly = 1) {
                 repository.updateBookProgress(
                     book = inputBook,
@@ -105,6 +110,7 @@ class UpdateBookProgressUseCaseTest {
                     actionAt = actionAt,
                 )
             }
+
             coVerify(exactly = 1) { markReadingActivityUseCase(actionAt) }
         }
 

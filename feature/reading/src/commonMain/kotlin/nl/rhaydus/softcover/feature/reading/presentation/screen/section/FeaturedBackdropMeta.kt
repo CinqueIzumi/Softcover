@@ -40,6 +40,7 @@ internal fun FeaturedBackdropMeta(
         ),
         blurRadius = 14f,
     )
+
     val foreground = MaterialTheme.colorScheme.onSurface
 
     Column(modifier = modifier) {

@@ -66,18 +66,22 @@ internal fun BookCardCoverLayout(
 
     val scheme = MaterialTheme.colorScheme
     val motionScheme = MaterialTheme.motionScheme
+
     val coverAlpha by animateFloatAsState(
         targetValue = if (selection?.dimsUnselected == true) 0.55f else 1f,
         animationSpec = motionScheme.slowEffectsSpec(),
     )
+
     val coverScale by animateFloatAsState(
         targetValue = if (selected) 0.92f else 1f,
         animationSpec = motionScheme.defaultSpatialSpec(),
     )
+
     val liftProgress by animateFloatAsState(
         targetValue = if (lifted) 1f else 0f,
         animationSpec = motionScheme.defaultSpatialSpec(),
     )
+
     val ringFraction by animateFloatAsState(
         targetValue = if (selected) 1f else 0f,
         animationSpec = motionScheme.slowEffectsSpec(),

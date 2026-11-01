@@ -50,6 +50,7 @@ class BooksByStatusCollectorTest {
         enabledStatusesFlow = MutableStateFlow(UserBookStatus.entries.map { it.code }.toSet())
         booksByStatus = UserBookStatus.entries.associateWith { MutableStateFlow(emptyList()) }
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -194,6 +195,7 @@ class BooksByStatusCollectorTest {
                     direction = SortDirection.DESCENDING,
                 )
             }
+
             verify(exactly = 0) {
                 getSortedBooksByStatusUseCase(
                     status = UserBookStatus.WANT_TO_READ,
@@ -201,6 +203,7 @@ class BooksByStatusCollectorTest {
                     direction = any(),
                 )
             }
+
             job.cancel()
         }
     }

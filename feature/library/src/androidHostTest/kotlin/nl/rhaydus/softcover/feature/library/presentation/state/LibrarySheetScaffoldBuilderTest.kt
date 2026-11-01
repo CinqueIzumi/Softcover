@@ -106,6 +106,7 @@ class LibrarySheetScaffoldBuilderTest {
                 resultCount = noResults,
                 filtersActive = true,
             ).footer.shouldNotBeNull().primary.shouldNotBeNull().count
+
             val many = filterSheetScaffoldFor(
                 resultCount = manyResults,
                 filtersActive = true,
@@ -169,6 +170,7 @@ class LibrarySheetScaffoldBuilderTest {
                 bookCount = oneBook,
                 inProgress = false,
             )
+
             val many = bulkRemoveSheetScaffoldFor(
                 bookCount = manyBooks,
                 inProgress = false,
@@ -231,6 +233,7 @@ class LibrarySheetScaffoldBuilderTest {
             // ----- Arrange -----
             val visibleTabs = listOf(allTab, readingTab)
             val selectedTabId = allTab.id
+
             val tabStatsByTab = mapOf(
                 allTab.id to LibraryTabStats(
                     itemCount = 12,
@@ -254,6 +257,7 @@ class LibrarySheetScaffoldBuilderTest {
             // ----- Arrange -----
             val visibleTabs = listOf(allTab, readingTab, listTab)
             val selectedTabId = allTab.id
+
             val tabStatsByTab = mapOf(
                 allTab.id to LibraryTabStats(
                     itemCount = 12,

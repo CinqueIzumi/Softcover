@@ -125,6 +125,7 @@ class BookReviewMapperTest {
                 reviewSlate = slateWithText("A fine read."),
                 hasSpoilers = true,
             )
+
             stubUser()
 
             // ----- Act -----
@@ -158,6 +159,7 @@ class BookReviewMapperTest {
                 reviewSlate = slateWithText("No stars given."),
                 rating = null,
             )
+
             stubUser()
 
             // ----- Act -----
@@ -174,6 +176,7 @@ class BookReviewMapperTest {
                 reviewSlate = slateWithText("Timeless."),
                 reviewedAt = null,
             )
+
             stubUser()
 
             // ----- Act -----

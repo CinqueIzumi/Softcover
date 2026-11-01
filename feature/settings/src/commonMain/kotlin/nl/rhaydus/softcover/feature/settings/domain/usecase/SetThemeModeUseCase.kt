@@ -14,6 +14,7 @@ class SetThemeModeUseCase(
 ) {
     suspend operator fun invoke(mode: ThemeMode): Result<Unit> = runCatchingLogged {
         settingsRepository.setThemeMode(mode = mode)
+
         if (mode == ThemeMode.DIM) {
             settingsRepository.setDynamicColorEnabled(enabled = false)
         }

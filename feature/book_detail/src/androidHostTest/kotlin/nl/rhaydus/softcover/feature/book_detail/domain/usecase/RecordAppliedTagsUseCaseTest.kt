@@ -22,6 +22,7 @@ class RecordAppliedTagsUseCaseTest {
     fun setUp() {
         userTagVocabularyRepository = mockk()
         getUserIdUseCase = mockk()
+
         useCase = RecordAppliedTagsUseCase(
             userTagVocabularyRepository = userTagVocabularyRepository,
             getUserIdUseCase = getUserIdUseCase,

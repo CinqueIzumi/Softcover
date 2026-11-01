@@ -38,51 +38,67 @@ class EditionCachePlannerTest {
         every {
             this@mockk.id
         } returns id
+
         every {
             this@mockk.canonicalId
         } returns canonicalId
+
         every {
             this@mockk.bookId
         } returns bookId
+
         every {
             this@mockk.publisher
         } returns publisher
+
         every {
             this@mockk.title
         } returns title
+
         every {
             this@mockk.url
         } returns url
+
         every {
             this@mockk.localImagePath
         } returns localImagePath
+
         every {
             this@mockk.isbn10
         } returns isbn10
+
         every {
             this@mockk.isbn13
         } returns isbn13
+
         every {
             this@mockk.pages
         } returns pages
+
         every {
             this@mockk.audioSeconds
         } returns audioSeconds
+
         every {
             this@mockk.authors
         } returns emptyList()
+
         every {
             this@mockk.releaseYear
         } returns releaseYear
+
         every {
             this@mockk.releaseDate
         } returns releaseDate
+
         every {
             this@mockk.format
         } returns format
+
         every {
             this@mockk.readingFormat
         } returns readingFormat
+
         every {
             this@mockk.owned
         } returns false
@@ -117,6 +133,7 @@ class EditionCachePlannerTest {
                 id = 1,
                 url = "https://example.com/cover.jpg",
             )
+
             val ref = EditionImageRef(
                 id = 1,
                 localImagePath = null,
@@ -142,6 +159,7 @@ class EditionCachePlannerTest {
                 id = 1,
                 url = "https://example.com/cover.jpg",
             )
+
             val ref = EditionImageRef(
                 id = 1,
                 localImagePath = null,
@@ -165,10 +183,12 @@ class EditionCachePlannerTest {
         fun `matching url preserves existing path and url on entity`() {
             // ----- Arrange -----
             val url = "https://example.com/cover.jpg"
+
             val edition = stubBookEdition(
                 id = 1,
                 url = url,
             )
+
             val ref = EditionImageRef(
                 id = 1,
                 localImagePath = "/cache/cover.jpg",
@@ -194,6 +214,7 @@ class EditionCachePlannerTest {
                 id = 1,
                 url = null,
             )
+
             val ref = EditionImageRef(
                 id = 1,
                 localImagePath = "/cache/cover.jpg",
@@ -222,6 +243,7 @@ class EditionCachePlannerTest {
                 id = 1,
                 url = "https://example.com/new.jpg",
             )
+
             val ref = EditionImageRef(
                 id = 1,
                 localImagePath = "/cache/old.jpg",
@@ -247,6 +269,7 @@ class EditionCachePlannerTest {
                 id = 1,
                 url = "https://example.com/cover.jpg",
             )
+
             val ref = EditionImageRef(
                 id = 1,
                 localImagePath = "/cache/legacy.jpg",
@@ -277,18 +300,22 @@ class EditionCachePlannerTest {
                 id = 1,
                 url = url,
             )
+
             val editionPreserved = stubBookEdition(
                 id = 2,
                 url = url,
             )
+
             val editionStale = stubBookEdition(
                 id = 3,
                 url = "https://example.com/new.jpg",
             )
+
             val editionLegacyStale = stubBookEdition(
                 id = 4,
                 url = "https://example.com/cover.jpg",
             )
+
             val editionNoRef = stubBookEdition(
                 id = 5,
                 url = url,
@@ -335,6 +362,7 @@ class EditionCachePlannerTest {
                 id = 1,
                 url = "https://example.com/new-a.jpg",
             )
+
             val editionB = stubBookEdition(
                 id = 2,
                 url = "https://example.com/new-b.jpg",

@@ -16,13 +16,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.component.AdaptiveModalSheet as FoundationAdaptiveModalSheet
 import nl.rhaydus.designsystem.component.LocalModalSheetForm
 import nl.rhaydus.designsystem.model.ModalSheetForm
 import nl.rhaydus.designsystem.theme.Corners
 import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.snackbar.LocalSnackbarHostLevel
 import nl.rhaydus.softcover.core.component.snackbar.SoftcoverSnackbarHost
+import nl.rhaydus.designsystem.component.AdaptiveModalSheet as FoundationAdaptiveModalSheet
 
 /**
  * The height, in pixels, the bottom sheet's snackbar keeps clear at the bottom: a [SheetScaffold] footer

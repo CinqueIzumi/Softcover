@@ -91,6 +91,7 @@ class PendingListWriteStoreTest {
                 orderedListBookIds = listOf(201, 202),
                 enqueuedAt = "2026-05-11T10:00:00Z",
             )
+
             val slot = slot<PendingListWriteEntity>()
 
             coJustRun {
@@ -144,6 +145,7 @@ class PendingListWriteStoreTest {
                 kind = PendingListWriteKind.CREATE_LIST.name,
                 attempts = 0,
             )
+
             val entityB = pendingListWriteEntity(
                 localId = 2L,
                 kind = PendingListWriteKind.ADD_LIST_BOOK.name,
@@ -193,6 +195,7 @@ class PendingListWriteStoreTest {
 
             // ----- Assert -----
             result shouldBe emptyList()
+
             coVerify(exactly = 1) {
                 dao.delete(localId = 6L)
             }

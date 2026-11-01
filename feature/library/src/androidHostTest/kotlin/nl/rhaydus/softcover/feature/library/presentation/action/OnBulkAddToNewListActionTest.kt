@@ -48,6 +48,7 @@ class OnBulkAddToNewListActionTest {
         addBookToListUseCase = mockk(relaxed = true)
         eventChannel = Channel(Channel.BUFFERED)
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -109,12 +110,11 @@ class OnBulkAddToNewListActionTest {
         userBook = null,
     )
 
-    private fun stubDependencies(): LibraryDependencies =
-        mockk<LibraryDependencies>(relaxed = true).also { mock ->
-            every {
-                mock.addBookToListUseCase
-            } returns addBookToListUseCase
-        }
+    private fun stubDependencies(): LibraryDependencies = mockk<LibraryDependencies>(relaxed = true).also { mock ->
+        every {
+            mock.addBookToListUseCase
+        } returns addBookToListUseCase
+    }
 
     @Nested
     inner class Execute {
@@ -130,6 +130,7 @@ class OnBulkAddToNewListActionTest {
                 listId = listId,
                 listName = listName,
             )
+
             val dependencies = stubDependencies()
 
             // ----- Act -----
@@ -140,6 +141,7 @@ class OnBulkAddToNewListActionTest {
 
             // ----- Assert -----
             stateFlow.value.chooseListsSheet shouldBe SheetSession.Closed
+
             coVerify(exactly = 0) {
                 addBookToListUseCase(
                     listId = any(),
@@ -147,6 +149,7 @@ class OnBulkAddToNewListActionTest {
                     edition = any(),
                 )
             }
+
             verify(exactly = 0) {
                 SnackBarManager.showSnackbar(title = any())
             }
@@ -157,6 +160,7 @@ class OnBulkAddToNewListActionTest {
             // ----- Arrange -----
             val firstBook = buildBook(id = 1)
             val secondBook = buildBook(id = 2)
+
             stateFlow.value = LibraryUiState(
                 selectedBookIds = persistentSetOf(1, 2),
                 booksByTab = persistentMapOf(tabKey to persistentListOf(firstBook, secondBook)),
@@ -174,6 +178,7 @@ class OnBulkAddToNewListActionTest {
                 listId = listId,
                 listName = listName,
             )
+
             val dependencies = stubDependencies()
 
             // ----- Act -----
@@ -190,6 +195,7 @@ class OnBulkAddToNewListActionTest {
                     edition = firstBook.defaultEdition.shouldNotBeNull(),
                 )
             }
+
             coVerify(exactly = 1) {
                 addBookToListUseCase(
                     listId = listId,
@@ -197,6 +203,7 @@ class OnBulkAddToNewListActionTest {
                     edition = secondBook.defaultEdition.shouldNotBeNull(),
                 )
             }
+
             verify(exactly = 0) {
                 SnackBarManager.showSnackbar(title = any())
             }
@@ -212,11 +219,13 @@ class OnBulkAddToNewListActionTest {
                 closing = true,
                 pending = CreateList,
             )
+
             stateFlow.value = LibraryUiState(
                 selectedBookIds = persistentSetOf(1),
                 booksByTab = persistentMapOf(tabKey to persistentListOf(buildBook(id = 1))),
                 chooseListsSheet = closing,
             )
+
             coEvery {
                 addBookToListUseCase(
                     listId = any(),
@@ -248,6 +257,7 @@ class OnBulkAddToNewListActionTest {
                 selectedBookIds = persistentSetOf(1),
                 booksByTab = persistentMapOf(tabKey to persistentListOf(buildBook(id = 1))),
             )
+
             var requestedDuringWrite: Boolean? = null
             var mutatedDuringWrite: Set<Int>? = null
 
@@ -287,6 +297,7 @@ class OnBulkAddToNewListActionTest {
                 id = 1,
                 edition = null,
             )
+
             stateFlow.value = LibraryUiState(
                 selectedBookIds = persistentSetOf(1),
                 booksByTab = persistentMapOf(tabKey to persistentListOf(editionlessBook)),
@@ -296,6 +307,7 @@ class OnBulkAddToNewListActionTest {
                 listId = listId,
                 listName = listName,
             )
+
             val dependencies = stubDependencies()
 
             // ----- Act -----
@@ -312,6 +324,7 @@ class OnBulkAddToNewListActionTest {
                     edition = any(),
                 )
             }
+
             verify(exactly = 1) {
                 SnackBarManager.showSnackbar(
                     title = match { title -> title.contains(listName) },
@@ -323,6 +336,7 @@ class OnBulkAddToNewListActionTest {
         fun `failed add-to-list call surfaces the failure snackbar with the list name`() = runTest {
             // ----- Arrange -----
             val book = buildBook(id = 1)
+
             stateFlow.value = LibraryUiState(
                 selectedBookIds = persistentSetOf(1),
                 booksByTab = persistentMapOf(tabKey to persistentListOf(book)),
@@ -340,6 +354,7 @@ class OnBulkAddToNewListActionTest {
                 listId = listId,
                 listName = listName,
             )
+
             val dependencies = stubDependencies()
 
             // ----- Act -----
@@ -360,6 +375,7 @@ class OnBulkAddToNewListActionTest {
         fun `successful adds send no event`() = runTest {
             // ----- Arrange -----
             val book = buildBook(id = 1)
+
             stateFlow.value = LibraryUiState(
                 selectedBookIds = persistentSetOf(1),
                 booksByTab = persistentMapOf(tabKey to persistentListOf(book)),
@@ -390,6 +406,7 @@ class OnBulkAddToNewListActionTest {
         fun `a failed add sends NewListBooksAddFailedEvent`() = runTest {
             // ----- Arrange -----
             val book = buildBook(id = 1)
+
             stateFlow.value = LibraryUiState(
                 selectedBookIds = persistentSetOf(1),
                 booksByTab = persistentMapOf(tabKey to persistentListOf(book)),

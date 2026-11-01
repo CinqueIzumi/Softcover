@@ -14,10 +14,10 @@ internal class CreateListScreenModel(
     createListUseCase: CreateListUseCase,
     dispatchers: AppDispatchers,
 ) : ToadScreenModel<CreateListUiState, CreateListEvent, CreateListDependencies, CreateListCollector, LocalCreateListVariables>(
-    initializers = emptyList(),
-    initialState = CreateListUiState(),
-    initialLocalVariables = LocalCreateListVariables(),
-) {
+        initializers = emptyList(),
+        initialState = CreateListUiState(),
+        initialLocalVariables = LocalCreateListVariables(),
+    ) {
     override val dependencies: CreateListDependencies = CreateListDependencies(
         createListUseCase = createListUseCase,
         coroutineScope = screenModelScope,

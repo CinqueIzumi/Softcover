@@ -32,6 +32,7 @@ class OnEditVerdictDraftActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(ReadingScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ReadingLocalVariables()),
@@ -67,12 +68,14 @@ class OnEditVerdictDraftActionTest {
         fun `folds a review edit into the draft the same way the reducer does`() = runTest {
             // ----- Arrange -----
             val initial = sheet()
+
             val event = VerdictDraftEvent.ReviewEdited(
                 value = TextFieldValue(
                     text = "Loved it.",
                     selection = TextRange(9),
                 ),
             )
+
             stateFlow.value = ReadingScreenUiState(verdictSheet = initial)
 
             // ----- Act -----

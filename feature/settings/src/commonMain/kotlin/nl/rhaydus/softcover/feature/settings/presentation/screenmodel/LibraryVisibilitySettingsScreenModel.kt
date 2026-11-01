@@ -33,16 +33,16 @@ internal class LibraryVisibilitySettingsScreenModel(
     appDispatchers: AppDispatchers,
     flows: List<LibraryVisibilityCollector>,
 ) : ToadScreenModel<
-    LibraryVisibilitySettingsUiState,
-    LibraryVisibilitySettingsEvent,
-    LibraryVisibilitySettingsDependencies,
-    LibraryVisibilityCollector,
-    LibraryVisibilitySettingsLocalVariables,
+        LibraryVisibilitySettingsUiState,
+        LibraryVisibilitySettingsEvent,
+        LibraryVisibilitySettingsDependencies,
+        LibraryVisibilityCollector,
+        LibraryVisibilitySettingsLocalVariables,
     >(
-    initialState = LibraryVisibilitySettingsUiState(),
-    initialLocalVariables = LibraryVisibilitySettingsLocalVariables(),
-    initializers = flows,
-) {
+        initialState = LibraryVisibilitySettingsUiState(),
+        initialLocalVariables = LibraryVisibilitySettingsLocalVariables(),
+        initializers = flows,
+    ) {
     override val dependencies = LibraryVisibilitySettingsDependencies(
         getEnabledStatusCodesAsFlowUseCase = getEnabledStatusCodesAsFlowUseCase,
         getEnabledListIdsAsFlowUseCase = getEnabledListIdsAsFlowUseCase,

@@ -143,6 +143,7 @@ private fun BookOverflowMenuItems(
             val isOwned = state.isEditionOwned(edition = ownedEdition)
 
             val ownedLabel = if (isOwned) "Unmark as owned" else "Mark as owned"
+
             val ownedToggleIcon = drawableIconResource(
                 icon = if (isOwned) SoftcoverIcon.Close else SoftcoverIcon.Check,
                 contentDescription = "",
@@ -158,6 +159,7 @@ private fun BookOverflowMenuItems(
                 },
                 onClick = {
                     dismiss()
+
                     runAction(
                         OnEditionOwnedToggleAction(
                             edition = ownedEdition,

@@ -68,6 +68,7 @@ class ProfileRemoteDataSourceImplTest {
     @BeforeEach
     fun setUp() {
         apolloClient = mockk()
+
         dataSource = ProfileRemoteDataSourceImpl(
             apolloClient = apolloClient,
             clock = fixedClock,
@@ -76,16 +77,15 @@ class ProfileRemoteDataSourceImplTest {
     }
 
     // region me{} builders
-    private fun booksReadAgg(count: Int?): GetUserProfileDataQuery.Data.Me.Books_read =
-        GetUserProfileDataQuery.Data.Me.Books_read(
-            __typename = "user_books_aggregate",
-            aggregate = count?.let {
-                GetUserProfileDataQuery.Data.Me.Books_read.Aggregate(
-                    __typename = "aggregate",
-                    count = it,
-                )
-            },
-        )
+    private fun booksReadAgg(count: Int?): GetUserProfileDataQuery.Data.Me.Books_read = GetUserProfileDataQuery.Data.Me.Books_read(
+        __typename = "user_books_aggregate",
+        aggregate = count?.let {
+            GetUserProfileDataQuery.Data.Me.Books_read.Aggregate(
+                __typename = "aggregate",
+                count = it,
+            )
+        },
+    )
 
     private fun ratedBooksAgg(
         avgRating: Double?,
@@ -296,6 +296,7 @@ class ProfileRemoteDataSourceImplTest {
                     ratedBooks = ratedBooksAgg(avgRating = 3.75),
                 ),
             )
+
             mockEmptyStatsQuery()
 
             // ----- Act -----
@@ -359,6 +360,7 @@ class ProfileRemoteDataSourceImplTest {
                     ),
                 ),
             )
+
             mockEmptyStatsQuery()
 
             // ----- Act -----
@@ -403,6 +405,7 @@ class ProfileRemoteDataSourceImplTest {
             val expectedError = RuntimeException("stats query failed")
 
             mockProfileQuery(me())
+
             coEvery {
                 apolloClient.safeQuery(query = ofType<GetReadUserBooksForStatsQuery>())
             } throws expectedError
@@ -421,6 +424,7 @@ class ProfileRemoteDataSourceImplTest {
                 // Book B: 2025-12-01, 200 pages (book fallback), genre Mystery, rating null
                 // Book C: no resolvable date, 150 pages, no genres, rating 3.0
                 mockProfileQuery(me())
+
                 coEvery {
                     apolloClient.safeQuery(query = ofType<GetReadUserBooksForStatsQuery>())
                 } returns statsPage(
@@ -447,12 +451,14 @@ class ProfileRemoteDataSourceImplTest {
 
                 // ----- Assert -----
                 result.totalPagesRead shouldBe 650
+
                 result.booksByYear shouldBe (2019..2026).map { year ->
                     YearCount(
                         year = year,
                         count = if (year == 2025 || year == 2026) 1 else 0,
                     )
                 }
+
                 result.pagesByYear shouldBe (2019..2026).map { year ->
                     YearCount(
                         year = year,
@@ -463,22 +469,27 @@ class ProfileRemoteDataSourceImplTest {
                         },
                     )
                 }
+
                 result.pagesByMonth.first { it.month == 3 } shouldBe MonthCount(
                     year = 2026,
                     month = 3,
                     count = 300,
                 )
+
                 result.pagesByMonth.size shouldBe 12
+
                 result.genres.slices.map { it.name to it.count }.toSet() shouldBe setOf(
                     "Fantasy" to 1,
                     "Sci-Fi" to 1,
                     "Mystery" to 1,
                 )
+
                 result.ratings shouldBe RatingsDistribution(
                     average = 3.75,
                     totalRatings = 2,
                     halfStarBuckets = listOf(0, 0, 0, 0, 1, 0, 0, 1, 0),
                 )
+
                 // Book A (2026) and Book B (2025) are distinct finish-years; Book C has no
                 // resolvable date and does not contribute.
                 result.trackedYears shouldBe 2
@@ -491,6 +502,7 @@ class ProfileRemoteDataSourceImplTest {
         fun `a single partial page makes exactly one network call`() = runTest {
             // ----- Arrange -----
             mockProfileQuery(me())
+
             coEvery {
                 apolloClient.safeQuery(query = ofType<GetReadUserBooksForStatsQuery>())
             } returns statsPage(
@@ -513,6 +525,7 @@ class ProfileRemoteDataSourceImplTest {
             val partialPage = statsPage(*List(5) { statsUserBook(bookPages = 1) }.toTypedArray())
 
             mockProfileQuery(me())
+
             coEvery {
                 apolloClient.safeQuery(query = ofType<GetReadUserBooksForStatsQuery>())
             } returnsMany listOf(fullPage, partialPage)
@@ -523,6 +536,7 @@ class ProfileRemoteDataSourceImplTest {
             // ----- Assert -----
             result.totalPagesRead shouldBe STATS_PAGE_SIZE + 5
             coVerify(exactly = 2) { apolloClient.safeQuery(query = ofType<GetReadUserBooksForStatsQuery>()) }
+
             coVerify(exactly = 1) {
                 apolloClient.safeQuery(
                     query = GetReadUserBooksForStatsQuery(
@@ -539,6 +553,7 @@ class ProfileRemoteDataSourceImplTest {
             val fullPage = statsPage(*List(STATS_PAGE_SIZE) { statsUserBook(bookPages = 1) }.toTypedArray())
 
             mockProfileQuery(me())
+
             coEvery {
                 apolloClient.safeQuery(query = ofType<GetReadUserBooksForStatsQuery>())
             } returns fullPage
@@ -558,6 +573,7 @@ class ProfileRemoteDataSourceImplTest {
         fun `last_read_date takes priority over the finished-journal fallback when both are present`() = runTest {
             // ----- Arrange -----
             mockProfileQuery(me())
+
             coEvery {
                 apolloClient.safeQuery(query = ofType<GetReadUserBooksForStatsQuery>())
             } returns statsPage(
@@ -584,6 +600,7 @@ class ProfileRemoteDataSourceImplTest {
         fun `falls back to the finished journal's updated_at when last_read_date is null`() = runTest {
             // ----- Arrange -----
             mockProfileQuery(me())
+
             coEvery {
                 apolloClient.safeQuery(query = ofType<GetReadUserBooksForStatsQuery>())
             } returns statsPage(
@@ -607,38 +624,39 @@ class ProfileRemoteDataSourceImplTest {
         }
 
         @Test
-        fun `uses edition pages over book pages, falls back to book pages and contributes 0 when neither is present`() =
-            runTest {
-                // ----- Arrange -----
-                mockProfileQuery(me())
-                coEvery {
-                    apolloClient.safeQuery(query = ofType<GetReadUserBooksForStatsQuery>())
-                } returns statsPage(
-                    statsUserBook(
-                        editionPages = 300,
-                        bookPages = 999,
-                    ),
-                    statsUserBook(
-                        editionPages = null,
-                        bookPages = 280,
-                    ),
-                    statsUserBook(
-                        editionPages = null,
-                        bookPages = null,
-                    ),
-                )
+        fun `uses edition pages over book pages, falls back to book pages and contributes 0 when neither is present`() = runTest {
+            // ----- Arrange -----
+            mockProfileQuery(me())
 
-                // ----- Act -----
-                val result = dataSource.getUserProfileSnapshot()
+            coEvery {
+                apolloClient.safeQuery(query = ofType<GetReadUserBooksForStatsQuery>())
+            } returns statsPage(
+                statsUserBook(
+                    editionPages = 300,
+                    bookPages = 999,
+                ),
+                statsUserBook(
+                    editionPages = null,
+                    bookPages = 280,
+                ),
+                statsUserBook(
+                    editionPages = null,
+                    bookPages = null,
+                ),
+            )
 
-                // ----- Assert -----
-                result.totalPagesRead shouldBe 580
-            }
+            // ----- Act -----
+            val result = dataSource.getUserProfileSnapshot()
+
+            // ----- Assert -----
+            result.totalPagesRead shouldBe 580
+        }
 
         @Test
         fun `genre tags are deduplicated and a null tag reference is skipped`() = runTest {
             // ----- Arrange -----
             mockProfileQuery(me())
+
             coEvery {
                 apolloClient.safeQuery(query = ofType<GetReadUserBooksForStatsQuery>())
             } returns statsPage(
@@ -677,6 +695,7 @@ class ProfileRemoteDataSourceImplTest {
                     ),
                 ),
             )
+
             mockEmptyStatsQuery()
 
             // ----- Act -----
@@ -711,6 +730,7 @@ class ProfileRemoteDataSourceImplTest {
                     ),
                 ),
             )
+
             mockEmptyStatsQuery()
 
             // ----- Act -----
@@ -746,6 +766,7 @@ class ProfileRemoteDataSourceImplTest {
                     ),
                 ),
             )
+
             mockEmptyStatsQuery()
 
             // ----- Act -----
@@ -772,6 +793,7 @@ class ProfileRemoteDataSourceImplTest {
                     ),
                 ),
             )
+
             mockEmptyStatsQuery()
 
             // ----- Act -----
@@ -798,6 +820,7 @@ class ProfileRemoteDataSourceImplTest {
                     ),
                 ),
             )
+
             mockEmptyStatsQuery()
 
             // ----- Act -----
@@ -824,6 +847,7 @@ class ProfileRemoteDataSourceImplTest {
                     ),
                 ),
             )
+
             mockEmptyStatsQuery()
 
             // ----- Act -----
@@ -837,65 +861,69 @@ class ProfileRemoteDataSourceImplTest {
     @Nested
     inner class AuthorDemographicsMapping {
         @Test
-        fun `gender_id 1, 2 and 3 map to Male, Female and Other, while null and an unrecognized id both map to Unknown`() =
-            runTest {
-                // ----- Arrange -----
-                mockProfileQuery(me())
-                coEvery {
-                    apolloClient.safeQuery(query = ofType<GetReadUserBooksForStatsQuery>())
-                } returns statsPage(
-                    statsUserBook(
-                        bookPages = 100,
-                        contributions = listOf(
-                            contribution(
-                                id = 1,
-                                genderId = 1,
-                            ),
-                            contribution(
-                                id = 2,
-                                genderId = 2,
-                            ),
-                            contribution(
-                                id = 3,
-                                genderId = 3,
-                            ),
-                            contribution(
-                                id = 4,
-                                genderId = null,
-                            ),
-                            contribution(
-                                id = 5,
-                                genderId = 99,
-                            ),
+        fun `gender_id 1, 2 and 3 map to Male, Female and Other, while null and an unrecognized id both map to Unknown`() = runTest {
+            // ----- Arrange -----
+            mockProfileQuery(me())
+
+            coEvery {
+                apolloClient.safeQuery(query = ofType<GetReadUserBooksForStatsQuery>())
+            } returns statsPage(
+                statsUserBook(
+                    bookPages = 100,
+                    contributions = listOf(
+                        contribution(
+                            id = 1,
+                            genderId = 1,
+                        ),
+                        contribution(
+                            id = 2,
+                            genderId = 2,
+                        ),
+                        contribution(
+                            id = 3,
+                            genderId = 3,
+                        ),
+                        contribution(
+                            id = 4,
+                            genderId = null,
+                        ),
+                        contribution(
+                            id = 5,
+                            genderId = 99,
                         ),
                     ),
-                )
+                ),
+            )
 
-                // ----- Act -----
-                val result = dataSource.getUserProfileSnapshot()
+            // ----- Act -----
+            val result = dataSource.getUserProfileSnapshot()
 
-                // ----- Assert -----
-                result.authorDemographics.knownGenderCount shouldBe 3
-                result.authorDemographics.unknownGenderCount shouldBe 2
-                result.authorDemographics.genderSlices.last() shouldBe GenderSlice(
-                    gender = Gender.Unknown,
-                    count = 2,
-                    fraction = 2.0 / 5.0,
-                )
-                result.authorDemographics.genderSlices.dropLast(1).map { it.gender to it.count }.toSet() shouldBe setOf(
-                    Gender.Male to 1,
-                    Gender.Female to 1,
-                    Gender.Other to 1,
-                )
-                result.authorDemographics.genderSlices.dropLast(1).forEach {
-                    it.fraction shouldBe (1.0 / 5.0 plusOrMinus 0.0001)
-                }
+            // ----- Assert -----
+            result.authorDemographics.knownGenderCount shouldBe 3
+            result.authorDemographics.unknownGenderCount shouldBe 2
+
+            result.authorDemographics.genderSlices.last() shouldBe GenderSlice(
+                gender = Gender.Unknown,
+                count = 2,
+                fraction = 2.0 / 5.0,
+            )
+
+            result.authorDemographics.genderSlices.dropLast(1).map { it.gender to it.count }.toSet() shouldBe setOf(
+                Gender.Male to 1,
+                Gender.Female to 1,
+                Gender.Other to 1,
+            )
+
+            result.authorDemographics.genderSlices.dropLast(1).forEach {
+                it.fraction shouldBe (1.0 / 5.0 plusOrMinus 0.0001)
             }
+        }
 
         @Test
         fun `a contribution with a null author is skipped rather than crashing or counting as an author`() = runTest {
             // ----- Arrange -----
             mockProfileQuery(me())
+
             coEvery {
                 apolloClient.safeQuery(query = ofType<GetReadUserBooksForStatsQuery>())
             } returns statsPage(
@@ -920,66 +948,66 @@ class ProfileRemoteDataSourceImplTest {
         }
 
         @Test
-        fun `is_bipoc and is_lgbtq true, false and null across distinct authors land in the matching yes-no-unknown buckets`() =
-            runTest {
-                // ----- Arrange -----
-                mockProfileQuery(me())
-                coEvery {
-                    apolloClient.safeQuery(query = ofType<GetReadUserBooksForStatsQuery>())
-                } returns statsPage(
-                    statsUserBook(
-                        bookPages = 100,
-                        contributions = listOf(
-                            contribution(
-                                id = 1,
-                                isBipoc = true,
-                                isLgbtq = null,
-                                genderId = 1,
-                            ),
-                            contribution(
-                                id = 2,
-                                isBipoc = false,
-                                isLgbtq = true,
-                                genderId = 2,
-                            ),
-                            contribution(
-                                id = 3,
-                                isBipoc = null,
-                                isLgbtq = false,
-                                genderId = null,
-                            ),
+        fun `is_bipoc and is_lgbtq true, false and null across distinct authors land in the matching yes-no-unknown buckets`() = runTest {
+            // ----- Arrange -----
+            mockProfileQuery(me())
+
+            coEvery {
+                apolloClient.safeQuery(query = ofType<GetReadUserBooksForStatsQuery>())
+            } returns statsPage(
+                statsUserBook(
+                    bookPages = 100,
+                    contributions = listOf(
+                        contribution(
+                            id = 1,
+                            isBipoc = true,
+                            isLgbtq = null,
+                            genderId = 1,
+                        ),
+                        contribution(
+                            id = 2,
+                            isBipoc = false,
+                            isLgbtq = true,
+                            genderId = 2,
+                        ),
+                        contribution(
+                            id = 3,
+                            isBipoc = null,
+                            isLgbtq = false,
+                            genderId = null,
                         ),
                     ),
-                )
+                ),
+            )
 
-                // ----- Act -----
-                val result = dataSource.getUserProfileSnapshot()
+            // ----- Act -----
+            val result = dataSource.getUserProfileSnapshot()
 
-                // ----- Assert -----
-                result.authorDemographics.bipocBreakdown shouldBe DemographicBreakdown(
-                    yesCount = 1,
-                    noCount = 1,
-                    unknownCount = 1,
-                )
-                result.authorDemographics.lgbtqBreakdown shouldBe DemographicBreakdown(
-                    yesCount = 1,
-                    noCount = 1,
-                    unknownCount = 1,
-                )
-            }
+            // ----- Assert -----
+            result.authorDemographics.bipocBreakdown shouldBe DemographicBreakdown(
+                yesCount = 1,
+                noCount = 1,
+                unknownCount = 1,
+            )
+
+            result.authorDemographics.lgbtqBreakdown shouldBe DemographicBreakdown(
+                yesCount = 1,
+                noCount = 1,
+                unknownCount = 1,
+            )
+        }
     }
 
     @Nested
     inner class StreamReadingDaysDescending {
-        private fun readingActivityPage(vararg actionAts: String): GetReadingActivityDaysQuery.Data =
-            GetReadingActivityDaysQuery.Data(
-                reading_journals = actionAts.map {
-                    GetReadingActivityDaysQuery.Data.Reading_journal(
-                        __typename = "reading_journals",
-                        action_at = it,
-                    )
-                },
-            )
+        private fun readingActivityPage(vararg actionAts: String): GetReadingActivityDaysQuery.Data = GetReadingActivityDaysQuery.Data(
+            reading_journals = actionAts.map {
+                GetReadingActivityDaysQuery.Data.Reading_journal(
+                    __typename = "reading_journals",
+                    action_at = it,
+                )
+            },
+        )
 
         @Test
         fun `emits parsed dates across pages until an empty page ends the stream`() = runTest {
@@ -988,10 +1016,12 @@ class ProfileRemoteDataSourceImplTest {
                 "2026-05-04",
                 "2026-05-03",
             )
+
             val page2 = readingActivityPage(
                 "2026-05-02",
                 "2026-05-01",
             )
+
             val emptyPage = readingActivityPage()
 
             coEvery {
@@ -1024,6 +1054,7 @@ class ProfileRemoteDataSourceImplTest {
                     1,
                 ),
             )
+
             coVerify(exactly = 3) {
                 apolloClient.safeQuery(query = any<GetReadingActivityDaysQuery>())
             }
@@ -1037,6 +1068,7 @@ class ProfileRemoteDataSourceImplTest {
                 "not-a-date",
                 "2026-05-03",
             )
+
             val page2 = readingActivityPage()
 
             coEvery {
@@ -1059,6 +1091,7 @@ class ProfileRemoteDataSourceImplTest {
                     3,
                 ),
             )
+
             coVerify {
                 apolloClient.safeQuery(
                     query = GetReadingActivityDaysQuery(
@@ -1074,6 +1107,7 @@ class ProfileRemoteDataSourceImplTest {
         fun `buckets timestamps by local timezone and passes bare dates through unchanged`() = runTest {
             // ----- Arrange -----
             val utcMinus5 = UtcOffset(hours = -5).asTimeZone()
+
             val localDataSource = ProfileRemoteDataSourceImpl(
                 apolloClient = apolloClient,
                 clock = fixedClock,
@@ -1085,6 +1119,7 @@ class ProfileRemoteDataSourceImplTest {
                 "2026-05-19T04:00:00+00:00",
                 "2026-05-02",
             )
+
             val emptyPage = readingActivityPage()
 
             coEvery {

@@ -34,6 +34,7 @@ class LibraryTabEntryTest {
                     statusVisibilityToggle = null,
                 )
             }
+
             val expectedIds = UserBookStatus.entries.map { LibraryTab.Status.of(it).id }
 
             // ----- Act -----
@@ -55,6 +56,7 @@ class LibraryTabEntryTest {
                     visible = true,
                 ),
             )
+
             val tab = LibraryTab.CustomList(
                 listId = 42,
                 listName = "Favourites",

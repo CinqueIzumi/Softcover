@@ -150,6 +150,7 @@ class DeadlineMapperTest {
             val dayMonthYear = subject.toDeadlineSummaryUiModel(
                 dateStyle = DateStyle.DAY_MONTH_YEAR,
             )
+
             val monthDayYear = subject.toDeadlineSummaryUiModel(
                 dateStyle = DateStyle.MONTH_DAY_YEAR,
             )

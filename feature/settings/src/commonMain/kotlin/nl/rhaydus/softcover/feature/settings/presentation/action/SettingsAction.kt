@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUi
 import nl.rhaydus.toad.UiAction
 
 internal sealed interface SettingsAction : UiAction<
-        SettingsScreenDependencies,
-        SettingsScreenUiState,
-        SettingsScreenEvent,
-        SettingsLocalVariables
-        >
+    SettingsScreenDependencies,
+    SettingsScreenUiState,
+    SettingsScreenEvent,
+    SettingsLocalVariables
+>

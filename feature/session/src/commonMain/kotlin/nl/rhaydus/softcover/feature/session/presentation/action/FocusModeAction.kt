@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.feature.session.presentation.state.LocalFocusModeVar
 import nl.rhaydus.toad.UiAction
 
 internal sealed interface FocusModeAction : UiAction<
-        FocusModeDependencies,
-        FocusModeUiState,
-        FocusModeEvent,
-        LocalFocusModeVariables,
-        >
+    FocusModeDependencies,
+    FocusModeUiState,
+    FocusModeEvent,
+    LocalFocusModeVariables,
+>

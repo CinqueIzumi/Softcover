@@ -24,6 +24,7 @@ class OnUpdateTimeProgressClickActionTest {
     @BeforeEach
     fun setUp() {
         recordBookProgress = mockk(relaxed = true)
+
         coEvery {
             recordBookProgress(
                 book = any(),
@@ -32,7 +33,9 @@ class OnUpdateTimeProgressClickActionTest {
                 actionAt = any(),
             )
         } returns Result.success(null)
+
         stateFlow = MutableStateFlow(UpdateProgressUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(UpdateProgressLocalVariables()),
@@ -48,6 +51,7 @@ class OnUpdateTimeProgressClickActionTest {
             val book = stubAudiobook(audioSeconds = 7200)
             stateFlow.value = UpdateProgressUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
+
             every {
                 dependencies.recordBookProgress
             } returns recordBookProgress
@@ -79,6 +83,7 @@ class OnUpdateTimeProgressClickActionTest {
             val book = stubAudiobook(audioSeconds = 3600)
             stateFlow.value = UpdateProgressUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
+
             every {
                 dependencies.recordBookProgress
             } returns recordBookProgress
@@ -110,6 +115,7 @@ class OnUpdateTimeProgressClickActionTest {
             val book = stubAudiobook(audioSeconds = 3600)
             stateFlow.value = UpdateProgressUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
+
             every {
                 dependencies.recordBookProgress
             } returns recordBookProgress
@@ -141,6 +147,7 @@ class OnUpdateTimeProgressClickActionTest {
             val book = stubAudiobook(audioSeconds = null)
             stateFlow.value = UpdateProgressUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
+
             every {
                 dependencies.recordBookProgress
             } returns recordBookProgress

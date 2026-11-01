@@ -44,6 +44,7 @@ class OnMoodChipClickActionTest {
         searchByMoodUseCase = mockk()
         stateFlow = MutableStateFlow(ExploreScreenUiState())
         localVariablesFlow = MutableStateFlow(ExploreLocalVariables())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
@@ -53,6 +54,7 @@ class OnMoodChipClickActionTest {
 
     private fun stubDependencies(testScope: TestScope): ExploreDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<ExploreDependencies>(relaxed = true).also { mock ->
             every {
                 mock.searchByMoodUseCase
@@ -105,10 +107,12 @@ class OnMoodChipClickActionTest {
         fun `clears focus, sets the mood filter and loads until the search resolves`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
+
             stateFlow.value = stateFlow.value.copy(
                 searchFocused = true,
                 searchError = "previous error",
             )
+
             val gate = CompletableDeferred<Unit>()
 
             coEvery {

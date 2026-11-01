@@ -138,9 +138,9 @@ internal val modalEntries: ImmutableList<GalleryEntry> = persistentListOf(
         content = { model, modifier ->
             ScaledShareCardPreview(
                 capture = rememberShareCardCapture(
-                        config = softcoverShareCardCaptureConfig,
-                        ioDispatcher = LocalShareCardIoDispatcher.current,
-                    ),
+                    config = softcoverShareCardCaptureConfig,
+                    ioDispatcher = LocalShareCardIoDispatcher.current,
+                ),
                 modifier = modifier,
             ) {
                 ShareCard(model = model)

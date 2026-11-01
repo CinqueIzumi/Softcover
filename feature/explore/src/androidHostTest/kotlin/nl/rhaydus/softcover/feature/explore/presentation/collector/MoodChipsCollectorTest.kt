@@ -33,11 +33,13 @@ class MoodChipsCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(ExploreScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk<ExploreDependencies>(relaxed = true)
     }
 
@@ -47,6 +49,7 @@ class MoodChipsCollectorTest {
         fun `sets moodChips with chips and payloads from moodTags`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = MoodChipsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -65,25 +68,26 @@ class MoodChipsCollectorTest {
         }
 
         @Test
-        fun `unrelated state change that leaves moodTags equal does not retrigger recompute`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                stateFlow.value = ExploreScreenUiState(moodTags = persistentListOf(cozy))
-                val collector = MoodChipsCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-                val chipSetAfterFirstEmit = stateFlow.value.moodChips
+        fun `unrelated state change that leaves moodTags equal does not retrigger recompute`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = ExploreScreenUiState(moodTags = persistentListOf(cozy))
+            val collector = MoodChipsCollector()
 
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(isLoading = true)
-
-                // ----- Assert -----
-                (stateFlow.value.moodChips === chipSetAfterFirstEmit) shouldBe true
-                job.cancel()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            val chipSetAfterFirstEmit = stateFlow.value.moodChips
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(isLoading = true)
+
+            // ----- Assert -----
+            (stateFlow.value.moodChips === chipSetAfterFirstEmit) shouldBe true
+            job.cancel()
+        }
     }
 }

@@ -17,24 +17,23 @@ internal class PendingListWriteStore(
         dao.insert(entity = payload.toEntity())
     }
 
-    override suspend fun getPending(): List<PendingWrite<PendingListWrite>> =
-        dao.getPending().mapNotNull { entity ->
-            val payload: PendingListWrite? = entity.toPendingListWrite()
+    override suspend fun getPending(): List<PendingWrite<PendingListWrite>> = dao.getPending().mapNotNull { entity ->
+        val payload: PendingListWrite? = entity.toPendingListWrite()
 
-            if (payload == null) {
-                AppLog.e("Discarding unreplayable pending list write: unknown kind '${entity.kind}'")
+        if (payload == null) {
+            AppLog.e("Discarding unreplayable pending list write: unknown kind '${entity.kind}'")
 
-                dao.delete(localId = entity.localId)
+            dao.delete(localId = entity.localId)
 
-                return@mapNotNull null
-            }
-
-            PendingWrite(
-                localId = entity.localId,
-                attempts = entity.attempts,
-                payload = payload,
-            )
+            return@mapNotNull null
         }
+
+        PendingWrite(
+            localId = entity.localId,
+            attempts = entity.attempts,
+            payload = payload,
+        )
+    }
 
     override suspend fun delete(localId: Long) {
         dao.delete(localId = localId)

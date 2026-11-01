@@ -37,6 +37,7 @@ class FeaturedUpcomingReleaseCollectorTest {
         getFeaturedUpcomingReleaseUseCase = mockk()
         getAllUserBooksUseCase = mockk()
         stateFlow = MutableStateFlow(ExploreScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
@@ -73,6 +74,7 @@ class FeaturedUpcomingReleaseCollectorTest {
                 coEvery {
                     getFeaturedUpcomingReleaseUseCase()
                 } returns Result.success(null)
+
                 val collector = FeaturedUpcomingReleaseCollector()
 
                 // ----- Act -----
@@ -84,6 +86,7 @@ class FeaturedUpcomingReleaseCollectorTest {
                 // ----- Assert -----
                 stateFlow.value.loadingFeaturedUpcomingRelease shouldBe false
                 stateFlow.value.featuredUpcomingRelease shouldBe null
+
                 coVerify(exactly = 0) {
                     getAllUserBooksUseCase()
                 }
@@ -95,6 +98,7 @@ class FeaturedUpcomingReleaseCollectorTest {
             coEvery {
                 getFeaturedUpcomingReleaseUseCase()
             } returns Result.failure(RuntimeException("network error"))
+
             val collector = FeaturedUpcomingReleaseCollector()
 
             // ----- Act -----
@@ -113,10 +117,13 @@ class FeaturedUpcomingReleaseCollectorTest {
             // ----- Arrange -----
             val featured = stubBook(id = 5)
             val userBook = stubBook(id = 5)
+
             coEvery {
                 getFeaturedUpcomingReleaseUseCase()
             } returns Result.success(featured)
+
             val collector = FeaturedUpcomingReleaseCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -138,10 +145,13 @@ class FeaturedUpcomingReleaseCollectorTest {
             // ----- Arrange -----
             val featured = stubBook(id = 5)
             val otherUserBook = stubBook(id = 99)
+
             coEvery {
                 getFeaturedUpcomingReleaseUseCase()
             } returns Result.success(featured)
+
             val collector = FeaturedUpcomingReleaseCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -162,10 +172,13 @@ class FeaturedUpcomingReleaseCollectorTest {
             // ----- Arrange -----
             val featured = stubBook(id = 5)
             val laterUserBook = stubBook(id = 5)
+
             coEvery {
                 getFeaturedUpcomingReleaseUseCase()
             } returns Result.success(featured)
+
             val collector = FeaturedUpcomingReleaseCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

@@ -158,7 +158,10 @@ private fun DesktopReadingContent(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(readingScrollState)
-                .padding(top = Spacing.xs, bottom = Spacing.xl + rememberBottomBarPadding()),
+                .padding(
+                    top = Spacing.xs,
+                    bottom = Spacing.xl + rememberBottomBarPadding(),
+                ),
         ) {
             ReadingFeaturedSection(
                 state = state,
@@ -186,7 +189,10 @@ private fun DesktopReadingContent(
                                         coordinator = entry,
                                         index = index,
                                     )
-                                    .markAsReadSlide(controller, bookId),
+                                    .markAsReadSlide(
+                                        controller,
+                                        bookId,
+                                    ),
                             )
                         }
                     }
@@ -222,7 +228,11 @@ private fun DesktopReadingHeader(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = Spacing.gutter, end = Spacing.sm, top = Spacing.md),
+            .padding(
+                start = Spacing.gutter,
+                end = Spacing.sm,
+                top = Spacing.md,
+            ),
     ) {
         PageMasthead(model = state.visibleMasthead) {
             MastheadRefreshAction(

@@ -52,6 +52,7 @@ class OnMarkBookAsReadClickActionTest {
 
     private fun stubDependencies(testScope: TestScope): BookDetailDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<BookDetailDependencies>(relaxed = true).also { mock ->
             every {
                 mock.markBookAsReadUseCase
@@ -116,6 +117,7 @@ class OnMarkBookAsReadClickActionTest {
                 id = 42,
                 userBook = null,
             )
+
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -144,6 +146,7 @@ class OnMarkBookAsReadClickActionTest {
                 id = 42,
                 userBook = mockk<UserBook>(),
             )
+
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -172,6 +175,7 @@ class OnMarkBookAsReadClickActionTest {
                 id = 42,
                 userBook = null,
             )
+
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -200,6 +204,7 @@ class OnMarkBookAsReadClickActionTest {
                 id = 42,
                 userBook = null,
             )
+
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -255,6 +260,7 @@ class OnMarkBookAsReadClickActionTest {
             val bookId = 42
             val book = stubBook(id = bookId)
             val priorJob = Job()
+
             localVariablesFlow.value = BookDetailLocalVariables(
                 bookMutationJobs = mapOf(bookId to priorJob),
             )
@@ -351,15 +357,18 @@ class OnMarkBookAsReadClickActionTest {
             // ----- Arrange -----
             val book = stubBook(id = 42)
             val scanned = stubEdition(id = 555)
+
             val stateBook = stubStateBook(
                 editions = listOf(scanned),
                 currentEdition = stubEdition(id = 77),
             )
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = stateBook,
                 previewEdition = stubEdition(id = 55),
                 scannedEditionId = 555,
             )
+
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -390,14 +399,17 @@ class OnMarkBookAsReadClickActionTest {
         fun `falls back to the book's current edition id when off-shelf without preview or scan`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 42)
+
             val stateBook = stubStateBook(
                 editions = emptyList(),
                 currentEdition = stubEdition(id = 77),
             )
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = stateBook,
                 previewEdition = null,
             )
+
             dependencies = stubDependencies(this)
 
             coEvery {

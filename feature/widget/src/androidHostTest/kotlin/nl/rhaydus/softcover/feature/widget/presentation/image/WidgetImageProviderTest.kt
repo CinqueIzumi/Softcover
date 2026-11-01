@@ -4,10 +4,10 @@ import android.net.Uri
 import io.kotest.assertions.throwables.shouldThrow
 import io.mockk.every
 import io.mockk.mockk
-import java.io.FileNotFoundException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import java.io.FileNotFoundException
 
 class WidgetImageProviderTest {
     private lateinit var provider: WidgetImageProvider
@@ -39,6 +39,7 @@ class WidgetImageProviderTest {
                     "w",
                 )
             }
+
             shouldThrow<FileNotFoundException> {
                 provider.openFile(
                     uri,
@@ -60,6 +61,7 @@ class WidgetImageProviderTest {
                     "r",
                 )
             }
+
             shouldThrow<FileNotFoundException> {
                 provider.openFile(
                     uppercase,
@@ -75,6 +77,7 @@ class WidgetImageProviderTest {
                 "..",
                 "x",
             )
+
             val embeddedSegment = uriOf("../x")
 
             // ----- Act & Assert -----
@@ -84,6 +87,7 @@ class WidgetImageProviderTest {
                     "r",
                 )
             }
+
             shouldThrow<FileNotFoundException> {
                 provider.openFile(
                     embeddedSegment,

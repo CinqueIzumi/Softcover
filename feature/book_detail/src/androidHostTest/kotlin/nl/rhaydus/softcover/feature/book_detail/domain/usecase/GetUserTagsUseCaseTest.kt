@@ -22,6 +22,7 @@ class GetUserTagsUseCaseTest {
     fun setUp() {
         userTagsRepository = mockk()
         getUserIdUseCase = mockk()
+
         useCase = GetUserTagsUseCase(
             userTagsRepository = userTagsRepository,
             getUserIdUseCase = getUserIdUseCase,

@@ -59,6 +59,7 @@ class OptimisticBookTransformsTest {
                     progress = 100f,
                     finishedAt = "2025-06-01",
                 )
+
                 val book = bookWith(
                     status,
                     older,
@@ -90,11 +91,13 @@ class OptimisticBookTransformsTest {
                 progress = 100f,
                 finishedAt = "2025-06-01",
             )
+
             val unfinished = read(
                 id = 6,
                 progress = 40f,
                 page = 40,
             )
+
             val book = bookWith(
                 BookStatus.Paused,
                 finished,
@@ -118,6 +121,7 @@ class OptimisticBookTransformsTest {
                 progress = 100f,
                 finishedAt = "2025-06-01",
             )
+
             val book = bookWith(
                 BookStatus.Paused,
                 finished,
@@ -156,11 +160,13 @@ class OptimisticBookTransformsTest {
                     progress = 100f,
                     finishedAt = "2025-06-01",
                 )
+
                 val current = read(
                     id = 6,
                     progress = 40f,
                     page = 40,
                 )
+
                 val book = bookWith(
                     status,
                     older,
@@ -189,6 +195,7 @@ class OptimisticBookTransformsTest {
                     id = 6,
                     progress = 40f,
                 )
+
                 val book = bookWith(
                     status,
                     unfinished,
@@ -211,6 +218,7 @@ class OptimisticBookTransformsTest {
                 progress = 100f,
                 finishedAt = "2025-06-01",
             )
+
             val book = bookWith(
                 BookStatus.Reading,
                 alreadyFinished,
@@ -255,11 +263,13 @@ class OptimisticBookTransformsTest {
                 page = 100,
                 finishedAt = "2025-06-01",
             )
+
             val current = read(
                 id = 6,
                 progress = 10f,
                 page = 10,
             )
+
             val book = bookWith(
                 BookStatus.Reading,
                 older,

@@ -29,6 +29,7 @@ class OnQuoteWhenReadResetActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -48,6 +49,7 @@ class OnQuoteWhenReadResetActionTest {
                 8,
                 0,
             )
+
             stateFlow.value = buildBookDetailUiState().copy(
                 readAt = progressReadAt,
                 quoteDraft = QuoteDraft(
@@ -62,6 +64,7 @@ class OnQuoteWhenReadResetActionTest {
                     ),
                 ),
             )
+
             val action = OnQuoteWhenReadResetAction()
 
             // ----- Act -----

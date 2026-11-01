@@ -11,4 +11,4 @@ internal sealed interface WidgetsSettingsAction : UiAction<
     WidgetsSettingsUiState,
     WidgetsSettingsEvent,
     WidgetsSettingsLocalVariables,
-    >
+>

@@ -50,7 +50,12 @@ internal fun DesktopSearchResults(
             runAction = runAction,
             onBookClick = onBookClick,
         ) { onSearchResultEvent ->
-            Row(modifier = Modifier.padding(horizontal = Spacing.gutter, vertical = Spacing.xs)) {
+            Row(
+                modifier = Modifier.padding(
+                    horizontal = Spacing.gutter,
+                    vertical = Spacing.xs,
+                ),
+            ) {
                 SortChip(
                     state = state,
                     runAction = runAction,

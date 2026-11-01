@@ -27,35 +27,44 @@ internal fun buildQuoteBook(
         every {
             it.id
         } returns 70
+
         every {
             it.title
         } returns editionTitle
+
         every {
             it.url
         } returns editionUrl
+
         every {
             it.pages
         } returns currentPages
+
         every {
             it.audioSeconds
         } returns audioSeconds
+
         every {
             it.isAudiobook
         } returns isAudiobook
     }
+
     val defaultEdition = mockk<BookEdition>().also {
         every {
             it.pages
         } returns defaultPages
     }
+
     val read = mockk<UserBookRead>().also {
         every {
             it.currentPage
         } returns readPage
+
         every {
             it.currentSeconds
         } returns readSeconds
     }
+
     val userBook = mockk<UserBook>().also {
         every {
             it.privacySettingId
@@ -66,18 +75,23 @@ internal fun buildQuoteBook(
         every {
             it.id
         } returns id
+
         every {
             it.title
         } returns title
+
         every {
             it.currentEdition
         } returns currentEdition
+
         every {
             it.defaultEdition
         } returns defaultEdition
+
         every {
             it.currentRead
         } returns read
+
         every {
             it.userBook
         } returns userBook.takeIf { shelved }

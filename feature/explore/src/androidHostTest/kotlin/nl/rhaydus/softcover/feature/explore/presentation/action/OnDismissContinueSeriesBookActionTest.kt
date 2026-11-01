@@ -38,6 +38,7 @@ class OnDismissContinueSeriesBookActionTest {
         dismissContinueSeriesBookUseCase = mockk()
         undoContinueSeriesBookDismissalUseCase = mockk(relaxed = true)
         stateFlow = MutableStateFlow(ExploreScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
@@ -69,6 +70,7 @@ class OnDismissContinueSeriesBookActionTest {
 
     private fun stubDependencies(testScope: TestScope): ExploreDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<ExploreDependencies>(relaxed = true).also { mock ->
             every {
                 mock.dismissContinueSeriesBookUseCase
@@ -98,6 +100,7 @@ class OnDismissContinueSeriesBookActionTest {
         fun `invokes dismissContinueSeriesBookUseCase with the given book`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
+
             val book = DismissedSeriesBook(
                 bookId = 42,
                 title = "Dune",
@@ -130,6 +133,7 @@ class OnDismissContinueSeriesBookActionTest {
         fun `offers an Undo snackbar once the dismissal is saved`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
+
             val book = DismissedSeriesBook(
                 bookId = 42,
                 title = "Dune",
@@ -168,6 +172,7 @@ class OnDismissContinueSeriesBookActionTest {
         fun `does not show a snackbar when the use case fails`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
+
             val book = DismissedSeriesBook(
                 bookId = 42,
                 title = "Dune",
@@ -207,6 +212,7 @@ class OnDismissContinueSeriesBookActionTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
             val onActionClickSlot = slot<() -> Unit>()
+
             val book = DismissedSeriesBook(
                 bookId = 42,
                 title = "Dune",

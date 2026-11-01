@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiS
 import nl.rhaydus.toad.Collector
 
 internal sealed interface BookDetailCollector : Collector<
-        BookDetailUiState,
-        BookDetailEvent,
-        BookDetailDependencies,
-        BookDetailLocalVariables,
-        >
+    BookDetailUiState,
+    BookDetailEvent,
+    BookDetailDependencies,
+    BookDetailLocalVariables,
+>

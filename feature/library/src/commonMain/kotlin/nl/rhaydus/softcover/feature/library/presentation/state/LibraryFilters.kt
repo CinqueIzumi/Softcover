@@ -30,6 +30,7 @@ internal data class LibraryFilters(
     fun matchesBook(book: Book): Boolean {
         if (tags.isNotEmpty()) {
             val ids = activeTagIds
+
             if (book.tags.none { it.id in ids }) return false
         }
 
@@ -62,6 +63,7 @@ internal data class LibraryFilters(
         if (tags.isNotEmpty()) {
             val ids = activeTagIds
             val bookTags = book?.tags.orEmpty()
+
             if (bookTags.none { it.id in ids }) return false
         }
 
@@ -69,6 +71,7 @@ internal data class LibraryFilters(
 
         if (releaseYears.isNotEmpty()) {
             val year = book?.releaseYear ?: edition.releaseYear
+
             if (year !in releaseYears) return false
         }
 
@@ -82,6 +85,7 @@ internal data class LibraryFilters(
 
         if (ratingMin != null) {
             val rating = book?.rating ?: 0.0
+
             if (rating < ratingMin) return false
         }
 

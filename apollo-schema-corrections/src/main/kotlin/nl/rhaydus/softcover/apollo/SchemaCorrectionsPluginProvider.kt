@@ -19,29 +19,28 @@ private val corrections = listOf(
 )
 
 class SchemaCorrectionsPluginProvider : ApolloCompilerPluginProvider {
-    override fun create(environment: ApolloCompilerPluginEnvironment): ApolloCompilerPlugin =
-        object : ApolloCompilerPlugin {
-            override fun beforeCompilationStep(
-                environment: ApolloCompilerPluginEnvironment,
-                registry: ApolloCompilerRegistry,
-            ) {
-                registry.registerSchemaTransform(
-                    "schema-corrections",
-                    transform = SchemaDocumentTransform { document -> document.corrected() },
-                )
-            }
+    override fun create(environment: ApolloCompilerPluginEnvironment): ApolloCompilerPlugin = object : ApolloCompilerPlugin {
+        override fun beforeCompilationStep(
+            environment: ApolloCompilerPluginEnvironment,
+            registry: ApolloCompilerRegistry,
+        ) {
+            registry.registerSchemaTransform(
+                "schema-corrections",
+                transform = SchemaDocumentTransform { document -> document.corrected() },
+            )
         }
+    }
 }
 
-private fun GQLDocument.corrected(): GQLDocument =
-    copy(
-        definitions = definitions.map { definition ->
-            if (definition is GQLObjectTypeDefinition) definition.withCorrectedFields() else definition
-        },
-    )
+private fun GQLDocument.corrected(): GQLDocument = copy(
+    definitions = definitions.map { definition ->
+        if (definition is GQLObjectTypeDefinition) definition.withCorrectedFields() else definition
+    },
+)
 
 private fun GQLObjectTypeDefinition.withCorrectedFields(): GQLObjectTypeDefinition {
     val typeCorrections = corrections.filter { it.typeName == name }
+
     if (typeCorrections.isEmpty()) return this
 
     return copy(

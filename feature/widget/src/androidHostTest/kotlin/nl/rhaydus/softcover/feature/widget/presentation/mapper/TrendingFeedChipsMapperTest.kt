@@ -84,6 +84,7 @@ class TrendingFeedChipsMapperTest {
                     TrendingFeedKind.Recent,
                     TrendingFeedKind.Upcoming,
                 )
+
             result.chips.map { it.selected } shouldContainExactly listOf(false, true, false)
         }
     }

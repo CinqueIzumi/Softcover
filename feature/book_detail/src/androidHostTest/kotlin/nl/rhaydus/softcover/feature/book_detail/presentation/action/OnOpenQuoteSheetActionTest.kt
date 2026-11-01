@@ -29,6 +29,7 @@ class OnOpenQuoteSheetActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -62,6 +63,7 @@ class OnOpenQuoteSheetActionTest {
                     privacySettingId = 2,
                 ),
             )
+
             val action = OnOpenQuoteSheetAction()
 
             // ----- Act -----

@@ -125,7 +125,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                     """
             ALTER TABLE book_editions
             ADD COLUMN format TEXT NOT NULL DEFAULT ''
-        """.trimIndent(),
+                    """.trimIndent(),
                 )
             }
         }
@@ -141,7 +141,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 event TEXT NOT NULL,
                 updatedAt TEXT NOT NULL
             )
-        """.trimIndent(),
+                    """.trimIndent(),
                 )
             }
         }
@@ -319,12 +319,12 @@ abstract class SoftcoverDatabase : RoomDatabase() {
 
                 connection.execSQL(
                     "CREATE INDEX IF NOT EXISTS index_book_list_edition_cross_ref_bookListId " +
-                            "ON book_list_edition_cross_ref(bookListId)",
+                        "ON book_list_edition_cross_ref(bookListId)",
                 )
 
                 connection.execSQL(
                     "CREATE INDEX IF NOT EXISTS index_book_list_edition_cross_ref_editionId " +
-                            "ON book_list_edition_cross_ref(editionId)",
+                        "ON book_list_edition_cross_ref(editionId)",
                 )
             }
         }
@@ -343,7 +343,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                         AND bl.slug = 'owned'
                     ) AS isOwned
                 FROM book_editions edition
-            """.trimIndent(),
+                    """.trimIndent(),
                 )
             }
         }
@@ -368,7 +368,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                     FOREIGN KEY(bookId) REFERENCES books(id) ON UPDATE NO ACTION ON DELETE NO ACTION,
                     FOREIGN KEY(editionId) REFERENCES book_editions(id) ON UPDATE NO ACTION ON DELETE NO ACTION
                 )
-            """.trimIndent(),
+                    """.trimIndent(),
                 )
 
                 connection.execSQL(
@@ -377,10 +377,11 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 SELECT bler.bookListId, be.bookId, bler.editionId
                 FROM book_list_edition_cross_ref bler
                 JOIN book_editions be ON bler.editionId = be.id
-            """.trimIndent(),
+                    """.trimIndent(),
                 )
 
                 connection.execSQL("DROP VIEW IF EXISTS book_edition_view")
+
                 connection.execSQL(
                     """
                 CREATE VIEW `book_edition_view` AS SELECT
@@ -393,7 +394,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                             AND bl.slug = 'owned'
                         ) AS isOwned
                     FROM book_editions edition
-            """.trimIndent(),
+                    """.trimIndent(),
                 )
 
                 connection.execSQL("DROP TABLE IF EXISTS book_list_edition_cross_ref")
@@ -471,17 +472,18 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 connection.execSQL("ALTER TABLE book_editions ADD COLUMN localImagePath TEXT DEFAULT NULL")
 
                 connection.execSQL("DROP VIEW IF EXISTS book_edition_view")
+
                 connection.execSQL(
                     "CREATE VIEW `book_edition_view` AS SELECT${' '}\n" +
-                            "        edition.*,\n" +
-                            "        EXISTS(\n" +
-                            "            SELECT 1\n" +
-                            "            FROM list_books lb\n" +
-                            "            JOIN book_lists bl ON bl.id = lb.listId\n" +
-                            "            WHERE lb.editionId = edition.id\n" +
-                            "            AND bl.slug = 'owned'\n" +
-                            "        ) AS isOwned\n" +
-                            "    FROM book_editions edition",
+                        "        edition.*,\n" +
+                        "        EXISTS(\n" +
+                        "            SELECT 1\n" +
+                        "            FROM list_books lb\n" +
+                        "            JOIN book_lists bl ON bl.id = lb.listId\n" +
+                        "            WHERE lb.editionId = edition.id\n" +
+                        "            AND bl.slug = 'owned'\n" +
+                        "        ) AS isOwned\n" +
+                        "    FROM book_editions edition",
                 )
             }
         }
@@ -491,6 +493,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 connection.execSQL("ALTER TABLE book_editions ADD COLUMN canonicalId INTEGER DEFAULT NULL")
 
                 connection.execSQL("DROP VIEW IF EXISTS book_edition_view")
+
                 connection.execSQL(
                     """
                         CREATE VIEW `book_edition_view` AS SELECT
@@ -546,6 +549,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                         )
                     """.trimIndent(),
                 )
+
                 connection.execSQL(
                     """
                         INSERT INTO book_deadlines_new (bookId, deadlineDate, setAt, initialPerDay, unit)
@@ -553,10 +557,12 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                         FROM book_deadlines
                     """.trimIndent(),
                 )
+
                 connection.execSQL("DROP TABLE book_deadlines")
                 connection.execSQL("ALTER TABLE book_deadlines_new RENAME TO book_deadlines")
 
                 connection.execSQL("DROP VIEW IF EXISTS book_edition_view")
+
                 connection.execSQL(
                     """
                         CREATE VIEW `book_edition_view` AS SELECT
@@ -591,7 +597,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 amountOfBooks INTEGER NOT NULL,
                 PRIMARY KEY(id)
             )
-            """.trimIndent(),
+                    """.trimIndent(),
                 )
 
                 connection.execSQL("ALTER TABLE books ADD COLUMN seriesId INTEGER DEFAULT NULL")
@@ -758,6 +764,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 connection.execSQL("ALTER TABLE book_editions ADD COLUMN releaseDate TEXT DEFAULT NULL")
 
                 connection.execSQL("DROP VIEW IF EXISTS book_edition_view")
+
                 connection.execSQL(
                     """
                         CREATE VIEW `book_edition_view` AS SELECT
@@ -808,6 +815,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                         )
                     """.trimIndent(),
                 )
+
                 connection.execSQL("CREATE INDEX IF NOT EXISTS index_book_highlights_bookId ON book_highlights(bookId)")
 
                 connection.execSQL(
@@ -824,6 +832,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                         )
                     """.trimIndent(),
                 )
+
                 connection.execSQL("CREATE INDEX IF NOT EXISTS index_reading_sessions_bookId ON reading_sessions(bookId)")
 
                 connection.execSQL(
@@ -839,6 +848,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                         )
                     """.trimIndent(),
                 )
+
                 connection.execSQL("CREATE INDEX IF NOT EXISTS index_reading_log_entries_bookId ON reading_log_entries(bookId)")
             }
         }
@@ -863,9 +873,10 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                         )
                     """.trimIndent(),
                 )
+
                 connection.execSQL(
                     "CREATE UNIQUE INDEX IF NOT EXISTS index_pending_progress_updates_userBookId_kind " +
-                            "ON pending_progress_updates(userBookId, kind)",
+                        "ON pending_progress_updates(userBookId, kind)",
                 )
             }
         }
@@ -910,7 +921,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
 
                 connection.execSQL(
                     "CREATE UNIQUE INDEX IF NOT EXISTS index_pending_user_book_writes_userBookId_kind " +
-                            "ON pending_user_book_writes(userBookId, kind)",
+                        "ON pending_user_book_writes(userBookId, kind)",
                 )
             }
         }
@@ -1038,7 +1049,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
 
                 connection.execSQL(
                     "CREATE UNIQUE INDEX IF NOT EXISTS index_pending_user_book_writes_userBookId_kind " +
-                            "ON pending_user_book_writes(userBookId, kind)",
+                        "ON pending_user_book_writes(userBookId, kind)",
                 )
             }
         }
@@ -1063,6 +1074,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 connection.execSQL("ALTER TABLE book_editions ADD COLUMN readingFormatId INTEGER DEFAULT NULL")
 
                 connection.execSQL("DROP VIEW IF EXISTS book_edition_view")
+
                 connection.execSQL(
                     """
                         CREATE VIEW `book_edition_view` AS SELECT
@@ -1124,6 +1136,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 connection.execSQL("ALTER TABLE book_editions ADD COLUMN localImageUrl TEXT DEFAULT NULL")
 
                 connection.execSQL("DROP VIEW IF EXISTS book_edition_view")
+
                 connection.execSQL(
                     """
                         CREATE VIEW `book_edition_view` AS SELECT
@@ -1223,6 +1236,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 connection.execSQL("ALTER TABLE book_editions ADD COLUMN isbn13 TEXT DEFAULT NULL")
 
                 connection.execSQL("DROP VIEW IF EXISTS book_edition_view")
+
                 connection.execSQL(
                     """
                         CREATE VIEW `book_edition_view` AS SELECT
@@ -1364,6 +1378,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                         )
                     """.trimIndent(),
                 )
+
                 connection.execSQL("CREATE INDEX IF NOT EXISTS index_progress_history_bookId ON progress_history (bookId)")
                 connection.execSQL("ALTER TABLE pending_user_book_writes ADD COLUMN progressHistoryId INTEGER DEFAULT NULL")
             }
@@ -1394,12 +1409,14 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                         )
                     """.trimIndent(),
                 )
+
                 connection.execSQL(
                     """
                         INSERT INTO published_documents (`key`, markdown, fetchedAtEpochMillis)
                         SELECT 'roadmap', markdown, fetchedAtEpochMillis FROM roadmap_documents
                     """.trimIndent(),
                 )
+
                 connection.execSQL("DROP TABLE roadmap_documents")
             }
         }
@@ -1417,9 +1434,11 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                         )
                     """.trimIndent(),
                 )
+
                 connection.execSQL(
                     "CREATE INDEX IF NOT EXISTS index_trending_books_bookId ON trending_books (bookId)",
                 )
+
                 connection.execSQL(
                     """
                         CREATE TABLE IF NOT EXISTS trending_meta (
@@ -1454,8 +1473,10 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                         )
                     """.trimIndent(),
                 )
+
                 connection.execSQL("CREATE INDEX IF NOT EXISTS index_book_quotes_bookId ON book_quotes (bookId)")
                 connection.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_book_quotes_remoteId ON book_quotes (remoteId)")
+
                 connection.execSQL(
                     """
                         CREATE TABLE IF NOT EXISTS pending_quote_writes (
@@ -1467,6 +1488,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                         )
                     """.trimIndent(),
                 )
+
                 connection.execSQL("DROP TABLE IF EXISTS book_highlights")
             }
         }

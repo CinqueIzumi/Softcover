@@ -36,6 +36,7 @@ class ChooseListsCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -74,13 +75,16 @@ class ChooseListsCollectorTest {
                 url = "https://example.com/default.jpg",
                 localImagePath = null,
             )
+
             val book = PreviewData.baseBook.copy(
                 editions = persistentListOf(),
                 defaultEdition = defaultEdition,
                 coverUrl = "https://example.com/fallback.jpg",
                 userBook = null,
             )
+
             val collector = ChooseListsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -104,10 +108,12 @@ class ChooseListsCollectorTest {
             // ----- Assert -----
             val trailing = stateFlow.value.chooseListsSheet?.scaffold?.header?.trailing
                 .shouldBeInstanceOf<SheetHeaderTrailing.Jacket>()
+
             trailing.cover.source shouldBe CoverSource.Remote(
                 url = "https://example.com/default.jpg",
                 persistEditionId = 42,
             )
+
             job.cancel()
         }
 
@@ -115,12 +121,14 @@ class ChooseListsCollectorTest {
         fun `titles the sheet after the book and leaves the built-in Owned list out of the rows`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = PreviewData.baseBook
+
             val ownedList = buildList(
                 id = 1,
                 name = "Owned",
                 slug = "owned",
                 bookId = book.id,
             )
+
             val customList = buildList(
                 id = 2,
                 name = "Winter reading",
@@ -129,6 +137,7 @@ class ChooseListsCollectorTest {
             )
 
             val collector = ChooseListsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -161,6 +170,7 @@ class ChooseListsCollectorTest {
             )
 
             val collector = ChooseListsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -180,6 +190,7 @@ class ChooseListsCollectorTest {
         fun `listsBeingMutated marks the matching row as pending`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = PreviewData.baseBook
+
             val customList = buildList(
                 id = 2,
                 name = "Winter reading",
@@ -188,6 +199,7 @@ class ChooseListsCollectorTest {
             )
 
             val collector = ChooseListsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -212,15 +224,18 @@ class ChooseListsCollectorTest {
         fun `a pending list keeps its pre-write row while its data changes underneath`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = PreviewData.baseBook
+
             val onList = buildList(
                 id = 2,
                 name = "Winter reading",
                 slug = "winter-reading",
                 bookId = book.id,
             )
+
             val offList = onList.copy(books = emptyList())
 
             val collector = ChooseListsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -232,6 +247,7 @@ class ChooseListsCollectorTest {
                 book = book,
                 userLists = persistentListOf(onList),
             )
+
             stateFlow.value = stateFlow.value.copy(listsBeingMutated = persistentSetOf(onList.id))
 
             // ----- Act -----

@@ -20,6 +20,7 @@ class TrendingSettingsTest {
         fun `written settings read back`() {
             // ----- Arrange -----
             val preferences = mutablePreferencesOf()
+
             val settings = TrendingSettings(
                 feed = TrendingFeed.Trending(period = TrendingPeriod.ThreeMonths),
                 cadence = TrendingRefreshCadence.TwiceDaily,
@@ -65,6 +66,7 @@ class TrendingSettingsTest {
                 feed = TrendingFeed.Trending(period = TrendingPeriod.Week),
                 page = 0,
             )
+
             settings shouldBe TrendingSettings(
                 feed = TrendingFeed.Trending(period = TrendingPeriod.Week),
                 cadence = TrendingRefreshCadence.Daily,

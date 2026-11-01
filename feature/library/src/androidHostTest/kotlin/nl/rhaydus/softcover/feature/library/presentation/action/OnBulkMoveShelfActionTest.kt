@@ -53,6 +53,7 @@ class OnBulkMoveShelfActionTest {
         pauseBookUseCase = mockk(relaxed = true)
         eventChannel = Channel(Channel.BUFFERED)
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -87,21 +88,23 @@ class OnBulkMoveShelfActionTest {
         userBook = null,
     )
 
-    private fun stubDependencies(): LibraryDependencies =
-        mockk<LibraryDependencies>(relaxed = true).also { mock ->
-            every {
-                mock.markBookAsReadUseCase
-            } returns markBookAsReadUseCase
-            every {
-                mock.markBookAsReadingUseCase
-            } returns markBookAsReadingUseCase
-            every {
-                mock.markBookAsWantToReadUseCase
-            } returns markBookAsWantToReadUseCase
-            every {
-                mock.pauseBookUseCase
-            } returns pauseBookUseCase
-        }
+    private fun stubDependencies(): LibraryDependencies = mockk<LibraryDependencies>(relaxed = true).also { mock ->
+        every {
+            mock.markBookAsReadUseCase
+        } returns markBookAsReadUseCase
+
+        every {
+            mock.markBookAsReadingUseCase
+        } returns markBookAsReadingUseCase
+
+        every {
+            mock.markBookAsWantToReadUseCase
+        } returns markBookAsWantToReadUseCase
+
+        every {
+            mock.pauseBookUseCase
+        } returns pauseBookUseCase
+    }
 
     @Nested
     inner class Execute {
@@ -110,6 +113,7 @@ class OnBulkMoveShelfActionTest {
             // ----- Arrange -----
             val selectedBook = buildBook(id = 1)
             val unselectedBook = buildBook(id = 2)
+
             stateFlow.value = LibraryUiState(
                 selectionMode = true,
                 selectedBookIds = persistentSetOf(1),
@@ -146,6 +150,7 @@ class OnBulkMoveShelfActionTest {
             val selectedBook1 = buildBook(id = 1)
             val selectedBook2 = buildBook(id = 2)
             val explicitBook = buildBook(id = 99)
+
             stateFlow.value = LibraryUiState(
                 selectedBookIds = persistentSetOf(1, 2),
                 booksByTab = persistentMapOf(tabKey to persistentListOf(selectedBook1, selectedBook2, explicitBook)),
@@ -174,6 +179,7 @@ class OnBulkMoveShelfActionTest {
         fun `CURRENTLY_READING routes to the reading use case`() = runTest {
             // ----- Arrange -----
             val book = buildBook(id = 1)
+
             stateFlow.value = LibraryUiState(
                 selectedBookIds = persistentSetOf(1),
                 booksByTab = persistentMapOf(tabKey to persistentListOf(book)),
@@ -199,6 +205,7 @@ class OnBulkMoveShelfActionTest {
         fun `WANT_TO_READ routes to the want-to-read use case`() = runTest {
             // ----- Arrange -----
             val book = buildBook(id = 1)
+
             stateFlow.value = LibraryUiState(
                 selectedBookIds = persistentSetOf(1),
                 booksByTab = persistentMapOf(tabKey to persistentListOf(book)),
@@ -224,6 +231,7 @@ class OnBulkMoveShelfActionTest {
         fun `PAUSED routes to the pause use case`() = runTest {
             // ----- Arrange -----
             val book = buildBook(id = 1)
+
             stateFlow.value = LibraryUiState(
                 selectedBookIds = persistentSetOf(1),
                 booksByTab = persistentMapOf(tabKey to persistentListOf(book)),
@@ -250,6 +258,7 @@ class OnBulkMoveShelfActionTest {
             // ----- Arrange -----
             val sessionBook = buildBook(id = 1)
             val otherBook = buildBook(id = 2)
+
             stateFlow.value = LibraryUiState(
                 selectionMode = true,
                 selectedBookIds = persistentSetOf(1, 2),
@@ -277,6 +286,7 @@ class OnBulkMoveShelfActionTest {
         fun `PAUSED with a confirmed session pause goes straight to the pause use case`() = runTest {
             // ----- Arrange -----
             val sessionBook = buildBook(id = 1)
+
             stateFlow.value = LibraryUiState(
                 booksByTab = persistentMapOf(tabKey to persistentListOf(sessionBook)),
                 activeSessionBookId = 1,
@@ -305,6 +315,7 @@ class OnBulkMoveShelfActionTest {
         fun `moving the session's book to a status other than PAUSED does not ask for confirmation`() = runTest {
             // ----- Arrange -----
             val sessionBook = buildBook(id = 1)
+
             stateFlow.value = LibraryUiState(
                 selectedBookIds = persistentSetOf(1),
                 booksByTab = persistentMapOf(tabKey to persistentListOf(sessionBook)),
@@ -331,6 +342,7 @@ class OnBulkMoveShelfActionTest {
             // ----- Arrange -----
             val failingBook = buildBook(id = 1)
             val okBook = buildBook(id = 2)
+
             stateFlow.value = LibraryUiState(
                 selectionMode = true,
                 selectedBookIds = persistentSetOf(1, 2),
@@ -340,9 +352,11 @@ class OnBulkMoveShelfActionTest {
             coEvery {
                 markBookAsReadUseCase(book = failingBook)
             } returns Result.failure(RuntimeException("boom"))
+
             coEvery {
                 markBookAsReadUseCase(book = okBook)
             } returns Result.success(ShelfMutationOutcome.Applied)
+
             every {
                 SnackBarManager.showSnackbar(title = any())
             } returns mockk(relaxed = true)
@@ -355,6 +369,7 @@ class OnBulkMoveShelfActionTest {
 
             // ----- Assert -----
             coVerify(exactly = 1) { markBookAsReadUseCase(book = okBook) }
+
             verify(exactly = 1) {
                 SnackBarManager.showSnackbar(title = "Couldn't move 1 book. Try again.")
             }
@@ -387,6 +402,7 @@ class OnBulkMoveShelfActionTest {
         fun `moving to READ sends a Milestone BulkMoveAppliedEvent`() = runTest {
             // ----- Arrange -----
             val book = buildBook(id = 1)
+
             stateFlow.value = LibraryUiState(
                 selectedBookIds = persistentSetOf(1),
                 booksByTab = persistentMapOf(tabKey to persistentListOf(book)),
@@ -412,6 +428,7 @@ class OnBulkMoveShelfActionTest {
         fun `moving to a status other than READ sends a Routine BulkMoveAppliedEvent`() = runTest {
             // ----- Arrange -----
             val book = buildBook(id = 1)
+
             stateFlow.value = LibraryUiState(
                 selectedBookIds = persistentSetOf(1),
                 booksByTab = persistentMapOf(tabKey to persistentListOf(book)),
@@ -437,6 +454,7 @@ class OnBulkMoveShelfActionTest {
             // ----- Arrange -----
             val failingBook = buildBook(id = 1)
             val okBook = buildBook(id = 2)
+
             stateFlow.value = LibraryUiState(
                 selectedBookIds = persistentSetOf(1, 2),
                 booksByTab = persistentMapOf(tabKey to persistentListOf(failingBook, okBook)),
@@ -445,9 +463,11 @@ class OnBulkMoveShelfActionTest {
             coEvery {
                 markBookAsReadUseCase(book = failingBook)
             } returns Result.failure(RuntimeException("boom"))
+
             coEvery {
                 markBookAsReadUseCase(book = okBook)
             } returns Result.success(ShelfMutationOutcome.Applied)
+
             every {
                 SnackBarManager.showSnackbar(title = any())
             } returns mockk(relaxed = true)
@@ -468,6 +488,7 @@ class OnBulkMoveShelfActionTest {
         fun `after the move it withdraws the bulk sheet requests`() = runTest {
             // ----- Arrange -----
             val book = buildBook(id = 1)
+
             stateFlow.value = LibraryUiState(
                 selectionMode = true,
                 selectedBookIds = persistentSetOf(1),
@@ -495,6 +516,7 @@ class OnBulkMoveShelfActionTest {
         fun `a failed move still withdraws the bulk sheet requests`() = runTest {
             // ----- Arrange -----
             val book = buildBook(id = 1)
+
             stateFlow.value = LibraryUiState(
                 selectedBookIds = persistentSetOf(1),
                 booksByTab = persistentMapOf(tabKey to persistentListOf(book)),
@@ -504,6 +526,7 @@ class OnBulkMoveShelfActionTest {
             coEvery {
                 markBookAsReadUseCase(book = book)
             } returns Result.failure(RuntimeException("boom"))
+
             every {
                 SnackBarManager.showSnackbar(title = any())
             } returns mockk(relaxed = true)

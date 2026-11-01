@@ -30,6 +30,7 @@ class OnShareCaptureEventActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(ProfileUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalProfileVariables()),
@@ -75,6 +76,7 @@ class OnShareCaptureEventActionTest {
             stateFlow.value = ProfileUiState(
                 shareCapture = ShareCaptureState(progress = ShareCaptureProgress.Sharing),
             )
+
             val action = OnShareCaptureEventAction(captureEvent = ShareCardSheetEvent.CaptureFinished)
 
             // ----- Act -----
@@ -126,6 +128,7 @@ class OnShareCaptureEventActionTest {
                 isShareSheetRequested = true,
                 shareCapture = ShareCaptureState(progress = ShareCaptureProgress.Saving),
             )
+
             val action = OnShareCaptureEventAction(captureEvent = ShareCardSheetEvent.Dismissed)
 
             // ----- Act -----
@@ -148,6 +151,7 @@ class OnShareCaptureEventActionTest {
                     progress = ShareCaptureProgress.Idle,
                 ),
             )
+
             stateFlow.value = ProfileUiState(shareSheet = open)
             val action = OnShareCaptureEventAction(captureEvent = ShareCardSheetEvent.Shared)
 

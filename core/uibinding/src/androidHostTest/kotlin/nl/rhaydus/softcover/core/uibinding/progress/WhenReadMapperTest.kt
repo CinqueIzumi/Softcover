@@ -1,15 +1,15 @@
 package nl.rhaydus.softcover.core.uibinding.progress
 
-import io.kotest.matchers.shouldBe
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import kotlin.time.Instant
 import nl.rhaydus.softcover.core.component.chip.ChipTrailing
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import kotlin.time.Instant
 
 class WhenReadMapperTest {
     private val now = LocalDateTime(
@@ -70,6 +70,7 @@ class WhenReadMapperTest {
                 9,
                 5,
             )
+
             val earlier = LocalDateTime(
                 2024,
                 2,

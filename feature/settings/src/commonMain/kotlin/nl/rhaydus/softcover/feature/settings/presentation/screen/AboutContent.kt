@@ -140,6 +140,7 @@ private fun SourceSection(
                     target = SettingsMenuRowTarget.ExternalLink(onClick = { openUrl(GITHUB_REPO_URL) }),
                 )
             }
+
             DividedRow {
                 SettingsMenuRow(
                     title = "What's new",
@@ -148,6 +149,7 @@ private fun SourceSection(
                     target = SettingsMenuRowTarget.SubPage(onClick = onWhatsNewClick),
                 )
             }
+
             DividedRow {
                 SettingsMenuRow(
                     title = "Roadmap",
@@ -183,6 +185,7 @@ private fun ContactSection(
                     target = SettingsMenuRowTarget.ExternalLink(onClick = { openUrl(GITHUB_ISSUES_URL) }),
                 )
             }
+
             DividedRow {
                 SettingsMenuRow(
                     title = DISCORD_USERNAME,
@@ -191,6 +194,7 @@ private fun ContactSection(
                     target = SettingsMenuRowTarget.Copyable,
                 )
             }
+
             DividedRow {
                 SettingsMenuRow(
                     title = "Join the Hardcover Discord",

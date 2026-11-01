@@ -33,7 +33,6 @@ import nl.rhaydus.softcover.core.component.reorder.reorderLift
 import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
-import nl.rhaydus.softcover.core.presentation.model.LibraryTab as LibraryContentTab
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberPrefetchingBookCardEventHandler
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkAddToListSheetShownAction
@@ -47,6 +46,7 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.softcover.feature.library.presentation.state.bookReorderStatusFor
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyGridState
+import nl.rhaydus.softcover.core.presentation.model.LibraryTab as LibraryContentTab
 
 @Composable
 internal fun BookList(
@@ -161,7 +161,7 @@ internal fun BookList(
             is BookCardEvent.TrailingClicked,
             is BookCardEvent.MenuClicked,
             is BookCardEvent.ShakeEnded,
-                -> Unit
+            -> Unit
         }
     }
 
@@ -457,6 +457,7 @@ private fun libraryBookContextMenu(
             onClick = onAddToList,
         ),
     )
+
     add(
         DesktopContextMenuItem(
             label = "Remove from library",

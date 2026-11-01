@@ -258,6 +258,7 @@ private fun HelperLine(openUrl: (String) -> Unit) {
         withLink(link = link) {
             withStyle(style = SpanStyle(color = linkColor)) {
                 append("here")
+
                 appendInlineContent(
                     OPEN_IN_NEW_INLINE_CONTENT_ID,
                     "[external link]",
