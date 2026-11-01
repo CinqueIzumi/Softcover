@@ -15,24 +15,21 @@ filed before step 4. Every step boundary leaves both builds green. Sibling files
 
 ## Now
 
-- **State:** steps 1-3 and step 4 waves 1-4 are done, including the ktlint `indent` /
-  `expression-on-equals-line` sweep (Softcover `ace154fe1`) and the F65 suppression audit. The audit found no
-  suppression of a contract rule. It fixed `StatsBookMapper` (`month.number`), folded `requireData`'s exception
-  branch into one throw via `apiExceptionFor`, dropped `BarcodeScanner`'s `MissingPermission` and moved its
-  generic-catch suppression onto the `try`, removed 10 dead test suppressions, and corrected the stale
-  `ThrowsCount` and `LoopWithTooManyJumpStatements` comments in `config/detekt/detekt.yml`. 15 suppressions
-  stay, each a platform limit, a crash boundary or an unavoidable generic cast.
-- **Next:** the step 4 "Docs and memory" box plus marking F66 as split, then step 5 (pointer box moves
-  Softcover's `README.md` foundation line and the managed `CLAUDE.md` block from 0.3.2 to 0.4.0).
+- **State:** steps 1-4 are done. The last box documented F59 (`AdaptiveModalSheet` and `hoverHighlight` KDoc,
+  the embedded-composable rule in `toad-architecture.md`), moved the multi-line lambda brace rule into the
+  foundation `code-style.md` and dropped Softcover's delta, fixed two stale rule names in Softcover's
+  `code-style.md`, told the plugin reviewer that Konsist and detekt gate `@Nested` and the AAA markers, swapped
+  the close-out greps in `.claude/rhaydus.json` for `styleCheck :konsist:test`, pruned six agent memories, and
+  emptied `candidates.md` (F66 shipped split across ktlint, detekt and Konsist).
+- **Next:** step 5. Push the foundation branch, merge it, tag `v0.4.0`; move Softcover's pointer onto the tag
+  and re-run `rhaydus-adopt` so the managed `CLAUDE.md` block and `README.md` say 0.4.0; reinstall the plugin
+  so the reviewer edit applies.
 - **Open questions:** none. The user's Medium_Phone pass is pending and does not block step 4. It covers the
   widget repaint on a time-zone change, the Explore, Reading mark-as-read swipe and Settings rows, the deadline
   date picker and skeleton loading states, the count-up and chart motion, and the nav icons (bars, rail,
   sidebar) after the `navIconFor` change.
-- **Verification:** after the audit, `styleCheck`, `testAndroidHostTest` on `:core:network`, `:core:profile`
-  and `:feature:book_detail`, `:feature:scan:lint` and `:core:network:compileKotlinJvm` are green; the reviewer
-  found no behaviour change and no review-only rule breaks.
-- **Uncommitted:** this tracker doc and the F65 prune in `candidates.md` (the audit is Softcover `5b68a9f03`).
-  Not pushed: the foundation since `398f68c`,
+- **Verification:** the box changed only KDoc, markdown and JSON; Softcover `checkDocBudgets` passes.
+- **Uncommitted:** the docs-and-memory box in both repos. Not pushed: the foundation since `398f68c`,
   Softcover since `68dd22e4e`; push the foundation first.
 
 ## How to run a step
@@ -50,7 +47,7 @@ filed before step 4. Every step boundary leaves both builds green. Sibling files
 | 1 | Audit Softcover's agent setup against the plugin | [x] |
 | 2 | A generic agent layer in `rhaydus-kotlin`, adopted in Softcover | [x] |
 | 3 | Fix what the foundation already ships | [x] |
-| 4 | Clear the candidates backlog | [ ] |
+| 4 | Clear the candidates backlog | [x] |
 | 5 | Ship: push, tag, move the pointer | [ ] |
 
 ### 1 — Audit
@@ -106,7 +103,7 @@ deletes it from Softcover, and prunes its entries. Boxes on disjoint modules run
 - [x] detekt rules: F29, F39, F41, F65, and the detekt halves of F57, F62, F64 and F66.
 - [x] Konsist assertions: F34, and the Konsist halves of F52, F57, F62, F64 and F66.
 - [x] Build tooling: F30, F50, F52 (the Konsist half of F52 rides with the Konsist box).
-- [ ] Docs and memory: F59; the review-only rules in both code-style docs shrink to what the gates leave;
+- [x] Docs and memory: F59; the review-only rules in both code-style docs shrink to what the gates leave;
       prune agent memories the new gates make stale.
 
 ### 5 — Ship

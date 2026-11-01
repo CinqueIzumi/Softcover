@@ -28,9 +28,7 @@
     "activeFile": "docs/working/ACTIVE.md",
     "contextBudget": 150000,
     "closeOutGates": [
-      "./gradlew styleCheck",
-      "grep the changed *.kt files for the glommed closer: ^\\s*\\)\\s*\\}",
-      "every @Test in the changed test files has the Arrange / Act / Assert markers"
+      "./gradlew styleCheck :konsist:test"
     ]
   },
   "docGuard": {

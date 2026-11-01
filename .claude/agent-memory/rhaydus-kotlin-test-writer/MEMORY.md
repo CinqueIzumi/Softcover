@@ -7,6 +7,5 @@
 - [Pagination adds required query params](feedback_apollo_pagination_required_params.md) — new required GraphQL vars break old test call sites; run the tests first and fix those minimally
 - [Room migration test pattern](project_migration_test_pattern.md) — BundledSQLiteDriver in-memory per test; needs sqlite-bundled-jvm runtimeOnly; PRAGMA + sqlite_master helpers
 - [Room @Upsert conflict on host](feedback_room_upsert_conflict_host.md) — a second upsert on the same key throws a bare SQLException in host tests; seed via other methods, test delete+insert steps directly
-- [ktlintFormat nested-call trailing comma](feedback_ktlintformat_nested_call_trailing_comma.md) — grep for `),)` after ktlintFormat; wrap the outer call too
 - [Composable style resolution is untestable at unit level](feedback_composable_style_resolution_untestable.md) — no compose-ui-test dep in core:component; proxy "style resolution" coverage via enum/sealed-slot fixture coverage instead
 - [`:app` has no testDebug source set by default](feedback_app_module_testdebug_source_set.md) — add JUnit5/MockK/Kotest/coroutines-test + useJUnitPlatform() by hand; static-state ScreenModel test pattern

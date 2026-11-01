@@ -1,4 +1,3 @@
 - [doc-guard history-regex false positives](feedback_doc_guard_history_regex_false_positives.md) — "used to surface" trips the same rule as "used to be"; pinned-budget files need byte-diff-ordered edits
-- [Import order is not auto-fixed](feedback_import_order_not_autofixed.md) — ktlintFormat skips project-import-order and one-type-per-file; sort imports by script
 - [:app lacks toad/voyager-koin by default](feedback_app_module_lacks_toad_voyager_koin.md) — add both to debugImplementation before wiring a TOAD ScreenModel into an app/src/debug screen; also detekt task is `detektDebug`, not `detektAndroidDebug`
 - [detekt silently loses :app tasks under built-in Kotlin](project_detekt_builtin_kotlin_silent_loss.md) — hand-registered in root build; canary-check after toolchain bumps
