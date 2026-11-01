@@ -50,8 +50,7 @@ complexity:
     allowedFunctionParameters: 12
     ignoreDefaultParameters: true
   TooManyFunctions:
-    # DAOs (BookDao has ~90 queries), operation repositories, and Compose screen objects legitimately
-    # hold many members; @Composable members are not counted.
+    # DAOs, operation repositories, and Compose screen objects legitimately hold many members.
     allowedFunctionsPerFile: 100
     allowedFunctionsPerClass: 100
     allowedFunctionsPerInterface: 100

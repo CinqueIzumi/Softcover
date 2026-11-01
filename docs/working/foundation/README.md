@@ -24,16 +24,15 @@ filed before step 4. Every step boundary leaves both builds green. Sibling files
   stay, each a platform limit, a crash boundary or an unavoidable generic cast.
 - **Next:** the step 4 "Docs and memory" box plus marking F66 as split, then step 5 (pointer box moves
   Softcover's `README.md` foundation line and the managed `CLAUDE.md` block from 0.3.2 to 0.4.0).
-- **Open questions:** `BookDao` has 123 functions against the 100 Softcover's `TooManyFunctions` override
-  allows, hidden by `@Suppress`; the recommendation is to split it by concern as its own step (Room, Koin, every
-  caller). Awaiting the user's call. The user's Medium_Phone pass is pending and does not block step 4. It
-  covers the widget repaint on a time-zone change, the Explore, Reading mark-as-read swipe and Settings rows,
-  the deadline date picker and skeleton loading states, the count-up and chart motion, and the nav icons (bars,
-  rail, sidebar) after the `navIconFor` change.
+- **Open questions:** none. The user's Medium_Phone pass is pending and does not block step 4. It covers the
+  widget repaint on a time-zone change, the Explore, Reading mark-as-read swipe and Settings rows, the deadline
+  date picker and skeleton loading states, the count-up and chart motion, and the nav icons (bars, rail,
+  sidebar) after the `navIconFor` change.
 - **Verification:** after the audit, `styleCheck`, `testAndroidHostTest` on `:core:network`, `:core:profile`
   and `:feature:book_detail`, `:feature:scan:lint` and `:core:network:compileKotlinJvm` are green; the reviewer
   found no behaviour change and no review-only rule breaks.
-- **Uncommitted:** the F65 audit (8 files) and this tracker doc. Not pushed: the foundation since `398f68c`,
+- **Uncommitted:** this tracker doc and the F65 prune in `candidates.md` (the audit is Softcover `5b68a9f03`).
+  Not pushed: the foundation since `398f68c`,
   Softcover since `68dd22e4e`; push the foundation first.
 
 ## How to run a step
@@ -120,6 +119,8 @@ deletes it from Softcover, and prunes its entries. Boxes on disjoint modules run
 
 ## Later (not this plan)
 
+- `BookDao` holds 123 functions against Softcover's `TooManyFunctions` limit of 100, behind `@Suppress`; the user
+  reviews whether to split it by concern.
 - The second app adopts the submodule, once the foundation is finished.
 - Retire Maven Central publishing and the GitHub install instructions, after the second app builds from the
   submodule.

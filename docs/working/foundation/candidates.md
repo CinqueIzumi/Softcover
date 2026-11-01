@@ -167,15 +167,6 @@ Filed but not yet implemented in the foundation.
   detekt rule over test sources that each `@Test` body carries the three markers in order, reported at the
   line. Then drop the grep from the close-out gates and the prose copies.
 
-### F65 — Suppressing a contract rule is itself a finding
-
-- **Type:** gate (detekt config)
-- **Home:** the shared detekt baseline config
-- **Status:** **Open.** "No `@Suppress`" is prose only; 13 suppressions exist in Softcover.
-- **What to build:** enable the built-in `ForbiddenSuppress` for the contract rules (`NoReflection`,
-  `ScreenConstructorProperty`, `UnguardedFlowTerminalRead`, `UnsafeCallOnNullableType`) and audit the existing
-  suppressions.
-
 ### F66 — Pure-AST rules for the remaining review-only layout and naming rules
 
 - **Type:** gate (detekt rules)
