@@ -15,6 +15,7 @@ plugins {
     alias(libs.plugins.dependency.analysis) apply false
     alias(libs.plugins.kover)
     id("rhaydus.doc-budgets")
+    id("rhaydus.file-size")
     id("rhaydus.module-graph")
     id("rhaydus.dependency-analysis")
     id("rhaydus.style")
@@ -26,6 +27,10 @@ plugins {
 // to Codecov.
 dependencies {
     subprojects.forEach { kover(it) }
+}
+
+fileSize {
+    wholeModules.add(":core:component")
 }
 
 rhaydusStyle {
@@ -42,7 +47,6 @@ subprojects {
 
 subprojects {
     tasks.matching { it.name == "check" }.configureEach {
-        dependsOn(":checkPresentationFileSize")
         dependsOn(":checkDocBudgets")
     }
 }
@@ -228,55 +232,5 @@ dependencyAnalysis {
                 exclude("io.coil-kt.coil3:coil-compose")
             }
         }
-    }
-}
-
-// No baseline and no exemption list: the oversized files were split before this gate landed, so any
-// offender is a regression. Rationale in docs/reference/module-structure.md § Build wiring conventions.
-val presentationFileLineLimit = 600
-
-tasks.register("checkPresentationFileSize") {
-    group = "verification"
-    description = "Fails when a presentation or :core:component main source file exceeds " +
-        "$presentationFileLineLimit lines."
-
-    doLast {
-        val violations = mutableListOf<String>()
-        var checked = 0
-
-        subprojects.forEach { module ->
-            val isComponentLibrary = module.path == ":core:component"
-            val sourceSets = module.projectDir.resolve("src")
-                .listFiles { dir -> dir.isDirectory && dir.name.endsWith("Main") }
-                .orEmpty()
-
-            sourceSets.forEach { sourceSet ->
-                sourceSet.walkTopDown()
-                    .filter { it.isFile && it.extension == "kt" }
-                    .filter { file ->
-                        isComponentLibrary ||
-                            "presentation" in file.relativeTo(sourceSet).invariantSeparatorsPath.split("/")
-                    }
-                    .forEach { file ->
-                        checked++
-                        val lines = file.useLines { it.count() }
-                        if (lines > presentationFileLineLimit) {
-                            violations += "${file.relativeTo(rootDir).invariantSeparatorsPath}  ($lines lines)"
-                        }
-                    }
-            }
-        }
-
-        if (violations.isNotEmpty()) {
-            throw GradleException(
-                "Presentation files over $presentationFileLineLimit lines (split them one section per " +
-                    "file, see docs/reference/module-structure.md § Build wiring conventions):\n" +
-                    violations.sorted().joinToString("\n") { "  - $it" },
-            )
-        }
-
-        logger.lifecycle(
-            "checkPresentationFileSize: $checked file(s) checked, all within $presentationFileLineLimit lines.",
-        )
     }
 }

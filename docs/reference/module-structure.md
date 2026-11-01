@@ -301,11 +301,11 @@ Room DB.
   directory on disk, so it also covers the `customDirectory` case (`:feature:settings` has no such
   directory). Verified the same way as the rules above.
 - **No presentation or `:core:component` main source file exceeds 600 lines.** The limit covers every
-  `.kt` file under a `presentation` package in any `*Main` source set, and every main source file in
+  `.kt` file under a `presentation` package in `main` or any `*Main` source set (never tests), and every main source file in
   `:core:component`. An agent cannot read a larger file in one call, so it pages through the file and
   re-reads it. Split a growing screen one section composable per file under `…presentation.screen.section`.
-  Enforced by the `checkPresentationFileSize` Gradle task (wired into `check`), which lists each offender
-  with its line count. There is no baseline and no exemption list.
+  Enforced by the foundation `rhaydus.file-size` gate (`checkFileSize`, wired into `check`), which lists each
+  offender with its line count. There is no baseline and no exemption list.
 
 ### Kotlin Multiplatform
 

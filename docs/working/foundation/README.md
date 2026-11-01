@@ -20,7 +20,9 @@ filed before step 4. Every step boundary leaves both builds green. Sibling files
   foundation `code-style.md` and dropped Softcover's delta, fixed two stale rule names in Softcover's
   `code-style.md`, told the plugin reviewer that Konsist and detekt gate `@Nested` and the AAA markers, swapped
   the close-out greps in `.claude/rhaydus.json` for `styleCheck :konsist:test`, pruned six agent memories, and
-  emptied `candidates.md` (F66 shipped split across ktlint, detekt and Konsist).
+  emptied `candidates.md` (F66 shipped split across ktlint, detekt and Konsist). FU-9 is upstreamed: the
+  foundation `rhaydus.file-size` plugin (`checkFileSize`, 600 lines, now also scanning lowercase `src/main`)
+  replaces Softcover's root `checkPresentationFileSize`.
 - **Next:** step 5. Push the foundation branch, merge it, tag `v0.4.0`; move Softcover's pointer onto the tag
   and re-run `rhaydus-adopt` so the managed `CLAUDE.md` block and `README.md` say 0.4.0; reinstall the plugin
   so the reviewer edit applies.
@@ -28,8 +30,9 @@ filed before step 4. Every step boundary leaves both builds green. Sibling files
   widget repaint on a time-zone change, the Explore, Reading mark-as-read swipe and Settings rows, the deadline
   date picker and skeleton loading states, the count-up and chart motion, and the nav icons (bars, rail,
   sidebar) after the `navIconFor` change.
-- **Verification:** the box changed only KDoc, markdown and JSON; Softcover `checkDocBudgets` passes.
-- **Uncommitted:** the docs-and-memory box in both repos. Not pushed: the foundation since `398f68c`,
+- **Verification:** for FU-9, `checkFileSize styleCheck` passes, an over-limit file fails the gate,
+  `CheckFileSizeTaskTest` (9 tests) passes, and the reviewer's findings are fixed.
+- **Uncommitted:** FU-9 in both repos. Not pushed: the foundation since `398f68c`,
   Softcover since `68dd22e4e`; push the foundation first.
 
 ## How to run a step
