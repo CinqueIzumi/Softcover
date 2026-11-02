@@ -13,8 +13,7 @@ paths:
 - Commit in the foundation first, then record the pointer in Softcover with `git add foundation`.
 - Push the foundation commit before any Softcover commit that points at it (`git push
   --recurse-submodules=check` refuses otherwise).
-- Softcover merges to `main` only with the pointer on a tagged foundation commit; pushing a `v*` tag publishes
-  to Maven Central.
+- Softcover merges to `main` only with the pointer on a tagged foundation commit.
 - Ask before committing in either repo.
 - The `rhaydus-kotlin` plugin installs from `foundation/` through the project-scoped `rhaydus` marketplace in
   `.claude/settings.json` (`foundation/claude/plugins/rhaydus-kotlin/README.md` § Install). Claude Code runs a

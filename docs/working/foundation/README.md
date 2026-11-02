@@ -15,25 +15,27 @@ filed before step 4. Every step boundary leaves both builds green. Sibling files
 
 ## Now
 
-- **State:** steps 1-4 are done. The last box documented F59 (`AdaptiveModalSheet` and `hoverHighlight` KDoc,
-  the embedded-composable rule in `toad-architecture.md`), moved the multi-line lambda brace rule into the
-  foundation `code-style.md` and dropped Softcover's delta, fixed two stale rule names in Softcover's
-  `code-style.md`, told the plugin reviewer that Konsist and detekt gate `@Nested` and the AAA markers, swapped
-  the close-out greps in `.claude/rhaydus.json` for `styleCheck :konsist:test`, pruned six agent memories, and
-  emptied `candidates.md` (F66 shipped split across ktlint, detekt and Konsist). FU-9 is upstreamed: the
-  foundation `rhaydus.file-size` plugin (`checkFileSize`, 600 lines, now also scanning lowercase `src/main`)
-  replaces Softcover's root `checkPresentationFileSize`.
-- **Next:** step 5. Push the foundation branch, merge it, tag `v0.4.0`; move Softcover's pointer onto the tag
-  and re-run `rhaydus-adopt` so the managed `CLAUDE.md` block and `README.md` say 0.4.0; reinstall the plugin
-  so the reviewer edit applies.
-- **Open questions:** none. The user's Medium_Phone pass is pending and does not block step 4. It covers the
-  widget repaint on a time-zone change, the Explore, Reading mark-as-read swipe and Settings rows, the deadline
-  date picker and skeleton loading states, the count-up and chart motion, and the nav icons (bars, rail,
-  sidebar) after the `navIconFor` change.
-- **Verification:** for FU-9, `checkFileSize styleCheck` passes, an over-limit file fails the gate,
-  `CheckFileSizeTaskTest` (9 tests) passes, and the reviewer's findings are fixed.
-- **Uncommitted:** FU-9 in both repos. Not pushed: the foundation since `398f68c`,
-  Softcover since `68dd22e4e`; push the foundation first.
+- **State:** steps 1-4 are done and committed, including FU-9 (foundation `rhaydus.file-size` `08da2fd`,
+  Softcover `ed2b49f99`). Outside the plan, the verdict sheet now refuses swipe, outside tap and back while its
+  draft is unsaved (Softcover `4067ab543`). Both branches are pushed and up to date with their upstreams
+  (`chore/softcover-submodule`, `chore/foundation-submodule`); neither has a PR yet and `v0.4.0` is not
+  tagged. The `## Later` items are out of scope.
+- **Next:** step 5 in this README (`### 5`): open and merge the foundation PR for `chore/softcover-submodule`,
+  tag `v0.4.0`; move Softcover's pointer onto the tag; re-run `rhaydus-adopt` so the managed `CLAUDE.md`
+  block and the `README.md` foundation line say 0.4.0; reinstall the `rhaydus-kotlin` plugin so the reviewer
+  prompt edit applies; push `chore/foundation-submodule` and open its PR; then delete this README,
+  `agent-layer.md` and the `ACTIVE.md` line.
+- **Open questions:** none. The user's Medium_Phone pass is pending and does not block step 5: widget repaint
+  on a time-zone change, Explore / Reading swipe / Settings rows, the deadline date picker, skeletons,
+  count-up and chart motion, nav icons, `RhaydusMorphingButton`, and the verdict sheet's unsaved-draft guard
+  (installed on Medium_Phone).
+- **Verification:** the full CI gate set passed on both repos before the verdict change (`check koverXmlReport
+  :build-logic:test -x lint`, `lint buildHealth`, the iOS compiles, foundation `build`). After it,
+  `styleCheck :konsist:test` and the host tests of `:core:uibinding`, `:core:component`,
+  `:feature:book_detail` and `:feature:reading` pass; the reviewer's findings are fixed. The last session
+  only re-dated commits and edited this doc, so the close-out gate (`styleCheck :konsist:test`) did not need
+  re-running.
+- **Uncommitted:** this tracker doc (handoff rewrite of `## Now`).
 
 ## How to run a step
 
@@ -112,7 +114,8 @@ deletes it from Softcover, and prunes its entries. Boxes on disjoint modules run
 ### 5 — Ship
 
 - [x] Bump the foundation version for everything since 0.3.1 (`gradle.properties` and `plugin.json`).
-- [ ] Push the foundation branch, merge it, and tag the release (a `v*` tag publishes to Maven Central).
+- [ ] Remove Maven Central publishing, the `:catalog` artifact and the GitHub-install text from the foundation.
+- [ ] Merge the foundation PR and tag the release.
 - [ ] Move Softcover's submodule pointer onto the tag; push `chore/foundation-submodule` and open its PR.
 - [ ] Delete this README and `agent-layer.md` (emptied by step 2) and the `ACTIVE.md` line; `candidates.md` stays
       as the foundation backlog.
@@ -122,8 +125,6 @@ deletes it from Softcover, and prunes its entries. Boxes on disjoint modules run
 - `BookDao` holds 123 functions against Softcover's `TooManyFunctions` limit of 100, behind `@Suppress`; the user
   reviews whether to split it by concern.
 - The second app adopts the submodule, once the foundation is finished.
-- Retire Maven Central publishing and the GitHub install instructions, after the second app builds from the
-  submodule.
 
 ## Decisions
 
@@ -133,7 +134,7 @@ deletes it from Softcover, and prunes its entries. Boxes on disjoint modules run
 - The foundation and every app that includes it build on the same AGP and Kotlin versions.
 - One plugin, `rhaydus-kotlin`, loaded per project from its own `foundation/` checkout; no user-scope install.
 - The plugin ships process; project facts live in the project; personal preferences stay with the user.
-- Maven Central publishing stays live until the second app builds from the submodule.
+- The foundation is submodule-only: nothing is published, and a `v*` tag is a pin marker.
 - 0.4.0 ships the whole candidates backlog; nothing waits for a second app.
 - ktlint formats, detekt judges calls, Konsist judges declarations; gates replace agent or grep checks lacking judgement.
 - 2+-argument `Modifier` calls wrap one argument per line, like every other call.
