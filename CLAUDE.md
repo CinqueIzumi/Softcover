@@ -53,9 +53,9 @@ descriptions — never hand-edit it. The full rules are in `.claude/rules/roadma
 <!-- rhaydus:start -->
 ## Rhaydus foundation (managed by rhaydus-adopt - do not hand-edit)
 
-- **Version:** the nl.rhaydus foundation, built from the `foundation/` git submodule through an `includeBuild`, pinned at 0.3.2 (branch `chore/softcover-submodule`, untagged).
+- **Version:** the nl.rhaydus foundation, built from the `foundation/` git submodule through an `includeBuild`, pinned at v0.4.0.
 - **Docs:** `foundation/docs/` at the pinned commit (CAPABILITIES, architecture, toad-architecture, code-style, design-system-foundations). They are the source of truth; this app's docs keep only its deltas.
-- **Libraries consumed:** state and logic `toad`, `core-common`, `core-platform`, `offline-sync`; design system `designsystem-core`, `designsystem-editorial`, `designsystem-image`; gates `ktlint-rules`, `detekt-rules`.
+- **Libraries consumed:** state and logic `toad`, `core-common`, `core-platform`, `offline-sync`; design system `designsystem-core`, `designsystem-editorial`, `designsystem-image`; gates `ktlint-rules`, `detekt-rules`, `konsist-rules`.
 - **This app's design system:** `docs/reference/design-system.md`.
 
 ### Where things live

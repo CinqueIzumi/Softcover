@@ -139,7 +139,7 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 | [Compose Stability Analyzer](https://github.com/skydoves/compose-stability-analyzer) | 0.9.0 | Per-module Compose stability baselines, gated by `stabilityCheck` |
 | [Kover](https://github.com/Kotlin/kotlinx-kover) | 0.9.8 | Code-coverage reports, aggregated at the root for Codecov |
 
-#### Foundation (`nl.rhaydus`, v0.3.2 — first-party shared libraries, built from the `foundation/` git submodule)
+#### Foundation (`nl.rhaydus`, v0.4.0 — first-party shared libraries, built from the `foundation/` git submodule)
 | Library | Purpose |
 |---|---|
 | `nl.rhaydus:toad` | TOAD presentation runtime — `ToadScreenModel`, `UiState` / `UiAction` / `UiEvent`, `Collector`, `ActionDependencies` |
