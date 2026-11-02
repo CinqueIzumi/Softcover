@@ -196,7 +196,7 @@ class VerdictSheetCollectorTest {
                 context = VerdictSheetContext.FINISHED,
                 review = null,
                 cover = cover,
-            ).scaffold
+            ).scaffold.copy(dismissible = false)
         }
 
         @Test

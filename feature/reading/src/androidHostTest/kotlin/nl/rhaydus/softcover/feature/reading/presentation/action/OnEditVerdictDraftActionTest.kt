@@ -61,7 +61,10 @@ class OnEditVerdictDraftActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.verdictSheet shouldBe initial.copy(rating = 4.5)
+            stateFlow.value.verdictSheet shouldBe initial.copy(
+                rating = 4.5,
+                scaffold = initial.scaffold.copy(dismissible = false),
+            )
         }
 
         @Test

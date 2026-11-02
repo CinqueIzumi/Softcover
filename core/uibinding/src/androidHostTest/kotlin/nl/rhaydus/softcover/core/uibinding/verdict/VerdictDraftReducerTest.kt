@@ -345,7 +345,7 @@ class VerdictDraftReducerTest {
             val result = rebuilt.carryingDraftOf(previous = previous)
 
             // ----- Assert -----
-            result.scaffold shouldBe rebuilt.scaffold
+            result.scaffold shouldBe rebuilt.scaffold.copy(dismissible = false)
             result.rating shouldBe 2.5
             result.review shouldBe previous.review
             result.marks shouldBe previous.marks
@@ -409,6 +409,156 @@ class VerdictDraftReducerTest {
 
             // ----- Assert -----
             result shouldBe RichTextUiModel.EMPTY
+        }
+    }
+
+    @Nested
+    inner class Dismissible {
+        @Test
+        fun `a freshly mapped sheet is dismissible`() {
+            // ----- Arrange -----
+            val book = PreviewData.baseBook
+
+            // ----- Act -----
+            val result = book.toVerdictSheetUiModel(
+                context = VerdictSheetContext.EDIT,
+                review = null,
+                cover = null,
+            )
+
+            // ----- Assert -----
+            result.scaffold.dismissible shouldBe true
+        }
+
+        @Test
+        fun `a rating change makes the sheet non-dismissible`() {
+            // ----- Arrange -----
+            val model = freshModel()
+
+            // ----- Act -----
+            val result = model.reduce(VerdictDraftEvent.RatingChanged(rating = 4.5))
+
+            // ----- Assert -----
+            result.scaffold.dismissible shouldBe false
+        }
+
+        @Test
+        fun `a review text change makes the sheet non-dismissible`() {
+            // ----- Arrange -----
+            val model = freshModel()
+
+            // ----- Act -----
+            val result = model.reduce(
+                VerdictDraftEvent.ReviewEdited(
+                    value = TextFieldValue(
+                        text = "hello",
+                        selection = TextRange(5),
+                    ),
+                ),
+            )
+
+            // ----- Assert -----
+            result.scaffold.dismissible shouldBe false
+        }
+
+        @Test
+        fun `a mark change makes the sheet non-dismissible`() {
+            // ----- Arrange -----
+            val model = freshModel().typed(
+                text = "hello",
+                selection = TextRange(
+                    start = 0,
+                    end = 5,
+                ),
+            )
+                .let { it.copy(opened = it.draft) }
+
+            // ----- Act -----
+            val result = model.reduce(VerdictDraftEvent.MarkToggled(mark = RichTextMarkType.BOLD))
+
+            // ----- Assert -----
+            result.scaffold.dismissible shouldBe false
+        }
+
+        @Test
+        fun `a spoiler toggle makes the sheet non-dismissible`() {
+            // ----- Arrange -----
+            val model = freshModel()
+
+            // ----- Act -----
+            val result = model.reduce(VerdictDraftEvent.SpoilersToggled(checked = true))
+
+            // ----- Assert -----
+            result.scaffold.dismissible shouldBe false
+        }
+
+        @Test
+        fun `reverting to the opened draft makes the sheet dismissible again`() {
+            // ----- Arrange -----
+            val edited = freshModel().reduce(VerdictDraftEvent.RatingChanged(rating = 4.5))
+
+            // ----- Act -----
+            val result = edited.reduce(VerdictDraftEvent.RatingChanged(rating = null))
+
+            // ----- Assert -----
+            result.scaffold.dismissible shouldBe true
+        }
+
+        @Test
+        fun `a selection-only change keeps the sheet dismissible`() {
+            // ----- Arrange -----
+            val model = freshModel()
+
+            // ----- Act -----
+            val result = model.reduce(
+                VerdictDraftEvent.ReviewEdited(
+                    value = model.review.copy(selection = TextRange(0)),
+                ),
+            )
+
+            // ----- Assert -----
+            result.scaffold.dismissible shouldBe true
+        }
+
+        @Test
+        fun `a composing-only change keeps the sheet dismissible`() {
+            // ----- Arrange -----
+            val model = freshModel()
+
+            // ----- Act -----
+            val result = model.reduce(
+                VerdictDraftEvent.ReviewEdited(
+                    value = model.review.copy(composition = TextRange(0)),
+                ),
+            )
+
+            // ----- Assert -----
+            result.scaffold.dismissible shouldBe true
+        }
+
+        @Test
+        fun `carryingDraftOf keeps a dirty draft non-dismissible across a rebuild`() {
+            // ----- Arrange -----
+            val dirty = freshModel().reduce(VerdictDraftEvent.RatingChanged(rating = 2.0))
+
+            // ----- Act -----
+            val result = freshModel().carryingDraftOf(dirty)
+
+            // ----- Assert -----
+            result.rating shouldBe 2.0
+            result.scaffold.dismissible shouldBe false
+        }
+
+        @Test
+        fun `carryingDraftOf a clean draft stays dismissible`() {
+            // ----- Arrange -----
+            val clean = freshModel()
+
+            // ----- Act -----
+            val result = freshModel().carryingDraftOf(clean)
+
+            // ----- Assert -----
+            result.scaffold.dismissible shouldBe true
         }
     }
 }

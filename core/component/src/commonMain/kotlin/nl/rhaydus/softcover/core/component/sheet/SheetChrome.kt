@@ -29,6 +29,16 @@ internal class SheetChrome(
             close()
         }
     }
+
+    /**
+     * Starts the animated hide for a button the reader tapped on purpose. Unlike [dismiss] it ignores
+     * `dismissible`, which only guards the accidental scrim, back and swipe exits.
+     */
+    fun dismissFromButton() {
+        if (busy.not() && unlocked) {
+            close()
+        }
+    }
 }
 
 @Composable

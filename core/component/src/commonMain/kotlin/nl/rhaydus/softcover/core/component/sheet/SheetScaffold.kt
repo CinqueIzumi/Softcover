@@ -236,8 +236,8 @@ private fun SheetTop(
             RhaydusButton(
                 label = model.dismissLabel,
                 style = ButtonStyle.TEXT,
-                onClick = chrome::dismiss,
-                enabled = chrome.canDismiss && chrome.unlocked,
+                onClick = chrome::dismissFromButton,
+                enabled = chrome.busy.not() && chrome.unlocked,
             )
         }
     }
@@ -301,7 +301,7 @@ private fun RowScope.SheetHeaderTrailingContent(
                     onEvent(SheetScaffoldEvent.HeaderActionClicked)
 
                     if (trailing.dismissesSheet) {
-                        chrome.dismiss()
+                        chrome.dismissFromButton()
                     }
                 }
             },
@@ -438,7 +438,7 @@ private fun FooterButton(
                     onEvent(if (primary) SheetScaffoldEvent.PrimaryClicked else SheetScaffoldEvent.SecondaryClicked)
 
                     if (button.dismissesSheet) {
-                        chrome.dismiss()
+                        chrome.dismissFromButton()
                     }
                 }
             },

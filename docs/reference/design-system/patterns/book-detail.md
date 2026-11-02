@@ -132,6 +132,7 @@
 - `Book.toVerdictSheetUiModel` (`:core:uibinding`) takes a `VerdictSheetContext` (`FINISHED` / `EDIT`) that
   swaps the copy and whether Delete is offered, never the anatomy.
 - Tapping `VerdictBlock` (or its "Edit" link) is the only way back into the sheet, always in `EDIT`.
+- While the draft holds an unsaved change only the sheet's buttons close it; swipe, outside tap and back do nothing.
 
 ### Verdict prompt (open-on-finish)
 
