@@ -16,6 +16,7 @@ class StopSessionThenTest {
             // ----- Arrange -----
             val calls = mutableListOf<String>()
             val controller = mockk<ActiveSessionController>()
+
             every {
                 controller.stop()
             } answers { calls.add("stop") }
@@ -34,6 +35,7 @@ class StopSessionThenTest {
             // ----- Arrange -----
             val calls = mutableListOf<String>()
             val controller = mockk<ActiveSessionController>()
+
             every {
                 controller.stop()
             } answers { calls.add("stop") }

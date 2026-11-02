@@ -20,12 +20,13 @@ import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import nl.rhaydus.softcover.core.component.modifier.tactileClickable
-import nl.rhaydus.softcover.core.component.state.skeletonMask
+import nl.rhaydus.designsystem.modifier.pressScaleClickable
+import nl.rhaydus.designsystem.modifier.skeletonMask
+import nl.rhaydus.designsystem.theme.Corners
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.MoodInkCosyBackground
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.MoodInkCosyForeground
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.MoodInkDreadBackground
@@ -33,7 +34,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.MoodInkDreadEye
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.MoodInkDreadForeground
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.MoodInkHeartWrenchBackground
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.MoodInkHeartWrenchForeground
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
@@ -93,7 +93,7 @@ fun MoodTile(
                 if (isLoading) {
                     Modifier
                 } else {
-                    Modifier.tactileClickable(
+                    Modifier.pressScaleClickable(
                         onClick = { onEvent(MoodTileEvent.Clicked(key = model.key)) },
                         hoverShape = Corners.lg,
                     )
@@ -126,7 +126,10 @@ fun MoodTile(
                 tint = foreground.copy(alpha = 0.75f),
                 modifier = Modifier
                     .size(16.dp)
-                    .skeletonMask(visible = isLoading),
+                    .skeletonMask(
+                        visible = isLoading,
+                        shape = Corners.xs,
+                    ),
             )
         }
 

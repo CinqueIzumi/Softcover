@@ -19,11 +19,13 @@ internal class UnknownIsbnSheetCollector : ScanCollector {
         dependencies: ScanDependencies,
     ) {
         scope.state
-            .map { state -> Triple(
+            .map { state ->
+                Triple(
                     first = state.unknownIsbn,
                     second = state.isAddingBook,
                     third = state.isImportPending,
-                ) }
+                )
+            }
             .distinctUntilChanged()
             .collectLatest { (isbn, isAdding, isImportPending) ->
                 scope.setState {

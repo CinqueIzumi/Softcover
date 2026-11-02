@@ -19,6 +19,7 @@ class LibraryVisibilityToggleTest {
                 label = label,
                 visible = true,
             )
+
             val hidden = libraryVisibilityToggleFor(
                 label = label,
                 visible = false,

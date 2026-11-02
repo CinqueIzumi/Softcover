@@ -1,5 +1,5 @@
 plugins {
-    id("softcover.kmp.library")
+    id("rhaydus.kmp.library")
     id("softcover.android.room")
     alias(libs.plugins.kotlin.serialization)
 }

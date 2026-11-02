@@ -32,6 +32,7 @@ class QuoteDaoTest {
             builder = Room.inMemoryDatabaseBuilder(context = context),
             queryContext = testDispatcher,
         )
+
         dao = database.quoteDao()
         pendingDao = database.pendingQuoteWriteDao()
     }
@@ -99,6 +100,7 @@ class QuoteDaoTest {
                     actionAt = 10,
                 ),
             )
+
             dao.insertQuote(
                 quote(
                     bookId = 2,
@@ -107,6 +109,7 @@ class QuoteDaoTest {
                     actionAt = 30,
                 ),
             )
+
             dao.insertQuote(
                 quote(
                     bookId = 3,
@@ -134,6 +137,7 @@ class QuoteDaoTest {
                     bookTitle = "Dune",
                 ),
             )
+
             dao.insertQuote(
                 quote(
                     remoteId = 2,
@@ -165,6 +169,7 @@ class QuoteDaoTest {
                     actionAt = 10,
                 ),
             )
+
             dao.insertQuote(
                 quote(
                     remoteId = 2,
@@ -172,6 +177,7 @@ class QuoteDaoTest {
                     actionAt = 30,
                 ),
             )
+
             dao.insertQuote(
                 quote(
                     remoteId = 3,
@@ -180,6 +186,7 @@ class QuoteDaoTest {
                     state = QuoteSyncState.PENDING_DELETE,
                 ),
             )
+
             dao.insertQuote(
                 quote(
                     bookId = 2,
@@ -234,6 +241,7 @@ class QuoteDaoTest {
                     text = "other book",
                 ),
             )
+
             dao.insertQuote(
                 quote(
                     text = "local",
@@ -382,6 +390,7 @@ class QuoteDaoTest {
                     text = "stale one",
                 ),
             )
+
             dao.insertQuote(
                 quote(
                     bookId = 2,
@@ -534,6 +543,7 @@ class QuoteDaoTest {
                     text = "pulled by refresh",
                 ),
             )
+
             val localId = dao.insertQuote(
                 quote(
                     text = "mine",
@@ -600,6 +610,7 @@ class QuoteDaoTest {
             val localId = dao.insertQuote(
                 quote(remoteId = 4),
             )
+
             dao.removeQuote(
                 localId = localId,
                 enqueuedAt = "2024-01-02T00:00:00",
@@ -620,7 +631,7 @@ class QuoteDaoTest {
     @Nested
     inner class PendingWrites {
         @Test
-        fun `getPending skips writes at the attempt cap and orders by enqueue time`() = runTest(testDispatcher) {
+        fun `getPending returns writes at any attempt count ordered by enqueue time`() = runTest(testDispatcher) {
             // ----- Arrange -----
             pendingDao.insert(
                 PendingQuoteWriteEntity(
@@ -629,6 +640,7 @@ class QuoteDaoTest {
                     enqueuedAt = "b",
                 ),
             )
+
             pendingDao.insert(
                 PendingQuoteWriteEntity(
                     kind = "INSERT",
@@ -636,6 +648,7 @@ class QuoteDaoTest {
                     enqueuedAt = "a",
                 ),
             )
+
             pendingDao.insert(
                 PendingQuoteWriteEntity(
                     kind = "INSERT",
@@ -649,7 +662,7 @@ class QuoteDaoTest {
             val result = pendingDao.getPending()
 
             // ----- Assert -----
-            result.map { it.quoteLocalId } shouldBe listOf(2L, 1L)
+            result.map { it.quoteLocalId } shouldBe listOf(2L, 1L, 3L)
         }
     }
 }

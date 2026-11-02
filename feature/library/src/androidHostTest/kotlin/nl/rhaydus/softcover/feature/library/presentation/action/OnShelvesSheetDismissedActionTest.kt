@@ -29,6 +29,7 @@ class OnShelvesSheetDismissedActionTest {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(LibraryUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -39,31 +40,30 @@ class OnShelvesSheetDismissedActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `closes the session, resets the pick flag and sends ManageShelvesRequestedEvent when manage was recorded`() =
-            runTest {
-                // ----- Arrange -----
-                stateFlow.value = LibraryUiState(
-                    shelvesSheet = openShelvesSession(
-                        closing = true,
-                        pending = ManageShelves,
-                    ),
-                    isShelvesSheetRequested = true,
-                    isShelvesSheetPickPending = true,
-                )
+        fun `closes the session, resets the pick flag and sends ManageShelvesRequestedEvent when manage was recorded`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(
+                shelvesSheet = openShelvesSession(
+                    closing = true,
+                    pending = ManageShelves,
+                ),
+                isShelvesSheetRequested = true,
+                isShelvesSheetPickPending = true,
+            )
 
-                // ----- Act -----
-                OnShelvesSheetDismissedAction().execute(
-                    dependencies = dependencies,
-                    scope = scope,
-                )
+            // ----- Act -----
+            OnShelvesSheetDismissedAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
 
-                // ----- Assert -----
-                stateFlow.value.shelvesSheet shouldBe SheetSession.Closed
-                stateFlow.value.isShelvesSheetRequested shouldBe false
-                stateFlow.value.isShelvesSheetPickPending shouldBe false
-                eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<LibraryEvent.ManageShelvesRequestedEvent>()
-                eventChannel.tryReceive().getOrNull() shouldBe null
-            }
+            // ----- Assert -----
+            stateFlow.value.shelvesSheet shouldBe SheetSession.Closed
+            stateFlow.value.isShelvesSheetRequested shouldBe false
+            stateFlow.value.isShelvesSheetPickPending shouldBe false
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<LibraryEvent.ManageShelvesRequestedEvent>()
+            eventChannel.tryReceive().getOrNull() shouldBe null
+        }
 
         @Test
         fun `closes the session, resets the pick flag and sends no event after a tab pick`() = runTest {

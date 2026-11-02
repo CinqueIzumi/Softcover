@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshAction
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshEvent
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
@@ -14,7 +15,6 @@ import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRefreshAction
 
@@ -27,7 +27,11 @@ internal fun DesktopExploreHeader(
 ) {
     PageMasthead(
         model = masthead,
-        modifier = Modifier.padding(start = Spacing.xl, end = Spacing.sm, top = Spacing.md),
+        modifier = Modifier.padding(
+            start = Spacing.xl,
+            end = Spacing.sm,
+            top = Spacing.md,
+        ),
     ) {
         MastheadRefreshAction(
             model = refresh,

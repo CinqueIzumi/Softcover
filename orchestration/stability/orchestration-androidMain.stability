@@ -82,12 +82,11 @@ internal fun nl.rhaydus.softcover.orchestration.presentation.EditorialSidebar(mo
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
-internal fun nl.rhaydus.softcover.orchestration.presentation.NavItemIcon(item: nl.rhaydus.softcover.orchestration.presentation.NavItemUi, painter: androidx.compose.ui.graphics.painter.Painter): kotlin.Unit
+internal fun nl.rhaydus.softcover.orchestration.presentation.NavItemIcon(item: nl.rhaydus.softcover.orchestration.presentation.NavItemUi): kotlin.Unit
   skippable: false
   restartable: true
   params:
     - item: RUNTIME (requires runtime check)
-    - painter: UNKNOWN (interface or non-final class; concrete implementation unknown)
 
 @Composable
 internal fun nl.rhaydus.softcover.orchestration.presentation.NavigationRailBar(modifier: androidx.compose.ui.Modifier): kotlin.Unit
@@ -121,12 +120,11 @@ internal fun nl.rhaydus.softcover.orchestration.presentation.RootStackTransition
     - content: STABLE (composable function type)
 
 @Composable
-private fun nl.rhaydus.softcover.orchestration.presentation.SidebarItem(item: nl.rhaydus.softcover.orchestration.presentation.NavItemUi, painter: androidx.compose.ui.graphics.painter.Painter, onClick: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+private fun nl.rhaydus.softcover.orchestration.presentation.SidebarItem(item: nl.rhaydus.softcover.orchestration.presentation.NavItemUi, onClick: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: false
   restartable: true
   params:
     - item: RUNTIME (requires runtime check)
-    - painter: UNKNOWN (interface or non-final class; concrete implementation unknown)
     - onClick: STABLE (function type)
 
 @Composable

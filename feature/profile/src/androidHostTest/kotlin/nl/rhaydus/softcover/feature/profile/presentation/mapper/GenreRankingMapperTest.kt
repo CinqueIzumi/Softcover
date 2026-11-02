@@ -2,10 +2,10 @@ package nl.rhaydus.softcover.feature.profile.presentation.mapper
 
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import nl.rhaydus.softcover.core.component.chart.ChartTone
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
-import io.kotest.matchers.string.shouldContain
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -56,6 +56,7 @@ class GenreRankingMapperTest {
                 name = "Fantasy",
                 fraction = 0.625,
             )
+
             val genres = GenreBreakdown(slices = listOf(fantasy))
 
             // ----- Act -----
@@ -102,6 +103,7 @@ class GenreRankingMapperTest {
 
             // ----- Assert -----
             result.rows.map { it.label } shouldBe listOf("A", "B", "C", "D", "E")
+
             result.rows.map { it.tone } shouldBe listOf(
                 ChartTone.Lead,
                 ChartTone.Second,

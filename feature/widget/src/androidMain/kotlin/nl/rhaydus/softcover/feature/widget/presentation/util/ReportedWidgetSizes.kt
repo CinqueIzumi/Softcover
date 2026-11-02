@@ -61,6 +61,7 @@ private fun Bundle.orientationSize(
         widthKey,
         0,
     )
+
     val height = getInt(
         heightKey,
         0,
@@ -80,6 +81,7 @@ private fun Bundle.orientationSize(
  */
 internal fun Context.providerMinSize(appWidgetId: Int): DpSize {
     val info = AppWidgetManager.getInstance(this).getAppWidgetInfo(appWidgetId) ?: return DpSize.Zero
+
     val density = resources.displayMetrics.density
 
     val width = if (info.resizeMode and AppWidgetProviderInfo.RESIZE_HORIZONTAL != 0) {

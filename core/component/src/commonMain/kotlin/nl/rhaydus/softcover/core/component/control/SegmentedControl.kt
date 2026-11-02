@@ -30,11 +30,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.hoverHighlight
+import nl.rhaydus.designsystem.modifier.pressScaleSelectable
+import nl.rhaydus.designsystem.theme.Corners
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
-import nl.rhaydus.softcover.core.component.modifier.tactileSelectable
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
@@ -113,6 +113,7 @@ private fun <K> RowScope.TrackSegment(
     // A segment flips enabled the instant its data lands; an un-animated alpha snap would read as a
     // flash amid everything else settling, so it rides the same spec as the selection.
     val floatSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
+
     val disabledAlpha by animateFloatAsState(
         targetValue = if (option.enabled) 1f else DISABLED_ALPHA,
         animationSpec = floatSpec,
@@ -124,7 +125,7 @@ private fun <K> RowScope.TrackSegment(
             .weight(1f)
             .alpha(disabledAlpha)
             .minimumInteractiveComponentSize()
-            .tactileSelectable(
+            .pressScaleSelectable(
                 selected = isSelected,
                 onClick = { if (isSelected.not()) onSelect() },
                 role = Role.RadioButton,
@@ -211,16 +212,19 @@ private fun ProseWord(
     val interactionSource = remember { MutableInteractionSource() }
     val scheme = MaterialTheme.colorScheme
     val colorSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Color>()
+
     val wordColor by animateColorAsState(
         targetValue = if (isSelected) scheme.primary else scheme.onSurfaceVariant.copy(alpha = 0.55f),
         animationSpec = colorSpec,
         label = "ProseWordColor",
     )
+
     val underlineColor by animateColorAsState(
         targetValue = if (isSelected) scheme.primary else Color.Transparent,
         animationSpec = colorSpec,
         label = "ProseWordUnderline",
     )
+
     val disabledAlpha by animateFloatAsState(
         targetValue = if (enabled) 1f else DISABLED_ALPHA,
         animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
@@ -231,7 +235,7 @@ private fun ProseWord(
         modifier = modifier
             .minimumInteractiveComponentSize()
             .alpha(disabledAlpha)
-            .tactileSelectable(
+            .pressScaleSelectable(
                 selected = isSelected,
                 onClick = { if (isSelected.not()) onSelect() },
                 role = Role.RadioButton,

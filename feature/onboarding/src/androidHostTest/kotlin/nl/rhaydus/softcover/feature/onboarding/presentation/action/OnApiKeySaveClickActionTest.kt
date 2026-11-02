@@ -46,6 +46,7 @@ class OnApiKeySaveClickActionTest {
         initializeUserIdAndBooksUseCase = mockk()
         stateFlow = MutableStateFlow(OnboardingUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalOnboardingVariables()),
@@ -55,13 +56,14 @@ class OnApiKeySaveClickActionTest {
 
     private fun stateWithApiKey(text: String): OnboardingUiState = OnboardingUiState().let {
         it.copy(
-        apiKeyField = it.apiKeyField.copy(text = text),
-        saveApiKeyButtonEnabled = true,
-    )
+            apiKeyField = it.apiKeyField.copy(text = text),
+            saveApiKeyButtonEnabled = true,
+        )
     }
 
     private fun stubDependencies(testScope: TestScope): OnboardingDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<OnboardingDependencies>(relaxed = true).also { mock ->
             every {
                 mock.resetUserDataUseCase
@@ -127,12 +129,15 @@ class OnApiKeySaveClickActionTest {
 
             // ----- Assert -----
             stateFlow.value shouldBe stateBefore
+
             coVerify(exactly = 0) {
                 resetUserDataUseCase()
             }
+
             coVerify(exactly = 0) {
                 updateApiKeyUseCase(key = any())
             }
+
             coVerify(exactly = 0) {
                 initializeUserIdAndBooksUseCase()
             }
@@ -146,6 +151,7 @@ class OnApiKeySaveClickActionTest {
             stubUseCases()
 
             var stateAtReset: OnboardingUiState? = null
+
             coEvery {
                 resetUserDataUseCase()
             } coAnswers {
@@ -243,6 +249,7 @@ class OnApiKeySaveClickActionTest {
             stubUseCases()
 
             var progressAtReset: Float? = 1f
+
             coEvery {
                 resetUserDataUseCase()
             } coAnswers {
@@ -268,6 +275,7 @@ class OnApiKeySaveClickActionTest {
             stubUseCases()
 
             var progressAtReset: Float? = null
+
             coEvery {
                 resetUserDataUseCase()
             } coAnswers {
@@ -293,12 +301,14 @@ class OnApiKeySaveClickActionTest {
             stubUseCases()
 
             val progressAtStep = mutableListOf<Float?>()
+
             coEvery {
                 updateApiKeyUseCase(key = any())
             } coAnswers {
                 progressAtStep += stateFlow.value.loadingSheet.modelOrNull.shouldNotBeNull().progress
                 Result.success(Unit)
             }
+
             coEvery {
                 initializeUserIdAndBooksUseCase()
             } coAnswers {
@@ -337,9 +347,11 @@ class OnApiKeySaveClickActionTest {
             stateFlow.value.loadingSheet.modelOrNull.shouldNotBeNull().progress shouldBe 0f
             stateFlow.value.signInFailedBefore shouldBe true
             stateFlow.value.submissionError.shouldNotBeNull()
+
             coVerify(exactly = 0) {
                 updateApiKeyUseCase(key = any())
             }
+
             eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<OnboardingEvent.SignInFailedEvent>()
             eventChannel.tryReceive().getOrNull() shouldBe null
         }
@@ -366,9 +378,11 @@ class OnApiKeySaveClickActionTest {
             stateFlow.value.signInFailedBefore shouldBe true
             stateFlow.value.apiKeyField.error shouldBe TextFieldError(message = REJECTED_KEY_MESSAGE)
             stateFlow.value.submissionError shouldBe null
+
             coVerify(exactly = 0) {
                 initializeUserIdAndBooksUseCase()
             }
+
             eventChannel.tryReceive().getOrNull() shouldBe null
         }
 

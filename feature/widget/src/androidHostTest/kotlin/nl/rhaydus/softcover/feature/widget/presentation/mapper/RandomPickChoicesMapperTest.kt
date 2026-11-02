@@ -44,6 +44,7 @@ class RandomPickChoicesMapperTest {
 
             // ----- Assert -----
             result.chips.map { it.label } shouldContainExactly listOf("Want to Read", "Owned", "Favourites")
+
             result.payloadByKey.values.toList() shouldContainExactly listOf(
                 RandomPickSource.WantToRead,
                 RandomPickSource.Owned,
@@ -158,6 +159,7 @@ class RandomPickChoicesMapperTest {
                 id = 2,
                 name = "Favourites",
             )
+
             val lists = listOf(
                 list(
                     id = 1,

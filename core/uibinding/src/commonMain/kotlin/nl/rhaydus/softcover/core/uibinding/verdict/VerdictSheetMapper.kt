@@ -18,6 +18,7 @@ import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetLayout
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
+import nl.rhaydus.softcover.core.component.verdict.VerdictDraft
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 
@@ -59,6 +60,8 @@ fun Book.toVerdictSheetUiModel(
     }
 
     val buffer = documentToEditorBuffer(document = review ?: RichTextUiModel.EMPTY)
+    val rating = userBook?.rating?.takeIf { it > 0.0 }
+    val hasSpoilers = userBook?.reviewHasSpoilers == true
 
     return VerdictSheetUiModel(
         scaffold = SheetScaffoldUiModel(
@@ -83,7 +86,7 @@ fun Book.toVerdictSheetUiModel(
             ),
             layout = SheetLayout.Pinned,
         ),
-        rating = userBook?.rating?.takeIf { it > 0.0 },
+        rating = rating,
         review = TextFieldValue(
             text = buffer.text,
             selection = TextRange(buffer.text.length),
@@ -93,7 +96,7 @@ fun Book.toVerdictSheetUiModel(
             key = "spoilers",
             title = "Contains spoilers",
             gloss = "Readers will need to tap to reveal the whole review.",
-            checked = userBook?.reviewHasSpoilers == true,
+            checked = hasSpoilers,
         ),
         markChips = RichTextMarkType.entries
             .associateWith { mark ->
@@ -112,5 +115,11 @@ fun Book.toVerdictSheetUiModel(
                 )
             }
             .toImmutableMap(),
+        opened = VerdictDraft(
+            rating = rating,
+            reviewText = buffer.text,
+            marks = buffer.marks,
+            spoilersChecked = hasSpoilers,
+        ),
     ).withToolbarState()
 }

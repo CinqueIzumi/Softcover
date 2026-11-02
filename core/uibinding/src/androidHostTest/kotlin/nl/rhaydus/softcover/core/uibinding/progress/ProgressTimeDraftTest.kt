@@ -25,10 +25,12 @@ class ProgressTimeDraftTest {
                 unit = ProgressTimeUnit.HOURS,
                 text = replacement,
             )
+
             val minutes = draft.withText(
                 unit = ProgressTimeUnit.MINUTES,
                 text = replacement,
             )
+
             val seconds = draft.withText(
                 unit = ProgressTimeUnit.SECONDS,
                 text = replacement,

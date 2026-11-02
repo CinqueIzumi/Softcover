@@ -44,6 +44,7 @@ class OnUpdatePageProgressClickActionTest {
     @BeforeEach
     fun setUp() {
         updateBookProgress = mockk(relaxed = true)
+
         coEvery {
             updateBookProgress(
                 book = any(),
@@ -51,8 +52,10 @@ class OnUpdatePageProgressClickActionTest {
                 newSeconds = any(),
             )
         } returns Result.success(null)
+
         stateFlow = MutableStateFlow(ReadingScreenUiState())
         localVariablesFlow = MutableStateFlow(ReadingLocalVariables())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
@@ -86,6 +89,7 @@ class OnUpdatePageProgressClickActionTest {
         every {
             mock.id
         } returns id
+
         every {
             mock.userBook
         } returns null
@@ -103,12 +107,15 @@ class OnUpdatePageProgressClickActionTest {
                 21,
                 0,
             )
+
             val book = stubBook()
+
             stateFlow.value = ReadingScreenUiState(
                 bookToUpdate = book,
                 progressSheet = openProgressSheet,
                 readAt = readAt,
             )
+
             val dependencies = stubDependencies(this)
 
             coEvery {
@@ -137,6 +144,7 @@ class OnUpdatePageProgressClickActionTest {
                     actionAt = readAt.toActionAt(),
                 )
             }
+
             stateFlow.value.progressSheet shouldBe openProgressSheet
             stateFlow.value.bookToUpdate shouldBe book
         }
@@ -196,6 +204,7 @@ class OnUpdatePageProgressClickActionTest {
                 bookToUpdate = null,
                 progressSheet = openProgressSheet,
             )
+
             val dependencies = stubDependencies(this)
             val action = OnUpdatePageProgressClickAction(newPage = "42")
 
@@ -213,6 +222,7 @@ class OnUpdatePageProgressClickActionTest {
                     any(),
                 )
             }
+
             stateFlow.value.progressSheet shouldBe openProgressSheet
         }
 
@@ -381,6 +391,7 @@ class OnUpdatePageProgressClickActionTest {
             localVariablesFlow.value = ReadingLocalVariables(
                 bookMutationJobs = mapOf(bookId to priorJob),
             )
+
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
 
             val dependencies = stubDependencies(this)

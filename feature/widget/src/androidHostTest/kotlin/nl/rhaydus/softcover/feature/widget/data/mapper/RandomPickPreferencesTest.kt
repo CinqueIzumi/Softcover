@@ -41,6 +41,7 @@ class RandomPickPreferencesTest {
         fun `a user list source reads back with the same id`() {
             // ----- Arrange -----
             val preferences = mutablePreferencesOf()
+
             val settings = RandomPickSettings(
                 source = RandomPickSource.UserList(listId = 42),
                 cadence = RandomPickCadence.Weekly,
@@ -57,6 +58,7 @@ class RandomPickPreferencesTest {
         fun `owned source reads back`() {
             // ----- Arrange -----
             val preferences = mutablePreferencesOf()
+
             val settings = RandomPickSettings(
                 source = RandomPickSource.Owned,
                 cadence = RandomPickCadence.OnShuffleOnly,
@@ -76,6 +78,7 @@ class RandomPickPreferencesTest {
         fun `a written pick reads back`() {
             // ----- Arrange -----
             val preferences = mutablePreferencesOf()
+
             val state = RandomPickState(
                 pickedBookId = 7,
                 pickedAtMillis = 1_700_000_000_000L,
@@ -92,6 +95,7 @@ class RandomPickPreferencesTest {
         fun `writing an empty state clears a stored pick`() {
             // ----- Arrange -----
             val preferences = mutablePreferencesOf()
+
             preferences.write(
                 RandomPickState(
                     pickedBookId = 7,

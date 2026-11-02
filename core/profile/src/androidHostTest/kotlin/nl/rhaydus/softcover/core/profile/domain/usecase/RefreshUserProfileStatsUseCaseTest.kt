@@ -25,6 +25,7 @@ class RefreshUserProfileStatsUseCaseTest {
     fun setUp() {
         profileRepository = mockk()
         statsRefreshGate = ProfileRefreshGate()
+
         useCase = RefreshUserProfileStatsUseCase(
             profileRepository = profileRepository,
             statsRefreshGate = statsRefreshGate,
@@ -90,6 +91,7 @@ class RefreshUserProfileStatsUseCaseTest {
             coEvery {
                 profileRepository.fetchUserProfileSnapshot()
             } returns snapshot()
+
             coEvery {
                 profileRepository.cacheUserProfileStats(snapshot = any())
             } returns Unit
@@ -119,6 +121,7 @@ class RefreshUserProfileStatsUseCaseTest {
                 fetchCallCount++
                 if (fetchCallCount == 1) throw RuntimeException("network error") else snapshot()
             }
+
             coEvery {
                 profileRepository.cacheUserProfileStats(snapshot = any())
             } returns Unit

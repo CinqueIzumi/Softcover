@@ -46,6 +46,7 @@ internal data class OnBecauseYouReadGenreSelectedAction(val genre: String?) : Ex
         scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>,
     ) {
         val target = genre ?: scope.currentState.becauseYouReadGenreOptions.firstOrNull()
+
         if (target == scope.currentState.becauseYouReadGenre) return
 
         scope.setState {
@@ -58,7 +59,7 @@ internal data class OnBecauseYouReadGenreSelectedAction(val genre: String?) : Ex
 
         dependencies.setBecauseYouReadGenreUseCase(genre = genre)
             .onFailure {
-                scope.setState { it.copy(loadingBecauseYouReadBooks = false) }
+                scope.setState { state -> state.copy(loadingBecauseYouReadBooks = false) }
             }
     }
 }

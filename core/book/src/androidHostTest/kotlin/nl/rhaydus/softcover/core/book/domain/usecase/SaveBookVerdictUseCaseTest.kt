@@ -24,6 +24,7 @@ class SaveBookVerdictUseCaseTest {
     fun setUp() {
         updateBookRatingUseCase = mockk()
         updateBookReviewUseCase = mockk()
+
         useCase = SaveBookVerdictUseCase(
             updateBookRatingUseCase = updateBookRatingUseCase,
             updateBookReviewUseCase = updateBookReviewUseCase,
@@ -78,6 +79,7 @@ class SaveBookVerdictUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+
             coVerify(exactly = 0) {
                 updateBookRatingUseCase(
                     book = any(),
@@ -105,6 +107,7 @@ class SaveBookVerdictUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+
             coVerify(exactly = 0) {
                 updateBookRatingUseCase(
                     book = any(),
@@ -139,12 +142,14 @@ class SaveBookVerdictUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+
             coVerify(exactly = 1) {
                 updateBookRatingUseCase(
                     book = book,
                     rating = 4.0,
                 )
             }
+
             coVerify(exactly = 0) {
                 updateBookReviewUseCase(
                     book = any(),
@@ -158,6 +163,7 @@ class SaveBookVerdictUseCaseTest {
         fun `propagates a rating save failure and never attempts the review save`() = runTest {
             // ----- Arrange -----
             val expectedError = RuntimeException("rating update failed")
+
             val book = stubBook(
                 rating = 3.0,
                 reviewDocument = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Old text"))))),
@@ -182,6 +188,7 @@ class SaveBookVerdictUseCaseTest {
             // ----- Assert -----
             result.isFailure shouldBe true
             result.exceptionOrNull() shouldBe expectedError
+
             coVerify(exactly = 0) {
                 updateBookReviewUseCase(
                     book = any(),
@@ -195,9 +202,11 @@ class SaveBookVerdictUseCaseTest {
         fun `skips the review save when the canonical content and hasSpoilers flag are unchanged`() = runTest {
             // ----- Arrange -----
             val existingReview = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Great book")))))
+
             val newReview = ReviewDocument(
                 listOf(ReviewParagraph(listOf(ReviewRun("Great"), ReviewRun(" book")))),
             )
+
             val book = stubBook(
                 rating = 3.5,
                 reviewDocument = existingReview,
@@ -214,6 +223,7 @@ class SaveBookVerdictUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+
             coVerify(exactly = 0) {
                 updateBookReviewUseCase(
                     book = any(),
@@ -227,6 +237,7 @@ class SaveBookVerdictUseCaseTest {
         fun `treats a blank new review as unchanged when the existing review is also blank`() = runTest {
             // ----- Arrange -----
             val existingReview = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("")))))
+
             val book = stubBook(
                 rating = 3.5,
                 reviewDocument = existingReview,
@@ -243,6 +254,7 @@ class SaveBookVerdictUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+
             coVerify(exactly = 0) {
                 updateBookReviewUseCase(
                     book = any(),
@@ -257,6 +269,7 @@ class SaveBookVerdictUseCaseTest {
             // ----- Arrange -----
             val existingReview = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Old text")))))
             val newReview = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("New text")))))
+
             val book = stubBook(
                 rating = 3.5,
                 reviewDocument = existingReview,
@@ -281,12 +294,14 @@ class SaveBookVerdictUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+
             coVerify(exactly = 0) {
                 updateBookRatingUseCase(
                     book = any(),
                     rating = any(),
                 )
             }
+
             coVerify(exactly = 1) {
                 updateBookReviewUseCase(
                     book = book,
@@ -300,6 +315,7 @@ class SaveBookVerdictUseCaseTest {
         fun `saves the review when only the hasSpoilers flag changed while content stayed the same`() = runTest {
             // ----- Arrange -----
             val review = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Same text")))))
+
             val book = stubBook(
                 rating = 3.5,
                 reviewDocument = review,
@@ -324,6 +340,7 @@ class SaveBookVerdictUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+
             coVerify(exactly = 1) {
                 updateBookReviewUseCase(
                     book = book,
@@ -339,6 +356,7 @@ class SaveBookVerdictUseCaseTest {
             val expectedError = RuntimeException("review update failed")
             val existingReview = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Old text")))))
             val newReview = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("New text")))))
+
             val book = stubBook(
                 rating = 3.5,
                 reviewDocument = existingReview,
@@ -371,6 +389,7 @@ class SaveBookVerdictUseCaseTest {
             // ----- Arrange -----
             val existingReview = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Old text")))))
             val newReview = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("New text")))))
+
             val book = stubBook(
                 rating = 3.0,
                 reviewDocument = existingReview,
@@ -402,12 +421,14 @@ class SaveBookVerdictUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+
             coVerify(exactly = 1) {
                 updateBookRatingUseCase(
                     book = book,
                     rating = 4.0,
                 )
             }
+
             coVerify(exactly = 1) {
                 updateBookReviewUseCase(
                     book = book,

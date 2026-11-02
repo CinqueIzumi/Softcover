@@ -21,10 +21,10 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 private const val LIST_DOT_INLINE_CONTENT_ID = "library-tabs-list-dot"
@@ -57,10 +57,12 @@ private fun LibraryTabsGroupSubhead() {
 
     val annotatedText = buildAnnotatedString {
         append("Drag to reorder. Shelves and lists share one row. A ")
+
         appendInlineContent(
             id = LIST_DOT_INLINE_CONTENT_ID,
             alternateText = "•",
         )
+
         append(" marks a list.")
     }
 

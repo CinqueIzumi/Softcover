@@ -77,6 +77,7 @@ class FetchBookByIdUseCaseTest {
             coEvery {
                 booksRepository.fetchBookById(id = bookId)
             } returns remoteBook
+
             coEvery {
                 booksRepository.getEditionsByBookId(bookId = bookId)
             } returns remoteEditions
@@ -101,9 +102,11 @@ class FetchBookByIdUseCaseTest {
             coEvery {
                 booksRepository.fetchBookById(id = requestedId)
             } returns remoteBook
+
             coEvery {
                 booksRepository.getEditionsByBookId(bookId = requestedId)
             } returns initialEditions
+
             coEvery {
                 booksRepository.getEditionsByBookId(bookId = canonicalId)
             } returns canonicalEditions
@@ -125,6 +128,7 @@ class FetchBookByIdUseCaseTest {
             coEvery {
                 booksRepository.fetchBookById(id = bookId)
             } throws expectedError
+
             coEvery {
                 booksRepository.getEditionsByBookId(bookId = bookId)
             } returns emptyList()
@@ -147,6 +151,7 @@ class FetchBookByIdUseCaseTest {
             coEvery {
                 booksRepository.fetchBookById(id = bookId)
             } returns remoteBook
+
             coEvery {
                 booksRepository.getEditionsByBookId(bookId = bookId)
             } throws expectedError

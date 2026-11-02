@@ -45,6 +45,7 @@ class OnUpdatePageProgressClickActionTest {
         updateBookProgress = mockk(relaxed = true)
         stateFlow = MutableStateFlow(buildBookDetailUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -62,6 +63,7 @@ class OnUpdatePageProgressClickActionTest {
 
     private fun stubDependencies(testScope: TestScope): BookDetailDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<BookDetailDependencies>(relaxed = true).also { mock ->
             every {
                 mock.recordBookProgressUseCase
@@ -93,10 +95,12 @@ class OnUpdatePageProgressClickActionTest {
         fun `leaves the update progress sheet open for its own dismiss`() = runTest {
             // ----- Arrange -----
             val book = stubBook()
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
                 progressSheet = openProgressSheet,
             )
+
             dependencies = stubDependencies(this)
 
             val action = OnUpdatePageProgressClickAction(newPage = "100")
@@ -145,11 +149,14 @@ class OnUpdatePageProgressClickActionTest {
                 21,
                 0,
             )
+
             val book = stubBook()
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
                 readAt = readAt,
             )
+
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -211,6 +218,7 @@ class OnUpdatePageProgressClickActionTest {
                 book = null,
                 progressSheet = openProgressSheet,
             )
+
             dependencies = stubDependencies(this)
 
             val action = OnUpdatePageProgressClickAction(newPage = "50")
@@ -223,6 +231,7 @@ class OnUpdatePageProgressClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.progressSheet shouldBe openProgressSheet
+
             coVerify(exactly = 0) {
                 updateBookProgress(
                     any(),

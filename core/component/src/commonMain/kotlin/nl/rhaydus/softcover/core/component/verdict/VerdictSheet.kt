@@ -38,9 +38,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlin.math.roundToInt
 import kotlinx.collections.immutable.ImmutableMap
 import nl.rhaydus.designsystem.component.StarRatingInput
+import nl.rhaydus.designsystem.theme.Corners
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
@@ -53,12 +54,11 @@ import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerEditorHighlight
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.tabularFigures
+import kotlin.math.roundToInt
 
 private val VERDICT_CAPTIONS = listOf(
     "Awful.",
@@ -258,7 +258,7 @@ private fun VerdictScoreAndCaption(
                 (
                     fadeIn(animationSpec = effectsSpec) +
                         slideInVertically(animationSpec = spatialSpec) { height -> height / 4 }
-                    ).togetherWith(fadeOut(animationSpec = effectsSpec))
+                ).togetherWith(fadeOut(animationSpec = effectsSpec))
             },
             label = "VerdictScoreCaption",
         ) { animatedScore ->
@@ -314,6 +314,7 @@ private fun buildEditorAnnotatedString(
             0,
             text.length,
         )
+
         val end = mark.end.coerceIn(
             start,
             text.length,

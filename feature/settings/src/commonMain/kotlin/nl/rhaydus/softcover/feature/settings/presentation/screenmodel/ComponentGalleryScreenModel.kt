@@ -22,16 +22,16 @@ internal class ComponentGalleryScreenModel(
     appDispatchers: AppDispatchers,
     flows: List<ComponentGalleryCollector>,
 ) : ToadScreenModel<
-    ComponentGalleryUiState,
-    ComponentGalleryEvent,
-    ComponentGalleryDependencies,
-    ComponentGalleryCollector,
-    ComponentGalleryLocalVariables,
+        ComponentGalleryUiState,
+        ComponentGalleryEvent,
+        ComponentGalleryDependencies,
+        ComponentGalleryCollector,
+        ComponentGalleryLocalVariables,
     >(
-    initialState = ComponentGalleryUiState(),
-    initialLocalVariables = ComponentGalleryLocalVariables(),
-    initializers = flows,
-) {
+        initialState = ComponentGalleryUiState(),
+        initialLocalVariables = ComponentGalleryLocalVariables(),
+        initializers = flows,
+    ) {
     override val dependencies = ComponentGalleryDependencies(
         getThemeConfigurationUseCase = getThemeConfigurationUseCase,
         mainDispatcher = appDispatchers.main,

@@ -20,6 +20,7 @@ internal class OnStatusToggleAction(
             val updated = state.draftEnabledStatusCodes.toPersistentSet().let { current ->
                 if (enabled) current.add(code) else current.remove(code)
             }
+
             state.copy(draftEnabledStatusCodes = updated).withOrderedEntries()
         }
     }

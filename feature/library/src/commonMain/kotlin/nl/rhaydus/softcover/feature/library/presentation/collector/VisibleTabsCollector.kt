@@ -74,6 +74,7 @@ internal class VisibleTabsCollector : LibraryCollector {
 
             scope.setLocalVariables { locals ->
                 val kept: Map<String, LazyGridState> = locals.gridStates.filterKeys { it in tabIds }
+
                 val additions: Map<String, LazyGridState> = tabIds
                     .filterNot { it in kept }
                     .associateWith { LazyGridState() }

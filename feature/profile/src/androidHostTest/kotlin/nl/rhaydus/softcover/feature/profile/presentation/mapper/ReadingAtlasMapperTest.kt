@@ -37,6 +37,7 @@ class ReadingAtlasMapperTest {
                 result.rating.stat,
                 result.streak.stat,
             )
+
             stats.map { it.value } shouldBe listOf(0.0, 0.0, 0.0, 0.0)
             stats.map { it.isLoading } shouldBe listOf(true, true, true, true)
         }
@@ -54,14 +55,17 @@ class ReadingAtlasMapperTest {
                 value = 12000.0,
                 format = StatNumberFormat.Grouped,
             )
+
             result.volumes.stat shouldBe StatNumberUiModel(
                 value = 42.0,
                 format = StatNumberFormat.Grouped,
             )
+
             result.rating.stat shouldBe StatNumberUiModel(
                 value = 4.2,
                 format = StatNumberFormat.Decimal,
             )
+
             result.streak.stat shouldBe StatNumberUiModel(
                 value = 7.0,
                 format = StatNumberFormat.Plain,

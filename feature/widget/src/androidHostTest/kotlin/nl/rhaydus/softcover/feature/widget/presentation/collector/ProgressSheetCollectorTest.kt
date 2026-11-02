@@ -29,11 +29,13 @@ class ProgressSheetCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(UpdateProgressUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(UpdateProgressLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk(relaxed = true)
     }
 
@@ -43,6 +45,7 @@ class ProgressSheetCollectorTest {
         fun `opens the sheet on the mapped model when a book is set`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = PreviewData.baseBook
+
             val job = launch {
                 ProgressSheetCollector().onLaunch(
                     scope = scope,
@@ -69,6 +72,7 @@ class ProgressSheetCollectorTest {
                     dependencies = dependencies,
                 )
             }
+
             stateFlow.value = stateFlow.value.copy(bookToUpdate = PreviewData.baseBook)
 
             // ----- Act -----

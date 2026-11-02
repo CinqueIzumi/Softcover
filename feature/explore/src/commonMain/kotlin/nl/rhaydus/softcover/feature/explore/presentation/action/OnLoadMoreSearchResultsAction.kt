@@ -24,6 +24,7 @@ internal data object OnLoadMoreSearchResultsAction : ExploreAction {
         scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>,
     ) {
         val state = scope.currentState
+
         if (state.isLoading || state.loadingMoreQueriedBooks || state.queriedBooksHasMore.not()) return
 
         val nextPage = scope.currentLocalVariables.searchResultsPage + 1

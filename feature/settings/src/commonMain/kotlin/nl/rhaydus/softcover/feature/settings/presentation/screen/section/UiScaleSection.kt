@@ -7,9 +7,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnUiScaleSelectedAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
@@ -27,7 +27,7 @@ internal fun UiScaleSection(
 
         SettingsRowGroup(selectableGroup = true) {
             state.uiScaleRows.forEach { uiScaleRow ->
-                row {
+                DividedRow {
                     SettingsSelectableRow(
                         model = uiScaleRow,
                         onClick = { runAction(OnUiScaleSelectedAction(scale = uiScaleRow.key)) },

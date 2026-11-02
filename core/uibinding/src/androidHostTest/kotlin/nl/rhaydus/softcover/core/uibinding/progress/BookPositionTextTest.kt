@@ -119,6 +119,7 @@ class BookPositionTextTest {
                 audioSeconds = 7_200,
                 readingFormat = ReadingFormat.Audio,
             )
+
             val subject = read(currentSeconds = 1_800)
 
             // ----- Act -----
@@ -197,11 +198,13 @@ class BookPositionTextTest {
                 pages = null,
                 readingFormat = ReadingFormat.Physical,
             )
+
             val default = PreviewData.baseEdition.copy(
                 id = 11,
                 pages = 250,
                 readingFormat = ReadingFormat.Physical,
             )
+
             val subject = PreviewData.baseBook.copy(
                 editions = listOf(current),
                 defaultEdition = default,
@@ -217,6 +220,7 @@ class BookPositionTextTest {
 
             // ----- Assert -----
             subject.resolvedTotalPages() shouldBe 250
+
             result shouldBe BookPositionText(
                 position = "p. 50 of 250",
                 remaining = "200 pages to go",
@@ -227,10 +231,12 @@ class BookPositionTextTest {
         fun `a paused book reports pages left`() {
             // ----- Arrange -----
             val paused = PreviewData.baseBook.userBook.shouldNotBeNull().copy(status = BookStatus.Paused)
+
             val edition = PreviewData.baseEdition.copy(
                 pages = 300,
                 readingFormat = ReadingFormat.Physical,
             )
+
             val subject = PreviewData.baseBook.copy(
                 editions = listOf(edition),
                 userBook = paused.copy(
@@ -250,10 +256,12 @@ class BookPositionTextTest {
         fun `a reading book reports pages to go`() {
             // ----- Arrange -----
             val reading = PreviewData.baseBook.userBook.shouldNotBeNull().copy(status = BookStatus.Reading)
+
             val edition = PreviewData.baseEdition.copy(
                 pages = 300,
                 readingFormat = ReadingFormat.Physical,
             )
+
             val subject = PreviewData.baseBook.copy(
                 editions = listOf(edition),
                 userBook = reading.copy(

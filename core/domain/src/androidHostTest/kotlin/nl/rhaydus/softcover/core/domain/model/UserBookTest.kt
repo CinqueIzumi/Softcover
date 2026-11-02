@@ -3,11 +3,11 @@ package nl.rhaydus.softcover.core.domain.model
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import kotlinx.datetime.LocalDate
-import java.util.TimeZone
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import java.util.TimeZone
 
 class UserBookTest {
     private lateinit var originalZone: TimeZone
@@ -548,6 +548,7 @@ class UserBookTest {
         fun `a zone behind UTC shows the previous day for an early UTC morning`() {
             // ----- Arrange -----
             TimeZone.setDefault(TimeZone.getTimeZone("Pacific/Pago_Pago"))
+
             val userBook = buildUserBook(
                 journals = listOf(
                     journal(

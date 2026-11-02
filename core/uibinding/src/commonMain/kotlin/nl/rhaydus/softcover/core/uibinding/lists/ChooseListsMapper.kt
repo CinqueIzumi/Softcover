@@ -248,6 +248,7 @@ private fun membershipChipLabelFor(
     isBulk: Boolean,
 ): String {
     val isPlural = isBulk && totalCount > 1
+
     return when (membership) {
         ListMembership.ALL -> if (isPlural) "On all $totalCount" else "On the list"
         ListMembership.PARTIAL -> "Add the other ${totalCount - matchingCount}"

@@ -17,17 +17,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.component.RhaydusMorphingButton
+import nl.rhaydus.designsystem.model.MorphingButtonTone
+import nl.rhaydus.designsystem.modifier.pressScaleClickable
+import nl.rhaydus.designsystem.modifier.skeletonMask
+import nl.rhaydus.designsystem.theme.Corners
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.badge.Badge
-import nl.rhaydus.softcover.core.component.button.MorphingButton
-import nl.rhaydus.softcover.core.component.button.MorphingButtonTone
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
-import nl.rhaydus.softcover.core.component.modifier.tactileClickable
-import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.explore.presentation.model.FeaturedCardEvent
 import nl.rhaydus.softcover.feature.explore.presentation.model.FeaturedCardUiModel
@@ -55,7 +55,7 @@ internal fun FeaturedCard(
                     Modifier
                 } else {
                     Modifier
-                        .tactileClickable(
+                        .pressScaleClickable(
                             onClick = { onEvent(FeaturedCardEvent.Clicked) },
                             hoverShape = Corners.xl,
                         )
@@ -79,13 +79,19 @@ internal fun FeaturedCard(
             model.badge?.let { badge ->
                 Badge(
                     model = badge,
-                    modifier = Modifier.skeletonMask(visible = model.isLoading),
+                    modifier = Modifier.skeletonMask(
+                        visible = model.isLoading,
+                        shape = Corners.xs,
+                    ),
                 )
             }
 
             SoftcoverText(
                 text = model.readersLabel,
-                modifier = Modifier.skeletonMask(visible = model.isLoading),
+                modifier = Modifier.skeletonMask(
+                    visible = model.isLoading,
+                    shape = Corners.xs,
+                ),
                 style = MaterialTheme.editorialTypography.eyebrowSmall,
                 color = MaterialTheme.colorScheme.primary,
             )
@@ -105,7 +111,10 @@ internal fun FeaturedCard(
             Column(modifier = Modifier.weight(1f)) {
                 SoftcoverText(
                     text = model.title,
-                    modifier = Modifier.skeletonMask(visible = model.isLoading),
+                    modifier = Modifier.skeletonMask(
+                        visible = model.isLoading,
+                        shape = Corners.xs,
+                    ),
                     style = MaterialTheme.editorialTypography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
@@ -114,7 +123,10 @@ internal fun FeaturedCard(
 
                 SoftcoverText(
                     text = model.byline,
-                    modifier = Modifier.skeletonMask(visible = model.isLoading),
+                    modifier = Modifier.skeletonMask(
+                        visible = model.isLoading,
+                        shape = Corners.xs,
+                    ),
                     style = MaterialTheme.editorialTypography.eyebrowSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -124,7 +136,10 @@ internal fun FeaturedCard(
 
                     SoftcoverText(
                         text = description,
-                        modifier = Modifier.skeletonMask(visible = model.isLoading),
+                        modifier = Modifier.skeletonMask(
+                            visible = model.isLoading,
+                            shape = Corners.xs,
+                        ),
                         style = MaterialTheme.editorialTypography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -134,7 +149,7 @@ internal fun FeaturedCard(
 
         Spacer(modifier = Modifier.height(Spacing.md))
 
-        MorphingButton(
+        RhaydusMorphingButton(
             label = if (model.inLibrary) "Remove from library" else "Want to read",
             tone = if (model.inLibrary) MorphingButtonTone.Tonal else MorphingButtonTone.Filled,
             onClick = {
@@ -146,7 +161,10 @@ internal fun FeaturedCard(
                     },
                 )
             },
-            modifier = Modifier.skeletonMask(visible = model.isLoading),
+            modifier = Modifier.skeletonMask(
+                visible = model.isLoading,
+                shape = Corners.xs,
+            ),
         )
     }
 }

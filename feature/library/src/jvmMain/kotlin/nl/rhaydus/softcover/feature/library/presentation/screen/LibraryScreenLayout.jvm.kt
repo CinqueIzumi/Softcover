@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.modifier.dismissOnEscape
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.divider.VerticalDivider
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshAction
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshEvent
@@ -31,11 +32,9 @@ import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.core.component.sidebar.Sidebar
 import nl.rhaydus.softcover.core.component.sidebar.SidebarEvent
 import nl.rhaydus.softcover.core.component.sidebar.SidebarUiModel
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
-import nl.rhaydus.softcover.core.presentation.model.LibraryTab as LibraryContentTab
 import nl.rhaydus.softcover.core.presentation.util.TabReselectScrollToTopEffect
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnExitRearrangeModeAction
@@ -50,6 +49,7 @@ import nl.rhaydus.softcover.feature.library.presentation.screen.section.LibraryS
 import nl.rhaydus.softcover.feature.library.presentation.screen.section.LibrarySelectionHeader
 import nl.rhaydus.softcover.feature.library.presentation.screen.section.LibrarySheets
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.core.presentation.model.LibraryTab as LibraryContentTab
 
 /**
  * Desktop Library: a vertical shelf **source list** (the native desktop pattern for switching
@@ -176,14 +176,14 @@ internal actual fun LibraryScreenLayout(
 
                         is LibraryContentTab.All,
                         is LibraryContentTab.Status,
-                            -> BookList(
-                                tab = currentTab,
-                                state = state,
-                                gridState = gridState,
-                                onBookClick = onBookClick,
-                                runAction = runAction,
-                                columnsOverride = columns,
-                            )
+                        -> BookList(
+                            tab = currentTab,
+                            state = state,
+                            gridState = gridState,
+                            onBookClick = onBookClick,
+                            runAction = runAction,
+                            columnsOverride = columns,
+                        )
                     }
 
                     DesktopVerticalScrollbar(
@@ -251,9 +251,9 @@ private fun desktopGridColumns(layout: LibraryGridLayout): GridCells = when (lay
     LibraryGridLayout.GRID_THREE_COLUMNS,
     LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY,
     LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY,
-        -> GridCells.Adaptive(minSize = 150.dp)
+    -> GridCells.Adaptive(minSize = 150.dp)
 
     LibraryGridLayout.LIST_COMPACT,
     LibraryGridLayout.LIST_LARGE,
-        -> GridCells.Fixed(count = 1)
+    -> GridCells.Fixed(count = 1)
 }

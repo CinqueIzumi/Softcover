@@ -116,24 +116,22 @@ internal fun Author.toEntity(): AuthorEntity = AuthorEntity(
     id = id,
 )
 
-internal fun Book.toBookAuthorRefs(authorIdsByName: Map<String, Int>): List<BookAuthorCrossRef> =
-    authors.map {
-        BookAuthorCrossRef(
-            bookId = id,
-            authorId = authorIdsByName.getValue(it.name),
-        )
-    }
+internal fun Book.toBookAuthorRefs(authorIdsByName: Map<String, Int>): List<BookAuthorCrossRef> = authors.map {
+    BookAuthorCrossRef(
+        bookId = id,
+        authorId = authorIdsByName.getValue(it.name),
+    )
+}
 
 internal fun Book.toEditionAuthorRefs(authorIdsByName: Map<String, Int>): List<EditionAuthorCrossRef> =
     editions.flatMap { it.toEditionAuthorRefs(authorIdsByName) }
 
-internal fun BookEdition.toEditionAuthorRefs(authorIdsByName: Map<String, Int>): List<EditionAuthorCrossRef> =
-    authors.map {
-        EditionAuthorCrossRef(
-            editionId = id,
-            authorId = authorIdsByName.getValue(it.name),
-        )
-    }
+internal fun BookEdition.toEditionAuthorRefs(authorIdsByName: Map<String, Int>): List<EditionAuthorCrossRef> = authors.map {
+    EditionAuthorCrossRef(
+        editionId = id,
+        authorId = authorIdsByName.getValue(it.name),
+    )
+}
 // endregion
 // region Entity -> UI mappers
 fun AuthorEntity.toModel(): Author = Author(
@@ -209,6 +207,7 @@ fun ReadingJournalEntity.toModel(): ReadingJournal = ReadingJournal(
 fun BookFullEntity.toModel(): Book {
     val uiEditions = editions.map { editionWithAuthors ->
         val editionAuthors = editionWithAuthors.authors.ifEmpty { bookAuthors }
+
         editionWithAuthors.edition.edition.toModel(
             authors = editionAuthors,
             owned = editionWithAuthors.edition.isOwned,
@@ -219,11 +218,12 @@ fun BookFullEntity.toModel(): Book {
         uiEditions.firstOrNull { it.id == id }
     }
 
-    val journals = userBookWithJournals?.journals?.map { it.toModel() } ?: emptyList()
+    val journals = userBookWithJournals?.journals?.map { it.toModel() }.orEmpty()
+
     val reads = userBookWithJournals?.userBookReads
         ?.sortedBy { it.id }
         ?.map { it.toModel() }
-        ?: emptyList()
+        .orEmpty()
 
     return Book(
         id = book.id,

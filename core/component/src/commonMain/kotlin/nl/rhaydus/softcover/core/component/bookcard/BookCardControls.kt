@@ -17,16 +17,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.designsystem.modifier.skeletonMask
+import nl.rhaydus.designsystem.theme.Corners
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.badge.Badge
 import nl.rhaydus.softcover.core.component.button.PillButton
 import nl.rhaydus.softcover.core.component.control.Toggle
-import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.MonogramCoverForeground
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.MonogramCoverInk
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 @Composable
 internal fun BookCardTrailingControl(
@@ -34,7 +35,12 @@ internal fun BookCardTrailingControl(
     isLoading: Boolean,
     onClick: () -> Unit,
 ) {
-    Box(modifier = Modifier.skeletonMask(visible = isLoading)) {
+    Box(
+        modifier = Modifier.skeletonMask(
+            visible = isLoading,
+            shape = Corners.xs,
+        ),
+    ) {
         when (trailing) {
             is BookCardTrailing.Badge -> Badge(model = trailing.model)
 

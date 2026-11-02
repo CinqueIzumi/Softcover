@@ -27,23 +27,22 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 internal fun tagEditorSheetScaffoldFor(
     bookTitle: String,
     cover: CoverUiModel?,
-): SheetScaffoldUiModel =
-    SheetScaffoldUiModel(
-        header = SheetHeaderUiModel(
-            section = SectionHeaderUiModel.Section(
-                eyebrow = "Your tags",
-                headline = persistentListOf(HeaderTextSegment.Plain(text = "Add your own tags.")),
-                description = persistentListOf(
-                    HeaderTextSegment.Plain(text = "Your own genres, moods and notes on "),
-                    HeaderTextSegment.Emphasised(text = bookTitle),
-                    HeaderTextSegment.Plain(text = ". Mark any as a spoiler to keep it off shared cards."),
-                ),
+): SheetScaffoldUiModel = SheetScaffoldUiModel(
+    header = SheetHeaderUiModel(
+        section = SectionHeaderUiModel.Section(
+            eyebrow = "Your tags",
+            headline = persistentListOf(HeaderTextSegment.Plain(text = "Add your own tags.")),
+            description = persistentListOf(
+                HeaderTextSegment.Plain(text = "Your own genres, moods and notes on "),
+                HeaderTextSegment.Emphasised(text = bookTitle),
+                HeaderTextSegment.Plain(text = ". Mark any as a spoiler to keep it off shared cards."),
             ),
-            trailing = cover?.let { SheetHeaderTrailing.Jacket(cover = it) },
         ),
-        dismissLabel = "Done",
-        layout = SheetLayout.Pinned,
-    )
+        trailing = cover?.let { SheetHeaderTrailing.Jacket(cover = it) },
+    ),
+    dismissLabel = "Done",
+    layout = SheetLayout.Pinned,
+)
 
 internal fun editionSheetScaffoldFor(
     bookTitle: String,
@@ -51,28 +50,27 @@ internal fun editionSheetScaffoldFor(
     selectedEdition: BookEdition,
     cover: CoverUiModel?,
     isLoading: Boolean,
-): SheetScaffoldUiModel =
-    SheetScaffoldUiModel(
-        header = SheetHeaderUiModel(
-            section = SectionHeaderUiModel.Section(
-                eyebrow = "Editions",
-                headline = "Change edition",
-                description = currentEdition.authorString.let { author ->
-                    if (author.isBlank()) bookTitle else "$bookTitle · $author"
-                },
-            ),
-            trailing = cover?.let { SheetHeaderTrailing.Jacket(cover = it) },
+): SheetScaffoldUiModel = SheetScaffoldUiModel(
+    header = SheetHeaderUiModel(
+        section = SectionHeaderUiModel.Section(
+            eyebrow = "Editions",
+            headline = "Change edition",
+            description = currentEdition.authorString.let { author ->
+                if (author.isBlank()) bookTitle else "$bookTitle · $author"
+            },
         ),
-        footer = SheetFooterUiModel.Stacked(
-            primary = SheetFooterButton(
-                label = "Track this edition",
-                enabled = isLoading.not() && selectedEdition != currentEdition,
-                dismissesSheet = true,
-            ),
-            secondary = null,
+        trailing = cover?.let { SheetHeaderTrailing.Jacket(cover = it) },
+    ),
+    footer = SheetFooterUiModel.Stacked(
+        primary = SheetFooterButton(
+            label = "Track this edition",
+            enabled = isLoading.not() && selectedEdition != currentEdition,
+            dismissesSheet = true,
         ),
-        layout = SheetLayout.Pinned,
-    )
+        secondary = null,
+    ),
+    layout = SheetLayout.Pinned,
+)
 
 internal fun shareSheetFor(
     card: ShareCardUiModel,
@@ -83,80 +81,77 @@ internal fun shareSheetFor(
     hasExpandableText: Boolean,
     tagPicker: ShareTagPickerUiModel?,
     progress: ShareCaptureProgress = ShareCaptureProgress.Idle,
-): ShareSheetUiModel =
-    ShareSheetUiModel(
-        sheet = ShareCardSheetUiModel(
-            card = card,
-            scaffold = shareSheetScaffoldFor(bookTitle = bookTitle).withShareCapture(progress = progress),
-            displayName = bookTitle,
-            previewMaxHeight = if (tagPicker?.expanded == true) 280.dp else 440.dp,
-        ),
-        variantToggle = if (hasUpdateCard) {
-            SegmentedControlUiModel(
-                options = ShareCardVariant.entries
-                    .map { option ->
-                        SegmentUiModel(
-                            key = option,
-                            label = option.label,
-                        )
-                    }
-                    .toImmutableList(),
-                selected = variant,
-                variant = SegmentedControlVariant.Prose(
-                    prefix = "A card for ",
-                    suffix = ".",
-                ),
+): ShareSheetUiModel = ShareSheetUiModel(
+    sheet = ShareCardSheetUiModel(
+        card = card,
+        scaffold = shareSheetScaffoldFor(bookTitle = bookTitle).withShareCapture(progress = progress),
+        displayName = bookTitle,
+        previewMaxHeight = if (tagPicker?.expanded == true) 280.dp else 440.dp,
+    ),
+    variantToggle = if (hasUpdateCard) {
+        SegmentedControlUiModel(
+            options = ShareCardVariant.entries
+                .map { option ->
+                    SegmentUiModel(
+                        key = option,
+                        label = option.label,
+                    )
+                }
+                .toImmutableList(),
+            selected = variant,
+            variant = SegmentedControlVariant.Prose(
+                prefix = "A card for ",
+                suffix = ".",
+            ),
+        )
+    } else {
+        null
+    },
+    options = buildList {
+        if (hasExpandableText) {
+            add(
+                ChipUiModel(
+                    key = SHARE_FULL_TEXT_KEY,
+                    label = ShareCardSize.FULL_TEXT.label,
+                    tone = ChipTone.Choice,
+                    selected = size == ShareCardSize.FULL_TEXT,
+                ) to ShareSheetOption.FULL_TEXT,
             )
-        } else {
-            null
-        },
-        options = buildList {
-            if (hasExpandableText) {
-                add(
-                    ChipUiModel(
-                        key = SHARE_FULL_TEXT_KEY,
-                        label = ShareCardSize.FULL_TEXT.label,
-                        tone = ChipTone.Choice,
-                        selected = size == ShareCardSize.FULL_TEXT,
-                    ) to ShareSheetOption.FULL_TEXT,
-                )
-            }
+        }
 
-            if (tagPicker != null) add(tagPicker.header to ShareSheetOption.TAGS)
-        }.toChipSet(),
-        tagPicker = tagPicker,
-    )
+        if (tagPicker != null) add(tagPicker.header to ShareSheetOption.TAGS)
+    }.toChipSet(),
+    tagPicker = tagPicker,
+)
 
 private const val SHARE_FULL_TEXT_KEY = "share-full-text"
 
-private fun shareSheetScaffoldFor(bookTitle: String): SheetScaffoldUiModel =
-    SheetScaffoldUiModel(
-        header = SheetHeaderUiModel(
-            section = SectionHeaderUiModel.Section(
-                eyebrow = "Share",
-                headline = bookTitle,
-            ),
+private fun shareSheetScaffoldFor(bookTitle: String): SheetScaffoldUiModel = SheetScaffoldUiModel(
+    header = SheetHeaderUiModel(
+        section = SectionHeaderUiModel.Section(
+            eyebrow = "Share",
+            headline = bookTitle,
         ),
-        layout = SheetLayout.Pinned,
-    )
+    ),
+    layout = SheetLayout.Pinned,
+)
 
-internal fun deleteQuoteSheetScaffold(): SheetScaffoldUiModel =
-    SheetScaffoldUiModel(
-        header = SheetHeaderUiModel(
-            section = SectionHeaderUiModel.Section(
-                eyebrow = "Delete quote",
-                headline = "Delete this quote?",
-                description = "It comes off your Hardcover account too, and you can't undo this.",
-            ),
+internal fun deleteQuoteSheetScaffold(): SheetScaffoldUiModel = SheetScaffoldUiModel(
+    header = SheetHeaderUiModel(
+        section = SectionHeaderUiModel.Section(
+            eyebrow = "Delete quote",
+            headline = "Delete this quote?",
+            description = "It comes off your Hardcover account too, and you can't undo this.",
         ),
-        footer = SheetFooterUiModel.Stacked(
-            primary = SheetFooterButton(
-                label = "Delete",
-                dismissesSheet = true,
-            ),
-            secondary = SheetFooterButton(
-                label = "Cancel",
-                dismissesSheet = true,
-            ),
+    ),
+    footer = SheetFooterUiModel.Stacked(
+        primary = SheetFooterButton(
+            label = "Delete",
+            dismissesSheet = true,
         ),
-    )
+        secondary = SheetFooterButton(
+            label = "Cancel",
+            dismissesSheet = true,
+        ),
+    ),
+)

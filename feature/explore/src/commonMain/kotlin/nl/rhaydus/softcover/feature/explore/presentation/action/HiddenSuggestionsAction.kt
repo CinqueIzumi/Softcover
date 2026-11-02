@@ -11,4 +11,4 @@ internal sealed interface HiddenSuggestionsAction : UiAction<
     HiddenSuggestionsUiState,
     HiddenSuggestionsEvent,
     HiddenSuggestionsLocalVariables,
-    >
+>

@@ -40,6 +40,7 @@ class SecretTapCounterTest {
             // gap of 5s, well over the 2s reset window, restarts the run at the late tap (count = 1),
             // so six more taps are needed to reach the seventh tap of the new run
             val lateTap = counter.registerTap(at = base + 7.seconds)
+
             val results = (1..6).map { offset ->
                 counter.registerTap(at = base + 7.seconds + (offset * 1000).milliseconds)
             }
@@ -61,6 +62,7 @@ class SecretTapCounterTest {
 
             // exactly resetWindow later - the implementation's `<=` should treat this as a continuation
             val boundaryTap = counter.registerTap(at = base + 2.seconds)
+
             val results = (1..5).map { offset ->
                 counter.registerTap(at = base + 2.seconds + offset.seconds)
             }
@@ -83,6 +85,7 @@ class SecretTapCounterTest {
             val firstRun = (0 until 7).map { index ->
                 counter.registerTap(at = base + (index * 1000).milliseconds)
             }
+
             val secondRun = (0 until 7).map { index ->
                 counter.registerTap(at = base + 100.seconds + (index * 1000).milliseconds)
             }

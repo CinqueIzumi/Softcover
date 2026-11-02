@@ -22,9 +22,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.lazyKey
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.util.TabReselectScrollToTopEffect
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
@@ -50,7 +50,12 @@ internal fun DesktopSearchResults(
             runAction = runAction,
             onBookClick = onBookClick,
         ) { onSearchResultEvent ->
-            Row(modifier = Modifier.padding(horizontal = Spacing.gutter, vertical = Spacing.xs)) {
+            Row(
+                modifier = Modifier.padding(
+                    horizontal = Spacing.gutter,
+                    vertical = Spacing.xs,
+                ),
+            ) {
                 SortChip(
                     state = state,
                     runAction = runAction,
@@ -90,7 +95,7 @@ internal fun DesktopSearchResults(
                         BookCard(
                             model = card,
                             onEvent = onSearchResultEvent,
-                            modifier = searchResultItemModifier(),
+                            modifier = Modifier.searchResultItem(this),
                         )
                     }
 

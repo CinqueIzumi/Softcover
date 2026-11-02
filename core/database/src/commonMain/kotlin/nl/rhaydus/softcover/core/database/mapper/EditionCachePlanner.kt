@@ -39,6 +39,7 @@ internal fun planEditionCaching(
             // provenance is unknown (null) but the edition now has a URL: evict and re-fetch.
             else -> {
                 stalePaths += cachedPath
+
                 edition.toEntity().copy(
                     localImagePath = null,
                     localImageUrl = null,

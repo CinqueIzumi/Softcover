@@ -42,6 +42,7 @@ class OnIsbnSubmittedActionTest {
         resolveBookByIsbnUseCase = mockk()
         stateFlow = MutableStateFlow(ScanUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalScanVariables()),
@@ -79,6 +80,7 @@ class OnIsbnSubmittedActionTest {
             stateFlow.value = ScanUiState(isResolving = true)
             val dependencies = stubDependencies(this)
             val stateBefore = stateFlow.value
+
             val action = OnIsbnSubmittedAction(
                 isbn = "9780451524935",
                 origin = IsbnOrigin.Camera,
@@ -94,6 +96,7 @@ class OnIsbnSubmittedActionTest {
             coVerify(exactly = 0) {
                 resolveBookByIsbnUseCase(isbn = any())
             }
+
             stateFlow.value shouldBe stateBefore
         }
 
@@ -103,6 +106,7 @@ class OnIsbnSubmittedActionTest {
             stateFlow.value = ScanUiState(isAddingBook = true)
             val dependencies = stubDependencies(this)
             val stateBefore = stateFlow.value
+
             val action = OnIsbnSubmittedAction(
                 isbn = "9780451524935",
                 origin = IsbnOrigin.Camera,
@@ -118,6 +122,7 @@ class OnIsbnSubmittedActionTest {
             coVerify(exactly = 0) {
                 resolveBookByIsbnUseCase(isbn = any())
             }
+
             stateFlow.value shouldBe stateBefore
         }
 
@@ -272,10 +277,11 @@ class OnIsbnSubmittedActionTest {
             val existingSheet = UnknownIsbnSheetUiModel(
                 isbn = "9780451524935",
                 scaffold = unknownIsbnSheetScaffoldFor(
-                isAdding = false,
-                isImportPending = false,
-            ),
+                    isAdding = false,
+                    isImportPending = false,
+                ),
             )
+
             val existingSession = SheetSession.Open<UnknownIsbnSheetUiModel, ResolvedScan>(model = existingSheet)
             stateFlow.value = ScanUiState(unknownIsbnSheet = existingSession)
             val dependencies = stubDependencies(this)
@@ -329,5 +335,5 @@ class OnIsbnSubmittedActionTest {
             stateFlow.value.isImportPending shouldBe false
             stateFlow.value.unknownIsbn shouldBe normalizedIsbn
         }
-}
+    }
 }

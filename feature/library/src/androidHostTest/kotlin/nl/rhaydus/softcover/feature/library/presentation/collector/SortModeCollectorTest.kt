@@ -31,6 +31,7 @@ class SortModeCollectorTest {
     fun setUp() {
         settingsFlow = MutableStateFlow(emptyMap())
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -79,10 +80,12 @@ class SortModeCollectorTest {
                 "all" to LibrarySortMode.TITLE,
                 "status-3" to LibrarySortMode.DATE_FINISHED,
             )
+
             stateFlow.value.sortDirectionByTab shouldBe mapOf(
                 "all" to SortDirection.DESCENDING,
                 "status-3" to SortDirection.ASCENDING,
             )
+
             job.cancel()
         }
 
@@ -95,6 +98,7 @@ class SortModeCollectorTest {
                     direction = SortDirection.ASCENDING,
                 ),
             )
+
             val job = launch {
                 SortModeCollector().onLaunch(
                     scope = scope,

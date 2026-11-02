@@ -4,8 +4,8 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.res.Resources
-import android.util.DisplayMetrics
 import android.os.Bundle
+import android.util.DisplayMetrics
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import io.kotest.matchers.collections.shouldContainExactly
@@ -39,18 +39,21 @@ class ReportedWidgetSizesTest {
                 0,
             )
         } returns minWidth
+
         every {
             getInt(
                 AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH,
                 0,
             )
         } returns maxWidth
+
         every {
             getInt(
                 AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT,
                 0,
             )
         } returns minHeight
+
         every {
             getInt(
                 AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT,
@@ -158,20 +161,25 @@ class ReportedWidgetSizesTest {
                     getAppWidgetInfo(7)
                 } returns info
             }
+
             val metrics = DisplayMetrics().apply { density = 2f }
+
             val resources = mockk<Resources> {
                 every {
                     displayMetrics
                 } returns metrics
             }
+
             val context = mockk<Context> {
                 every {
                     this@mockk.resources
                 } returns resources
             }
+
             every {
                 AppWidgetManager.getInstance(context)
             } returns manager
+
             return context
         }
 

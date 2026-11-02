@@ -17,29 +17,28 @@ private const val MONTHS_IN_YEAR = 12
  * sheet renders. [ReadingLifeShareCardUiModel] deliberately carries no `core:profile` dependency, so
  * this mapping — not a shared use case — is where the two meet.
  */
-internal fun ReadingLife.toReadingLifeShareCardUiModel(profile: UserProfileData): ReadingLifeShareCardUiModel =
-    ReadingLifeShareCardUiModel(
-        readerName = profile.name,
-        avatarUrl = profile.profileImageUrl.takeIf { it.isNotBlank() },
-        readerInitials = profile.name.toInitials(),
-        totalPagesRead = formatGroupedNumber(profile.totalPagesRead),
-        totalBooksLine = "across ${profile.booksRead} ${if (profile.booksRead == 1) "book" else "books"}",
-        // Already ranked highest-first by the mapper, so the card's leading row is the top genre.
-        topGenres = genres.slices.take(SHARE_CARD_GENRE_LIMIT).map { slice ->
-            ReadingLifeGenre(
-                name = slice.name,
-                percentLabel = "${(slice.fraction * PERCENTAGE_MULTIPLIER).roundToInt()}%",
-            )
-        }.toImmutableList(),
-        pagesByMonth = currentYearMonthlyPages().toImmutableList(),
-        averageRating = ratings.average,
-        averageRatingText = formatDecimalNumber(
-            value = ratings.average,
-            fractionDigits = 1,
-        ),
-        dayStreak = profile.readingStreak.toString(),
-        trackedYears = trackedYears.toString(),
-    )
+internal fun ReadingLife.toReadingLifeShareCardUiModel(profile: UserProfileData): ReadingLifeShareCardUiModel = ReadingLifeShareCardUiModel(
+    readerName = profile.name,
+    avatarUrl = profile.profileImageUrl.takeIf { it.isNotBlank() },
+    readerInitials = profile.name.toInitials(),
+    totalPagesRead = formatGroupedNumber(profile.totalPagesRead),
+    totalBooksLine = "across ${profile.booksRead} ${if (profile.booksRead == 1) "book" else "books"}",
+    // Already ranked highest-first by the mapper, so the card's leading row is the top genre.
+    topGenres = genres.slices.take(SHARE_CARD_GENRE_LIMIT).map { slice ->
+        ReadingLifeGenre(
+            name = slice.name,
+            percentLabel = "${(slice.fraction * PERCENTAGE_MULTIPLIER).roundToInt()}%",
+        )
+    }.toImmutableList(),
+    pagesByMonth = currentYearMonthlyPages().toImmutableList(),
+    averageRating = ratings.average,
+    averageRatingText = formatDecimalNumber(
+        value = ratings.average,
+        fractionDigits = 1,
+    ),
+    dayStreak = profile.readingStreak.toString(),
+    trackedYears = trackedYears.toString(),
+)
 
 private fun String.toInitials(): String {
     val letters = trim()
@@ -55,6 +54,7 @@ private fun String.toInitials(): String {
 
 private fun ReadingLife.currentYearMonthlyPages(): List<Int> {
     val year = pagesByMonth.maxOfOrNull { it.year } ?: return List(MONTHS_IN_YEAR) { 0 }
+
     val countByMonth = pagesByMonth.filter { it.year == year }.associate { it.month to it.count }
 
     return (1..MONTHS_IN_YEAR).map { month -> countByMonth[month] ?: 0 }

@@ -81,8 +81,8 @@ internal data object OnApiKeySaveClickAction : OnboardingAction {
                     return@launch
                 }
                 .onSuccess {
-                    scope.setState {
-                        it.copy(loadingSheet = it.loadingSheet.withModel { sheet -> sheet.copy(progress = 1f) })
+                    scope.setState { state ->
+                        state.copy(loadingSheet = state.loadingSheet.withModel { sheet -> sheet.copy(progress = 1f) })
                     }
 
                     scope.sendEvent(event = OnboardingEvent.SignedInEvent())

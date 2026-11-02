@@ -87,16 +87,19 @@ class Migration50To51Test {
         }
     }
 
-    @Test
-    fun `migration runs cleanly from a real v50 database`() {
-        // ----- Arrange -----
-        val db = connection
+    @Nested
+    inner class CleanMigration {
+        @Test
+        fun `migration runs cleanly from a real v50 database`() {
+            // ----- Arrange -----
+            val db = connection
 
-        // ----- Act -----
-        val result = runCatching { migration.migrate(db) }
+            // ----- Act -----
+            val result = runCatching { migration.migrate(db) }
 
-        // ----- Assert -----
-        result.isSuccess.shouldBeTrue()
+            // ----- Assert -----
+            result.isSuccess.shouldBeTrue()
+        }
     }
 
     @Nested

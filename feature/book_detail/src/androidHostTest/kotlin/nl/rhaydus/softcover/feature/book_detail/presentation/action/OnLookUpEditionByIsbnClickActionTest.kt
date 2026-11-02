@@ -29,12 +29,15 @@ class OnLookUpEditionByIsbnClickActionTest {
     @BeforeEach
     fun setUp() {
         dependencies = mockk(relaxed = true)
+
         model = mockk<EditionSheetUiModel>().also {
             every {
                 it.requestingClose()
             } returns it
         }
+
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -61,6 +64,7 @@ class OnLookUpEditionByIsbnClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.editionSheetRequested shouldBe false
+
             stateFlow.value.editionSheet.shouldNotBeNull().let { it as SheetSession.Open }.pending shouldBe
                 IsbnLookup(prefilledIsbn = "9780374710781")
         }

@@ -12,20 +12,20 @@ import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
 import nl.rhaydus.toad.ToadScreenModel
 
 internal class ScanScreenModel(
-    private val resolveBookByIsbnUseCase: ResolveBookByIsbnUseCase,
-    private val addBookByIsbnUseCase: AddBookByIsbnUseCase,
+    resolveBookByIsbnUseCase: ResolveBookByIsbnUseCase,
+    addBookByIsbnUseCase: AddBookByIsbnUseCase,
     dispatchers: AppDispatchers,
     flows: List<ScanCollector>,
     prefilledIsbn: String? = null,
     startInManualEntry: Boolean = false,
 ) : ToadScreenModel<ScanUiState, ScanEvent, ScanDependencies, ScanCollector, LocalScanVariables>(
-    initializers = flows,
-    initialState = ScanUiState().seededWith(
-        prefilledIsbn = prefilledIsbn,
-        startInManualEntry = startInManualEntry,
-    ),
-    initialLocalVariables = LocalScanVariables(),
-) {
+        initializers = flows,
+        initialState = ScanUiState().seededWith(
+            prefilledIsbn = prefilledIsbn,
+            startInManualEntry = startInManualEntry,
+        ),
+        initialLocalVariables = LocalScanVariables(),
+    ) {
     override val dependencies: ScanDependencies = ScanDependencies(
         resolveBookByIsbnUseCase = resolveBookByIsbnUseCase,
         addBookByIsbnUseCase = addBookByIsbnUseCase,

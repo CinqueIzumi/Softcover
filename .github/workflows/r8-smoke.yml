@@ -26,6 +26,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          submodules: true
           fetch-depth: 0
 
       - name: Set up JDK 17

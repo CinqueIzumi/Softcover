@@ -65,6 +65,7 @@ class ChooseListsMapperTest {
                     bookIds = emptyList(),
                 ),
             )
+
             val cover = coverUiModel()
 
             // ----- Act -----
@@ -78,10 +79,12 @@ class ChooseListsMapperTest {
 
             // ----- Assert -----
             val header = result.scaffold.header.shouldNotBeNull()
+
             header.section.headline shouldBe persistentListOf(
                 HeaderTextSegment.Plain(text = "Shelve "),
                 HeaderTextSegment.Emphasised(text = "Piranesi"),
             )
+
             header.trailing shouldBe SheetHeaderTrailing.Jacket(cover = cover)
         }
 
@@ -397,6 +400,7 @@ class ChooseListsMapperTest {
         fun `covers above 3 are capped down to the first 3`() {
             // ----- Arrange -----
             val covers = List(5) { coverUiModel() }
+
             val lists = listOf(
                 bookList(
                     id = 1,
@@ -416,6 +420,7 @@ class ChooseListsMapperTest {
             val trailing = result.scaffold.header
                 .shouldNotBeNull()
                 .trailing as SheetHeaderTrailing.JacketStack
+
             trailing.covers.toList() shouldBe covers.take(3)
         }
 
@@ -444,6 +449,7 @@ class ChooseListsMapperTest {
             val trailing = result.scaffold.header
                 .shouldNotBeNull()
                 .trailing as SheetHeaderTrailing.Jacket
+
             trailing.cover shouldBe CoverUiModel(
                 source = null,
                 coverlessTitle = "1 book",
@@ -468,6 +474,7 @@ class ChooseListsMapperTest {
             val trailing = result.scaffold.header
                 .shouldNotBeNull()
                 .trailing as SheetHeaderTrailing.JacketStack
+
             trailing.covers.toList() shouldBe covers
         }
 
@@ -490,6 +497,7 @@ class ChooseListsMapperTest {
             val section = result.scaffold.header
                 .shouldNotBeNull()
                 .section
+
             section.headline shouldBe persistentListOf(
                 HeaderTextSegment.Plain(text = "Shelve "),
                 HeaderTextSegment.Emphasised(text = "3 books"),
@@ -651,6 +659,7 @@ class ChooseListsMapperTest {
                 listsBeingMutated = emptySet(),
                 previous = null,
             )
+
             val after = listOf(
                 bookList(
                     id = 1,
@@ -686,6 +695,7 @@ class ChooseListsMapperTest {
                 listsBeingMutated = emptySet(),
                 previous = null,
             )
+
             val halfWritten = listOf(
                 bookList(
                     id = 1,
@@ -720,6 +730,7 @@ class ChooseListsMapperTest {
                     bookIds = emptyList(),
                 ),
             )
+
             val previous = listOf(
                 bookList(
                     id = 2,
@@ -763,6 +774,7 @@ class ChooseListsMapperTest {
                 listsBeingMutated = setOf(1),
                 previous = null,
             )
+
             val finished = listOf(
                 bookList(
                     id = 1,

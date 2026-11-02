@@ -26,6 +26,7 @@ internal class RandomPickImages(
         coverHeightDp: Int,
     ): Uri? {
         val source = book.coverSource() ?: return null
+
         val coverPx = (coverHeightDp * density).roundToInt()
 
         return store.uriFor(

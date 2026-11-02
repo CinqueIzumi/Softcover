@@ -174,6 +174,7 @@ class FeaturedCardMapperTest {
                 badge = null,
                 cover = null,
             )
+
             val unsavedCard = unsaved.toFeaturedCard(
                 header = header,
                 badge = null,

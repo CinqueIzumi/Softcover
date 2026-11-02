@@ -7,7 +7,7 @@ metadata:
 
 When asked to refresh the foundation wiring (version bump, module split, includeBuild switch), do the
 wiring only — do not delete or rewrite app-local forks that a foundation module now duplicates, even if
-the tracking doc (`docs/working/foundation-upstream-candidates.md`) shows the item as
+the foundation candidates backlog shows the item as
 "Implemented, not adopted" and the target module is being wired in the very same pass.
 
 **Why:** the user explicitly separates "make the new coordinates/imports compile" from "migrate the

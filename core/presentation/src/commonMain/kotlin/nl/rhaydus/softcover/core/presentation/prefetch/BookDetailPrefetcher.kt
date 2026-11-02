@@ -32,6 +32,7 @@ class BookDetailPrefetcher internal constructor(
     fun prefetch(bookId: Int) {
         scope.launch {
             val isNew = mutex.withLock { prefetched.add(bookId) }
+
             if (isNew.not()) return@launch
 
             fetchBookByIdUseCase(id = bookId).onFailure { error ->
@@ -62,7 +63,7 @@ fun rememberBookDetailPrefetcher(): BookDetailPrefetcher {
 // network round-trip overlaps with the user lifting their finger and the
 // subsequent navigation transition. `awaitFirstDown(requireUnconsumed = false)`
 // observes the press without consuming it, so any sibling `clickable` /
-// `tactileClickable` modifier still receives the gesture normally.
+// `pressScaleClickable` modifier still receives the gesture normally.
 fun Modifier.prefetchBookDetailOnPress(bookId: Int): Modifier = composed {
     val prefetcher = LocalBookDetailPrefetcher.current ?: return@composed this
 

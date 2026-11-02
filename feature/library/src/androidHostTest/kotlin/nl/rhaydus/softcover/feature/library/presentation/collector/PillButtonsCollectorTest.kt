@@ -35,11 +35,13 @@ class PillButtonsCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk(relaxed = true)
     }
 
@@ -49,6 +51,7 @@ class PillButtonsCollectorTest {
         fun `each visible tab is judged by its own filters`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = PillButtonsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -67,6 +70,7 @@ class PillButtonsCollectorTest {
                 readingTab.id to filterPillButton(active = false),
                 readTab.id to filterPillButton(active = true),
             )
+
             job.cancel()
         }
 
@@ -74,6 +78,7 @@ class PillButtonsCollectorTest {
         fun `selectionPills follow bulkActionInProgress`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = PillButtonsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -89,6 +94,7 @@ class PillButtonsCollectorTest {
                 bulkActionInProgress = true,
                 currentShelf = UserBookStatus.CURRENTLY_READING,
             )
+
             job.cancel()
         }
 
@@ -97,6 +103,7 @@ class PillButtonsCollectorTest {
         fun `a status tab leaves its own shelf out of the move targets`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = PillButtonsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -115,6 +122,7 @@ class PillButtonsCollectorTest {
                 bulkActionInProgress = false,
                 currentShelf = UserBookStatus.READ,
             )
+
             job.cancel()
         }
 
@@ -122,12 +130,14 @@ class PillButtonsCollectorTest {
         fun `switching to another status tab moves the omitted shelf`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = PillButtonsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
                     dependencies = dependencies,
                 )
             }
+
             stateFlow.value = LibraryUiState(
                 visibleTabs = persistentListOf(readingTab, readTab),
                 selectedTabId = readTab.id,
@@ -142,6 +152,7 @@ class PillButtonsCollectorTest {
                 UserBookStatus.PAUSED,
                 UserBookStatus.READ,
             )
+
             job.cancel()
         }
 
@@ -149,6 +160,7 @@ class PillButtonsCollectorTest {
         fun `a non-status tab offers every shelf`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = PillButtonsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -167,6 +179,7 @@ class PillButtonsCollectorTest {
                 bulkActionInProgress = false,
                 currentShelf = null,
             )
+
             job.cancel()
         }
 
@@ -174,6 +187,7 @@ class PillButtonsCollectorTest {
         fun `a selected tab id missing from the visible tabs offers every shelf`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = PillButtonsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

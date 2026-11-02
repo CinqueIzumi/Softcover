@@ -154,6 +154,7 @@ internal class ListsRepositoryImpl(
                 editionId = edition.id,
                 snapshot = snapshot,
             )
+
             throw error
         }
 
@@ -212,6 +213,7 @@ internal class ListsRepositoryImpl(
             listId = listId,
             bookId = bookId,
         )
+
         listsLocalDataSource.cacheListBook(book = real)
     }
 

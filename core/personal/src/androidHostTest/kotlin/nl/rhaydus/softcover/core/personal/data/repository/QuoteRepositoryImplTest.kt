@@ -38,6 +38,7 @@ class QuoteRepositoryImplTest {
         localDataSource = mockk()
         remoteDataSource = mockk()
         drainer = mockk()
+
         repository = QuoteRepositoryImpl(
             localDataSource = localDataSource,
             remoteDataSource = remoteDataSource,
@@ -107,6 +108,7 @@ class QuoteRepositoryImplTest {
                     entity = any(),
                     enqueuedAt = any(),
                 )
+
                 drainer.drain()
             }
         }
@@ -209,6 +211,7 @@ class QuoteRepositoryImplTest {
             coVerifyOrder {
                 drainer.drain()
                 remoteDataSource.getQuotes(bookId = 1)
+
                 localDataSource.replaceSyncedForBook(
                     bookId = 1,
                     remote = fetched,

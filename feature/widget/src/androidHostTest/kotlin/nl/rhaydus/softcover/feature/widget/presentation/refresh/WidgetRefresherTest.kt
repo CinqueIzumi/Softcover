@@ -20,9 +20,6 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.NO_USER_ID
@@ -41,6 +38,9 @@ import nl.rhaydus.softcover.feature.widget.presentation.glance.TrendingWidget
 import nl.rhaydus.softcover.feature.widget.presentation.image.WidgetImageStore
 import nl.rhaydus.softcover.feature.widget.presentation.worker.QuoteRefreshScheduler
 import nl.rhaydus.softcover.feature.widget.presentation.worker.TrendingRefreshScheduler
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 
@@ -82,11 +82,13 @@ class WidgetRefresherTest {
         quoteFetchTracker: QuoteFetchTracker = QuoteFetchTracker(),
     ): WidgetRefresher {
         val getUserIdAsFlow = mockk<GetUserIdAsFlowUseCase>()
+
         every {
             getUserIdAsFlow()
         } returns userId
 
         val observeAllQuotes = mockk<ObserveAllQuotesUseCase>()
+
         every {
             observeAllQuotes()
         } returns quotes
@@ -118,10 +120,12 @@ class WidgetRefresherTest {
             // ----- Arrange -----
             val scheduler = mockk<TrendingRefreshScheduler>(relaxed = true)
             val userId = MutableStateFlow(NO_USER_ID)
+
             refresher(
                 userId = userId,
                 scheduler = scheduler,
             ).start()
+
             runCurrent()
 
             // ----- Act -----
@@ -145,6 +149,7 @@ class WidgetRefresherTest {
                 userId = userId,
                 scheduler = scheduler,
             ).start()
+
             runCurrent()
 
             // ----- Assert -----
@@ -158,10 +163,12 @@ class WidgetRefresherTest {
             // ----- Arrange -----
             val scheduler = mockk<TrendingRefreshScheduler>(relaxed = true)
             val userId = MutableStateFlow(signedInUserId)
+
             refresher(
                 userId = userId,
                 scheduler = scheduler,
             ).start()
+
             runCurrent()
 
             // ----- Act -----
@@ -182,11 +189,13 @@ class WidgetRefresherTest {
             // ----- Arrange -----
             val widget = mockk<QuoteWidget>()
             val quotes = MutableStateFlow(listOf(quote(text = "First")))
+
             val refresher = refresher(
                 userId = MutableStateFlow(signedInUserId),
                 quotes = quotes,
                 widgets = listOf(widget),
             )
+
             refresher.start()
             refresher.onEnabled(widget)
             runCurrent()
@@ -207,11 +216,13 @@ class WidgetRefresherTest {
             // ----- Arrange -----
             val widget = mockk<GlanceAppWidget>()
             val quotes = MutableStateFlow(listOf(quote(text = "First")))
+
             refresher(
                 userId = MutableStateFlow(signedInUserId),
                 quotes = quotes,
                 widgets = listOf(widget),
             ).start()
+
             runCurrent()
 
             // ----- Act -----
@@ -232,16 +243,20 @@ class WidgetRefresherTest {
         fun `a quote source re-emitting an equal list repaints nothing`() = runTest {
             // ----- Arrange -----
             val widget = mockk<QuoteWidget>()
+
             val quotes = MutableSharedFlow<List<Quote>>(
                 replay = 1,
                 extraBufferCapacity = 8,
             )
+
             quotes.tryEmit(listOf(quote(text = "First")))
+
             val refresher = refresher(
                 userId = MutableStateFlow(signedInUserId),
                 quotes = quotes,
                 widgets = listOf(widget),
             )
+
             refresher.start()
             refresher.onEnabled(widget)
             runCurrent()
@@ -262,16 +277,20 @@ class WidgetRefresherTest {
         fun `an equal re-emission followed by a real change repaints exactly once`() = runTest {
             // ----- Arrange -----
             val widget = mockk<QuoteWidget>()
+
             val quotes = MutableSharedFlow<List<Quote>>(
                 replay = 1,
                 extraBufferCapacity = 8,
             )
+
             quotes.tryEmit(listOf(quote(text = "First")))
+
             val refresher = refresher(
                 userId = MutableStateFlow(signedInUserId),
                 quotes = quotes,
                 widgets = listOf(widget),
             )
+
             refresher.start()
             refresher.onEnabled(widget)
             runCurrent()
@@ -298,17 +317,21 @@ class WidgetRefresherTest {
             val quote = mockk<QuoteWidget>()
             val firstFeed = MutableStateFlow(emptyList<Book>())
             val observeTrendingFeed = mockk<ObserveTrendingFeedUseCase>()
+
             every {
                 observeTrendingFeed(any())
             } returns MutableStateFlow(emptyList())
+
             every {
                 observeTrendingFeed(TrendingFeed.All.first())
             } returns firstFeed
+
             val refresher = refresher(
                 userId = MutableStateFlow(signedInUserId),
                 widgets = listOf(trending, quote),
                 observeTrendingFeed = observeTrendingFeed,
             )
+
             refresher.start()
             refresher.onEnabled(trending)
             refresher.onEnabled(quote)
@@ -323,6 +346,7 @@ class WidgetRefresherTest {
             coVerify(exactly = 1) {
                 renderer.renderAll(trending)
             }
+
             coVerify(exactly = 0) {
                 renderer.renderAll(quote)
             }
@@ -334,11 +358,13 @@ class WidgetRefresherTest {
             val trending = mockk<TrendingWidget>()
             val quote = mockk<QuoteWidget>()
             val quotes = MutableStateFlow(listOf(quote(text = "First")))
+
             val refresher = refresher(
                 userId = MutableStateFlow(signedInUserId),
                 quotes = quotes,
                 widgets = listOf(trending, quote),
             )
+
             refresher.start()
             refresher.onEnabled(trending)
             refresher.onEnabled(quote)
@@ -353,6 +379,7 @@ class WidgetRefresherTest {
             coVerify(exactly = 1) {
                 renderer.renderAll(quote)
             }
+
             coVerify(exactly = 0) {
                 renderer.renderAll(trending)
             }
@@ -366,10 +393,12 @@ class WidgetRefresherTest {
             // ----- Arrange -----
             val imageStore = mockk<WidgetImageStore>(relaxed = true)
             val userId = MutableStateFlow(signedInUserId)
+
             refresher(
                 userId = userId,
                 imageStore = imageStore,
             ).start()
+
             runCurrent()
 
             // ----- Act -----
@@ -388,11 +417,13 @@ class WidgetRefresherTest {
             val widget = mockk<QuoteWidget>()
             val imageStore = mockk<WidgetImageStore>(relaxed = true)
             val userId = MutableStateFlow(signedInUserId)
+
             refresher(
                 userId = userId,
                 widgets = listOf(widget),
                 imageStore = imageStore,
             ).start()
+
             runCurrent()
 
             // ----- Act -----
@@ -411,10 +442,12 @@ class WidgetRefresherTest {
             // ----- Arrange -----
             val imageStore = mockk<WidgetImageStore>(relaxed = true)
             val userId = MutableStateFlow(NO_USER_ID)
+
             refresher(
                 userId = userId,
                 imageStore = imageStore,
             ).start()
+
             runCurrent()
 
             // ----- Act -----
@@ -435,10 +468,12 @@ class WidgetRefresherTest {
             // ----- Arrange -----
             val quoteScheduler = mockk<QuoteRefreshScheduler>(relaxed = true)
             val userId = MutableStateFlow(NO_USER_ID)
+
             val refresher = refresher(
                 userId = userId,
                 quoteScheduler = quoteScheduler,
             )
+
             refresher.start()
             refresher.onEnabled(mockk<QuoteWidget>())
             runCurrent()
@@ -458,10 +493,12 @@ class WidgetRefresherTest {
             // ----- Arrange -----
             val quoteScheduler = mockk<QuoteRefreshScheduler>(relaxed = true)
             val userId = MutableStateFlow(NO_USER_ID)
+
             val refresher = refresher(
                 userId = userId,
                 quoteScheduler = quoteScheduler,
             )
+
             refresher.start()
             refresher.onEnabled(mockk<GlanceAppWidget>())
             runCurrent()
@@ -480,10 +517,12 @@ class WidgetRefresherTest {
         fun `starting already signed in runs no quote refresh`() = runTest {
             // ----- Arrange -----
             val quoteScheduler = mockk<QuoteRefreshScheduler>(relaxed = true)
+
             val refresher = refresher(
                 userId = MutableStateFlow(signedInUserId),
                 quoteScheduler = quoteScheduler,
             )
+
             refresher.onEnabled(mockk<QuoteWidget>())
 
             // ----- Act -----
@@ -508,11 +547,13 @@ class WidgetRefresherTest {
             trendingFetchTracker.track(week) { Result.failure(IllegalStateException("down")) }
             quoteFetchTracker.track { Result.failure(IllegalStateException("down")) }
             val userId = MutableStateFlow(signedInUserId)
+
             refresher(
                 userId = userId,
                 trendingFetchTracker = trendingFetchTracker,
                 quoteFetchTracker = quoteFetchTracker,
             ).start()
+
             runCurrent()
 
             // ----- Act -----
@@ -539,6 +580,7 @@ class WidgetRefresherTest {
                 trendingFetchTracker = trendingFetchTracker,
                 quoteFetchTracker = quoteFetchTracker,
             ).start()
+
             runCurrent()
 
             // ----- Assert -----

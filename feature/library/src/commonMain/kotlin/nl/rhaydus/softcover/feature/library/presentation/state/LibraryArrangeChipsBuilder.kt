@@ -79,18 +79,17 @@ internal fun buildLibraryArrangeChips(
     )
 }
 
-private fun LibrarySortMode.directionTrailing(direction: SortDirection): ChipTrailing.Icon =
-    if (direction == SortDirection.ASCENDING) {
-        ChipTrailing.Icon(
-            icon = SoftcoverIcon.ArrowDropUp,
-            description = "Ascending",
-        )
-    } else {
-        ChipTrailing.Icon(
-            icon = SoftcoverIcon.ArrowDropDown,
-            description = "Descending",
-        )
-    }
+private fun LibrarySortMode.directionTrailing(direction: SortDirection): ChipTrailing.Icon = if (direction == SortDirection.ASCENDING) {
+    ChipTrailing.Icon(
+        icon = SoftcoverIcon.ArrowDropUp,
+        description = "Ascending",
+    )
+} else {
+    ChipTrailing.Icon(
+        icon = SoftcoverIcon.ArrowDropDown,
+        description = "Descending",
+    )
+}
 
 internal val LibraryLayoutChip.arrangeChipKey: String
     get() = "layout:$name"

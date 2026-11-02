@@ -17,28 +17,26 @@ class UserTagMapperTest {
         tag: String = "Dark",
         count: Int = 5,
         tagCategoryValue: String? = "Mood",
-    ): FindTagsByUserAndTaggableQuery.Data.Tagging.Tag =
-        FindTagsByUserAndTaggableQuery.Data.Tagging.Tag(
-            __typename = "tags",
-            id = 1L,
-            tag = tag,
-            count = count,
-            tag_category = FindTagsByUserAndTaggableQuery.Data.Tagging.Tag.Tag_category(
-                __typename = "tag_categories",
-                category = tagCategoryValue,
-            ),
-        )
+    ): FindTagsByUserAndTaggableQuery.Data.Tagging.Tag = FindTagsByUserAndTaggableQuery.Data.Tagging.Tag(
+        __typename = "tags",
+        id = 1L,
+        tag = tag,
+        count = count,
+        tag_category = FindTagsByUserAndTaggableQuery.Data.Tagging.Tag.Tag_category(
+            __typename = "tag_categories",
+            category = tagCategoryValue,
+        ),
+    )
 
     private fun stubTagging(
         tag: FindTagsByUserAndTaggableQuery.Data.Tagging.Tag = stubTaggingTag(),
         spoiler: Boolean = false,
-    ): FindTagsByUserAndTaggableQuery.Data.Tagging =
-        FindTagsByUserAndTaggableQuery.Data.Tagging(
-            __typename = "taggings",
-            id = 100L,
-            spoiler = spoiler,
-            tag = tag,
-        )
+    ): FindTagsByUserAndTaggableQuery.Data.Tagging = FindTagsByUserAndTaggableQuery.Data.Tagging(
+        __typename = "taggings",
+        id = 100L,
+        spoiler = spoiler,
+        tag = tag,
+    )
 
     // ----- FindUserTagVocabularyQuery.Data.Tag helpers -----
 
@@ -46,25 +44,24 @@ class UserTagMapperTest {
         tag: String = "emotional",
         tagCategoryValue: String? = "Mood",
         aggregateCount: Int? = 111,
-    ): FindUserTagVocabularyQuery.Data.Tag =
-        FindUserTagVocabularyQuery.Data.Tag(
-            __typename = "tags",
-            id = 1L,
-            tag = tag,
-            tag_category = FindUserTagVocabularyQuery.Data.Tag.Tag_category(
-                __typename = "tag_categories",
-                category = tagCategoryValue,
-            ),
-            taggings_aggregate = FindUserTagVocabularyQuery.Data.Tag.Taggings_aggregate(
-                __typename = "taggings_aggregate",
-                aggregate = aggregateCount?.let {
-                    FindUserTagVocabularyQuery.Data.Tag.Taggings_aggregate.Aggregate(
-                        __typename = "taggings_aggregate_fields",
-                        count = it,
-                    )
-                },
-            ),
-        )
+    ): FindUserTagVocabularyQuery.Data.Tag = FindUserTagVocabularyQuery.Data.Tag(
+        __typename = "tags",
+        id = 1L,
+        tag = tag,
+        tag_category = FindUserTagVocabularyQuery.Data.Tag.Tag_category(
+            __typename = "tag_categories",
+            category = tagCategoryValue,
+        ),
+        taggings_aggregate = FindUserTagVocabularyQuery.Data.Tag.Taggings_aggregate(
+            __typename = "taggings_aggregate",
+            aggregate = aggregateCount?.let {
+                FindUserTagVocabularyQuery.Data.Tag.Taggings_aggregate.Aggregate(
+                    __typename = "taggings_aggregate_fields",
+                    count = it,
+                )
+            },
+        ),
+    )
 
     // ----- SaveTagsMutation.Data.UpsertTags.Tag helpers -----
 
@@ -73,14 +70,13 @@ class UserTagMapperTest {
         category: String = "Genre",
         count: Int? = 7,
         spoiler: Boolean = false,
-    ): SaveTagsMutation.Data.UpsertTags.Tag =
-        SaveTagsMutation.Data.UpsertTags.Tag(
-            __typename = "tags",
-            category = category,
-            tag = tag,
-            count = count,
-            spoiler = spoiler,
-        )
+    ): SaveTagsMutation.Data.UpsertTags.Tag = SaveTagsMutation.Data.UpsertTags.Tag(
+        __typename = "tags",
+        category = category,
+        tag = tag,
+        count = count,
+        spoiler = spoiler,
+    )
 
     @Nested
     inner class TaggingToUserTag {

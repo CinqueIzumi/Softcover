@@ -31,6 +31,7 @@ class RecordProgressTest {
     fun setUp() {
         recordBookProgress = mockk(relaxed = true)
         localVariablesFlow = MutableStateFlow(UpdateProgressLocalVariables())
+
         scope = ActionScope(
             stateFlow = MutableStateFlow(UpdateProgressUiState()),
             localVariablesFlow = localVariablesFlow,
@@ -55,6 +56,7 @@ class RecordProgressTest {
         fun `a new submit cancels the previous in-flight write`() = runTest {
             // ----- Arrange -----
             val gate = CompletableDeferred<Unit>()
+
             coEvery {
                 recordBookProgress(
                     book = any(),
@@ -66,11 +68,15 @@ class RecordProgressTest {
                 gate.await()
                 Result.success(null)
             }
+
             val dependencies = stubDependencies(this)
+
             every {
                 dependencies.recordBookProgress
             } returns recordBookProgress
+
             val book = stubPagedBook(pages = 100)
+
             recordProgress(
                 dependencies = dependencies,
                 scope = scope,
@@ -78,6 +84,7 @@ class RecordProgressTest {
                 newPage = 10,
                 newSeconds = null,
             )
+
             val firstJob = localVariablesFlow.value.mutationJob.shouldNotBeNull()
 
             // ----- Act -----
@@ -100,9 +107,11 @@ class RecordProgressTest {
             // ----- Arrange -----
             stubWrite(Result.success(ShelfMutationOutcome.Applied))
             val dependencies = stubDependencies(this)
+
             every {
                 dependencies.recordBookProgress
             } returns recordBookProgress
+
             recordProgress(
                 dependencies = dependencies,
                 scope = scope,
@@ -119,12 +128,15 @@ class RecordProgressTest {
 
             // ----- Assert -----
             localVariablesFlow.value.finishedBookId shouldBe 99
+
             verify(exactly = 1) {
                 dependencies.openVerdict(99)
             }
+
             verify(exactly = 0) {
                 dependencies.showSaveFailed()
             }
+
             eventChannel.tryReceive().getOrNull() shouldBe UpdateProgressEvent.Finished
         }
 
@@ -133,9 +145,11 @@ class RecordProgressTest {
             // ----- Arrange -----
             stubWrite(Result.success(ShelfMutationOutcome.NoChange))
             val dependencies = stubDependencies(this)
+
             every {
                 dependencies.recordBookProgress
             } returns recordBookProgress
+
             recordProgress(
                 dependencies = dependencies,
                 scope = scope,
@@ -152,9 +166,11 @@ class RecordProgressTest {
 
             // ----- Assert -----
             localVariablesFlow.value.finishedBookId.shouldBeNull()
+
             verify(exactly = 0) {
                 dependencies.openVerdict(any())
             }
+
             eventChannel.tryReceive().getOrNull() shouldBe UpdateProgressEvent.Finished
         }
 
@@ -163,10 +179,13 @@ class RecordProgressTest {
             // ----- Arrange -----
             stubWrite(Result.success(ShelfMutationOutcome.Applied))
             val dependencies = stubDependencies(this)
+
             every {
                 dependencies.recordBookProgress
             } returns recordBookProgress
+
             val book = stubPagedBook(pages = 100)
+
             recordProgress(
                 dependencies = dependencies,
                 scope = scope,
@@ -174,7 +193,9 @@ class RecordProgressTest {
                 newPage = 100,
                 newSeconds = null,
             )
+
             val gate = CompletableDeferred<Unit>()
+
             coEvery {
                 recordBookProgress(
                     book = any(),
@@ -207,9 +228,11 @@ class RecordProgressTest {
             // ----- Arrange -----
             stubWrite(Result.failure(IllegalStateException("boom")))
             val dependencies = stubDependencies(this)
+
             every {
                 dependencies.recordBookProgress
             } returns recordBookProgress
+
             recordProgress(
                 dependencies = dependencies,
                 scope = scope,
@@ -228,9 +251,11 @@ class RecordProgressTest {
             verify(exactly = 1) {
                 dependencies.showSaveFailed()
             }
+
             verify(exactly = 0) {
                 dependencies.openVerdict(any())
             }
+
             eventChannel.tryReceive().getOrNull() shouldBe UpdateProgressEvent.Finished
         }
 
@@ -239,10 +264,13 @@ class RecordProgressTest {
             // ----- Arrange -----
             stubWrite(Result.failure(IllegalStateException("boom")))
             val dependencies = stubDependencies(this)
+
             every {
                 dependencies.recordBookProgress
             } returns recordBookProgress
+
             val book = stubPagedBook(pages = 100)
+
             recordProgress(
                 dependencies = dependencies,
                 scope = scope,
@@ -250,7 +278,9 @@ class RecordProgressTest {
                 newPage = 10,
                 newSeconds = null,
             )
+
             val gate = CompletableDeferred<Unit>()
+
             coEvery {
                 recordBookProgress(
                     book = any(),

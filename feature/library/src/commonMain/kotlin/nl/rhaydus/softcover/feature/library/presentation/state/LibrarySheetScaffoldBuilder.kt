@@ -7,26 +7,36 @@ import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetLayout
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
-import nl.rhaydus.softcover.feature.library.presentation.util.formatBookCount
+import nl.rhaydus.softcover.core.component.statistic.StatNumberFormat
+import nl.rhaydus.softcover.core.component.statistic.StatNumberSuffix
+import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
 
 private fun showResultsButton(resultCount: Int): SheetFooterButton = SheetFooterButton(
-    label = "Show ${formatBookCount(count = resultCount)}",
+    label = "Show",
+    count = StatNumberUiModel(
+        value = resultCount.toDouble(),
+        format = StatNumberFormat.Grouped,
+        prefix = " ",
+        suffix = StatNumberSuffix.Plural(
+            one = " title",
+            other = " titles",
+        ),
+    ),
     dismissesSheet = true,
 )
 
-internal fun arrangeSheetScaffoldFor(resultCount: Int): SheetScaffoldUiModel =
-    SheetScaffoldUiModel(
-        header = SheetHeaderUiModel(
-            section = SectionHeaderUiModel.Section(
-                eyebrow = "Arrange the shelf",
-                headline = "Arrange this shelf.",
-            ),
+internal fun arrangeSheetScaffoldFor(resultCount: Int): SheetScaffoldUiModel = SheetScaffoldUiModel(
+    header = SheetHeaderUiModel(
+        section = SectionHeaderUiModel.Section(
+            eyebrow = "Arrange the shelf",
+            headline = "Arrange this shelf.",
         ),
-        footer = SheetFooterUiModel.Stacked(
-            primary = showResultsButton(resultCount = resultCount),
-            secondary = null,
-        ),
-    )
+    ),
+    footer = SheetFooterUiModel.Stacked(
+        primary = showResultsButton(resultCount = resultCount),
+        secondary = null,
+    ),
+)
 
 /**
  * The secondary "Clear all" is always present so the primary never shifts sideways when the first
@@ -35,38 +45,36 @@ internal fun arrangeSheetScaffoldFor(resultCount: Int): SheetScaffoldUiModel =
 internal fun filterSheetScaffoldFor(
     resultCount: Int,
     filtersActive: Boolean,
-): SheetScaffoldUiModel =
-    SheetScaffoldUiModel(
-        header = SheetHeaderUiModel(
-            section = SectionHeaderUiModel.Section(
-                eyebrow = "Filter this shelf",
-                headline = "Narrow this shelf.",
-                description = "Combine filters to narrow this shelf down.",
-            ),
+): SheetScaffoldUiModel = SheetScaffoldUiModel(
+    header = SheetHeaderUiModel(
+        section = SectionHeaderUiModel.Section(
+            eyebrow = "Filter this shelf",
+            headline = "Narrow this shelf.",
+            description = "Combine filters to narrow this shelf down.",
         ),
-        footer = SheetFooterUiModel.Inline(
-            primary = showResultsButton(resultCount = resultCount),
-            secondary = SheetFooterButton(
-                label = "Clear all",
-                enabled = filtersActive,
-            ),
+    ),
+    footer = SheetFooterUiModel.Inline(
+        primary = showResultsButton(resultCount = resultCount),
+        secondary = SheetFooterButton(
+            label = "Clear all",
+            enabled = filtersActive,
         ),
-        layout = SheetLayout.Pinned,
-    )
+    ),
+    layout = SheetLayout.Pinned,
+)
 
-internal fun shelvesSheetScaffold(): SheetScaffoldUiModel =
-    SheetScaffoldUiModel(
-        header = SheetHeaderUiModel(
-            section = SectionHeaderUiModel.Section(
-                eyebrow = "Your shelves",
-                headline = "Jump to a shelf",
-            ),
-            trailing = SheetHeaderTrailing.Action(
-                label = "Manage",
-                dismissesSheet = true,
-            ),
+internal fun shelvesSheetScaffold(): SheetScaffoldUiModel = SheetScaffoldUiModel(
+    header = SheetHeaderUiModel(
+        section = SectionHeaderUiModel.Section(
+            eyebrow = "Your shelves",
+            headline = "Jump to a shelf",
         ),
-    )
+        trailing = SheetHeaderTrailing.Action(
+            label = "Manage",
+            dismissesSheet = true,
+        ),
+    ),
+)
 
 internal fun bulkRemoveSheetScaffoldFor(
     bookCount: Int,

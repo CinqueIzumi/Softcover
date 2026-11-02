@@ -25,6 +25,7 @@ fun TabReselectEffect(
 
     DisposableEffect(registry, tab) {
         val handler: suspend () -> Boolean = { currentOnReselect() }
+
         registry.register(
             tab,
             handler,

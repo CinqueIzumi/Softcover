@@ -35,6 +35,7 @@ class OnScannedEditionReturnedActionTest {
         getEditionsByBookIdUseCase = mockk()
         stateFlow = MutableStateFlow(buildBookDetailUiState())
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
@@ -44,6 +45,7 @@ class OnScannedEditionReturnedActionTest {
 
     private fun stubDependencies(testScope: TestScope): BookDetailDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<BookDetailDependencies>(relaxed = true).also { mock ->
             every {
                 mock.getEditionsByBookIdUseCase
@@ -80,6 +82,7 @@ class OnScannedEditionReturnedActionTest {
                 scannedEditionBannerDismissed = true,
                 previewEdition = buildEdition(id = 3),
             )
+
             val dependencies = stubDependencies(this)
 
             coEvery {
@@ -132,10 +135,12 @@ class OnScannedEditionReturnedActionTest {
         fun `leaves editions untouched and unmarked when the refetch fails`() = runTest {
             // ----- Arrange -----
             val existing = persistentListOf(buildEdition(id = 5))
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = stubBook(id = 9),
                 editions = existing,
             )
+
             val dependencies = stubDependencies(this)
 
             coEvery {
@@ -171,6 +176,7 @@ class OnScannedEditionReturnedActionTest {
 
             // ----- Assert -----
             stateFlow.value.scannedEditionId shouldBe null
+
             coVerify(exactly = 0) {
                 getEditionsByBookIdUseCase(
                     bookId = any(),

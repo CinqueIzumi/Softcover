@@ -44,11 +44,13 @@ class UnreleasedCoverOverlaysCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(ExploreScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk(relaxed = true)
     }
 
@@ -100,6 +102,7 @@ class UnreleasedCoverOverlaysCollectorTest {
                 id = 1,
                 isUnreleased = false,
             )
+
             stateFlow.value = ExploreScreenUiState(trendingBooks = persistentListOf(book))
             val collector = UnreleasedCoverOverlaysCollector()
 
@@ -123,6 +126,7 @@ class UnreleasedCoverOverlaysCollectorTest {
                 id = 1,
                 releaseDate = null,
             )
+
             stateFlow.value = ExploreScreenUiState(trendingBooks = persistentListOf(book))
             val collector = UnreleasedCoverOverlaysCollector()
 
@@ -148,6 +152,7 @@ class UnreleasedCoverOverlaysCollectorTest {
                 continueSeriesBooks = persistentListOf(stubBook(id = 3)),
                 queriedBooks = persistentListOf(stubBook(id = 4)),
             )
+
             val collector = UnreleasedCoverOverlaysCollector()
 
             // ----- Act -----
@@ -167,10 +172,12 @@ class UnreleasedCoverOverlaysCollectorTest {
         fun `collapses the same book appearing in two lists into one entry`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = stubBook(id = 5)
+
             stateFlow.value = ExploreScreenUiState(
                 trendingBooks = persistentListOf(book),
                 becauseYouReadBooks = persistentListOf(book),
             )
+
             val collector = UnreleasedCoverOverlaysCollector()
 
             // ----- Act -----
@@ -194,6 +201,7 @@ class UnreleasedCoverOverlaysCollectorTest {
                 id = 7,
                 isUnreleased = false,
             )
+
             stateFlow.value = ExploreScreenUiState(featuredUpcomingRelease = featured)
             val collector = UnreleasedCoverOverlaysCollector()
 
@@ -236,6 +244,7 @@ class UnreleasedCoverOverlaysCollectorTest {
                 id = 8,
                 releaseDate = null,
             )
+
             stateFlow.value = ExploreScreenUiState(featuredUpcomingRelease = featured)
             val collector = UnreleasedCoverOverlaysCollector()
 

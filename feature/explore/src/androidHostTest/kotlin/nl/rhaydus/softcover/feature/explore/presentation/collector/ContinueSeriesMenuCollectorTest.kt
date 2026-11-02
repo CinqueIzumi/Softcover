@@ -39,6 +39,7 @@ class ContinueSeriesMenuCollectorTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(ExploreScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
@@ -73,6 +74,7 @@ class ContinueSeriesMenuCollectorTest {
             stateFlow.value.continueSeriesMenu shouldBe SheetSession.Open<_, PendingContinueSeriesDismissal>(
                 model = continueSeriesMenuSheetFor(book = book),
             )
+
             job.cancel()
         }
 
@@ -121,6 +123,7 @@ class ContinueSeriesMenuCollectorTest {
                     dependencies = dependencies,
                 )
             }
+
             stateFlow.value = stateWith(requestedBookId = 5)
             val renamed = book.copy(title = "A renamed title")
 
@@ -144,7 +147,9 @@ class ContinueSeriesMenuCollectorTest {
                     dependencies = dependencies,
                 )
             }
+
             stateFlow.value = stateWith(requestedBookId = 5)
+
             val pending = PendingContinueSeriesDismissal(
                 bookId = 5,
                 kind = ContinueSeriesDismissalKind.THIS_BOOK,
@@ -174,6 +179,7 @@ class ContinueSeriesMenuCollectorTest {
                     dependencies = dependencies,
                 )
             }
+
             stateFlow.value = stateWith(requestedBookId = 5)
             stateFlow.value = stateFlow.value.copy(continueSeriesMenuBookId = null)
 

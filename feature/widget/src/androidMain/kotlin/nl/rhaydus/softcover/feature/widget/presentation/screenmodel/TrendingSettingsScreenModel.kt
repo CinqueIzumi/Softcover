@@ -25,16 +25,16 @@ internal class TrendingSettingsScreenModel(
     appDispatchers: AppDispatchers,
     flows: List<TrendingSettingsCollector>,
 ) : ToadScreenModel<
-    TrendingSettingsUiState,
-    TrendingSettingsEvent,
-    TrendingSettingsDependencies,
-    TrendingSettingsCollector,
-    TrendingSettingsLocalVariables,
+        TrendingSettingsUiState,
+        TrendingSettingsEvent,
+        TrendingSettingsDependencies,
+        TrendingSettingsCollector,
+        TrendingSettingsLocalVariables,
     >(
-    initialState = TrendingSettingsUiState(),
-    initialLocalVariables = TrendingSettingsLocalVariables(),
-    initializers = flows,
-) {
+        initialState = TrendingSettingsUiState(),
+        initialLocalVariables = TrendingSettingsLocalVariables(),
+        initializers = flows,
+    ) {
     override val dependencies = TrendingSettingsDependencies(
         getTrendingSettings = getTrendingSettings,
         saveTrendingSettings = saveTrendingSettings,

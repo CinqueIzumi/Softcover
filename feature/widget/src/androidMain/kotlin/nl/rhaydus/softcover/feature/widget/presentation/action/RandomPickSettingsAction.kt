@@ -11,4 +11,4 @@ internal sealed interface RandomPickSettingsAction : UiAction<
     RandomPickSettingsUiState,
     RandomPickSettingsEvent,
     RandomPickSettingsLocalVariables,
-    >
+>

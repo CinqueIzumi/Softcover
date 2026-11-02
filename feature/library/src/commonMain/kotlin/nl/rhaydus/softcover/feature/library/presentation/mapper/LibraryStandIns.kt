@@ -28,11 +28,11 @@ internal fun LibraryGridLayout.standInCards(): ImmutableList<BookCardUiModel> {
 private fun LibraryGridLayout.standInCard(): BookCardUiModel = when (this) {
     LibraryGridLayout.GRID_TWO_COLUMNS,
     LibraryGridLayout.GRID_THREE_COLUMNS,
-        -> COLUMN_STAND_IN_CARD
+    -> COLUMN_STAND_IN_CARD
 
     LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY,
     LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY,
-        -> COVER_ONLY_STAND_IN_CARD
+    -> COVER_ONLY_STAND_IN_CARD
 
     LibraryGridLayout.LIST_COMPACT -> COMPACT_ROW_STAND_IN_CARD
 

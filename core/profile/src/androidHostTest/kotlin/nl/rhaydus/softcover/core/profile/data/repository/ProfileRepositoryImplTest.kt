@@ -21,6 +21,7 @@ class ProfileRepositoryImplTest {
         profileLocalDataSource = mockk(relaxed = true)
         activityRefreshGate = mockk(relaxed = true)
         statsRefreshGate = mockk(relaxed = true)
+
         repository = ProfileRepositoryImpl(
             profileRemoteDataSource = mockk<ProfileRemoteDataSource>(),
             profileLocalDataSource = profileLocalDataSource,

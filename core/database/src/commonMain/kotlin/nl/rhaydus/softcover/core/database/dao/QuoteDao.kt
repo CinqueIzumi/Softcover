@@ -130,6 +130,7 @@ interface QuoteDao {
             localId = localId,
             state = QuoteSyncState.PENDING_DELETE,
         )
+
         insertPendingWrite(
             entity = PendingQuoteWriteEntity(
                 kind = KIND_DELETE,
@@ -209,6 +210,7 @@ interface QuoteDao {
                     localId = pendingMatch.localId,
                     remoteId = remoteId,
                 )
+
                 deletePendingInsertFor(quoteLocalId = pendingMatch.localId)
             }
         }

@@ -7,11 +7,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import nl.rhaydus.designsystem.component.InlineErrorState
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.field.TextField
 import nl.rhaydus.softcover.core.component.field.TextFieldEvent
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 @Composable

@@ -41,6 +41,7 @@ class BookDaoTrendingTest {
             builder = Room.inMemoryDatabaseBuilder(context = context),
             queryContext = testDispatcher,
         )
+
         dao = database.bookDao()
     }
 
@@ -135,10 +136,12 @@ class BookDaoTrendingTest {
             // ----- Arrange -----
             insertBook(id = 1)
             insertBook(id = 2)
+
             insertUserBook(
                 userBookId = 10,
                 bookId = 1,
             )
+
             dao.upsertTrending(
                 rows = listOf(
                     TrendingBookEntity(
@@ -161,10 +164,12 @@ class BookDaoTrendingTest {
             // ----- Arrange -----
             insertBook(id = 1)
             insertBook(id = 2)
+
             insertUserBook(
                 userBookId = 10,
                 bookId = 1,
             )
+
             insertListBook(bookId = 2)
 
             // ----- Act -----
@@ -178,27 +183,26 @@ class BookDaoTrendingTest {
     @Nested
     inner class ReplaceTrendingBooks {
         @Test
-        fun `caches the books, ranks them in requested order and records the fetch together`() =
-            runTest(testDispatcher) {
-                // ----- Arrange -----
-                val books = listOf(
-                    domainBook(id = 1),
-                    domainBook(id = 2),
-                    domainBook(id = 3),
-                )
+        fun `caches the books, ranks them in requested order and records the fetch together`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val books = listOf(
+                domainBook(id = 1),
+                domainBook(id = 2),
+                domainBook(id = 3),
+            )
 
-                // ----- Act -----
-                dao.replaceTrendingBooks(
-                    period = WEEK,
-                    requestedIds = listOf(3, 1, 2),
-                    books = books,
-                    fetchedAtEpochMillis = 200L,
-                )
+            // ----- Act -----
+            dao.replaceTrendingBooks(
+                period = WEEK,
+                requestedIds = listOf(3, 1, 2),
+                books = books,
+                fetchedAtEpochMillis = 200L,
+            )
 
-                // ----- Assert -----
-                trendingIds() shouldContainExactly listOf(3, 1, 2)
-                dao.getTrendingFetchedAt(period = WEEK) shouldBe 200L
-            }
+            // ----- Assert -----
+            trendingIds() shouldContainExactly listOf(3, 1, 2)
+            dao.getTrendingFetchedAt(period = WEEK) shouldBe 200L
+        }
 
         @Test
         fun `appends a book returned under a redirected id after the requested ones`() = runTest(testDispatcher) {
@@ -224,6 +228,7 @@ class BookDaoTrendingTest {
         fun `deletes a book that left trending and is no longer referenced`() = runTest(testDispatcher) {
             // ----- Arrange -----
             insertBook(id = 1)
+
             dao.upsertTrending(
                 rows = listOf(
                     TrendingBookEntity(
@@ -253,11 +258,14 @@ class BookDaoTrendingTest {
             // ----- Arrange -----
             insertBook(id = 1)
             insertBook(id = 2)
+
             insertUserBook(
                 userBookId = 10,
                 bookId = 1,
             )
+
             insertListBook(bookId = 2)
+
             dao.upsertTrending(
                 rows = listOf(
                     TrendingBookEntity(
@@ -333,6 +341,7 @@ class BookDaoTrendingTest {
             // ----- Arrange -----
             insertBook(id = 1)
             insertBook(id = 5)
+
             dao.upsertTrending(
                 rows = listOf(
                     TrendingBookEntity(
@@ -347,6 +356,7 @@ class BookDaoTrendingTest {
                     ),
                 ),
             )
+
             insertBook(id = 7)
 
             // ----- Act -----
@@ -367,6 +377,7 @@ class BookDaoTrendingTest {
         fun `keeps a book that left one period but still trends in another`() = runTest(testDispatcher) {
             // ----- Arrange -----
             insertBook(id = 1)
+
             dao.upsertTrending(
                 rows = listOf(
                     TrendingBookEntity(
@@ -404,6 +415,7 @@ class BookDaoTrendingTest {
             // ----- Arrange -----
             insertBook(id = 1)
             insertBook(id = 2)
+
             dao.upsertTrending(
                 rows = listOf(
                     TrendingBookEntity(
@@ -433,6 +445,7 @@ class BookDaoTrendingTest {
             insertBook(id = 1)
             insertBook(id = 2)
             insertBook(id = 3)
+
             dao.upsertTrending(
                 rows = listOf(
                     TrendingBookEntity(
@@ -459,46 +472,48 @@ class BookDaoTrendingTest {
         }
 
         @Test
-        fun `drops the old trending rows and keeps the user book when the new id has no book`() =
-            runTest(testDispatcher) {
-                // ----- Arrange -----
-                insertBook(id = 1)
-                insertUserBook(
-                    userBookId = 10,
-                    bookId = 1,
-                )
-                dao.upsertTrending(
-                    rows = listOf(
-                        TrendingBookEntity(
-                            period = WEEK,
-                            bookId = 1,
-                            rank = 0,
-                        ),
-                        TrendingBookEntity(
-                            period = MONTH,
-                            bookId = 1,
-                            rank = 0,
-                        ),
+        fun `drops the old trending rows and keeps the user book when the new id has no book`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            insertBook(id = 1)
+
+            insertUserBook(
+                userBookId = 10,
+                bookId = 1,
+            )
+
+            dao.upsertTrending(
+                rows = listOf(
+                    TrendingBookEntity(
+                        period = WEEK,
+                        bookId = 1,
+                        rank = 0,
                     ),
-                )
+                    TrendingBookEntity(
+                        period = MONTH,
+                        bookId = 1,
+                        rank = 0,
+                    ),
+                ),
+            )
 
-                // ----- Act -----
-                dao.redirectBookId(
-                    oldId = 1,
-                    newId = 2,
-                )
+            // ----- Act -----
+            dao.redirectBookId(
+                oldId = 1,
+                newId = 2,
+            )
 
-                // ----- Assert -----
-                trendingIds(period = WEEK) shouldContainExactly emptyList()
-                trendingIds(period = MONTH) shouldContainExactly emptyList()
-                dao.getBookIdByUserBookId(userBookId = 10) shouldBe 1
-            }
+            // ----- Assert -----
+            trendingIds(period = WEEK) shouldContainExactly emptyList()
+            trendingIds(period = MONTH) shouldContainExactly emptyList()
+            dao.getBookIdByUserBookId(userBookId = 10) shouldBe 1
+        }
 
         @Test
         fun `moves the trending rows of every period to an existing new book`() = runTest(testDispatcher) {
             // ----- Arrange -----
             insertBook(id = 1)
             insertBook(id = 2)
+
             dao.upsertTrending(
                 rows = listOf(
                     TrendingBookEntity(
@@ -532,10 +547,12 @@ class BookDaoTrendingTest {
         fun `keeps a book that is still trending`() = runTest(testDispatcher) {
             // ----- Arrange -----
             insertBook(id = 1)
+
             insertUserBook(
                 userBookId = 10,
                 bookId = 1,
             )
+
             dao.upsertTrending(
                 rows = listOf(
                     TrendingBookEntity(
@@ -558,6 +575,7 @@ class BookDaoTrendingTest {
         fun `deletes a book that is not trending`() = runTest(testDispatcher) {
             // ----- Arrange -----
             insertBook(id = 1)
+
             insertUserBook(
                 userBookId = 10,
                 bookId = 1,
@@ -577,6 +595,7 @@ class BookDaoTrendingTest {
         fun `empties both trending tables`() = runTest(testDispatcher) {
             // ----- Arrange -----
             insertBook(id = 1)
+
             dao.upsertTrending(
                 rows = listOf(
                     TrendingBookEntity(

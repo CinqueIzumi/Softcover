@@ -23,18 +23,16 @@ data class BookCardSet<out P> internal constructor(
     operator fun get(key: BookCardKey): P? = payloadByKey[key]
 
     companion object {
-        fun standIns(cards: ImmutableList<BookCardUiModel>): BookCardSet<Nothing> =
-            BookCardSet(
-                cards = cards,
-                payloadByKey = persistentMapOf(),
-            )
+        fun standIns(cards: ImmutableList<BookCardUiModel>): BookCardSet<Nothing> = BookCardSet(
+            cards = cards,
+            payloadByKey = persistentMapOf(),
+        )
 
         fun empty(): BookCardSet<Nothing> = standIns(persistentListOf())
     }
 }
 
-fun <P> Iterable<Pair<BookCardUiModel, P>>.toBookCardSet(): BookCardSet<P> =
-    BookCardSet(
-        cards = map { it.first }.toImmutableList(),
-        payloadByKey = associate { it.first.key to it.second }.toImmutableMap(),
-    )
+fun <P> Iterable<Pair<BookCardUiModel, P>>.toBookCardSet(): BookCardSet<P> = BookCardSet(
+    cards = map { it.first }.toImmutableList(),
+    payloadByKey = associate { it.first.key to it.second }.toImmutableMap(),
+)

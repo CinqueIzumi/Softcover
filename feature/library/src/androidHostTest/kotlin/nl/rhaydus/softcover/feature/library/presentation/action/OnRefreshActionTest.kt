@@ -31,6 +31,7 @@ class OnRefreshActionTest {
     fun setUp() {
         refreshLibraryUseCase = mockk()
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -40,6 +41,7 @@ class OnRefreshActionTest {
 
     private fun stubDependencies(testScope: TestScope): LibraryDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<LibraryDependencies>(relaxed = true).also { mock ->
             every {
                 mock.refreshLibraryUseCase

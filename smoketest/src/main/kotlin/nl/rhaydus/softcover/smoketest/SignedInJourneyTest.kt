@@ -5,8 +5,8 @@ import android.content.Intent
 import android.os.ParcelFileDescriptor
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
-import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.StaleObjectException
+import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 import org.junit.After
@@ -93,17 +93,21 @@ class SignedInJourneyTest {
 
         openBookFromLibrary()
         openFullScreenCover()
+
         backgroundKillAndRestore(
             expected = labelled("More actions"),
             what = "book detail after the restored cover viewer popped itself",
         )
+
         returnToTabs()
 
         openCreateListSheet()
+
         backgroundKillAndRestore(
             expected = tagged(LIBRARY_TABS_PAGE_TAG),
             what = "the Library tabs page after the restore",
         )
+
         returnToTabs()
 
         visitSettingsSubPages()
@@ -120,6 +124,7 @@ class SignedInJourneyTest {
         launchApp()
 
         assertAppAlive("returning from home with Don't keep activities on")
+
         waitFor(
             labelled("More actions"),
             what = "book detail after returning from home",
@@ -148,6 +153,7 @@ class SignedInJourneyTest {
             clickLabel("^$tab$")
 
             assertAppAlive("opening the $tab tab")
+
             waitFor(
                 labelled("^$tab$"),
                 what = "the $tab tab to stay visible",
@@ -200,6 +206,7 @@ class SignedInJourneyTest {
             tagged(LIBRARY_TABS_PAGE_TAG),
             what = "the Library tabs page",
         )
+
         scrollToAndClick("Create a new list")
 
         waitFor(
@@ -234,10 +241,12 @@ class SignedInJourneyTest {
                 tagged(SETTINGS_SCREEN_TAG),
                 what = "Settings to make way for the ${page.row} page",
             )
+
             waitFor(
                 tagged(page.tag),
                 what = "the ${page.row} page",
             )
+
             assertAppAlive("opening ${page.row}")
 
             device.pressBack()
@@ -283,6 +292,7 @@ class SignedInJourneyTest {
         launchApp()
 
         assertAppAlive("restoring after the process was killed")
+
         waitFor(
             expected,
             what = what,
@@ -294,6 +304,7 @@ class SignedInJourneyTest {
             "^Begin$",
             timeoutMillis = LAUNCH_TIMEOUT_MILLIS,
         )
+
         clickLabel("^Continue$")
 
         waitFor(
@@ -376,6 +387,7 @@ class SignedInJourneyTest {
             "The app crashed or stopped responding while $step",
             crashDialog.not(),
         )
+
         assertTrue(
             "The app is no longer in the foreground after $step",
             device.hasObject(By.pkg(APP_PACKAGE)),
@@ -388,6 +400,7 @@ class SignedInJourneyTest {
         val body = regex.split("|").joinToString(separator = "|") { alt ->
             if (alt.startsWith("^")) alt else ".*($alt).*"
         }
+
         val pattern = Pattern.compile(
             body,
             Pattern.CASE_INSENSITIVE or Pattern.DOTALL,
@@ -488,6 +501,7 @@ class SignedInJourneyTest {
                 height / 3,
                 SWIPE_STEPS,
             )
+
             device.waitForIdle()
             Thread.sleep(SETTLE_MILLIS)
         }

@@ -37,11 +37,13 @@ class OnDismissShareSheetActionTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk<BookDetailDependencies>(relaxed = true)
     }
 

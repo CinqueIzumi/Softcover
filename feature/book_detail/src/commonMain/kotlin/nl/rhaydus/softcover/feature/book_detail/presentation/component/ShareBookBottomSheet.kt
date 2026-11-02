@@ -15,13 +15,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
 import kotlinx.coroutines.launch
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.chip.ChipFlow
 import nl.rhaydus.softcover.core.component.control.SegmentedControl
 import nl.rhaydus.softcover.core.component.control.SegmentedControlEvent
 import nl.rhaydus.softcover.core.component.share.ShareCardSheetContent
 import nl.rhaydus.softcover.core.component.share.ShareCardSheetEvent
 import nl.rhaydus.softcover.core.component.state.RevealedWhenPresent
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareSheetEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareSheetUiModel
 

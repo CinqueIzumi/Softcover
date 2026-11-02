@@ -25,6 +25,7 @@ class OnApiKeyPasteActionTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(OnboardingUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalOnboardingVariables()),
@@ -38,6 +39,7 @@ class OnApiKeyPasteActionTest {
 
     private fun stubDependencies(testScope: TestScope): OnboardingDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<OnboardingDependencies>(relaxed = true).also { mock ->
             every {
                 mock.coroutineScope

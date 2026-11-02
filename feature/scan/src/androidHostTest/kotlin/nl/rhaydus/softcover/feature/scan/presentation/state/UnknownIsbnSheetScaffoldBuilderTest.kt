@@ -20,6 +20,7 @@ class UnknownIsbnSheetScaffoldBuilderTest {
                 isAdding = addingInput,
                 isImportPending = false,
             )
+
             val idle = unknownIsbnSheetScaffoldFor(
                 isAdding = idleInput,
                 isImportPending = false,
@@ -41,6 +42,7 @@ class UnknownIsbnSheetScaffoldBuilderTest {
                 isAdding = addingInput,
                 isImportPending = false,
             )
+
             val idle = unknownIsbnSheetScaffoldFor(
                 isAdding = idleInput,
                 isImportPending = false,
@@ -63,6 +65,7 @@ class UnknownIsbnSheetScaffoldBuilderTest {
                 isAdding = addingInput,
                 isImportPending = false,
             ).footer.shouldNotBeNull()
+
             val idle = unknownIsbnSheetScaffoldFor(
                 isAdding = idleInput,
                 isImportPending = false,
@@ -110,5 +113,5 @@ class UnknownIsbnSheetScaffoldBuilderTest {
             primary.enabled shouldBe true
             primary.dismissesSheet shouldBe false
         }
-}
+    }
 }

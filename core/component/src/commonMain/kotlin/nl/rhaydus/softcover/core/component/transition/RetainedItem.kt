@@ -25,6 +25,7 @@ internal fun <T> retainExiting(
             )
         }
         .toMutableList()
+
     val currentKeys = result.mapTo(mutableSetOf()) { it.key }
 
     var anchorKey: Any? = null
@@ -36,6 +37,7 @@ internal fun <T> retainExiting(
 
         if (isRemoved) {
             val anchorIndex = anchorKey?.let { anchor -> result.indexOfFirst { it.key == anchor } } ?: -1
+
             result.add(
                 anchorIndex + 1,
                 entry.copy(exiting = true),

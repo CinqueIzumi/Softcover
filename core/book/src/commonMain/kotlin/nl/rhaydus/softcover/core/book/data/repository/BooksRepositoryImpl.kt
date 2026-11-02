@@ -37,7 +37,6 @@ import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.domain.model.UpcomingWindow
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
-import nl.rhaydus.softcover.core.domain.model.isBlank
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Clock
 import kotlin.time.Duration
@@ -630,6 +629,7 @@ internal class BooksRepositoryImpl(
                         book = optimistic,
                         status = status,
                     )
+
                     optimistic
                 }
 
@@ -653,6 +653,7 @@ internal class BooksRepositoryImpl(
         // currently-reading list until the next refresh. Falling back to [book] only when uncached.
         val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
         val optimistic = (snapshot ?: book).withRating(rating = rating)
+
         userBookCacheGate.cacheBook(
             book = optimistic,
             kind = PendingUserBookWriteKind.UPDATE_RATING,
@@ -683,6 +684,7 @@ internal class BooksRepositoryImpl(
                             book = optimistic,
                             rating = rating,
                         )
+
                         optimistic
                     }
 
@@ -716,10 +718,12 @@ internal class BooksRepositoryImpl(
         // snapshot still marked Reading, and re-caching that would resurrect the book in the
         // currently-reading list until the next refresh. Falling back to [book] only when uncached.
         val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
+
         val optimistic = (snapshot ?: book).withReview(
             review = review,
             hasSpoilers = hasSpoilers,
         )
+
         userBookCacheGate.cacheBook(
             book = optimistic,
             kind = PendingUserBookWriteKind.UPDATE_REVIEW,
@@ -753,6 +757,7 @@ internal class BooksRepositoryImpl(
                             review = review,
                             hasSpoilers = hasSpoilers,
                         )
+
                         optimistic
                     }
 
@@ -822,7 +827,7 @@ internal class BooksRepositoryImpl(
                 runCatching {
                     booksRemoteDataSource.removeBookFromLibrary(book = book)
                 }.onSuccess {
-                    book.userBook?.id?.let { userBookCacheGate.removeUserBooks(ids = listOf(it)) }
+                    book.userBook?.id?.let { userBookId -> userBookCacheGate.removeUserBooks(ids = listOf(userBookId)) }
                 }.onFailure { error ->
                     if (error is CancellationException) throw error
 
@@ -879,10 +884,12 @@ internal class BooksRepositoryImpl(
         }
 
         val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
+
         val optimistic = book.withProgress(
             newPage = newPage,
             newSeconds = newSeconds,
         )
+
         userBookCacheGate.cacheBook(
             book = optimistic,
             kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
@@ -924,6 +931,7 @@ internal class BooksRepositoryImpl(
                     book = optimistic,
                     kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
                 )
+
                 progressHistoryLocalDataSource.markSynced(localId = historyId)
             }.getOrElse { error ->
                 when (error) {
@@ -942,6 +950,7 @@ internal class BooksRepositoryImpl(
                             actionAt = readAtIso,
                             progressHistoryId = historyId,
                         )
+
                         optimistic
                     }
 
@@ -961,6 +970,7 @@ internal class BooksRepositoryImpl(
             actionAt = readAtIso,
             progressHistoryId = historyId,
         )
+
         return optimistic
     }
 
@@ -1005,6 +1015,7 @@ internal class BooksRepositoryImpl(
                             book = optimistic,
                             actionAt = actionAt,
                         )
+
                         optimistic
                     }
 
@@ -1020,6 +1031,7 @@ internal class BooksRepositoryImpl(
             book = optimistic,
             actionAt = actionAt,
         )
+
         return optimistic
     }
 

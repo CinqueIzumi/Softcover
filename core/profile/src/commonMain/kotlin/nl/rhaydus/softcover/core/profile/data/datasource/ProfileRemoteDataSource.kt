@@ -54,6 +54,7 @@ internal class ProfileRemoteDataSourceImpl(
     override suspend fun getUserProfileSnapshot(): UserProfileSnapshot {
         val currentYear = clock.todayIn(timeZone).year
         val data = apolloClient.safeQuery(query = GetUserProfileDataQuery())
+
         val me = data
             .me
             .firstOrNull()
@@ -90,15 +91,14 @@ internal class ProfileRemoteDataSourceImpl(
     // Pages through every finished book once per session. Unlike the reading-day stream below,
     // every row is needed to compute accurate aggregates, so this collects eagerly into a list
     // rather than staying a lazily-cancellable Flow.
-    private suspend fun fetchAllStatsBooks(): List<StatsBook> =
-        fetchAllPages { limit, offset ->
-            apolloClient.safeQuery(
-                query = GetReadUserBooksForStatsQuery(
-                    limit = limit,
-                    offset = offset,
-                ),
-            ).me.firstOrNull()?.user_books.orEmpty()
-        }.map { it.toStatsBook() }
+    private suspend fun fetchAllStatsBooks(): List<StatsBook> = fetchAllPages { limit, offset ->
+        apolloClient.safeQuery(
+            query = GetReadUserBooksForStatsQuery(
+                limit = limit,
+                offset = offset,
+            ),
+        ).me.firstOrNull()?.user_books.orEmpty()
+    }.map { it.toStatsBook() }
 
     private fun GetReadUserBooksForStatsQuery.Data.Me.User_book.toStatsBook(): StatsBook {
         val journalFinishDate = user_book_read_finished_journal
@@ -119,13 +119,12 @@ internal class ProfileRemoteDataSourceImpl(
         )
     }
 
-    private fun GetReadUserBooksForStatsQuery.Data.Me.User_book.Book.Contribution.Author.toStatsAuthor(): StatsAuthor =
-        StatsAuthor(
-            id = id,
-            isBipoc = is_bipoc,
-            isLgbtq = is_lgbtq,
-            gender = Gender.fromId(gender_id),
-        )
+    private fun GetReadUserBooksForStatsQuery.Data.Me.User_book.Book.Contribution.Author.toStatsAuthor(): StatsAuthor = StatsAuthor(
+        id = id,
+        isBipoc = is_bipoc,
+        isLgbtq = is_lgbtq,
+        gender = Gender.fromId(gender_id),
+    )
     // endregion
     // region me{} response mapping
     private fun GetUserProfileDataQuery.Data.Me.recentlyLoved(): List<LovedBook> = recently_loved.map { loved ->
@@ -165,6 +164,7 @@ internal class ProfileRemoteDataSourceImpl(
                     offset = offset,
                 ),
             )
+
             val rawCount = data.reading_journals.size
 
             data.reading_journals.forEach { row ->

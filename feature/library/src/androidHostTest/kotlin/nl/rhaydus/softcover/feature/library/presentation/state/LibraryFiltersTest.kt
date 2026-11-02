@@ -678,6 +678,7 @@ class LibraryFiltersTest {
                     owned = true,
                     releaseYear = 2020,
                 )
+
                 val book = buildBook(
                     tags = listOf(tagFiction),
                     rating = 3.5,
@@ -707,6 +708,7 @@ class LibraryFiltersTest {
                     owned = true,
                     releaseYear = 2020,
                 )
+
                 val book = buildBook(
                     tags = listOf(tagFiction),
                     rating = 4.5,

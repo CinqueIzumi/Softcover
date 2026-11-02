@@ -51,6 +51,7 @@ class Migration42To43Test {
                 1,
                 name,
             )
+
             return stmt.step()
         } finally {
             stmt.close()

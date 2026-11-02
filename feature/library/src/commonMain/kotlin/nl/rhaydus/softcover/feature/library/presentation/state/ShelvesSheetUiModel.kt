@@ -17,11 +17,10 @@ internal data class ShelvesSheetUiModel(
     override fun requestingClose(): ShelvesSheetUiModel = copy(scaffold = scaffold.requestingClose())
 }
 
-internal fun shelvesSheetUiModel(rows: ImmutableList<SheetRowUiModel<String>>): ShelvesSheetUiModel =
-    ShelvesSheetUiModel(
-        scaffold = shelvesSheetScaffold(),
-        group = SheetRowGroupUiModel(
-            rows = rows,
-            dismissesSheet = false,
-        ),
-    )
+internal fun shelvesSheetUiModel(rows: ImmutableList<SheetRowUiModel<String>>): ShelvesSheetUiModel = ShelvesSheetUiModel(
+    scaffold = shelvesSheetScaffold(),
+    group = SheetRowGroupUiModel(
+        rows = rows,
+        dismissesSheet = false,
+    ),
+)

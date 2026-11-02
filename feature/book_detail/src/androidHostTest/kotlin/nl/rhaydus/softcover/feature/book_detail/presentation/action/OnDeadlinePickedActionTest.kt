@@ -12,7 +12,6 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
-import nl.rhaydus.softcover.core.component.dialog.DatePickerUiModel
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.SetBookDeadlineUseCase
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -40,6 +39,7 @@ class OnDeadlinePickedActionTest {
         setBookDeadlineUseCase = mockk()
         stateFlow = MutableStateFlow(buildBookDetailUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -49,6 +49,7 @@ class OnDeadlinePickedActionTest {
 
     private fun stubDependencies(testScope: TestScope): BookDetailDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<BookDetailDependencies>(relaxed = true).also { mock ->
             every {
                 mock.setBookDeadlineUseCase
@@ -76,6 +77,7 @@ class OnDeadlinePickedActionTest {
         currentSeconds: Int? = null,
     ): Book {
         val isAudiobook = (audioSeconds ?: 0) > 0
+
         val edition = mockk<BookEdition> {
             every {
                 this@mockk.pages
@@ -89,6 +91,7 @@ class OnDeadlinePickedActionTest {
                 this@mockk.isAudiobook
             } returns isAudiobook
         }
+
         val userBookRead = if (currentPage != null || currentSeconds != null) {
             mockk<UserBookRead> {
                 every {
@@ -102,6 +105,7 @@ class OnDeadlinePickedActionTest {
         } else {
             null
         }
+
         return mockk {
             every {
                 this@mockk.id
@@ -117,12 +121,10 @@ class OnDeadlinePickedActionTest {
         }
     }
 
-    private val openPicker = DatePickerUiModel(
-        initialDate = LocalDate(
-            2026,
-            6,
-            15,
-        ),
+    private val openPicker = LocalDate(
+        2026,
+        6,
+        15,
     )
 
     @Nested
@@ -135,8 +137,10 @@ class OnDeadlinePickedActionTest {
                 pages = 250,
                 currentPage = 75,
             )
+
             stateFlow.value = buildBookDetailUiState().copy(book = book)
             dependencies = stubDependencies(this)
+
             val date = LocalDate(
                 2026,
                 6,
@@ -181,8 +185,10 @@ class OnDeadlinePickedActionTest {
                 pages = null,
                 currentPage = 10,
             )
+
             stateFlow.value = buildBookDetailUiState().copy(book = book)
             dependencies = stubDependencies(this)
+
             val date = LocalDate(
                 2026,
                 6,
@@ -228,8 +234,10 @@ class OnDeadlinePickedActionTest {
                 currentPage = null,
                 currentSeconds = null,
             )
+
             stateFlow.value = buildBookDetailUiState().copy(book = book)
             dependencies = stubDependencies(this)
+
             val date = LocalDate(
                 2026,
                 6,
@@ -267,18 +275,21 @@ class OnDeadlinePickedActionTest {
         }
 
         @Test
-        fun `clears deadlinePicker after calling use case`() = runTest {
+        fun `clears deadlinePickerDate after calling use case`() = runTest {
             // ----- Arrange -----
             val book = stubBook(
                 id = 5,
                 pages = 100,
                 currentPage = 0,
             )
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
-                deadlinePicker = openPicker,
+                deadlinePickerDate = openPicker,
             )
+
             dependencies = stubDependencies(this)
+
             val date = LocalDate(
                 2026,
                 7,
@@ -304,24 +315,27 @@ class OnDeadlinePickedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.deadlinePicker shouldBe null
+            stateFlow.value.deadlinePickerDate shouldBe null
             val sentEvent = eventChannel.tryReceive().getOrNull()
             sentEvent.shouldBeInstanceOf<BookDetailEvent.MutationSucceededEvent>()
         }
 
         @Test
-        fun `sends MutationFailedEvent and still clears deadlinePicker when use case fails`() = runTest {
+        fun `sends MutationFailedEvent and still clears deadlinePickerDate when use case fails`() = runTest {
             // ----- Arrange -----
             val book = stubBook(
                 id = 5,
                 pages = 100,
                 currentPage = 0,
             )
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
-                deadlinePicker = openPicker,
+                deadlinePickerDate = openPicker,
             )
+
             dependencies = stubDependencies(this)
+
             val date = LocalDate(
                 2026,
                 7,
@@ -349,7 +363,7 @@ class OnDeadlinePickedActionTest {
             // ----- Assert -----
             val sentEvent = eventChannel.tryReceive().getOrNull()
             sentEvent.shouldBeInstanceOf<BookDetailEvent.MutationFailedEvent>()
-            stateFlow.value.deadlinePicker shouldBe null
+            stateFlow.value.deadlinePickerDate shouldBe null
         }
 
         @Test
@@ -357,14 +371,17 @@ class OnDeadlinePickedActionTest {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState().copy(
                 book = null,
-                deadlinePicker = openPicker,
+                deadlinePickerDate = openPicker,
             )
+
             dependencies = stubDependencies(this)
+
             val date = LocalDate(
                 2026,
                 7,
                 1,
             )
+
             val action = OnDeadlinePickedAction(date = date)
 
             // ----- Act -----
@@ -374,7 +391,8 @@ class OnDeadlinePickedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.deadlinePicker shouldBe openPicker
+            stateFlow.value.deadlinePickerDate shouldBe openPicker
+
             coVerify(exactly = 0) {
                 setBookDeadlineUseCase(
                     bookId = any(),
@@ -394,8 +412,10 @@ class OnDeadlinePickedActionTest {
                 audioSeconds = 18000,
                 currentSeconds = 3600,
             )
+
             stateFlow.value = buildBookDetailUiState().copy(book = book)
             dependencies = stubDependencies(this)
+
             val date = LocalDate(
                 2026,
                 6,
@@ -444,34 +464,43 @@ class OnDeadlinePickedActionTest {
                 every {
                     this@mockk.pages
                 } returns null
+
                 every {
                     this@mockk.audioSeconds
                 } returns null
+
                 every {
                     this@mockk.isAudiobook
                 } returns true
             }
+
             val userBookRead = mockk<UserBookRead> {
                 every {
                     this@mockk.currentPage
                 } returns null
+
                 every {
                     this@mockk.currentSeconds
                 } returns 0
             }
+
             val book = mockk<Book> {
                 every {
                     this@mockk.id
                 } returns 9
+
                 every {
                     this@mockk.currentEdition
                 } returns edition
+
                 every {
                     this@mockk.currentRead
                 } returns userBookRead
             }
+
             stateFlow.value = buildBookDetailUiState().copy(book = book)
             dependencies = stubDependencies(this)
+
             val date = LocalDate(
                 2026,
                 6,
@@ -515,26 +544,33 @@ class OnDeadlinePickedActionTest {
                 every {
                     this@mockk.pages
                 } returns null
+
                 every {
                     this@mockk.audioSeconds
                 } returns 18000
+
                 every {
                     this@mockk.isAudiobook
                 } returns true
             }
+
             val book = mockk<Book> {
                 every {
                     this@mockk.id
                 } returns 10
+
                 every {
                     this@mockk.currentEdition
                 } returns edition
+
                 every {
                     this@mockk.currentRead
                 } returns null
             }
+
             stateFlow.value = buildBookDetailUiState().copy(book = book)
             dependencies = stubDependencies(this)
+
             val date = LocalDate(
                 2026,
                 6,

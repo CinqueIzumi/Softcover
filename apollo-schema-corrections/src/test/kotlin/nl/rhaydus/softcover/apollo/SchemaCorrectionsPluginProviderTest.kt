@@ -30,12 +30,14 @@ class SchemaCorrectionsPluginProviderTest {
     private fun registeredTransform(): SchemaDocumentTransform {
         val registry = mockk<ApolloCompilerRegistry>(relaxed = true)
         val transform = slot<SchemaDocumentTransform>()
+
         SchemaCorrectionsPluginProvider()
             .create(environment)
             .beforeCompilationStep(
                 environment,
                 registry,
             )
+
         verify {
             registry.registerSchemaTransform(
                 any(),
@@ -43,6 +45,7 @@ class SchemaCorrectionsPluginProviderTest {
                 transform = capture(transform),
             )
         }
+
         return transform.captured
     }
 

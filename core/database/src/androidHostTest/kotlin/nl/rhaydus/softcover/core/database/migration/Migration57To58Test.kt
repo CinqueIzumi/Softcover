@@ -52,10 +52,12 @@ class Migration57To58Test {
         fun `an existing quote keeps its columns and gets no edition details`() {
             // ----- Arrange -----
             val columns = schema57.table("book_quotes").columns.map { it.name }
+
             val before = connection.snapshot(
                 "book_quotes",
                 columns,
             )
+
             before.size shouldBe 1
 
             // ----- Act -----
@@ -66,6 +68,7 @@ class Migration57To58Test {
                 "book_quotes",
                 columns,
             ) shouldBe before
+
             connection.snapshot(
                 "book_quotes",
                 listOf(
@@ -79,6 +82,7 @@ class Migration57To58Test {
         fun `every other v57 table keeps identical rows`() {
             // ----- Arrange -----
             val kept = schema57.tables.filter { it.name != "book_quotes" }
+
             val rowsBefore = kept.associate { table ->
                 table.name to connection.snapshot(
                     table.name,

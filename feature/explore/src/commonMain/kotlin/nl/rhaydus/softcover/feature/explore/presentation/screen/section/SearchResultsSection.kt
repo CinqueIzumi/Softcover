@@ -23,10 +23,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import nl.rhaydus.designsystem.component.InlineErrorState
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyState
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberPrefetchingBookCardEventHandler
@@ -110,7 +110,7 @@ internal fun ColumnScope.SearchResultsSection(
             is BookCardEvent.PressStarted,
             is BookCardEvent.MenuClicked,
             is BookCardEvent.ShakeEnded,
-                -> Unit
+            -> Unit
         }
     }
 
@@ -133,6 +133,7 @@ internal fun LoadMoreSearchResultsEffect(
 
     LaunchedEffect(state.queriedBooks.size, state.queriedBooksHasMore, showsStandIns) {
         val itemCount = state.queriedBooks.size
+
         if (state.queriedBooksHasMore.not() || itemCount == 0 || showsStandIns) return@LaunchedEffect
 
         snapshotFlow(lastVisibleIndex)
@@ -160,6 +161,7 @@ internal fun ScrollToTopWhenResultsReplacedEffect(
         .firstOrNull()
         ?.takeUnless(BookCardUiModel::isLoading)
         ?.key
+
     var previousHeadKey by remember { mutableStateOf(headKey) }
 
     LaunchedEffect(headKey) {
@@ -175,6 +177,7 @@ internal fun ScrollToTopWhenResultsReplacedEffect(
 @Composable
 internal fun Modifier.dimWhileRefreshing(refreshing: Boolean): Modifier {
     val target = if (refreshing) REFRESHING_RESULTS_ALPHA else 1f
+
     val alpha by animateFloatAsState(
         targetValue = target,
         animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
@@ -185,22 +188,26 @@ internal fun Modifier.dimWhileRefreshing(refreshing: Boolean): Modifier {
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-internal fun LazyItemScope.searchResultItemModifier(): Modifier {
-    return Modifier.animateItem(
-        fadeInSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
-        placementSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
-        fadeOutSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
-    )
+internal fun Modifier.searchResultItem(scope: LazyItemScope): Modifier {
+    return with(scope) {
+        animateItem(
+            fadeInSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+            placementSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
+            fadeOutSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-internal fun LazyGridItemScope.searchResultItemModifier(): Modifier {
-    return Modifier.animateItem(
-        fadeInSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
-        placementSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
-        fadeOutSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
-    )
+internal fun Modifier.searchResultItem(scope: LazyGridItemScope): Modifier {
+    return with(scope) {
+        animateItem(
+            fadeInSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+            placementSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
+            fadeOutSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)

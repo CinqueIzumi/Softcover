@@ -51,6 +51,7 @@ class LibraryArrangeChipsBuilderTest {
                 listId = 10,
                 listName = "Winter reading",
             )
+
             val draft = LibraryArrangeDraft(
                 tabId = customListTab.id,
                 sortMode = LibrarySortMode.TITLE,
@@ -93,6 +94,7 @@ class LibraryArrangeChipsBuilderTest {
             // ----- Assert -----
             val titleChip = result.sortChips.chips.single { it.key == "sort:TITLE" }
             titleChip.selected shouldBe true
+
             titleChip.trailing shouldBe ChipTrailing.Icon(
                 icon = SoftcoverIcon.ArrowDropUp,
                 description = "Ascending",
@@ -121,6 +123,7 @@ class LibraryArrangeChipsBuilderTest {
             // ----- Assert -----
             val titleChip = result.sortChips.chips.single { it.key == "sort:TITLE" }
             titleChip.selected shouldBe true
+
             titleChip.trailing shouldBe ChipTrailing.Icon(
                 icon = SoftcoverIcon.ArrowDropDown,
                 description = "Descending",
@@ -184,6 +187,7 @@ class LibraryArrangeChipsBuilderTest {
                 listId = 10,
                 listName = "Winter reading",
             )
+
             val rankedList = BookList(
                 id = 10,
                 name = "Winter reading",
@@ -191,6 +195,7 @@ class LibraryArrangeChipsBuilderTest {
                 ranked = true,
                 books = emptyList(),
             )
+
             val draft = LibraryArrangeDraft(
                 tabId = customListTab.id,
                 sortMode = LibrarySortMode.ORDER,

@@ -11,4 +11,4 @@ internal sealed interface HiddenSuggestionsCollector : Collector<
     HiddenSuggestionsEvent,
     HiddenSuggestionsDependencies,
     HiddenSuggestionsLocalVariables,
-    >
+>

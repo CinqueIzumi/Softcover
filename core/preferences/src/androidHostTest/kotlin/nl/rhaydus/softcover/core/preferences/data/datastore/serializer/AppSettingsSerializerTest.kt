@@ -131,6 +131,7 @@ class AppSettingsSerializerTest {
                 libraryTabOrder = listOf("read", "reading"),
                 becauseYouReadGenre = "Fantasy",
             )
+
             val buffer = Buffer()
 
             // ----- Act -----
@@ -138,6 +139,7 @@ class AppSettingsSerializerTest {
                 t = entity,
                 sink = buffer,
             )
+
             val result = AppSettingsSerializer.readFrom(buffer)
 
             // ----- Assert -----

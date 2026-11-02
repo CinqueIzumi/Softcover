@@ -32,6 +32,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.component.InlineErrorState
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.designsystem.theme.Corners
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerCenter
 import nl.rhaydus.softcover.core.component.field.TextField
@@ -39,8 +41,6 @@ import nl.rhaydus.softcover.core.component.field.TextFieldEvent
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.tabularFigures
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnApiKeyPasteAction
@@ -258,6 +258,7 @@ private fun HelperLine(openUrl: (String) -> Unit) {
         withLink(link = link) {
             withStyle(style = SpanStyle(color = linkColor)) {
                 append("here")
+
                 appendInlineContent(
                     OPEN_IN_NEW_INLINE_CONTENT_ID,
                     "[external link]",

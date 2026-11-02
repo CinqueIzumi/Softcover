@@ -157,10 +157,12 @@ class OfflineUserBookSyncImplTest {
         fun `happy path — enqueue called with UPDATE_PROGRESS kind and correct fields`() = runTest {
             // ----- Arrange -----
             val userBook = stubUserBook(id = 10)
+
             val userBookRead = stubUserBookRead(
                 id = 20,
                 currentPage = 100,
             )
+
             val book = stubBook(
                 userBook = userBook.copy(reads = listOf(userBookRead)),
             )
@@ -298,6 +300,7 @@ class OfflineUserBookSyncImplTest {
                 startedAt = "2026-07-21",
                 finishedAt = "2026-07-22",
             )
+
             val book = stubBook(
                 userBook = stubUserBook(id = 10),
                 userBookRead = placeholderRead,
@@ -336,6 +339,7 @@ class OfflineUserBookSyncImplTest {
                 startedAt = "2026-07-21",
                 finishedAt = null,
             )
+
             val book = stubBook(
                 userBook = stubUserBook(id = 10),
                 userBookRead = realRead,
@@ -369,10 +373,12 @@ class OfflineUserBookSyncImplTest {
         fun `happy path — enqueue called with MARK_AS_READ kind and progress fields from userBookRead`() = runTest {
             // ----- Arrange -----
             val userBook = stubUserBook(id = 10)
+
             val userBookRead = stubUserBookRead(
                 id = 20,
                 currentPage = 300,
             )
+
             val book = stubBook(
                 userBook = userBook.copy(reads = listOf(userBookRead)),
             )
@@ -517,6 +523,7 @@ class OfflineUserBookSyncImplTest {
             // ----- Arrange -----
             val userBook = stubUserBook(id = 10)
             val userBookRead = stubUserBookRead(id = 20)
+
             val book = stubBook(
                 userBook = userBook.copy(reads = listOf(userBookRead)),
             )
@@ -544,6 +551,7 @@ class OfflineUserBookSyncImplTest {
         fun `userBookRead is null — enqueue still called with placeholder userBookReadId of 0`() = runTest {
             // ----- Arrange -----
             val userBook = stubUserBook(id = 10)
+
             val book = stubBook(
                 userBook = userBook,
             )
@@ -600,6 +608,7 @@ class OfflineUserBookSyncImplTest {
             // ----- Arrange -----
             val userBook = stubUserBook(id = 10)
             val userBookRead = stubUserBookRead(id = 20)
+
             val book = stubBook(
                 userBook = userBook.copy(reads = listOf(userBookRead)),
             )
@@ -629,6 +638,7 @@ class OfflineUserBookSyncImplTest {
         fun `userBookRead is null — enqueue still called with placeholder userBookReadId of 0`() = runTest {
             // ----- Arrange -----
             val userBook = stubUserBook(id = 10)
+
             val book = stubBook(
                 userBook = userBook,
             )
@@ -685,10 +695,12 @@ class OfflineUserBookSyncImplTest {
             // ----- Arrange -----
             val syncedUserBookId = 61
             val localUserBook = stubUserBook(id = syncedUserBookId).copy(status = BookStatus.Paused)
+
             val serverUserBook = stubUserBook(id = syncedUserBookId).copy(
                 status = BookStatus.Reading,
                 rating = 4.5,
             )
+
             val fetchedBook = stubBook(userBook = serverUserBook)
             val localBook = fetchedBook.copy(userBook = localUserBook)
 
@@ -697,6 +709,7 @@ class OfflineUserBookSyncImplTest {
             } returns mapOf(
                 syncedUserBookId to setOf(PendingUserBookWriteKind.SET_STATUS),
             )
+
             every {
                 booksLocalDataSource.allUserBooks
             } returns flowOf(listOf(localBook))
@@ -715,6 +728,7 @@ class OfflineUserBookSyncImplTest {
             // ----- Arrange -----
             val syncedUserBookId = 62
             val fetchedBook = stubBook(userBook = null)
+
             val localBook = fetchedBook.copy(
                 userBook = stubUserBook(id = syncedUserBookId).copy(status = BookStatus.Paused),
             )
@@ -724,6 +738,7 @@ class OfflineUserBookSyncImplTest {
             } returns mapOf(
                 syncedUserBookId to setOf(PendingUserBookWriteKind.SET_STATUS),
             )
+
             every {
                 booksLocalDataSource.allUserBooks
             } returns flowOf(listOf(localBook))
@@ -761,6 +776,7 @@ class OfflineUserBookSyncImplTest {
         fun `empty syncedWrites — returns fetched list as-is and never accesses booksLocalDataSource`() = runTest {
             // ----- Arrange -----
             val fetchedBook = stubBook(userBook = stubUserBook(id = 1))
+
             coEvery {
                 userBookWriteDrainer.drain()
             } returns emptyMap()
@@ -819,6 +835,7 @@ class OfflineUserBookSyncImplTest {
                 journals = emptyList(),
                 reads = emptyList(),
             )
+
             val localRead = UserBookRead(
                 id = 1,
                 currentPage = 200,
@@ -844,6 +861,7 @@ class OfflineUserBookSyncImplTest {
                 journals = emptyList(),
                 reads = emptyList(),
             )
+
             val serverRead = UserBookRead(
                 id = 1,
                 currentPage = 50, // stale — local (200) should win
@@ -856,6 +874,7 @@ class OfflineUserBookSyncImplTest {
             val fetchedBook = stubBook(
                 userBook = serverUserBook.copy(reads = listOf(serverRead)),
             )
+
             val localBook = fetchedBook.copy(
                 userBook = localUserBook.copy(reads = listOf(localRead)),
             )
@@ -865,6 +884,7 @@ class OfflineUserBookSyncImplTest {
             } returns mapOf(
                 syncedUserBookId to setOf(PendingUserBookWriteKind.UPDATE_PROGRESS),
             )
+
             every {
                 booksLocalDataSource.allUserBooks
             } returns flowOf(listOf(localBook))
@@ -900,6 +920,7 @@ class OfflineUserBookSyncImplTest {
                 journals = emptyList(),
                 reads = emptyList(),
             )
+
             val localRead = UserBookRead(
                 id = 5,
                 currentPage = 200,
@@ -915,6 +936,7 @@ class OfflineUserBookSyncImplTest {
             val fetchedBook = stubBook(
                 userBook = serverUserBook,
             )
+
             val localBook = fetchedBook.copy(
                 userBook = localUserBook.copy(reads = listOf(localRead)),
             )
@@ -924,6 +946,7 @@ class OfflineUserBookSyncImplTest {
             } returns mapOf(
                 syncedUserBookId to setOf(PendingUserBookWriteKind.UPDATE_PROGRESS),
             )
+
             every {
                 booksLocalDataSource.allUserBooks
             } returns flowOf(listOf(localBook))
@@ -958,6 +981,7 @@ class OfflineUserBookSyncImplTest {
                 journals = emptyList(),
                 reads = emptyList(),
             )
+
             val localRead = UserBookRead(
                 id = 1,
                 currentPage = 100,
@@ -983,6 +1007,7 @@ class OfflineUserBookSyncImplTest {
                 journals = emptyList(),
                 reads = emptyList(),
             )
+
             val serverRead = UserBookRead(
                 id = 1,
                 currentPage = 350, // server progress — should flow through
@@ -995,6 +1020,7 @@ class OfflineUserBookSyncImplTest {
             val fetchedBook = stubBook(
                 userBook = serverUserBook.copy(reads = listOf(serverRead)),
             )
+
             val localBook = fetchedBook.copy(
                 userBook = localUserBook.copy(reads = listOf(localRead)),
             )
@@ -1004,6 +1030,7 @@ class OfflineUserBookSyncImplTest {
             } returns mapOf(
                 syncedUserBookId to setOf(PendingUserBookWriteKind.UPDATE_RATING),
             )
+
             every {
                 booksLocalDataSource.allUserBooks
             } returns flowOf(listOf(localBook))
@@ -1039,6 +1066,7 @@ class OfflineUserBookSyncImplTest {
                 journals = emptyList(),
                 reads = emptyList(),
             )
+
             val localRead = UserBookRead(
                 id = 1,
                 currentPage = 300,
@@ -1064,6 +1092,7 @@ class OfflineUserBookSyncImplTest {
                 journals = emptyList(),
                 reads = emptyList(),
             )
+
             val serverRead = UserBookRead(
                 id = 1,
                 currentPage = 0,
@@ -1076,6 +1105,7 @@ class OfflineUserBookSyncImplTest {
             val fetchedBook = stubBook(
                 userBook = serverUserBook.copy(reads = listOf(serverRead)),
             )
+
             val localBook = fetchedBook.copy(
                 userBook = localUserBook.copy(reads = listOf(localRead)),
             )
@@ -1085,6 +1115,7 @@ class OfflineUserBookSyncImplTest {
             } returns mapOf(
                 syncedUserBookId to setOf(PendingUserBookWriteKind.MARK_AS_READ),
             )
+
             every {
                 booksLocalDataSource.allUserBooks
             } returns flowOf(listOf(localBook))
@@ -1145,6 +1176,7 @@ class OfflineUserBookSyncImplTest {
             val fetchedBook = stubBook(
                 userBook = serverUserBook,
             )
+
             val localBook = fetchedBook.copy(userBook = localUserBook)
 
             coEvery {
@@ -1152,6 +1184,7 @@ class OfflineUserBookSyncImplTest {
             } returns mapOf(
                 syncedUserBookId to setOf(PendingUserBookWriteKind.UPDATE_REVIEW),
             )
+
             every {
                 booksLocalDataSource.allUserBooks
             } returns flowOf(listOf(localBook))
@@ -1224,6 +1257,7 @@ class OfflineUserBookSyncImplTest {
                     reads = emptyList(),
                 ),
             )
+
             val otherFetchedBook = stubBook(userBook = serverUserBookForOther)
 
             coEvery {
@@ -1233,6 +1267,7 @@ class OfflineUserBookSyncImplTest {
             )
 
             val localBookForSynced = syncedFetchedBook.copy(userBook = localUserBookForSynced)
+
             // Local also has a different-rated entry for otherUserBookId, but it should be ignored
             every {
                 booksLocalDataSource.allUserBooks
@@ -1293,6 +1328,7 @@ class OfflineUserBookSyncImplTest {
             val fetchedBook = stubBook(
                 userBook = serverUserBook,
             )
+
             val localBook = fetchedBook.copy(userBook = localUserBook)
 
             coEvery {
@@ -1303,6 +1339,7 @@ class OfflineUserBookSyncImplTest {
                     PendingUserBookWriteKind.UPDATE_REVIEW,
                 ),
             )
+
             every {
                 booksLocalDataSource.allUserBooks
             } returns flowOf(listOf(localBook))
@@ -1355,6 +1392,7 @@ class OfflineUserBookSyncImplTest {
             coEvery {
                 userBookWriteDrainer.drain()
             } returns mapOf(userBookId to setOf(kind))
+
             every {
                 booksLocalDataSource.allUserBooks
             } returns flowOf(listOf(snapshot))
@@ -1380,18 +1418,21 @@ class OfflineUserBookSyncImplTest {
                     finishedAt = "2025-01-01",
                 ),
             )
+
             val staleCurrent = read(
                 id = 10,
                 page = 20,
                 progress = 20f,
                 startedAt = "2026-02-02",
             )
+
             val olderRead = read(
                 id = 5,
                 page = 90,
                 progress = 90f,
                 finishedAt = "2025-01-02",
             )
+
             val fetched = bookWith(
                 BookStatus.Reading,
                 staleCurrent,
@@ -1407,12 +1448,14 @@ class OfflineUserBookSyncImplTest {
 
             // ----- Assert -----
             val reads = result.userBook.shouldNotBeNull().reads
+
             reads.first { it.id == 10 } shouldBe read(
                 id = 10,
                 page = 80,
                 progress = 80f,
                 startedAt = "2026-02-01",
             )
+
             reads.first { it.id == 5 } shouldBe olderRead
         }
 
@@ -1425,15 +1468,18 @@ class OfflineUserBookSyncImplTest {
                 progress = 80f,
                 startedAt = "2026-02-01",
             )
+
             val snapshot = bookWith(
                 BookStatus.Reading,
                 snapshotCurrent,
             )
+
             val olderRead = read(
                 id = 5,
                 progress = 100f,
                 finishedAt = "2025-01-01",
             )
+
             val fetched = bookWith(
                 BookStatus.Reading,
                 olderRead,
@@ -1462,15 +1508,18 @@ class OfflineUserBookSyncImplTest {
                     startedAt = "2026-02-01",
                 ),
             )
+
             val olderRead = read(
                 id = 5,
                 progress = 100f,
                 finishedAt = "2025-01-01",
             )
+
             val serverCurrent = read(
                 id = 9,
                 startedAt = "2026-02-01",
             )
+
             val fetched = bookWith(
                 BookStatus.Reading,
                 olderRead,
@@ -1497,16 +1546,19 @@ class OfflineUserBookSyncImplTest {
                 progress = 80f,
                 startedAt = "2026-02-01",
             )
+
             val snapshot = bookWith(
                 BookStatus.Reading,
                 snapshotCurrent,
             )
+
             val otherRead = read(
                 id = 11,
                 page = 5,
                 progress = 5f,
                 startedAt = "2026-03-01",
             )
+
             val fetched = bookWith(
                 BookStatus.Reading,
                 otherRead,
@@ -1537,18 +1589,21 @@ class OfflineUserBookSyncImplTest {
                     finishedAt = "2026-05-01",
                 ),
             )
+
             val staleCurrent = read(
                 id = 10,
                 page = 40,
                 progress = 40f,
                 startedAt = "2026-02-01",
             )
+
             val otherRead = read(
                 id = 9,
                 page = 7,
                 progress = 7f,
                 startedAt = "2025-02-01",
             )
+
             val fetched = bookWith(
                 BookStatus.Reading,
                 staleCurrent,
@@ -1565,10 +1620,12 @@ class OfflineUserBookSyncImplTest {
             // ----- Assert -----
             val userBook = result.userBook.shouldNotBeNull()
             userBook.status shouldBe BookStatus.Read
+
             userBook.reads.first { it.id == 10 } shouldBe staleCurrent.copy(
                 progress = 100f,
                 finishedAt = "2026-05-01",
             )
+
             userBook.reads.first { it.id == 9 } shouldBe otherRead
         }
 
@@ -1583,12 +1640,14 @@ class OfflineUserBookSyncImplTest {
                     finishedAt = "2026-05-01",
                 ),
             )
+
             val otherRead = read(
                 id = 11,
                 page = 5,
                 progress = 5f,
                 startedAt = "2026-03-01",
             )
+
             val fetched = bookWith(
                 BookStatus.Reading,
                 otherRead,
@@ -1606,40 +1665,42 @@ class OfflineUserBookSyncImplTest {
         }
 
         @Test
-        fun `SET_STATUS — a local placeholder read is kept when the fetched Reading book has only finished reads`() =
-            runTest {
-                // ----- Arrange -----
-                val placeholder = read(
-                    id = -1,
-                    startedAt = "2026-06-01",
-                )
-                val finished = read(
-                    id = 5,
-                    progress = 100f,
-                    finishedAt = "2025-01-01",
-                )
-                val snapshot = bookWith(
-                    BookStatus.Reading,
-                    placeholder,
-                    finished,
-                )
-                val fetched = bookWith(
-                    BookStatus.Reading,
-                    finished,
-                )
+        fun `SET_STATUS — a local placeholder read is kept when the fetched Reading book has only finished reads`() = runTest {
+            // ----- Arrange -----
+            val placeholder = read(
+                id = -1,
+                startedAt = "2026-06-01",
+            )
 
-                // ----- Act -----
-                val result = reconcile(
-                    PendingUserBookWriteKind.SET_STATUS,
-                    snapshot,
-                    fetched,
-                )
+            val finished = read(
+                id = 5,
+                progress = 100f,
+                finishedAt = "2025-01-01",
+            )
 
-                // ----- Assert -----
-                val userBook = result.userBook.shouldNotBeNull()
-                userBook.reads shouldBe listOf(finished, placeholder)
-                userBook.currentRead shouldBe placeholder
-            }
+            val snapshot = bookWith(
+                BookStatus.Reading,
+                placeholder,
+                finished,
+            )
+
+            val fetched = bookWith(
+                BookStatus.Reading,
+                finished,
+            )
+
+            // ----- Act -----
+            val result = reconcile(
+                PendingUserBookWriteKind.SET_STATUS,
+                snapshot,
+                fetched,
+            )
+
+            // ----- Assert -----
+            val userBook = result.userBook.shouldNotBeNull()
+            userBook.reads shouldBe listOf(finished, placeholder)
+            userBook.currentRead shouldBe placeholder
+        }
 
         @Test
         fun `SET_STATUS — a local placeholder read is kept when the fetched book is Paused`() = runTest {
@@ -1648,15 +1709,18 @@ class OfflineUserBookSyncImplTest {
                 id = -1,
                 startedAt = "2026-06-01",
             )
+
             val finished = read(
                 id = 5,
                 progress = 100f,
                 finishedAt = "2025-01-01",
             )
+
             val snapshot = bookWith(
                 BookStatus.Paused,
                 placeholder,
             )
+
             val fetched = bookWith(
                 BookStatus.Paused,
                 finished,
@@ -1674,36 +1738,38 @@ class OfflineUserBookSyncImplTest {
         }
 
         @Test
-        fun `SET_STATUS — the placeholder is not added when the fetched book already has an unfinished read`() =
-            runTest {
-                // ----- Arrange -----
-                val placeholder = read(
-                    id = -1,
-                    startedAt = "2026-06-01",
-                )
-                val snapshot = bookWith(
-                    BookStatus.Reading,
-                    placeholder,
-                )
-                val serverCurrent = read(
-                    id = 9,
-                    startedAt = "2026-06-01",
-                )
-                val fetched = bookWith(
-                    BookStatus.Reading,
-                    serverCurrent,
-                )
+        fun `SET_STATUS — the placeholder is not added when the fetched book already has an unfinished read`() = runTest {
+            // ----- Arrange -----
+            val placeholder = read(
+                id = -1,
+                startedAt = "2026-06-01",
+            )
 
-                // ----- Act -----
-                val result = reconcile(
-                    PendingUserBookWriteKind.SET_STATUS,
-                    snapshot,
-                    fetched,
-                )
+            val snapshot = bookWith(
+                BookStatus.Reading,
+                placeholder,
+            )
 
-                // ----- Assert -----
-                result.userBook.shouldNotBeNull().reads shouldBe listOf(serverCurrent)
-            }
+            val serverCurrent = read(
+                id = 9,
+                startedAt = "2026-06-01",
+            )
+
+            val fetched = bookWith(
+                BookStatus.Reading,
+                serverCurrent,
+            )
+
+            // ----- Act -----
+            val result = reconcile(
+                PendingUserBookWriteKind.SET_STATUS,
+                snapshot,
+                fetched,
+            )
+
+            // ----- Assert -----
+            result.userBook.shouldNotBeNull().reads shouldBe listOf(serverCurrent)
+        }
 
         @Test
         fun `SET_STATUS — the placeholder is not added when the reconciled status is Read`() = runTest {
@@ -1712,15 +1778,18 @@ class OfflineUserBookSyncImplTest {
                 id = -1,
                 startedAt = "2026-06-01",
             )
+
             val snapshot = bookWith(
                 BookStatus.Read,
                 placeholder,
             )
+
             val finished = read(
                 id = 5,
                 progress = 100f,
                 finishedAt = "2025-01-01",
             )
+
             val fetched = bookWith(
                 BookStatus.Reading,
                 finished,
@@ -1750,6 +1819,7 @@ class OfflineUserBookSyncImplTest {
         fun `an enqueue while online drains once after the first delay and not before`() = runTest {
             // ----- Arrange -----
             val impl = createSyncImpl(scope = backgroundScope)
+
             coEvery {
                 userBookWriteDrainer.drain()
             } returns emptyMap()
@@ -1759,6 +1829,7 @@ class OfflineUserBookSyncImplTest {
                 book = bookWithUserBook(),
                 rating = 4.0,
             )
+
             advanceBy(millis = 29_999)
 
             // ----- Assert -----
@@ -1780,6 +1851,7 @@ class OfflineUserBookSyncImplTest {
                 book = bookWithUserBook(),
                 rating = 4.0,
             )
+
             advanceBy(millis = 1_000_000)
 
             // ----- Assert -----
@@ -1790,6 +1862,7 @@ class OfflineUserBookSyncImplTest {
         fun `a tick that lands while offline ends the schedule and leaves replay to the reconnect trigger`() = runTest {
             // ----- Arrange -----
             val impl = createSyncImpl(scope = backgroundScope)
+
             coEvery {
                 userBookWriteDrainer.drain()
             } returns emptyMap()
@@ -1799,6 +1872,7 @@ class OfflineUserBookSyncImplTest {
                 book = bookWithUserBook(),
                 rating = 4.0,
             )
+
             isOnline.value = false
             advanceBy(millis = 30_000)
 
@@ -1815,6 +1889,7 @@ class OfflineUserBookSyncImplTest {
         fun `the loop drains three times in total and then stops`() = runTest {
             // ----- Arrange -----
             val impl = createSyncImpl(scope = backgroundScope)
+
             coEvery {
                 userBookWriteDrainer.drain()
             } returns emptyMap()
@@ -1824,6 +1899,7 @@ class OfflineUserBookSyncImplTest {
                 book = bookWithUserBook(),
                 rating = 4.0,
             )
+
             advanceBy(millis = 1_000_000)
 
             // ----- Assert -----
@@ -1834,13 +1910,16 @@ class OfflineUserBookSyncImplTest {
         fun `a second enqueue restarts the schedule so the first retry waits a full first delay from it`() = runTest {
             // ----- Arrange -----
             val impl = createSyncImpl(scope = backgroundScope)
+
             coEvery {
                 userBookWriteDrainer.drain()
             } returns emptyMap()
+
             impl.enqueueRatingUpdate(
                 book = bookWithUserBook(),
                 rating = 4.0,
             )
+
             advanceBy(millis = 20_000)
 
             // ----- Act -----
@@ -1848,6 +1927,7 @@ class OfflineUserBookSyncImplTest {
                 book = bookWithUserBook(),
                 rating = 5.0,
             )
+
             advanceBy(millis = 10_000)
 
             // ----- Assert -----
@@ -1866,13 +1946,16 @@ class OfflineUserBookSyncImplTest {
         fun `a restarted schedule still drains three times in total`() = runTest {
             // ----- Arrange -----
             val impl = createSyncImpl(scope = backgroundScope)
+
             coEvery {
                 userBookWriteDrainer.drain()
             } returns emptyMap()
+
             impl.enqueueRatingUpdate(
                 book = bookWithUserBook(),
                 rating = 4.0,
             )
+
             advanceBy(millis = 20_000)
 
             // ----- Act -----
@@ -1880,6 +1963,7 @@ class OfflineUserBookSyncImplTest {
                 book = bookWithUserBook(),
                 rating = 5.0,
             )
+
             advanceBy(millis = 1_000_000)
 
             // ----- Assert -----
@@ -1891,6 +1975,7 @@ class OfflineUserBookSyncImplTest {
             // ----- Arrange -----
             val impl = createSyncImpl(scope = backgroundScope)
             var completedDrains = 0
+
             coEvery {
                 userBookWriteDrainer.drain()
             } coAnswers {
@@ -1898,10 +1983,12 @@ class OfflineUserBookSyncImplTest {
                 completedDrains++
                 emptyMap()
             }
+
             impl.enqueueRatingUpdate(
                 book = bookWithUserBook(),
                 rating = 4.0,
             )
+
             advanceBy(millis = 32_000)
 
             // ----- Act -----
@@ -1909,6 +1996,7 @@ class OfflineUserBookSyncImplTest {
                 book = bookWithUserBook(),
                 rating = 5.0,
             )
+
             advanceBy(millis = 3_000)
 
             // ----- Assert -----
@@ -1919,9 +2007,11 @@ class OfflineUserBookSyncImplTest {
         fun `the loop stops when no write is pending after a drain`() = runTest {
             // ----- Arrange -----
             val impl = createSyncImpl(scope = backgroundScope)
+
             coEvery {
                 userBookWriteDrainer.drain()
             } returns emptyMap()
+
             coEvery {
                 userBookWriteQueue.hasPending()
             } returns false
@@ -1931,6 +2021,7 @@ class OfflineUserBookSyncImplTest {
                 book = bookWithUserBook(),
                 rating = 4.0,
             )
+
             advanceBy(millis = 1_000_000)
 
             // ----- Assert -----
@@ -1941,9 +2032,11 @@ class OfflineUserBookSyncImplTest {
         fun `the loop continues while writes remain pending and stops once they are gone`() = runTest {
             // ----- Arrange -----
             val impl = createSyncImpl(scope = backgroundScope)
+
             coEvery {
                 userBookWriteDrainer.drain()
             } returns emptyMap()
+
             coEvery {
                 userBookWriteQueue.hasPending()
             } returnsMany listOf(true, false)
@@ -1953,6 +2046,7 @@ class OfflineUserBookSyncImplTest {
                 book = bookWithUserBook(),
                 rating = 4.0,
             )
+
             advanceBy(millis = 1_000_000)
 
             // ----- Assert -----
@@ -1963,6 +2057,7 @@ class OfflineUserBookSyncImplTest {
         fun `concurrent enqueues produce a single schedule`() = runTest(StandardTestDispatcher()) {
             // ----- Arrange -----
             val impl = createSyncImpl(scope = backgroundScope)
+
             coEvery {
                 userBookWriteDrainer.drain()
             } returns emptyMap()
@@ -1974,12 +2069,14 @@ class OfflineUserBookSyncImplTest {
                     rating = 4.0,
                 )
             }
+
             launch {
                 impl.enqueueRatingUpdate(
                     book = bookWithUserBook(),
                     rating = 5.0,
                 )
             }
+
             runCurrent()
             advanceBy(millis = 30_000)
 
@@ -1995,13 +2092,16 @@ class OfflineUserBookSyncImplTest {
         fun `an enqueue after the loop has finished starts a fresh loop`() = runTest {
             // ----- Arrange -----
             val impl = createSyncImpl(scope = backgroundScope)
+
             coEvery {
                 userBookWriteDrainer.drain()
             } returns emptyMap()
+
             impl.enqueueRatingUpdate(
                 book = bookWithUserBook(),
                 rating = 4.0,
             )
+
             advanceBy(millis = 1_000_000)
 
             // ----- Act -----
@@ -2009,6 +2109,7 @@ class OfflineUserBookSyncImplTest {
                 book = bookWithUserBook(),
                 rating = 5.0,
             )
+
             advanceBy(millis = 30_000)
 
             // ----- Assert -----
@@ -2019,6 +2120,7 @@ class OfflineUserBookSyncImplTest {
         fun `a drain that throws does not stop the remaining retries`() = runTest {
             // ----- Arrange -----
             val impl = createSyncImpl(scope = backgroundScope)
+
             coEvery {
                 userBookWriteDrainer.drain()
             } throws IllegalStateException("boom")
@@ -2028,6 +2130,7 @@ class OfflineUserBookSyncImplTest {
                 book = bookWithUserBook(),
                 rating = 4.0,
             )
+
             advanceBy(millis = 1_000_000)
 
             // ----- Assert -----
@@ -2038,9 +2141,11 @@ class OfflineUserBookSyncImplTest {
         fun `hints from a retry drain are applied by the next drainAndReconcile and then cleared`() = runTest {
             // ----- Arrange -----
             val impl = createSyncImpl(scope = backgroundScope)
+
             val fetchedBook = stubBook(
                 userBook = stubUserBook(id = retryHintsUserBookId).copy(status = BookStatus.Reading),
             )
+
             val localBook = stubBook(
                 userBook = stubUserBook(id = retryHintsUserBookId).copy(status = BookStatus.Paused),
             )
@@ -2052,6 +2157,7 @@ class OfflineUserBookSyncImplTest {
                 emptyMap(),
                 emptyMap(),
             )
+
             every {
                 booksLocalDataSource.allUserBooks
             } returns flowOf(listOf(localBook))
@@ -2060,6 +2166,7 @@ class OfflineUserBookSyncImplTest {
                 book = localBook,
                 status = UserBookStatus.PAUSED,
             )
+
             advanceBy(millis = 30_000)
 
             // ----- Act -----
@@ -2075,12 +2182,14 @@ class OfflineUserBookSyncImplTest {
         fun `retry hints and the refresh drain hints for the same user book are merged`() = runTest {
             // ----- Arrange -----
             val impl = createSyncImpl(scope = backgroundScope)
+
             val fetchedBook = stubBook(
                 userBook = stubUserBook(id = retryHintsUserBookId).copy(
                     status = BookStatus.Reading,
                     rating = 1.0,
                 ),
             )
+
             val localBook = stubBook(
                 userBook = stubUserBook(id = retryHintsUserBookId).copy(
                     status = BookStatus.Paused,
@@ -2094,6 +2203,7 @@ class OfflineUserBookSyncImplTest {
                 mapOf(retryHintsUserBookId to setOf(PendingUserBookWriteKind.SET_STATUS)),
                 mapOf(retryHintsUserBookId to setOf(PendingUserBookWriteKind.UPDATE_RATING)),
             )
+
             every {
                 booksLocalDataSource.allUserBooks
             } returns flowOf(listOf(localBook))
@@ -2102,6 +2212,7 @@ class OfflineUserBookSyncImplTest {
                 book = localBook,
                 status = UserBookStatus.PAUSED,
             )
+
             advanceBy(millis = 30_000)
 
             // ----- Act -----
@@ -2117,12 +2228,14 @@ class OfflineUserBookSyncImplTest {
         fun `hints from consecutive retry drains accumulate until the next reconcile`() = runTest {
             // ----- Arrange -----
             val impl = createSyncImpl(scope = backgroundScope)
+
             val fetchedBook = stubBook(
                 userBook = stubUserBook(id = retryHintsUserBookId).copy(
                     status = BookStatus.Reading,
                     rating = 1.0,
                 ),
             )
+
             val localBook = stubBook(
                 userBook = stubUserBook(id = retryHintsUserBookId).copy(
                     status = BookStatus.Paused,
@@ -2137,6 +2250,7 @@ class OfflineUserBookSyncImplTest {
                 mapOf(retryHintsUserBookId to setOf(PendingUserBookWriteKind.UPDATE_RATING)),
                 emptyMap(),
             )
+
             every {
                 booksLocalDataSource.allUserBooks
             } returns flowOf(listOf(localBook))
@@ -2145,6 +2259,7 @@ class OfflineUserBookSyncImplTest {
                 book = localBook,
                 status = UserBookStatus.PAUSED,
             )
+
             advanceBy(millis = 120_000)
 
             // ----- Act -----
@@ -2161,15 +2276,19 @@ class OfflineUserBookSyncImplTest {
             // ----- Arrange -----
             val impl = createSyncImpl(scope = backgroundScope)
             val otherUserBookId = 8
+
             val fetchedRetryBook = stubBook(
                 userBook = stubUserBook(id = retryHintsUserBookId).copy(status = BookStatus.Reading),
             )
+
             val fetchedDrainBook = stubBook(
                 userBook = stubUserBook(id = otherUserBookId).copy(status = BookStatus.Reading),
             )
+
             val localRetryBook = stubBook(
                 userBook = stubUserBook(id = retryHintsUserBookId).copy(status = BookStatus.Paused),
             )
+
             val localDrainBook = stubBook(
                 userBook = stubUserBook(id = otherUserBookId).copy(status = BookStatus.Paused),
             )
@@ -2180,6 +2299,7 @@ class OfflineUserBookSyncImplTest {
                 mapOf(retryHintsUserBookId to setOf(PendingUserBookWriteKind.SET_STATUS)),
                 mapOf(otherUserBookId to setOf(PendingUserBookWriteKind.SET_STATUS)),
             )
+
             every {
                 booksLocalDataSource.allUserBooks
             } returns flowOf(listOf(localRetryBook, localDrainBook))
@@ -2188,6 +2308,7 @@ class OfflineUserBookSyncImplTest {
                 book = localRetryBook,
                 status = UserBookStatus.PAUSED,
             )
+
             advanceBy(millis = 30_000)
 
             // ----- Act -----
@@ -2237,20 +2358,24 @@ class OfflineUserBookSyncImplTest {
             coEvery {
                 userBookWriteDrainer.drain()
             } returns emptyMap()
+
             every {
                 booksLocalDataSource.allUserBooks
             } returns flowOf(listOf(local))
 
             val fetchGate = CompletableDeferred<List<Book>>()
+
             val refresh = async {
                 syncImpl.drainAndReconcile(fetchFromServer = { fetchGate.await() })
             }
+
             runCurrent()
 
             userBookCacheGate.cacheBook(
                 book = local,
                 kind = kind,
             )
+
             fetchGate.complete(fetched)
 
             return refresh.await()
@@ -2268,6 +2393,7 @@ class OfflineUserBookSyncImplTest {
                     ),
                 ),
             )
+
             val fetched = bookWith(
                 status = BookStatus.Reading,
                 reads = listOf(
@@ -2303,6 +2429,7 @@ class OfflineUserBookSyncImplTest {
                     ),
                 ),
             )
+
             val fetched = bookWith(
                 status = BookStatus.Reading,
                 reads = listOf(
@@ -2312,9 +2439,11 @@ class OfflineUserBookSyncImplTest {
                     ),
                 ),
             )
+
             coEvery {
                 userBookWriteDrainer.drain()
             } returns emptyMap()
+
             every {
                 booksLocalDataSource.allUserBooks
             } returns flowOf(listOf(local))
@@ -2330,18 +2459,22 @@ class OfflineUserBookSyncImplTest {
         fun `a book removed during the fetch is dropped from the result and not cached`() = runTest {
             // ----- Arrange -----
             val keptBook = bookWith(status = BookStatus.Reading)
+
             val removedBook = keptBook.copy(
                 id = 200,
                 userBook = keptBook.userBook.shouldNotBeNull().copy(id = 88),
             )
+
             coEvery {
                 userBookWriteDrainer.drain()
             } returns emptyMap()
 
             val fetchGate = CompletableDeferred<List<Book>>()
+
             val refresh = async {
                 syncImpl.drainAndReconcile(fetchFromServer = { fetchGate.await() })
             }
+
             runCurrent()
 
             // ----- Act -----
@@ -2351,6 +2484,7 @@ class OfflineUserBookSyncImplTest {
 
             // ----- Assert -----
             result shouldBe listOf(keptBook)
+
             coVerify(exactly = 1) {
                 booksLocalDataSource.cacheBooks(books = listOf(keptBook))
             }
@@ -2369,6 +2503,7 @@ class OfflineUserBookSyncImplTest {
                     read(id = 20),
                 ),
             )
+
             val fetched = bookWith(
                 status = BookStatus.WantToRead,
                 reads = listOf(
@@ -2404,6 +2539,7 @@ class OfflineUserBookSyncImplTest {
                     ),
                 ),
             )
+
             val fetched = bookWith(
                 status = BookStatus.Reading,
                 reads = listOf(

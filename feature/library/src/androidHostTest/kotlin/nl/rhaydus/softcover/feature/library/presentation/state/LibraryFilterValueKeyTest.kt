@@ -26,6 +26,7 @@ class LibraryFilterValueKeyTest {
                 tags = persistentListOf(tagFiction),
                 ratingBuckets = persistentListOf(4.0),
             )
+
             val filters = LibraryFilters(
                 tags = persistentSetOf(tagFiction),
                 formats = persistentSetOf("ebook"),
@@ -37,12 +38,14 @@ class LibraryFilterValueKeyTest {
 
             // ----- Act -----
             val optionsChips = buildLibraryFilterChips(options = options)
+
             val optionsValueByKey = optionsChips.ownershipChips.payloadByKey +
                 optionsChips.formatChips.payloadByKey +
                 optionsChips.releaseYearChips.payloadByKey +
                 optionsChips.readYearChips.payloadByKey +
                 optionsChips.tagChips.payloadByKey +
                 optionsChips.ratingChips.payloadByKey
+
             val activeValueByKey = buildLibraryActiveFilterChips(filters = filters).chips.payloadByKey
 
             // ----- Assert -----

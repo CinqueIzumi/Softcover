@@ -31,6 +31,7 @@ class OnHoldBooksCollectorTest {
     fun setUp() {
         booksFlow = MutableSharedFlow()
         stateFlow = MutableStateFlow(ReadingScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ReadingLocalVariables()),
@@ -58,9 +59,11 @@ class OnHoldBooksCollectorTest {
         every {
             this@mockk.id
         } returns id
+
         every {
             currentEdition?.isAudiobook
         } returns isAudiobook
+
         every {
             currentRead?.progress
         } returns progress
@@ -75,11 +78,14 @@ class OnHoldBooksCollectorTest {
                 id = 1,
                 progress = 25f,
             )
+
             val second = pausedBook(
                 id = 2,
                 progress = 60f,
             )
+
             val collector = OnHoldBooksCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -95,6 +101,7 @@ class OnHoldBooksCollectorTest {
                 BookCardKey.Book(bookId = 1),
                 BookCardKey.Book(bookId = 2),
             )
+
             stateFlow.value.onHold[BookCardKey.Book(bookId = 2)] shouldBe second
             job.cancel()
         }
@@ -103,12 +110,14 @@ class OnHoldBooksCollectorTest {
         fun `an empty emission clears the rows`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = OnHoldBooksCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
                     dependencies = dependencies,
                 )
             }
+
             booksFlow.emit(
                 listOf(
                     pausedBook(
@@ -130,6 +139,7 @@ class OnHoldBooksCollectorTest {
         fun `does not gate the first load`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = OnHoldBooksCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

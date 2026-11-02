@@ -18,18 +18,22 @@ internal class OnDeadlinePickedAction(
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
         val book = scope.currentState.book ?: return
+
         val edition = book.currentEdition ?: run {
-            scope.setState { it.copy(deadlinePicker = null) }
+            scope.setState { it.copy(deadlinePickerDate = null) }
             return
         }
+
         val isAudiobook = edition.isAudiobook
 
         val total = if (isAudiobook) edition.audioSeconds ?: 0 else edition.pages ?: 0
+
         val current = if (isAudiobook) {
             book.currentRead?.currentSeconds ?: 0
         } else {
             book.currentRead?.currentPage ?: 0
         }
+
         val unit = if (isAudiobook) DeadlineUnit.SECONDS else DeadlineUnit.PAGES
 
         dependencies.setBookDeadlineUseCase(
@@ -47,6 +51,6 @@ internal class OnDeadlinePickedAction(
                 scope.sendEvent(BookDetailEvent.MutationFailedEvent())
             }
 
-        scope.setState { it.copy(deadlinePicker = null) }
+        scope.setState { it.copy(deadlinePickerDate = null) }
     }
 }

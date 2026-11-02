@@ -24,11 +24,13 @@ class OnPageFocusGainedActionTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(FocusModeUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalFocusModeVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk(relaxed = true)
     }
 
@@ -47,6 +49,7 @@ class OnPageFocusGainedActionTest {
 
             // ----- Assert -----
             stateFlow.value.pageDraft.text shouldBe "123"
+
             stateFlow.value.pageDraft.selection shouldBe TextRange(
                 start = 0,
                 end = 3,

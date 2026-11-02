@@ -34,7 +34,7 @@ internal class JvmAppUpdateDataSource(
     private val appVersionProvider: AppVersionProvider,
     private val releaseSource: ReleaseSource,
     private val installerLauncher: DesktopInstallerLauncher,
-    private val appDispatchers: AppDispatchers,
+    appDispatchers: AppDispatchers,
     private val appDataDirectory: String,
 ) : AppUpdateDataSource, AutoCloseable {
     private val scope = CoroutineScope(SupervisorJob() + appDispatchers.io)

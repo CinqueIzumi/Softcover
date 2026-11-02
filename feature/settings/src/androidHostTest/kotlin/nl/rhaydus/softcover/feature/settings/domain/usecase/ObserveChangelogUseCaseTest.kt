@@ -28,6 +28,7 @@ class ObserveChangelogUseCaseTest {
     fun setUp() {
         changelogRepository = mockk()
         appVersionProvider = mockk()
+
         useCase = ObserveChangelogUseCase(
             changelogRepository = changelogRepository,
             appVersionProvider = appVersionProvider,
@@ -66,6 +67,7 @@ class ObserveChangelogUseCaseTest {
         fun `hides entries newer than the installed version`() = runTest {
             // ----- Arrange -----
             installed("3.2.0")
+
             every {
                 changelogRepository.observeChangelog()
             } returns flowOf(
@@ -87,6 +89,7 @@ class ObserveChangelogUseCaseTest {
         fun `keeps entries equal to and older than the installed version in order`() = runTest {
             // ----- Arrange -----
             installed("3.2.0")
+
             every {
                 changelogRepository.observeChangelog()
             } returns flowOf(
@@ -108,6 +111,7 @@ class ObserveChangelogUseCaseTest {
         fun `treats an rc installed version as the release it precedes`() = runTest {
             // ----- Arrange -----
             installed("3.2.0-rc1")
+
             every {
                 changelogRepository.observeChangelog()
             } returns flowOf(
@@ -129,6 +133,7 @@ class ObserveChangelogUseCaseTest {
         fun `ignores a build suffix on the installed version`() = runTest {
             // ----- Arrange -----
             installed("3.2.0+45")
+
             every {
                 changelogRepository.observeChangelog()
             } returns flowOf(
@@ -149,6 +154,7 @@ class ObserveChangelogUseCaseTest {
         fun `yields no entries when every release is newer than the installed version`() = runTest {
             // ----- Arrange -----
             installed("1.0.0")
+
             every {
                 changelogRepository.observeChangelog()
             } returns flowOf(
@@ -169,6 +175,7 @@ class ObserveChangelogUseCaseTest {
         fun `keeps the fetch time and source`() = runTest {
             // ----- Arrange -----
             installed("3.2.0")
+
             every {
                 changelogRepository.observeChangelog()
             } returns flowOf(

@@ -33,6 +33,7 @@ fun main() {
         "apple.awt.application.name",
         "Softcover",
     )
+
     System.setProperty(
         "awt.application.name",
         "Softcover",
@@ -42,6 +43,7 @@ fun main() {
         tag = "Softcover",
         debug = true,
     )
+
     val bootstrap = bootstrapDesktop()
 
     // `exitApplication` only ends the Compose `application {}` block; it never calls exit. Tear the

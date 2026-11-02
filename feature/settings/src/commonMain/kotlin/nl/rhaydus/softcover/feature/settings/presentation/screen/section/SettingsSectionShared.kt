@@ -11,7 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import nl.rhaydus.softcover.core.component.modifier.tactileSelectable
+import nl.rhaydus.designsystem.modifier.pressScaleSelectable
 import nl.rhaydus.softcover.core.component.selection.SelectionCheck
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.tabularFigures
@@ -27,6 +27,7 @@ internal fun SettingsSelectableRow(
     onClick: () -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
+
     val titleColor by animateColorAsState(
         targetValue = if (model.selected) {
             MaterialTheme.colorScheme.primary
@@ -50,7 +51,7 @@ internal fun SettingsSelectableRow(
             )
         },
         interactionSource = interactionSource,
-        semantics = Modifier.tactileSelectable(
+        semantics = Modifier.pressScaleSelectable(
             selected = model.selected,
             onClick = onClick,
             role = Role.RadioButton,

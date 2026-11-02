@@ -19,6 +19,7 @@ class SheetFooterUiModelTest {
                 primary = saveButton,
                 secondary = null,
             )
+
             val secondaryOnly = SheetFooterUiModel.Stacked(
                 primary = null,
                 secondary = notNowButton,

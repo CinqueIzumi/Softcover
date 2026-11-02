@@ -13,7 +13,8 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
  * The chrome around a sheet's feature body. A null [header] renders none, for a body that carries its own
  * title page. [closeRequested] hides the sheet even when [dismissible] is false; while [busy] both footer
  * buttons and the dismiss label are disabled, and tapping outside, pressing back or swiping down does not
- * dismiss.
+ * dismiss. A non-[dismissible] sheet blocks only those accidental exits: the dismiss label and a
+ * [SheetFooterButton.dismissesSheet] button still close it.
  */
 @Immutable
 data class SheetScaffoldUiModel(

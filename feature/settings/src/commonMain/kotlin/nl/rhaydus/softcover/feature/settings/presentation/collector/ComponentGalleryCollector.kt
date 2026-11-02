@@ -14,8 +14,8 @@ import nl.rhaydus.toad.Collector
  * (`component-contract.md` R9).
  */
 internal sealed interface ComponentGalleryCollector : Collector<
-        ComponentGalleryUiState,
-        ComponentGalleryEvent,
-        ComponentGalleryDependencies,
-        ComponentGalleryLocalVariables,
-        >
+    ComponentGalleryUiState,
+    ComponentGalleryEvent,
+    ComponentGalleryDependencies,
+    ComponentGalleryLocalVariables,
+>

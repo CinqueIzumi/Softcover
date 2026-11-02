@@ -45,6 +45,7 @@ class OnUpdatePercentageProgressClickActionTest {
     @BeforeEach
     fun setUp() {
         updateBookProgress = mockk(relaxed = true)
+
         coEvery {
             updateBookProgress(
                 book = any(),
@@ -52,8 +53,10 @@ class OnUpdatePercentageProgressClickActionTest {
                 newSeconds = any(),
             )
         } returns Result.success(null)
+
         stateFlow = MutableStateFlow(ReadingScreenUiState())
         localVariablesFlow = MutableStateFlow(ReadingLocalVariables())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
@@ -87,65 +90,71 @@ class OnUpdatePercentageProgressClickActionTest {
         every {
             edition.pages
         } returns pages
+
         every {
             edition.isAudiobook
         } returns false
+
         every {
             edition.audioSeconds
         } returns null
     }
 
-    private fun stubAudiobookEdition(audioSeconds: Int?): BookEdition =
-        mockk<BookEdition>().also { edition ->
-            every {
-                edition.isAudiobook
-            } returns true
-            every {
-                edition.audioSeconds
-            } returns audioSeconds
-        }
+    private fun stubAudiobookEdition(audioSeconds: Int?): BookEdition = mockk<BookEdition>().also { edition ->
+        every {
+            edition.isAudiobook
+        } returns true
+
+        every {
+            edition.audioSeconds
+        } returns audioSeconds
+    }
 
     private fun stubBookWithCurrentEditionPages(
         pages: Int?,
         id: Int = 99,
-    ): Book =
-        mockk<Book>().also { book ->
-            val edition = stubEditionWithPages(pages = pages)
+    ): Book = mockk<Book>().also { book ->
+        val edition = stubEditionWithPages(pages = pages)
 
-            every {
-                book.id
-            } returns id
-            every {
-                book.currentEdition
-            } returns edition
-            every {
-                book.defaultEdition
-            } returns null
-            every {
-                book.userBook
-            } returns null
-        }
+        every {
+            book.id
+        } returns id
+
+        every {
+            book.currentEdition
+        } returns edition
+
+        every {
+            book.defaultEdition
+        } returns null
+
+        every {
+            book.userBook
+        } returns null
+    }
 
     private fun stubAudiobook(
         audioSeconds: Int?,
         id: Int = 99,
-    ): Book =
-        mockk<Book>().also { book ->
-            val edition = stubAudiobookEdition(audioSeconds = audioSeconds)
+    ): Book = mockk<Book>().also { book ->
+        val edition = stubAudiobookEdition(audioSeconds = audioSeconds)
 
-            every {
-                book.id
-            } returns id
-            every {
-                book.currentEdition
-            } returns edition
-            every {
-                book.defaultEdition
-            } returns null
-            every {
-                book.userBook
-            } returns null
-        }
+        every {
+            book.id
+        } returns id
+
+        every {
+            book.currentEdition
+        } returns edition
+
+        every {
+            book.defaultEdition
+        } returns null
+
+        every {
+            book.userBook
+        } returns null
+    }
 
     @Nested
     inner class Execute {
@@ -153,10 +162,12 @@ class OnUpdatePercentageProgressClickActionTest {
         fun `leaves the sheet open for its own dismiss after recording`() = runTest {
             // ----- Arrange -----
             val book = stubBookWithCurrentEditionPages(pages = 300)
+
             stateFlow.value = ReadingScreenUiState(
                 bookToUpdate = book,
                 progressSheet = openProgressSheet,
             )
+
             val dependencies = stubDependencies(this)
             val action = OnUpdatePercentageProgressClickAction(newPercentage = "50")
 
@@ -181,11 +192,14 @@ class OnUpdatePercentageProgressClickActionTest {
                 21,
                 0,
             )
+
             val book = stubBookWithCurrentEditionPages(pages = 200)
+
             stateFlow.value = ReadingScreenUiState(
                 bookToUpdate = book,
                 readAt = readAt,
             )
+
             val dependencies = stubDependencies(this)
 
             coEvery {
@@ -249,6 +263,7 @@ class OnUpdatePercentageProgressClickActionTest {
                 bookToUpdate = null,
                 progressSheet = openProgressSheet,
             )
+
             val dependencies = stubDependencies(this)
             val action = OnUpdatePercentageProgressClickAction(newPercentage = "50")
 
@@ -266,6 +281,7 @@ class OnUpdatePercentageProgressClickActionTest {
                     any(),
                 )
             }
+
             stateFlow.value.progressSheet shouldBe openProgressSheet
         }
 
@@ -276,14 +292,17 @@ class OnUpdatePercentageProgressClickActionTest {
                 every {
                     b.id
                 } returns 99
+
                 every {
                     b.currentEdition
                 } returns null
             }
+
             stateFlow.value = ReadingScreenUiState(
                 bookToUpdate = book,
                 progressSheet = openProgressSheet,
             )
+
             val dependencies = stubDependencies(this)
             val action = OnUpdatePercentageProgressClickAction(newPercentage = "50")
 
@@ -301,6 +320,7 @@ class OnUpdatePercentageProgressClickActionTest {
                     any(),
                 )
             }
+
             stateFlow.value.progressSheet shouldBe openProgressSheet
             stateFlow.value.bookToUpdate shouldBe book
         }
@@ -310,17 +330,21 @@ class OnUpdatePercentageProgressClickActionTest {
             // ----- Arrange -----
             val currentEdition = stubEditionWithPages(pages = null)
             val defaultEdition = stubEditionWithPages(pages = 400)
+
             val book = mockk<Book>().also { b ->
                 every {
                     b.id
                 } returns 99
+
                 every {
                     b.currentEdition
                 } returns currentEdition
+
                 every {
                     b.defaultEdition
                 } returns defaultEdition
             }
+
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
             val action = OnUpdatePercentageProgressClickAction(newPercentage = "25")
@@ -346,17 +370,21 @@ class OnUpdatePercentageProgressClickActionTest {
             // ----- Arrange -----
             val currentEdition = stubEditionWithPages(pages = null)
             val defaultEdition = stubEditionWithPages(pages = null)
+
             val book = mockk<Book>().also { b ->
                 every {
                     b.id
                 } returns 99
+
                 every {
                     b.currentEdition
                 } returns currentEdition
+
                 every {
                     b.defaultEdition
                 } returns defaultEdition
             }
+
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
             val action = OnUpdatePercentageProgressClickAction(newPercentage = "50")
@@ -480,6 +508,7 @@ class OnUpdatePercentageProgressClickActionTest {
                 pages = 200,
                 id = 3,
             )
+
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
 
@@ -510,6 +539,7 @@ class OnUpdatePercentageProgressClickActionTest {
                 pages = 200,
                 id = 3,
             )
+
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
 
@@ -540,6 +570,7 @@ class OnUpdatePercentageProgressClickActionTest {
                 pages = 200,
                 id = 3,
             )
+
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
 
@@ -571,6 +602,7 @@ class OnUpdatePercentageProgressClickActionTest {
                 pages = 200,
                 id = 3,
             )
+
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
 
@@ -601,6 +633,7 @@ class OnUpdatePercentageProgressClickActionTest {
                 pages = 200,
                 id = 3,
             )
+
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
 
@@ -628,10 +661,12 @@ class OnUpdatePercentageProgressClickActionTest {
         fun `cancels the prior job for the same book id and stores a new one`() = runTest {
             // ----- Arrange -----
             val bookId = 3
+
             val book = stubBookWithCurrentEditionPages(
                 pages = 200,
                 id = bookId,
             )
+
             val priorJob = Job()
 
             localVariablesFlow.value = ReadingLocalVariables(

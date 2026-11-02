@@ -49,6 +49,7 @@ class VisibleTabsCollectorTest {
         getAllUserListsUseCase = mockk()
         getLibraryTabOrderAsFlowUseCase = mockk()
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -113,7 +114,9 @@ class VisibleTabsCollectorTest {
                 UserBookStatus.READ.code,
                 UserBookStatus.DID_NOT_FINISH.code,
             )
+
             val collector = VisibleTabsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -137,6 +140,7 @@ class VisibleTabsCollectorTest {
                 UserBookStatus.READ,
                 UserBookStatus.DID_NOT_FINISH,
             )
+
             job.cancel()
         }
 
@@ -144,6 +148,7 @@ class VisibleTabsCollectorTest {
         fun `unknown status code in enabled set produces only CURRENTLY_READING tab`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = VisibleTabsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -171,15 +176,19 @@ class VisibleTabsCollectorTest {
                 id = 1,
                 name = "Zebra",
             )
+
             val listAlpha = stubBookList(
                 id = 2,
                 name = "Alpha",
             )
+
             val listMid = stubBookList(
                 id = 3,
                 name = "Middle",
             )
+
             val collector = VisibleTabsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -206,11 +215,14 @@ class VisibleTabsCollectorTest {
                 id = 10,
                 name = "Owned",
             )
+
             val disabledList = stubBookList(
                 id = 20,
                 name = "Wishlist",
             )
+
             val collector = VisibleTabsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -234,6 +246,7 @@ class VisibleTabsCollectorTest {
         fun `tabsLoaded is false before any flows emit and true after first combined emission`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = VisibleTabsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -263,11 +276,14 @@ class VisibleTabsCollectorTest {
                     id = 2,
                     name = "Beta",
                 )
+
                 val listA = stubBookList(
                     id = 1,
                     name = "Alpha",
                 )
+
                 val collector = VisibleTabsCollector()
+
                 val job = launch {
                     collector.onLaunch(
                         scope = scope,
@@ -298,14 +314,17 @@ class VisibleTabsCollectorTest {
                 id = 1,
                 name = "Alpha",
             )
+
             val listB = stubBookList(
                 id = 2,
                 name = "Beta",
             )
+
             val readId = "status-${UserBookStatus.READ.code}"
             val listAId = "list-1"
             val listBId = "list-2"
             val collector = VisibleTabsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -332,6 +351,7 @@ class VisibleTabsCollectorTest {
         fun `persistedOrder with unknown ids ignores them silently`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = VisibleTabsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -360,12 +380,15 @@ class VisibleTabsCollectorTest {
                 id = 1,
                 name = "Alpha",
             )
+
             val listB = stubBookList(
                 id = 2,
                 name = "Beta",
             )
+
             val listBId = "list-2"
             val collector = VisibleTabsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

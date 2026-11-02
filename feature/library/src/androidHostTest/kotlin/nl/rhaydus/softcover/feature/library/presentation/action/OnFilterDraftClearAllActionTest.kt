@@ -28,6 +28,7 @@ class OnFilterDraftClearAllActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -64,6 +65,7 @@ class OnFilterDraftClearAllActionTest {
                 ),
                 tagSearch = "kotlin",
             )
+
             stateFlow.value = LibraryUiState(filterDraft = draft)
 
             // ----- Act -----

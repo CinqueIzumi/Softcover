@@ -29,11 +29,13 @@ class OnRemoveBookFromLibraryClickActionTest {
     fun setUp() {
         undoableBookRemover = mockk()
         stateFlow = MutableStateFlow(ExploreScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk<ExploreDependencies>(relaxed = true).also { mock ->
             every {
                 mock.undoableBookRemover

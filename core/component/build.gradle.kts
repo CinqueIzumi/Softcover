@@ -1,6 +1,6 @@
 plugins {
-    id("softcover.kmp.library")
-    id("softcover.kmp.compose")
+    id("rhaydus.kmp.library")
+    id("rhaydus.kmp.compose")
 }
 
 // `Res` stays internal: a consumer reaches a component's copy through the component, never through
@@ -27,7 +27,6 @@ kotlin {
             implementation(libs.rhaydus.designsystemImage)
 
             api(libs.coil3)
-            api(libs.kotlinx.datetime)
         }
 
         jvmMain.dependencies {

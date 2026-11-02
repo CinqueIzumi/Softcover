@@ -32,6 +32,7 @@ class DocumentPageRefreshCollectorTest {
         source = mockk()
         initialState = DocumentPage.ROADMAP.toInitialUiState()
         stateFlow = MutableStateFlow(initialState)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(DocumentPageLocalVariables()),

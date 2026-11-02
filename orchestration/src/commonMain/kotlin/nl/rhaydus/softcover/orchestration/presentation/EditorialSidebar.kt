@@ -25,12 +25,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.theme.Corners
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 
@@ -75,11 +74,8 @@ internal fun EditorialSidebar(modifier: Modifier = Modifier) {
                 verticalArrangement = Arrangement.spacedBy(Spacing.xxs),
             ) {
                 navItems.forEach { item ->
-                    val iconPainter = item.tab.options.icon ?: return@forEach
-
                     SidebarItem(
                         item = item,
-                        painter = iconPainter,
                         onClick = { onNavItemClick(item) },
                     )
                 }
@@ -91,7 +87,6 @@ internal fun EditorialSidebar(modifier: Modifier = Modifier) {
 @Composable
 private fun SidebarItem(
     item: NavItemUi,
-    painter: Painter,
     onClick: () -> Unit,
 ) {
     val containerColor = if (item.selected) {
@@ -130,7 +125,7 @@ private fun SidebarItem(
             },
         ) {
             Icon(
-                painter = painter,
+                painter = item.icon.getIconPainter(),
                 contentDescription = null,
                 tint = contentColor,
                 modifier = Modifier.graphicsLayer {

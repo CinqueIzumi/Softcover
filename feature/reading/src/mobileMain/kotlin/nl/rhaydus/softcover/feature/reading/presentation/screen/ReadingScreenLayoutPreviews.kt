@@ -1,0 +1,401 @@
+package nl.rhaydus.softcover.feature.reading.presentation.screen
+
+import androidx.compose.runtime.Composable
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentSetOf
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.minus
+import kotlinx.datetime.plus
+import nl.rhaydus.common.currentLocalDate
+import nl.rhaydus.designsystem.theme.StandardPreview
+import nl.rhaydus.softcover.core.component.bookcard.toBookCardSet
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
+import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookDeadline
+import nl.rhaydus.softcover.core.domain.model.BookSeries
+import nl.rhaydus.softcover.core.domain.model.BookStatus
+import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
+import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
+import nl.rhaydus.softcover.core.domain.preview.PreviewData
+import nl.rhaydus.softcover.feature.reading.presentation.mapper.streakStripFor
+import nl.rhaydus.softcover.feature.reading.presentation.mapper.toPickUpNextCard
+import nl.rhaydus.softcover.feature.reading.presentation.mapper.toTrendingTileUiModel
+import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
+
+private fun previewBook(
+    id: Int,
+    title: String,
+    authorNames: List<String>,
+    pages: Int,
+    currentPage: Int,
+    progress: Float,
+    series: BookSeries? = null,
+    positionsInSeries: List<Double> = emptyList(),
+    audioSeconds: Int? = null,
+    currentSeconds: Int? = null,
+): Book {
+    val editionId = id * 10
+
+    val edition = PreviewData.baseEdition.copy(
+        id = editionId,
+        pages = pages,
+        audioSeconds = audioSeconds,
+        authors = authorNames.map { PreviewData.baseAuthor.copy(name = it) },
+    )
+
+    return PreviewData.baseBook.copy(
+        id = id,
+        title = title,
+        editions = listOf(edition),
+        defaultEdition = edition,
+        authors = edition.authors,
+        userBook = PreviewData.baseBook.userBook?.copy(
+            status = BookStatus.Reading,
+            editionId = editionId,
+            reads = PreviewData.baseBook.userBook?.reads.orEmpty().map { read ->
+                read.copy(
+                    currentPage = currentPage,
+                    currentSeconds = currentSeconds,
+                    progress = progress,
+                )
+            },
+        ),
+        bookSeries = series,
+        positionsInSeries = positionsInSeries,
+    )
+}
+
+private val previewBooks: List<Book> = listOf(
+    previewBook(
+        id = 1,
+        title = "The Dungeon Anarchist's Cookbook",
+        authorNames = listOf("Matt Dinniman"),
+        pages = 534,
+        currentPage = 470,
+        progress = 88.014984f,
+        series = BookSeries(
+            id = 1,
+            name = "Dungeon Crawler Carl",
+            amountOfBooks = 20,
+        ),
+    ),
+    previewBook(
+        id = 2,
+        title = "Last to Leave the Room",
+        authorNames = listOf("Caitlin Starling"),
+        pages = 320,
+        currentPage = 262,
+        progress = 81.875f,
+        series = BookSeries(
+            id = 1,
+            name = "Dungeon Crawler Carl",
+            amountOfBooks = 20,
+        ),
+        positionsInSeries = listOf(3.0),
+    ),
+    previewBook(
+        id = 3,
+        title = "Cursed Bunny",
+        authorNames = listOf("Bora Chung", "Anton Hur"),
+        pages = 534,
+        currentPage = 49,
+        progress = 19.140625f,
+    ),
+    previewBook(
+        id = 4,
+        title = "Sherlock Holmes: The complete illustrated novels",
+        authorNames = listOf("Arthur Conan Doyle"),
+        pages = 534,
+        currentPage = 200,
+        progress = 40.322582f,
+    ),
+    previewBook(
+        id = 5,
+        title = "The Complete Fiction",
+        authorNames = listOf("H.P. Lovecraft", "S.T. Joshi"),
+        pages = 1098,
+        currentPage = 110,
+        progress = 10.018215f,
+    ),
+)
+
+@StandardPreview
+@Composable
+private fun ReadingScreenEmptyPreview() {
+    SoftcoverTheme {
+        ReadingScreenLayout(
+            state = ReadingScreenUiState(isLoading = false),
+            runAction = {},
+            onBookClick = {},
+            onNavigateToSearch = {},
+        )
+    }
+}
+
+/**
+ * The two empty-screen preview states, built as top-level `val`s so the cover mapping a
+ * `CoverModelsCollector` performs at runtime happens off the composition here too. Without the
+ * covers the tiles would render blank placeholders.
+ *
+ * Declared **after** [previewBooks]: top-level properties initialise in file order, so reading it
+ * from above would see an uninitialised list.
+ */
+private val previewEmptyWithPickUpNextState = ReadingScreenUiState(
+    isLoading = false,
+    wantToReadBooks = previewBooks.take(3).toImmutableList(),
+    pickUpNext = previewBooks.take(3).map { it.toPickUpNextCard() to it }.toBookCardSet(),
+)
+
+private val previewEmptyWithTrendingState = ReadingScreenUiState(
+    isLoading = false,
+    trendingBooks = persistentListOf(previewBooks.first()),
+    trendingTile = previewBooks.first().toTrendingTileUiModel(),
+)
+
+@StandardPreview
+@Composable
+private fun ReadingScreenEmptyWithPickUpNextPreview() {
+    SoftcoverTheme {
+        ReadingScreenLayout(
+            state = previewEmptyWithPickUpNextState,
+            runAction = {},
+            onBookClick = {},
+            onNavigateToSearch = {},
+        )
+    }
+}
+
+@StandardPreview
+@Composable
+private fun ReadingScreenEmptyWithTrendingPreview() {
+    SoftcoverTheme {
+        ReadingScreenLayout(
+            state = previewEmptyWithTrendingState,
+            runAction = {},
+            onBookClick = {},
+            onNavigateToSearch = {},
+        )
+    }
+}
+
+@StandardPreview
+@Composable
+private fun ReadingScreenLoadingPreview() {
+    SoftcoverTheme {
+        ReadingScreenLayout(
+            state = ReadingScreenUiState(isLoading = true),
+            runAction = {},
+            onBookClick = {},
+            onNavigateToSearch = {},
+        )
+    }
+}
+
+@StandardPreview
+@Composable
+private fun ReadingScreenSingleBookPreview() {
+    SoftcoverTheme {
+        ReadingScreenLayout(
+            state = ReadingScreenUiState(
+                books = previewBooks.take(1).toImmutableList(),
+                isLoading = false,
+            ),
+            runAction = {},
+            onBookClick = {},
+            onNavigateToSearch = {},
+        )
+    }
+}
+
+@StandardPreview
+@Composable
+private fun ReadingScreenPreview() {
+    SoftcoverTheme {
+        ReadingScreenLayout(
+            state = ReadingScreenUiState(
+                books = previewBooks.toImmutableList(),
+                isLoading = false,
+            ),
+            runAction = {},
+            onBookClick = {},
+            onNavigateToSearch = {},
+        )
+    }
+}
+
+private fun previewReadingActivity(): List<ReadingDayActivity> {
+    val today = currentLocalDate()
+
+    val firstDay = today.minus(
+        20,
+        DateTimeUnit.DAY,
+    )
+
+    val litOffsets = setOf(0, 1, 2, 3, 5, 6, 7, 8, 9, 12, 13, 16, 17, 18, 19, 20)
+
+    return (0..20).map { offset ->
+        ReadingDayActivity(
+            date = firstDay.plus(
+                offset,
+                DateTimeUnit.DAY,
+            ),
+            didRead = offset in litOffsets,
+        )
+    }
+}
+
+@StandardPreview
+@Composable
+private fun ReadingScreenWithStreakStripPreview() {
+    SoftcoverTheme {
+        ReadingScreenLayout(
+            state = ReadingScreenUiState(
+                books = previewBooks.toImmutableList(),
+                isLoading = false,
+                streakStrip = streakStripFor(activity = previewReadingActivity()),
+            ),
+            runAction = {},
+            onBookClick = {},
+            onNavigateToSearch = {},
+        )
+    }
+}
+
+@StandardPreview
+@Composable
+private fun ReadingScreenWithDeadlineAndNudgePreview() {
+    val today = currentLocalDate()
+    val featured = previewBooks.first()
+    val behindBook = previewBooks[2]
+
+    val deadlines = mapOf(
+        featured.id to BookDeadline(
+            bookId = featured.id,
+            deadlineDate = today.plus(
+                5,
+                DateTimeUnit.DAY,
+            ),
+            setAt = today.minus(
+                10,
+                DateTimeUnit.DAY,
+            ),
+            initialPerDay = 30f,
+            unit = DeadlineUnit.PAGES,
+        ),
+        behindBook.id to BookDeadline(
+            bookId = behindBook.id,
+            deadlineDate = today.plus(
+                3,
+                DateTimeUnit.DAY,
+            ),
+            setAt = today.minus(
+                20,
+                DateTimeUnit.DAY,
+            ),
+            initialPerDay = 15f,
+            unit = DeadlineUnit.PAGES,
+        ),
+    )
+
+    SoftcoverTheme {
+        ReadingScreenLayout(
+            state = ReadingScreenUiState(
+                books = previewBooks.toImmutableList(),
+                isLoading = false,
+                deadlines = deadlines.toImmutableMap(),
+            ),
+            runAction = {},
+            onBookClick = {},
+            onNavigateToSearch = {},
+        )
+    }
+}
+
+@StandardPreview
+@Composable
+private fun ReadingScreenExpiredDeadlinePreview() {
+    val today = currentLocalDate()
+    val featured = previewBooks.first()
+
+    val deadlines = mapOf(
+        featured.id to BookDeadline(
+            bookId = featured.id,
+            deadlineDate = today.minus(
+                2,
+                DateTimeUnit.DAY,
+            ),
+            setAt = today.minus(
+                30,
+                DateTimeUnit.DAY,
+            ),
+            initialPerDay = 20f,
+            unit = DeadlineUnit.PAGES,
+        ),
+    )
+
+    SoftcoverTheme {
+        ReadingScreenLayout(
+            state = ReadingScreenUiState(
+                books = previewBooks.take(3).toImmutableList(),
+                isLoading = false,
+                deadlines = deadlines.toImmutableMap(),
+            ),
+            runAction = {},
+            onBookClick = {},
+            onNavigateToSearch = {},
+        )
+    }
+}
+
+@StandardPreview
+@Composable
+private fun ReadingScreenMutationFailedPreview() {
+    SoftcoverTheme {
+        ReadingScreenLayout(
+            state = ReadingScreenUiState(
+                books = previewBooks.toImmutableList(),
+                isLoading = false,
+                failedMutationBookIds = persistentSetOf(previewBooks[0].id, previewBooks[2].id),
+            ),
+            runAction = {},
+            onBookClick = {},
+            onNavigateToSearch = {},
+        )
+    }
+}
+
+@StandardPreview
+@Composable
+private fun ReadingScreenAudiobookPreview() {
+    val audioBook = previewBook(
+        id = 6,
+        title = "Project Hail Mary",
+        authorNames = listOf("Andy Weir"),
+        pages = 0,
+        currentPage = 0,
+        progress = 42.5f,
+        audioSeconds = 58_000,
+        currentSeconds = 24_650,
+    ).let {
+        val edition = it.editions.first().copy(format = "Audiobook")
+
+        it.copy(
+            editions = listOf(edition),
+            defaultEdition = edition,
+        )
+    }
+
+    SoftcoverTheme {
+        ReadingScreenLayout(
+            state = ReadingScreenUiState(
+                books = (listOf(audioBook) + previewBooks.take(2)).toImmutableList(),
+                isLoading = false,
+            ),
+            runAction = {},
+            onBookClick = {},
+            onNavigateToSearch = {},
+        )
+    }
+}

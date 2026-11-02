@@ -28,11 +28,12 @@ class OnReorderLibraryTabsActionTest {
         LibraryVisibilitySettingsUiState,
         LibraryVisibilitySettingsEvent,
         LibraryVisibilitySettingsLocalVariables,
-        >
+    >
 
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(LibraryVisibilitySettingsUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryVisibilitySettingsLocalVariables()),
@@ -67,6 +68,7 @@ class OnReorderLibraryTabsActionTest {
             val dependencies = stubDependencies(this)
             val readId = LibraryTab.Status.idFor(status = UserBookStatus.READ)
             val wantToReadId = LibraryTab.Status.idFor(status = UserBookStatus.WANT_TO_READ)
+
             val action = OnReorderLibraryTabsAction(
                 newOrderedIds = listOf(
                     readId,
@@ -95,6 +97,7 @@ class OnReorderLibraryTabsActionTest {
                 draftTabOrder = persistentListOf(),
                 initialized = true,
             )
+
             val dependencies = stubDependencies(this)
             val newOrder = listOf(LibraryTabEntry.ALL_ID, "list-2", "status-3")
             val action = OnReorderLibraryTabsAction(newOrderedIds = newOrder)

@@ -262,6 +262,7 @@ class AuthorRepresentationChartMapperTest {
         fun `uses the fill-in caption when hidden and no authors remain`() {
             // ----- Arrange -----
             val demographics = AuthorDemographics()
+
             val fillInCaption = genderBreakdownUiModel(
                 demographics = demographics,
                 hideUntaggedAuthors = false,
@@ -316,6 +317,7 @@ class AuthorRepresentationChartMapperTest {
         fun `says none of the authors carry the data when hidden and the breakdown is empty`() {
             // ----- Arrange -----
             val breakdown = DemographicBreakdown()
+
             val fillInCaption = demographicBreakdownUiModel(
                 breakdown = breakdown,
                 hideUntaggedAuthors = false,

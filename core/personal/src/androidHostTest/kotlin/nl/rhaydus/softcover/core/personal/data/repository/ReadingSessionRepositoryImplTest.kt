@@ -133,6 +133,7 @@ class ReadingSessionRepositoryImplTest {
                 id = 3L,
                 endedAt = null,
             )
+
             val updatedEntitySlot = slot<ReadingSessionEntity>()
 
             every {
@@ -179,6 +180,7 @@ class ReadingSessionRepositoryImplTest {
         fun `folds open pause into pausedSeconds and clears lastPausedAt`() = runTest {
             // ----- Arrange -----
             val knownPausedAt = (Clock.System.now() - 60.seconds).toString()
+
             val existingEntity = buildEntity(
                 id = 4L,
                 pausedSeconds = 100,
@@ -222,6 +224,7 @@ class ReadingSessionRepositoryImplTest {
                 endedAt = null,
                 lastPausedAt = null,
             )
+
             val updatedEntitySlot = slot<ReadingSessionEntity>()
 
             every {
@@ -300,6 +303,7 @@ class ReadingSessionRepositoryImplTest {
         fun `accumulates pausedSeconds and clears lastPausedAt`() = runTest {
             // ----- Arrange -----
             val knownPausedAt = (Clock.System.now() - 60.seconds).toString()
+
             val existingEntity = buildEntity(
                 id = 6L,
                 pausedSeconds = 50,

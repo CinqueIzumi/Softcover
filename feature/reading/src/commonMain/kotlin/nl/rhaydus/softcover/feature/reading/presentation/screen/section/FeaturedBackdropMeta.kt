@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -19,9 +17,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.state.RevealedWhenPresent
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.reading.presentation.state.FeaturedBookUiModel
 
@@ -42,6 +40,7 @@ internal fun FeaturedBackdropMeta(
         ),
         blurRadius = 14f,
     )
+
     val foreground = MaterialTheme.colorScheme.onSurface
 
     Column(modifier = modifier) {

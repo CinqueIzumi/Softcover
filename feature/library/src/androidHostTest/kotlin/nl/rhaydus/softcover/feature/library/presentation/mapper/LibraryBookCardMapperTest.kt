@@ -9,6 +9,10 @@ import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.plus
+import kotlinx.datetime.todayIn
 import nl.rhaydus.softcover.core.component.bookcard.BookCardDecorations
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLead
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLinePart
@@ -25,10 +29,6 @@ import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
-import kotlinx.datetime.DatePeriod
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.plus
-import kotlinx.datetime.todayIn
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import kotlin.time.Clock
@@ -146,6 +146,7 @@ class LibraryBookCardMapperTest {
         fun `is the author string prefixed with By on every text variant`() {
             // ----- Arrange -----
             val book = stubBook(authorString = "Ann, Bob")
+
             val layouts = listOf(
                 LibraryGridLayout.GRID_TWO_COLUMNS,
                 LibraryGridLayout.GRID_THREE_COLUMNS,
@@ -310,6 +311,7 @@ class LibraryBookCardMapperTest {
         fun `is the edition author string prefixed with By on every text variant`() {
             // ----- Arrange -----
             val edition = stubEdition(authorString = "Ann, Bob")
+
             val layouts = listOf(
                 LibraryGridLayout.GRID_TWO_COLUMNS,
                 LibraryGridLayout.LIST_COMPACT,
@@ -471,14 +473,17 @@ class LibraryBookCardMapperTest {
 
             // ----- Assert -----
             val column = variant.shouldBeInstanceOf<BookCardVariant.Column>()
+
             val expectedTitle = bookTransitionKey(
                 element = BookTransitionElement.Title,
                 bookId = 1,
             )
+
             val expectedCover = bookTransitionKey(
                 element = BookTransitionElement.Cover,
                 bookId = 1,
             )
+
             column.text.titleTransitionKey.shouldNotBeNull() shouldBe expectedTitle
             column.cover.shouldNotBeNull().model.sharedTransitionKey shouldBe expectedCover
         }
@@ -494,10 +499,12 @@ class LibraryBookCardMapperTest {
             // ----- Assert -----
             val row = variant.shouldBeInstanceOf<BookCardVariant.Row>()
             val lead = row.lead.shouldBeInstanceOf<BookCardLead.Cover>()
+
             row.text.titleTransitionKey shouldBe bookTransitionKey(
                 element = BookTransitionElement.Title,
                 bookId = 1,
             )
+
             lead.cover.model.sharedTransitionKey shouldBe bookTransitionKey(
                 element = BookTransitionElement.Cover,
                 bookId = 1,
@@ -515,6 +522,7 @@ class LibraryBookCardMapperTest {
             // ----- Assert -----
             val row = variant.shouldBeInstanceOf<BookCardVariant.Row>()
             row.lead.shouldBeNull()
+
             row.text.titleTransitionKey shouldBe bookTransitionKey(
                 element = BookTransitionElement.Title,
                 bookId = 1,
@@ -554,6 +562,7 @@ class LibraryBookCardMapperTest {
         fun `the title key falls back to the book id when there is no current edition`() {
             // ----- Arrange -----
             val book = stubBook()
+
             every {
                 book.currentEdition
             } returns null

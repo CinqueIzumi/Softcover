@@ -28,6 +28,7 @@ class MarkReadingActivityUseCaseTest {
     @BeforeEach
     fun setUp() {
         profileRepository = mockk(relaxed = true)
+
         useCase = MarkReadingActivityUseCaseImpl(
             profileRepository = profileRepository,
             clock = fixedClock,
@@ -77,6 +78,7 @@ class MarkReadingActivityUseCaseTest {
                 month = 6,
                 day = 10,
             )
+
             val amsterdamUseCase = MarkReadingActivityUseCaseImpl(
                 profileRepository = profileRepository,
                 clock = fixedClock,

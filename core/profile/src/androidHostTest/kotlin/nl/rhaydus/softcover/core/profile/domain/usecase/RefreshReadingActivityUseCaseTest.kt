@@ -58,6 +58,7 @@ class RefreshReadingActivityUseCaseTest {
         profileRepository = mockk()
         getUserIdUseCase = mockk()
         activityRefreshGate = ProfileRefreshGate()
+
         useCase = RefreshReadingActivityUseCase(
             profileRepository = profileRepository,
             getUserIdUseCase = getUserIdUseCase,
@@ -76,9 +77,11 @@ class RefreshReadingActivityUseCaseTest {
         coEvery {
             getUserIdUseCase()
         } returns Result.success(42)
+
         coEvery {
             profileRepository.streamReadingDaysDescending(userId = 42)
         } returns flowOf(*streamedDaysDescending.toTypedArray())
+
         coEvery {
             profileRepository.cacheUserProfileActivity(
                 readingStreak = capture(streakSlot),
@@ -99,9 +102,11 @@ class RefreshReadingActivityUseCaseTest {
             coEvery {
                 getUserIdUseCase()
             } returns Result.success(42)
+
             coEvery {
                 profileRepository.streamReadingDaysDescending(userId = 42)
             } returns flowOf(today)
+
             coEvery {
                 profileRepository.cacheUserProfileActivity(
                     readingStreak = 1,
@@ -114,6 +119,7 @@ class RefreshReadingActivityUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+
             coVerify(exactly = 1) {
                 profileRepository.cacheUserProfileActivity(
                     readingStreak = 1,
@@ -148,9 +154,11 @@ class RefreshReadingActivityUseCaseTest {
             coEvery {
                 getUserIdUseCase()
             } returns Result.success(42)
+
             coEvery {
                 profileRepository.streamReadingDaysDescending(userId = 42)
             } returns flowOf(today)
+
             coEvery {
                 profileRepository.cacheUserProfileActivity(
                     readingStreak = any(),
@@ -188,17 +196,16 @@ class RefreshReadingActivityUseCaseTest {
         }
 
         @Test
-        fun `returns a streak longer than the reading-activity window when the stream has 30 consecutive days`() =
-            runTest {
-                // ----- Arrange -----
-                // 30 consecutive days ending on today, strictly descending. Only the most recent
-                // 21 days fall inside the activity window, but the streak itself is unbounded —
-                // it must not be truncated by any window-like limit.
-                val streamedDays = (0 until 30).map(::day)
+        fun `returns a streak longer than the reading-activity window when the stream has 30 consecutive days`() = runTest {
+            // ----- Arrange -----
+            // 30 consecutive days ending on today, strictly descending. Only the most recent
+            // 21 days fall inside the activity window, but the streak itself is unbounded —
+            // it must not be truncated by any window-like limit.
+            val streamedDays = (0 until 30).map(::day)
 
-                // ----- Act & Assert -----
-                capturedActivityFor(streamedDaysDescending = streamedDays).first shouldBe 30
-            }
+            // ----- Act & Assert -----
+            capturedActivityFor(streamedDaysDescending = streamedDays).first shouldBe 30
+        }
     }
 
     @Nested
@@ -211,6 +218,7 @@ class RefreshReadingActivityUseCaseTest {
             val insideDate = day(5)
             val boundaryDate = windowStart
             val outsideDate = day(21)
+
             val streamedDays = listOf(
                 insideDate,
                 boundaryDate,
@@ -274,12 +282,14 @@ class RefreshReadingActivityUseCaseTest {
             coEvery {
                 getUserIdUseCase()
             } returns Result.success(42)
+
             coEvery {
                 profileRepository.streamReadingDaysDescending(userId = 42)
             } returns pagedFlow(
                 pages = pages,
                 pagesRequested = pagesRequested,
             )
+
             coEvery {
                 profileRepository.cacheUserProfileActivity(
                     readingStreak = any(),
@@ -308,12 +318,14 @@ class RefreshReadingActivityUseCaseTest {
             coEvery {
                 getUserIdUseCase()
             } returns Result.success(42)
+
             coEvery {
                 profileRepository.streamReadingDaysDescending(userId = 42)
             } returns pagedFlow(
                 pages = pages,
                 pagesRequested = mutableListOf(),
             )
+
             coEvery {
                 profileRepository.cacheUserProfileActivity(
                     readingStreak = capture(streakSlot),
@@ -338,9 +350,11 @@ class RefreshReadingActivityUseCaseTest {
             coEvery {
                 getUserIdUseCase()
             } returns Result.success(42)
+
             coEvery {
                 profileRepository.streamReadingDaysDescending(userId = 42)
             } returns flowOf()
+
             coEvery {
                 profileRepository.cacheUserProfileActivity(
                     readingStreak = any(),
@@ -370,12 +384,14 @@ class RefreshReadingActivityUseCaseTest {
             coEvery {
                 getUserIdUseCase()
             } returns Result.success(42)
+
             coEvery {
                 profileRepository.streamReadingDaysDescending(userId = 42)
             } answers {
                 fetchCallCount++
                 if (fetchCallCount == 1) flow { throw RuntimeException("network error") } else flowOf()
             }
+
             coEvery {
                 profileRepository.cacheUserProfileActivity(
                     readingStreak = any(),

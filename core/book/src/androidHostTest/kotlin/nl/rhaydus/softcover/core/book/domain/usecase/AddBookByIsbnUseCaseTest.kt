@@ -29,6 +29,7 @@ class AddBookByIsbnUseCaseTest {
     fun setUp() {
         booksRepository = mockk()
         fetchBookByIdUseCase = mockk()
+
         useCase = AddBookByIsbnUseCase(
             booksRepository = booksRepository,
             fetchBookByIdUseCase = fetchBookByIdUseCase,
@@ -56,6 +57,7 @@ class AddBookByIsbnUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+
             result.getOrNull() shouldBe IsbnLookupResult.Found(
                 book = book,
                 editionId = editionId,
@@ -149,6 +151,7 @@ class AddBookByIsbnUseCaseTest {
                 book = book,
                 editionId = editionId,
             )
+
             coVerify(exactly = 2) {
                 booksRepository.addBookByIsbn(isbn = isbn)
             }
@@ -167,6 +170,7 @@ class AddBookByIsbnUseCaseTest {
             // ----- Assert -----
             result.exceptionOrNull().shouldBeInstanceOf<BookImportPendingException>()
             testScheduler.currentTime shouldBe 60_000L
+
             coVerify(exactly = 0) {
                 fetchBookByIdUseCase(id = any())
             }
@@ -195,6 +199,7 @@ class AddBookByIsbnUseCaseTest {
             gaps.forEach { gap ->
                 (gap in 1_000L..5_000L) shouldBe true
             }
+
             gaps.first() shouldBe 1_000L
             testScheduler.currentTime shouldBe callTimes.last()
         }

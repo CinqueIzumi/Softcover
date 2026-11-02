@@ -21,11 +21,11 @@ import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
 import nl.rhaydus.softcover.core.domain.util.localDateOf
-import java.util.TimeZone
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import java.util.TimeZone
 
 class UserBookWriteReplayTest {
     private lateinit var booksRemoteDataSource: BooksRemoteDataSource
@@ -38,6 +38,7 @@ class UserBookWriteReplayTest {
         originalZone = TimeZone.getDefault()
         booksRemoteDataSource = mockk()
         progressHistoryLocalDataSource = mockk(relaxed = true)
+
         replay = UserBookWriteReplay(
             booksRemoteDataSource = booksRemoteDataSource,
             progressHistoryLocalDataSource = progressHistoryLocalDataSource,
@@ -146,6 +147,7 @@ class UserBookWriteReplayTest {
 
             // ----- Assert -----
             result shouldBe ReplayOutcome.SYNCED
+
             coVerify(exactly = 1) {
                 booksRemoteDataSource.replayUpdateBookProgress(
                     userBookReadId = 100,
@@ -186,6 +188,7 @@ class UserBookWriteReplayTest {
                 kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
                 progressHistoryId = 9L,
             )
+
             stubReplayProgress()
 
             // ----- Act -----
@@ -208,6 +211,7 @@ class UserBookWriteReplayTest {
                 kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
                 progressHistoryId = null,
             )
+
             stubReplayProgress()
 
             // ----- Act -----
@@ -226,6 +230,7 @@ class UserBookWriteReplayTest {
                 kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
                 progressHistoryId = null,
             )
+
             stubReplayProgressThrowing(error = RuntimeException("rejected"))
 
             // ----- Act -----
@@ -242,10 +247,11 @@ class UserBookWriteReplayTest {
                 kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
                 progressHistoryId = 9L,
             )
+
             val rejection = RuntimeException("rejected")
             stubReplayProgressThrowing(error = rejection)
 
-            // ----- Act & Assert -----
+            // ----- Act -----
             val thrown = shouldThrow<RuntimeException> { replay(payload = payload) }
 
             thrown shouldBe rejection
@@ -267,10 +273,11 @@ class UserBookWriteReplayTest {
                 kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
                 progressHistoryId = 9L,
             )
+
             val transient = ServerUnavailableException(message = "down")
             stubReplayProgressThrowing(error = transient)
 
-            // ----- Act & Assert -----
+            // ----- Act -----
             val thrown = shouldThrow<ServerUnavailableException> { replay(payload = payload) }
 
             thrown shouldBe transient
@@ -310,6 +317,7 @@ class UserBookWriteReplayTest {
                 id = 555,
                 startedAt = "2026-03-03",
             )
+
             stubReplayProgress()
 
             // ----- Act -----
@@ -317,6 +325,7 @@ class UserBookWriteReplayTest {
 
             // ----- Assert -----
             result shouldBe ReplayOutcome.SYNCED
+
             coVerify(exactly = 1) {
                 booksRemoteDataSource.replayUpdateBookProgress(
                     userBookReadId = 555,
@@ -349,6 +358,7 @@ class UserBookWriteReplayTest {
                 id = 555,
                 startedAt = null,
             )
+
             stubReplayProgress()
 
             // ----- Act -----
@@ -387,6 +397,7 @@ class UserBookWriteReplayTest {
 
             // ----- Assert -----
             result shouldBe ReplayOutcome.DISCARDED
+
             coVerify(exactly = 0) {
                 booksRemoteDataSource.replayUpdateBookProgress(
                     userBookReadId = any(),
@@ -437,13 +448,14 @@ class UserBookWriteReplayTest {
                 userBookReadId = -7,
                 progressHistoryId = 9L,
             )
+
             val transient = ServerUnavailableException(message = "down")
 
             coEvery {
                 booksRemoteDataSource.fetchLatestUnfinishedRead(userBookId = any())
             } throws transient
 
-            // ----- Act & Assert -----
+            // ----- Act -----
             val thrown = shouldThrow<ServerUnavailableException> { replay(payload = payload) }
 
             thrown shouldBe transient
@@ -459,6 +471,7 @@ class UserBookWriteReplayTest {
                 kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
                 userBookReadId = 100,
             )
+
             stubReplayProgress()
 
             // ----- Act -----
@@ -498,6 +511,7 @@ class UserBookWriteReplayTest {
 
             // ----- Assert -----
             result shouldBe ReplayOutcome.SYNCED
+
             coVerify(exactly = 1) {
                 booksRemoteDataSource.replayMarkBookAsRead(
                     bookId = 300,
@@ -553,6 +567,7 @@ class UserBookWriteReplayTest {
 
             // ----- Assert -----
             result shouldBe ReplayOutcome.SYNCED
+
             coVerify(exactly = 1) {
                 booksRemoteDataSource.replayUpdateBookRating(
                     userBookId = 30,
@@ -586,6 +601,7 @@ class UserBookWriteReplayTest {
         fun `passes hasSpoilers and the local date of enqueuedAt for a valid review body`() = runTest {
             // ----- Arrange -----
             TimeZone.setDefault(TimeZone.getTimeZone("Pacific/Kiritimati"))
+
             val payload = pendingUserBookWrite(
                 kind = PendingUserBookWriteKind.UPDATE_REVIEW,
                 userBookId = 40,
@@ -608,6 +624,7 @@ class UserBookWriteReplayTest {
 
             // ----- Assert -----
             result shouldBe ReplayOutcome.SYNCED
+
             coVerify(exactly = 1) {
                 booksRemoteDataSource.replayUpdateBookReview(
                     userBookId = 40,
@@ -693,6 +710,7 @@ class UserBookWriteReplayTest {
 
             // ----- Assert -----
             result shouldBe ReplayOutcome.SYNCED
+
             coVerify(exactly = 1) {
                 booksRemoteDataSource.replayUpdateUserBookStatus(
                     userBookId = 40,

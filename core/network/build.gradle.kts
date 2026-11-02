@@ -1,13 +1,13 @@
 import java.util.Properties
 
 plugins {
-    id("softcover.kmp.library")
+    id("rhaydus.kmp.library")
     id("softcover.android.apollo")
 }
 
 // Bearer token for the `downloadApolloSchema` introspection call below. Sourced from the environment
 // first (CI / a shell export keeps it out of the repo), falling back to `local.properties`, which is
-// git-ignored — the same local-override channel `foundation.local` uses.
+// git-ignored.
 val hardcoverApiToken: String = run {
     System.getenv("HARDCOVER_API_TOKEN")?.let { return@run it }
 

@@ -28,11 +28,13 @@ class ReviewsSummaryCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk(relaxed = true)
     }
 
@@ -86,6 +88,7 @@ class ReviewsSummaryCollectorTest {
                     ratingsCount = 87,
                 ),
             )
+
             launchCollector()
 
             // ----- Act -----

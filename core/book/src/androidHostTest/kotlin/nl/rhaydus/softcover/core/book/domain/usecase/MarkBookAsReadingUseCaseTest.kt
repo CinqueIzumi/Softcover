@@ -62,12 +62,14 @@ class MarkBookAsReadingUseCaseTest {
             // ----- Assert -----
             result.isSuccess shouldBe true
             result.getOrNull() shouldBe ShelfMutationOutcome.Applied
+
             coVerify(exactly = 1) {
                 booksRepository.markBookAsReading(
                     book = inputBook,
                     editionId = null,
                 )
             }
+
             coVerify(exactly = 1) { booksRepository.cacheBook(book = updatedBook) }
         }
 
@@ -244,12 +246,14 @@ class MarkBookAsReadingUseCaseTest {
 
             // ----- Assert -----
             result.getOrNull() shouldBe ShelfMutationOutcome.NoChange
+
             coVerify(exactly = 0) {
                 booksRepository.markBookAsReading(
                     book = any(),
                     editionId = any(),
                 )
             }
+
             coVerify(exactly = 0) { booksRepository.cacheBook(any()) }
         }
     }

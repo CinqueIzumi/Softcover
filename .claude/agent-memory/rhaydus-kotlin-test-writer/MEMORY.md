@@ -1,0 +1,11 @@
+- [Softcover test conventions](project_test_conventions.md) — stack, mockk domain models, TOAD action `launch` callOriginal workaround, @Nested name-clash FQN exception, UserBook.status is BookStatus
+- [Canonical test templates by layer](project_canonical_test_templates.md) — one template file per layer; clone the matching one, skip broad exploration
+- [SessionValueCache testing](project_sessionvaluecache_testing.md) — use a real cache; per-key caching test shape; virtual-time proof of per-key locking
+- [Apollo extensions mocking](project_apollo_extensions_mocking.md) — fetchPolicy/toFlow chain mocking and testing the private retry helper via safeQuery/safeMutation
+- [Apollo generated-type mocking](feedback_apollo_generated_type_mocking.md) — taggable_counts shape + raw-count hasMore, fragment accessor is identity, nested-interface aliases, Optional.Absent
+- [Apollo CompiledField mocking](feedback_apollo_compiled_field_mocking.md) — stub argumentValues + nameWithArguments for the FieldPolicyCacheResolver delegate path; ResolverContext construction
+- [Pagination adds required query params](feedback_apollo_pagination_required_params.md) — new required GraphQL vars break old test call sites; run the tests first and fix those minimally
+- [Room migration test pattern](project_migration_test_pattern.md) — BundledSQLiteDriver in-memory per test; needs sqlite-bundled-jvm runtimeOnly; PRAGMA + sqlite_master helpers
+- [Room @Upsert conflict on host](feedback_room_upsert_conflict_host.md) — a second upsert on the same key throws a bare SQLException in host tests; seed via other methods, test delete+insert steps directly
+- [Composable style resolution is untestable at unit level](feedback_composable_style_resolution_untestable.md) — no compose-ui-test dep in core:component; proxy "style resolution" coverage via enum/sealed-slot fixture coverage instead
+- [`:app` has no testDebug source set by default](feedback_app_module_testdebug_source_set.md) — add JUnit5/MockK/Kotest/coroutines-test + useJUnitPlatform() by hand; static-state ScreenModel test pattern

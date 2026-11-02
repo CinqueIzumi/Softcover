@@ -91,7 +91,7 @@ When a component seems to need a domain type, give it a library-owned model of t
 events takes a generic key: `ColorPalettePreviewTileUiModel<K>` is built by `feature:settings` as
 `ColorPalettePreviewTileUiModel<ColorPalette>`, and the component only forwards the key (R9).
 `kotlinx.datetime.LocalDate` is an allowed value type: a plain calendar day carries no domain vocabulary
-(`DatePickerUiModel.initialDate`).
+(`BookDetailUiState.deadlinePickerDate`).
 
 **R5 — A UI model that is rendered or tested ships preview fixtures.**
 
@@ -175,9 +175,10 @@ TopBar(model = state.topBar)
   implementation, bound once in `presentationModule` (`:core:component` itself uses no DI). A collector
   reads it from its `Dependencies` and puts the result on the `UiState`, so the render never builds the
   model and a collector test can substitute the copy.
-- **Gated by `softcover:UiModelBuiltInRender`.** Preview fixtures, the gallery and debug screens are excluded
-  by path. A `*UiState` member may look up models the collectors stored but never builds one; a constructor,
-  `.copy` or model-returning call in a member or getter that returns a model is reported. A reducer that
+- **Gated by detekt `rhaydus:UiModelBuiltInComposable` and Konsist `assertNoUiModelBuiltInStateMember`.**
+  Preview fixtures, the gallery and debug screens are excluded by path. A `*UiState` member may look up models
+  the collectors stored but never builds one; a constructor, `.copy` or model-returning call in a member or
+  getter that returns a model is reported. A reducer that
   returns the `UiState` itself (`withName`) is not. A recorded § 7.4a exception carries
   `@ModelBuiltInComposition(reason)`, never `@Suppress`.
 
@@ -206,7 +207,7 @@ RichText(model = state.review)          // model.variant decides the face and th
 **R12 — Loading is the component's own state, never a separate skeleton.** A component that renders data
 the screen may not have yet takes `isLoading` (on the model, or as a parameter on a data-free primitive)
 and keeps its real layout while loading. Unknown text renders through `SoftcoverText` with a stand-in;
-other unknown leaves sit under `Modifier.skeletonMask(isLoading)` at their real size. A list of unknown
+other unknown leaves sit under the foundation's `Modifier.skeletonMask(isLoading)` at their real size. A list of unknown
 length renders a fixed count of its real items, each loading: the UiState carries that list of loading
 models, built by the feature's mapper / collector, and the render iterates it like the loaded list.
 No per-surface skeleton composable, no skeleton variant, no `SkeletonCrossfade` from a skeleton layout to
@@ -244,7 +245,8 @@ pans it); never add a "gallery mode" parameter.
 
 ### 7.4 What the build enforces
 
-- **detekt `softcover:UiModelBuiltInRender`** (R10) fails on a UI model built in composition.
+- **detekt `rhaydus:UiModelBuiltInComposable`** (R10) fails on a UI model built in composition, and Konsist
+  `assertNoUiModelBuiltInStateMember` on one built by a `*UiState` member.
 - **`checkModuleGraph`** fails if `:core:component` declares a dependency on anything but
   `:core:designsystem`, or on Koin / Voyager / Apollo coordinates.
 - **detekt `ForbiddenImport`**, scoped to `**/core/component/**`, fails on an import of `org.koin.**`,

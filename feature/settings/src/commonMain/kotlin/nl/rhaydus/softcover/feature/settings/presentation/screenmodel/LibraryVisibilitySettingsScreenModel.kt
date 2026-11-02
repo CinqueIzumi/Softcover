@@ -20,29 +20,29 @@ import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilit
 import nl.rhaydus.toad.ToadScreenModel
 
 internal class LibraryVisibilitySettingsScreenModel(
-    private val getEnabledStatusCodesAsFlowUseCase: GetEnabledStatusCodesAsFlowUseCase,
-    private val getEnabledListIdsAsFlowUseCase: GetEnabledListIdsAsFlowUseCase,
-    private val getLibraryTabOrderAsFlowUseCase: GetLibraryTabOrderAsFlowUseCase,
-    private val setEnabledStatusCodesUseCase: SetEnabledStatusCodesUseCase,
-    private val setEnabledListIdsUseCase: SetEnabledListIdsUseCase,
-    private val setLibraryTabOrderUseCase: SetLibraryTabOrderUseCase,
-    private val getAllUserListsUseCase: GetAllUserListsUseCase,
-    private val getAllUserBooksUseCase: GetAllUserBooksUseCase,
-    private val refreshLibraryUseCase: RefreshLibraryUseCase,
-    private val applicationScope: ApplicationScope,
+    getEnabledStatusCodesAsFlowUseCase: GetEnabledStatusCodesAsFlowUseCase,
+    getEnabledListIdsAsFlowUseCase: GetEnabledListIdsAsFlowUseCase,
+    getLibraryTabOrderAsFlowUseCase: GetLibraryTabOrderAsFlowUseCase,
+    setEnabledStatusCodesUseCase: SetEnabledStatusCodesUseCase,
+    setEnabledListIdsUseCase: SetEnabledListIdsUseCase,
+    setLibraryTabOrderUseCase: SetLibraryTabOrderUseCase,
+    getAllUserListsUseCase: GetAllUserListsUseCase,
+    getAllUserBooksUseCase: GetAllUserBooksUseCase,
+    refreshLibraryUseCase: RefreshLibraryUseCase,
+    applicationScope: ApplicationScope,
     appDispatchers: AppDispatchers,
     flows: List<LibraryVisibilityCollector>,
 ) : ToadScreenModel<
-    LibraryVisibilitySettingsUiState,
-    LibraryVisibilitySettingsEvent,
-    LibraryVisibilitySettingsDependencies,
-    LibraryVisibilityCollector,
-    LibraryVisibilitySettingsLocalVariables,
+        LibraryVisibilitySettingsUiState,
+        LibraryVisibilitySettingsEvent,
+        LibraryVisibilitySettingsDependencies,
+        LibraryVisibilityCollector,
+        LibraryVisibilitySettingsLocalVariables,
     >(
-    initialState = LibraryVisibilitySettingsUiState(),
-    initialLocalVariables = LibraryVisibilitySettingsLocalVariables(),
-    initializers = flows,
-) {
+        initialState = LibraryVisibilitySettingsUiState(),
+        initialLocalVariables = LibraryVisibilitySettingsLocalVariables(),
+        initializers = flows,
+    ) {
     override val dependencies = LibraryVisibilitySettingsDependencies(
         getEnabledStatusCodesAsFlowUseCase = getEnabledStatusCodesAsFlowUseCase,
         getEnabledListIdsAsFlowUseCase = getEnabledListIdsAsFlowUseCase,

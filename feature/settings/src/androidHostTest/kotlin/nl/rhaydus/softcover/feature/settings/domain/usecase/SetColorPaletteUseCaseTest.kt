@@ -33,6 +33,7 @@ class SetColorPaletteUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+
             coVerify {
                 settingsRepository.setColorPalette(palette = ColorPalette.INK)
                 settingsRepository.setDynamicColorEnabled(enabled = false)
@@ -53,6 +54,7 @@ class SetColorPaletteUseCaseTest {
 
             // ----- Assert -----
             result.exceptionOrNull() shouldBe expectedError
+
             coVerify(exactly = 0) {
                 settingsRepository.setDynamicColorEnabled(enabled = any())
             }

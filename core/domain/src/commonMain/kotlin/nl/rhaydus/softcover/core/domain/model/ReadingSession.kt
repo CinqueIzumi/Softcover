@@ -29,11 +29,10 @@ data class ReadingSession(
     val secondsDelta: Int?
         get() = if (startSeconds != null && endSeconds != null) endSeconds - startSeconds else null
 
-    fun readingDuration(now: Instant = Clock.System.now()): Duration =
-        readingDuration(
-            startedAtEpochMs = startedAt.toEpochMilliseconds(),
-            pausedSeconds = pausedSeconds,
-            lastPausedAtEpochMs = lastPausedAt?.toEpochMilliseconds(),
-            endEpochMs = (endedAt ?: now).toEpochMilliseconds(),
-        )
+    fun readingDuration(now: Instant = Clock.System.now()): Duration = readingDuration(
+        startedAtEpochMs = startedAt.toEpochMilliseconds(),
+        pausedSeconds = pausedSeconds,
+        lastPausedAtEpochMs = lastPausedAt?.toEpochMilliseconds(),
+        endEpochMs = (endedAt ?: now).toEpochMilliseconds(),
+    )
 }

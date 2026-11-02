@@ -12,6 +12,7 @@ private const val FULL_PERCENT = 100.0
 /** `null` when the quote would not move progress forward, or the book has no read or edition to move. */
 fun Book.progressAdvanceFor(position: QuotePosition): QuoteProgressAdvance? {
     val read: UserBookRead = currentRead ?: return null
+
     val edition: BookEdition = currentEdition ?: return null
 
     return if (edition.isAudiobook) {

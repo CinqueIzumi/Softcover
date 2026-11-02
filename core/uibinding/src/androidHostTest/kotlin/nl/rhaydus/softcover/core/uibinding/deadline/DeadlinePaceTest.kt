@@ -35,6 +35,7 @@ class DeadlinePaceTest {
                 amount = noPages,
                 unit = DeadlineUnit.PAGES,
             )
+
             val many = formatUnitAmount(
                 amount = manyPages,
                 unit = DeadlineUnit.PAGES,

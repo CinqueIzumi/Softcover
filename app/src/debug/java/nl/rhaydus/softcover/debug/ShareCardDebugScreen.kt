@@ -38,10 +38,12 @@ import nl.rhaydus.designsystem.share.SaveOutcome
 import nl.rhaydus.designsystem.share.ShareCardCapture
 import nl.rhaydus.designsystem.share.rememberGalleryWritePermissionRequester
 import nl.rhaydus.designsystem.share.rememberShareCardCapture
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.share.BookShareCardUiModel
+import nl.rhaydus.softcover.core.component.share.LocalShareCardIoDispatcher
 import nl.rhaydus.softcover.core.component.share.QuoteShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.ShareCard
 import nl.rhaydus.softcover.core.component.share.ShareCardUiModel
@@ -52,7 +54,6 @@ import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /** Fixed for this screen, so the model is a constant rather than rebuilt per frame. */
@@ -85,10 +86,27 @@ object ShareCardDebugScreen : Screen {
 
         val scope = rememberCoroutineScope()
 
-        val bookCapture = rememberShareCardCapture(config = softcoverShareCardCaptureConfig)
-        val statCapture = rememberShareCardCapture(config = softcoverShareCardCaptureConfig)
-        val quoteCapture = rememberShareCardCapture(config = softcoverShareCardCaptureConfig)
-        val recapCapture = rememberShareCardCapture(config = softcoverShareCardCaptureConfig)
+        val ioDispatcher = LocalShareCardIoDispatcher.current
+
+        val bookCapture = rememberShareCardCapture(
+            config = softcoverShareCardCaptureConfig,
+            ioDispatcher = ioDispatcher,
+        )
+
+        val statCapture = rememberShareCardCapture(
+            config = softcoverShareCardCaptureConfig,
+            ioDispatcher = ioDispatcher,
+        )
+
+        val quoteCapture = rememberShareCardCapture(
+            config = softcoverShareCardCaptureConfig,
+            ioDispatcher = ioDispatcher,
+        )
+
+        val recapCapture = rememberShareCardCapture(
+            config = softcoverShareCardCaptureConfig,
+            ioDispatcher = ioDispatcher,
+        )
 
         var pendingSave by remember { mutableStateOf<(suspend () -> Unit)?>(null) }
 
@@ -119,6 +137,8 @@ object ShareCardDebugScreen : Screen {
                         }
 
                         is SaveOutcome.Cached -> Unit
+
+                        is SaveOutcome.Cancelled -> Unit
                     }
                 }.onFailure { throwable ->
                     AppLog.e(

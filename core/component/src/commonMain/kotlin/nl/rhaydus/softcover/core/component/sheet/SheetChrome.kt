@@ -5,6 +5,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
+import nl.rhaydus.designsystem.component.LocalModalSheetClosing
 import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
 
 /**
@@ -28,6 +29,16 @@ internal class SheetChrome(
             close()
         }
     }
+
+    /**
+     * Starts the animated hide for a button the reader tapped on purpose. Unlike [dismiss] it ignores
+     * `dismissible`, which only guards the accidental scrim, back and swipe exits.
+     */
+    fun dismissFromButton() {
+        if (busy.not() && unlocked) {
+            close()
+        }
+    }
 }
 
 @Composable
@@ -36,7 +47,7 @@ internal fun rememberSheetChrome(
     dismissStarted: MutableState<Boolean>,
 ): SheetChrome {
     val hide by rememberUpdatedState(LocalModalSheetDismiss.current)
-    val sheetClosing = LocalSheetClosing.current
+    val sheetClosing = LocalModalSheetClosing.current
 
     return SheetChrome(
         busy = model.busy,

@@ -28,6 +28,7 @@ internal class BooksByStatusCollector : LibraryCollector {
         // Each status tab has its own persisted sort. The DAO emits an already-sorted list per
         // status; flatMapLatest re-subscribes whenever the user changes that tab's sort settings.
         val statuses = UserBookStatus.entries
+
         val perStatusFlows = statuses.map { status ->
             booksForStatus(
                 dependencies = dependencies,
@@ -51,9 +52,11 @@ internal class BooksByStatusCollector : LibraryCollector {
         }.collectLatest { grouped ->
             scope.setState { state ->
                 val retainedStatusKeys = grouped.keys
+
                 val stripped = state.booksByTab.filterKeys { key ->
                     key.startsWith("status-").not() || key in retainedStatusKeys
                 }
+
                 state.copy(
                     booksByTab = stripped.toPersistentMap().putAll(grouped.mapValues { (_, books) -> books.toImmutableList() }),
                 )

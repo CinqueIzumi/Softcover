@@ -19,6 +19,7 @@ internal class CycleBookCallback : ActionCallback, KoinComponent {
         parameters: ActionParameters,
     ) {
         val step = parameters[StepKey] ?: return
+
         val dependencies = get<CurrentlyReadingWidgetDependencies>()
         val appWidgetId = GlanceAppWidgetManager(context).getAppWidgetId(glanceId)
 

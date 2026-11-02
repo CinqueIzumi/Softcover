@@ -10,12 +10,11 @@ class RichTextEditingTest {
         start: Int,
         end: Int,
         type: RichTextMarkType,
-    ) =
-        RichTextMark(
-            start = start,
-            end = end,
-            type = type,
-        )
+    ) = RichTextMark(
+        start = start,
+        end = end,
+        type = type,
+    )
 
     private fun bold(
         start: Int,
@@ -721,6 +720,7 @@ class RichTextEditingTest {
 
             // ----- Act -----
             val buffer = documentToEditorBuffer(document = document)
+
             val recovered = editorBufferToDocument(
                 text = buffer.text,
                 marks = buffer.marks,
@@ -736,6 +736,7 @@ class RichTextEditingTest {
             // text = "boldnormal\nsecond"
             // marks: bold [0,4), spoiler [11,17)
             val text = "boldnormal\nsecond"
+
             val marks = listOf(
                 bold(
                     start = 0,
@@ -816,6 +817,7 @@ class RichTextEditingTest {
 
             // ----- Act -----
             val buffer = documentToEditorBuffer(document = document)
+
             val recovered = editorBufferToDocument(
                 text = buffer.text,
                 marks = buffer.marks,

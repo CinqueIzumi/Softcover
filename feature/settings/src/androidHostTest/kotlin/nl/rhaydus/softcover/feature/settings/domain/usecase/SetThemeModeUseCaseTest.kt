@@ -33,6 +33,7 @@ class SetThemeModeUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+
             coVerify {
                 settingsRepository.setThemeMode(mode = ThemeMode.DIM)
                 settingsRepository.setDynamicColorEnabled(enabled = false)
@@ -52,6 +53,7 @@ class SetThemeModeUseCaseTest {
                 result.isSuccess shouldBe true
                 coVerify { settingsRepository.setThemeMode(mode = mode) }
             }
+
             coVerify(exactly = 0) {
                 settingsRepository.setDynamicColorEnabled(enabled = any())
             }
@@ -71,6 +73,7 @@ class SetThemeModeUseCaseTest {
 
             // ----- Assert -----
             result.exceptionOrNull() shouldBe expectedError
+
             coVerify(exactly = 0) {
                 settingsRepository.setDynamicColorEnabled(enabled = any())
             }

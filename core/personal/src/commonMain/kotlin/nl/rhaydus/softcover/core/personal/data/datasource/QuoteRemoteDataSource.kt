@@ -4,9 +4,7 @@ import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Optional
 import nl.rhaydus.softcover.DeleteQuoteMutation
 import nl.rhaydus.softcover.GetAllQuotesQuery
-import nl.rhaydus.softcover.GetAllQuotesQuery.Data.Reading_journal.Companion.quoteFieldsFragment as allQuoteFieldsFragment
 import nl.rhaydus.softcover.GetBookQuotesQuery
-import nl.rhaydus.softcover.GetBookQuotesQuery.Data.Reading_journal.Companion.quoteFieldsFragment as bookQuoteFieldsFragment
 import nl.rhaydus.softcover.InsertQuoteMutation
 import nl.rhaydus.softcover.core.database.model.QuoteEntity
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
@@ -18,6 +16,8 @@ import nl.rhaydus.softcover.core.personal.data.mapper.toQuoteEntity
 import nl.rhaydus.softcover.core.personal.data.mapper.toQuoteMetadata
 import nl.rhaydus.softcover.type.ReadingJournalCreateType
 import kotlin.time.Instant
+import nl.rhaydus.softcover.GetAllQuotesQuery.Data.Reading_journal.Companion.quoteFieldsFragment as allQuoteFieldsFragment
+import nl.rhaydus.softcover.GetBookQuotesQuery.Data.Reading_journal.Companion.quoteFieldsFragment as bookQuoteFieldsFragment
 
 private const val QUOTE_EVENT = "quote"
 

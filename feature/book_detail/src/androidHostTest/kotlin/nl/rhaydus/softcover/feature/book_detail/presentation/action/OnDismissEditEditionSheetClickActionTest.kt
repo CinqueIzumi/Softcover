@@ -29,6 +29,7 @@ class OnDismissEditEditionSheetClickActionTest {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(buildBookDetailUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -61,6 +62,7 @@ class OnDismissEditEditionSheetClickActionTest {
             eventChannel.tryReceive().getOrNull() shouldBe BookDetailEvent.OpenIsbnLookupEvent(
                 prefilledIsbn = "9780374710781",
             )
+
             stateFlow.value.editionSheet shouldBe SheetSession.Closed
             stateFlow.value.editionSheetRequested shouldBe false
             stateFlow.value.editionSearchQuery shouldBe ""

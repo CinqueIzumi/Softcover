@@ -44,6 +44,7 @@ internal data class DisplayInputs(
                 query = searchQuery,
                 filters = filtersByTab[tabId] ?: LibraryFilters(),
             )
+
             val prev = prevBooksByTab[tabId]
             val stable = if (computed == prev) prev else computed
 
@@ -57,6 +58,7 @@ internal data class DisplayInputs(
 
         val newEditionsByTab = editionsByTab.mapValues { (tabId, raw) ->
             val mode = sortModeByTab[tabId] ?: LibraryTab.defaultSortMode(tabId = tabId)
+
             val computed = computeDisplayEditions(
                 raw = raw,
                 query = searchQuery,
@@ -66,6 +68,7 @@ internal data class DisplayInputs(
                 filters = filtersByTab[tabId] ?: LibraryFilters(),
                 bookByBookId = bookByBookId,
             )
+
             val prev = prevEditionsByTab[tabId]
             val stable = if (computed == prev) prev else computed
 

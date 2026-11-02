@@ -11,4 +11,4 @@ internal sealed interface LibraryVisibilityAction : UiAction<
     LibraryVisibilitySettingsUiState,
     LibraryVisibilitySettingsEvent,
     LibraryVisibilitySettingsLocalVariables,
-    >
+>

@@ -28,6 +28,7 @@ class OnMarkAsReadActionTest {
     fun setUp() {
         markBookAsRead = mockk(relaxed = true)
         localVariablesFlow = MutableStateFlow(UpdateProgressLocalVariables())
+
         scope = ActionScope(
             stateFlow = MutableStateFlow(UpdateProgressUiState(bookToUpdate = stubPagedBook(pages = 100))),
             localVariablesFlow = localVariablesFlow,
@@ -52,6 +53,7 @@ class OnMarkAsReadActionTest {
             // ----- Arrange -----
             stubMarkAsRead(ShelfMutationOutcome.Applied)
             val dependencies = stubDependencies(this)
+
             every {
                 dependencies.markBookAsRead
             } returns markBookAsRead
@@ -71,6 +73,7 @@ class OnMarkAsReadActionTest {
             // ----- Arrange -----
             stubMarkAsRead(ShelfMutationOutcome.NoChange)
             val dependencies = stubDependencies(this)
+
             every {
                 dependencies.markBookAsRead
             } returns markBookAsRead
@@ -95,7 +98,9 @@ class OnMarkAsReadActionTest {
                     actionAt = any(),
                 )
             } returns Result.failure(IllegalStateException("boom"))
+
             val dependencies = stubDependencies(this)
+
             every {
                 dependencies.markBookAsRead
             } returns markBookAsRead

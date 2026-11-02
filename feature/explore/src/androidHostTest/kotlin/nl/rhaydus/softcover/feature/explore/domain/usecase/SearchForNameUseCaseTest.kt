@@ -21,6 +21,7 @@ class SearchForNameUseCaseTest {
     fun setUp() {
         searchRepository = mockk(relaxed = true)
         getUserIdUseCase = mockk()
+
         useCase = SearchForNameUseCase(
             searchRepository = searchRepository,
             getUserIdUseCase = getUserIdUseCase,
@@ -44,6 +45,7 @@ class SearchForNameUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+
             coVerify {
                 searchRepository.searchForName(
                     name = "dune",
@@ -51,6 +53,7 @@ class SearchForNameUseCaseTest {
                     sortMode = ExploreSortMode.POPULARITY,
                     page = 1,
                 )
+
                 searchRepository.saveSearchQuery(name = "dune")
             }
         }
@@ -78,6 +81,7 @@ class SearchForNameUseCaseTest {
                     page = 2,
                 )
             }
+
             coVerify(exactly = 0) {
                 searchRepository.saveSearchQuery(name = any())
             }
@@ -100,6 +104,7 @@ class SearchForNameUseCaseTest {
 
             // ----- Assert -----
             result.exceptionOrNull() shouldBe expectedError
+
             coVerify(exactly = 0) {
                 searchRepository.searchForName(
                     name = any(),
@@ -107,6 +112,7 @@ class SearchForNameUseCaseTest {
                     sortMode = any(),
                     page = any(),
                 )
+
                 searchRepository.saveSearchQuery(name = any())
             }
         }
@@ -137,6 +143,7 @@ class SearchForNameUseCaseTest {
 
             // ----- Assert -----
             result.exceptionOrNull() shouldBe expectedError
+
             coVerify(exactly = 0) {
                 searchRepository.saveSearchQuery(name = any())
             }

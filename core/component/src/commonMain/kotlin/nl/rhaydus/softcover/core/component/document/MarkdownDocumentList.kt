@@ -7,9 +7,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import kotlinx.collections.immutable.ImmutableList
-import nl.rhaydus.softcover.core.component.state.skeletonMask
+import nl.rhaydus.designsystem.modifier.skeletonMask
+import nl.rhaydus.designsystem.theme.Corners
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 @Composable
@@ -30,7 +31,10 @@ internal fun MarkdownDocumentList(
                     onEvent = onEvent,
                     leadingMarker = item.marker,
                 ),
-                modifier = Modifier.skeletonMask(visible = isLoading),
+                modifier = Modifier.skeletonMask(
+                    visible = isLoading,
+                    shape = Corners.xs,
+                ),
                 style = MaterialTheme.editorialTypography.review.copy(color = MaterialTheme.colorScheme.onSurface),
             )
         }

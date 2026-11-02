@@ -26,10 +26,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.hoverHighlight
-import nl.rhaydus.softcover.core.component.modifier.tactileSelectable
+import nl.rhaydus.designsystem.modifier.pressScaleSelectable
+import nl.rhaydus.designsystem.theme.Corners
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 private const val TILE_ASPECT_RATIO = 0.78f
@@ -61,6 +61,7 @@ internal fun PreviewTileFrame(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val motionScheme = MaterialTheme.motionScheme
+
     val accentColor by animateColorAsState(
         targetValue = if (selected) {
             MaterialTheme.colorScheme.primary
@@ -69,10 +70,12 @@ internal fun PreviewTileFrame(
         },
         animationSpec = motionScheme.defaultEffectsSpec<Color>(),
     )
+
     val borderWidth by animateDpAsState(
         targetValue = if (selected) 2.dp else 1.dp,
         animationSpec = motionScheme.defaultEffectsSpec<Dp>(),
     )
+
     val labelColor by animateColorAsState(
         targetValue = if (selected) {
             MaterialTheme.colorScheme.primary
@@ -85,7 +88,7 @@ internal fun PreviewTileFrame(
     Column(
         modifier = modifier
             .alpha(if (enabled) 1f else DISABLED_ALPHA)
-            .tactileSelectable(
+            .pressScaleSelectable(
                 selected = selected,
                 onClick = onClick,
                 role = Role.RadioButton,

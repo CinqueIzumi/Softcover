@@ -34,15 +34,14 @@ internal class ReadingJournalHistoryRemoteDataSourceImpl(
     private suspend fun fetchAllJournalRows(
         bookId: Int,
         userId: Int,
-    ): List<GetReadingJournalHistoryQuery.Data.Reading_journal> =
-        fetchAllPages { limit, offset ->
-            apolloClient.safeQuery(
-                query = GetReadingJournalHistoryQuery(
-                    bookId = bookId,
-                    userId = userId,
-                    limit = limit,
-                    offset = offset,
-                ),
-            ).reading_journals
-        }
+    ): List<GetReadingJournalHistoryQuery.Data.Reading_journal> = fetchAllPages { limit, offset ->
+        apolloClient.safeQuery(
+            query = GetReadingJournalHistoryQuery(
+                bookId = bookId,
+                userId = userId,
+                limit = limit,
+                offset = offset,
+            ),
+        ).reading_journals
+    }
 }

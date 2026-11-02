@@ -12,12 +12,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import kotlinx.collections.immutable.ImmutableList
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.mood.MoodTile
 import nl.rhaydus.softcover.core.component.mood.MoodTileEvent
 import nl.rhaydus.softcover.core.component.mood.MoodTileUiModel
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnMoodTileClickedAction
 

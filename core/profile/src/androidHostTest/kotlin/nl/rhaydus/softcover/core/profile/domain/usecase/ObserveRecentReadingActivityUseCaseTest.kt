@@ -10,7 +10,6 @@ import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
-import kotlinx.datetime.plus
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
 import org.junit.jupiter.api.BeforeEach
@@ -36,6 +35,7 @@ class ObserveRecentReadingActivityUseCaseTest {
     @BeforeEach
     fun setUp() {
         profileRepository = mockk()
+
         useCase = ObserveRecentReadingActivityUseCase(
             profileRepository = profileRepository,
             clock = fixedClock,
@@ -67,12 +67,14 @@ class ObserveRecentReadingActivityUseCaseTest {
             // ----- Act & Assert -----
             useCase().test {
                 val items = awaitItem()
+
                 items.map { it.date } shouldBe (20 downTo 0).map {
                     today.minus(
                         it,
                         DateTimeUnit.DAY,
                     )
                 }
+
                 awaitComplete()
             }
         }
@@ -126,6 +128,7 @@ class ObserveRecentReadingActivityUseCaseTest {
                 22,
                 DateTimeUnit.DAY,
             )
+
             val activeDates = setOf(outsideDate)
 
             every {

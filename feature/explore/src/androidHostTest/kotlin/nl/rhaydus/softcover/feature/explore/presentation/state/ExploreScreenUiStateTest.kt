@@ -224,6 +224,7 @@ class ExploreScreenUiStateTest {
         fun `search with result cards is false`() {
             // ----- Arrange -----
             val card = BookCardUiModel.previews.values.first()
+
             val state = ExploreScreenUiState(
                 searchText = "dune",
                 searchResults = BookCardSet.standIns(persistentListOf(card)),

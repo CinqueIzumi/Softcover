@@ -27,12 +27,14 @@ class TrendingFetchTrackerTest {
             // ----- Act & Assert -----
             tracker.observe(week).test {
                 awaitItem().shouldBeNull()
+
                 launch {
                     tracker.track(week) {
                         release.await()
                         Result.success(Unit)
                     }
                 }
+
                 awaitItem() shouldBe TrendingFetchTracker.State.Running
                 release.complete(Unit)
                 awaitItem().shouldBeNull()
@@ -50,6 +52,7 @@ class TrendingFetchTrackerTest {
 
             // ----- Assert -----
             result shouldBe failure
+
             tracker.observe(week).test {
                 awaitItem() shouldBe TrendingFetchTracker.State.Failed
             }
@@ -78,9 +81,11 @@ class TrendingFetchTrackerTest {
             // ----- Act & Assert -----
             tracker.observe(week).test {
                 awaitItem().shouldBeNull()
+
                 val job = launch {
                     tracker.track(week) { awaitCancellation() }
                 }
+
                 awaitItem() shouldBe TrendingFetchTracker.State.Running
                 job.cancel()
                 awaitItem().shouldBeNull()
@@ -95,13 +100,16 @@ class TrendingFetchTrackerTest {
 
             // ----- Act -----
             val result = tracker.track(week) { error("boom") }
+
             tracker.observe(week).test {
                 awaitItem() shouldBe TrendingFetchTracker.State.Failed
             }
+
             tracker.track(week) { Result.success(Unit) }
 
             // ----- Assert -----
             result.isFailure shouldBe true
+
             tracker.observe(week).test {
                 awaitItem().shouldBeNull()
             }
@@ -131,19 +139,23 @@ class TrendingFetchTrackerTest {
             // ----- Act & Assert -----
             tracker.observe(week).test {
                 awaitItem().shouldBeNull()
+
                 launch {
                     tracker.track(week) {
                         failFirst.await()
                         Result.failure(IllegalStateException("down"))
                     }
                 }
+
                 awaitItem() shouldBe TrendingFetchTracker.State.Running
+
                 launch {
                     tracker.track(week) {
                         release.await()
                         Result.success(Unit)
                     }
                 }
+
                 runCurrent()
                 failFirst.complete(Unit)
                 runCurrent()
@@ -163,19 +175,23 @@ class TrendingFetchTrackerTest {
             // ----- Act & Assert -----
             tracker.observe(week).test {
                 awaitItem().shouldBeNull()
+
                 launch {
                     tracker.track(week) {
                         succeed.await()
                         Result.success(Unit)
                     }
                 }
+
                 awaitItem() shouldBe TrendingFetchTracker.State.Running
+
                 launch {
                     tracker.track(week) {
                         fail.await()
                         Result.failure(IllegalStateException("down"))
                     }
                 }
+
                 runCurrent()
                 succeed.complete(Unit)
                 runCurrent()
@@ -209,12 +225,14 @@ class TrendingFetchTrackerTest {
             // ----- Arrange -----
             val tracker = TrendingFetchTracker()
             val release = CompletableDeferred<Unit>()
+
             launch {
                 tracker.track(week) {
                     release.await()
                     Result.success(Unit)
                 }
             }
+
             runCurrent()
 
             // ----- Act -----
@@ -224,6 +242,7 @@ class TrendingFetchTrackerTest {
             tracker.observe(week).test {
                 awaitItem() shouldBe TrendingFetchTracker.State.Running
             }
+
             release.complete(Unit)
         }
     }

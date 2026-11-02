@@ -6,6 +6,7 @@ import nl.rhaydus.common.currentLocalDate
 import nl.rhaydus.softcover.core.component.badge.BadgeSize
 import nl.rhaydus.softcover.core.component.badge.BadgeTone
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class UnreleasedMapperTest {
@@ -27,63 +28,69 @@ class UnreleasedMapperTest {
         dayOfMonth = 2,
     )
 
-    @Test
-    fun `Compact mapper maps to a Compact release badge with an Out-prefixed compact date`() {
-        // ----- Arrange -----
-        val releaseDate = currentYearDate
+    @Nested
+    inner class BadgeAndDate {
+        @Test
+        fun `Compact mapper maps to a Compact release badge with an Out-prefixed compact date`() {
+            // ----- Arrange -----
+            val releaseDate = currentYearDate
 
-        // ----- Act -----
-        val result = releaseDate.toCompactUnreleasedBadgeUiModel()
+            // ----- Act -----
+            val result = releaseDate.toCompactUnreleasedBadgeUiModel()
 
-        // ----- Assert -----
-        result shouldBe BadgeUiModel(
-            label = "Out Sep 2",
-            tone = BadgeTone.Primary,
-            size = BadgeSize.Compact,
-        )
+            // ----- Assert -----
+            result shouldBe BadgeUiModel(
+                label = "Out Sep 2",
+                tone = BadgeTone.Primary,
+                size = BadgeSize.Compact,
+            )
+        }
+
+        @Test
+        fun `Prominent mapper maps to a Compact release badge with a Releases-prefixed long date`() {
+            // ----- Arrange -----
+            val releaseDate = date
+
+            // ----- Act -----
+            val result = releaseDate.toProminentUnreleasedBadgeUiModel()
+
+            // ----- Assert -----
+            result shouldBe BadgeUiModel(
+                label = "Releases September 2, 2026",
+                tone = BadgeTone.Primary,
+                size = BadgeSize.Compact,
+            )
+        }
+
+        @Test
+        fun `Featured mapper maps to a Regular badge with an Arriving-prefixed compact date`() {
+            // ----- Arrange -----
+            val releaseDate = currentYearDate
+
+            // ----- Act -----
+            val result = releaseDate.toFeaturedUnreleasedBadgeUiModel()
+
+            // ----- Assert -----
+            result shouldBe BadgeUiModel(
+                label = "Arriving Sep 2",
+                tone = BadgeTone.Primary,
+                size = BadgeSize.Regular,
+            )
+        }
     }
 
-    @Test
-    fun `Prominent mapper maps to a Compact release badge with a Releases-prefixed long date`() {
-        // ----- Arrange -----
-        val releaseDate = date
+    @Nested
+    inner class YearSuffix {
+        @Test
+        fun `Compact mapper appends the year when the date is not in the current year`() {
+            // ----- Arrange -----
+            val releaseDate = otherYearDate
 
-        // ----- Act -----
-        val result = releaseDate.toProminentUnreleasedBadgeUiModel()
+            // ----- Act -----
+            val result = releaseDate.toCompactUnreleasedBadgeUiModel()
 
-        // ----- Assert -----
-        result shouldBe BadgeUiModel(
-            label = "Releases September 2, 2026",
-            tone = BadgeTone.Primary,
-            size = BadgeSize.Compact,
-        )
-    }
-
-    @Test
-    fun `Featured mapper maps to a Regular badge with an Arriving-prefixed compact date`() {
-        // ----- Arrange -----
-        val releaseDate = currentYearDate
-
-        // ----- Act -----
-        val result = releaseDate.toFeaturedUnreleasedBadgeUiModel()
-
-        // ----- Assert -----
-        result shouldBe BadgeUiModel(
-            label = "Arriving Sep 2",
-            tone = BadgeTone.Primary,
-            size = BadgeSize.Regular,
-        )
-    }
-
-    @Test
-    fun `Compact mapper appends the year when the date is not in the current year`() {
-        // ----- Arrange -----
-        val releaseDate = otherYearDate
-
-        // ----- Act -----
-        val result = releaseDate.toCompactUnreleasedBadgeUiModel()
-
-        // ----- Assert -----
-        result.label shouldBe "Out Sep 2, $otherYear"
+            // ----- Assert -----
+            result.label shouldBe "Out Sep 2, $otherYear"
+        }
     }
 }

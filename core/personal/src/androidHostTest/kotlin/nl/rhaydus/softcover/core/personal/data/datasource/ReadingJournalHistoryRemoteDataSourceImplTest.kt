@@ -47,11 +47,11 @@ class ReadingJournalHistoryRemoteDataSourceImplTest {
     fun setUp() {
         apolloClient = mockk()
         getUserIdUseCase = mockk()
-        dataSource =
-            ReadingJournalHistoryRemoteDataSourceImpl(
-                apolloClient = apolloClient,
-                getUserIdUseCase = getUserIdUseCase,
-            )
+
+        dataSource = ReadingJournalHistoryRemoteDataSourceImpl(
+            apolloClient = apolloClient,
+            getUserIdUseCase = getUserIdUseCase,
+        )
     }
 
     /**
@@ -59,12 +59,11 @@ class ReadingJournalHistoryRemoteDataSourceImplTest {
      * maps into a distinct [ProgressHistoryEntity], keyed by [pages], so accumulated pagination results
      * can be asserted by value and order without mocking the mapper itself.
      */
-    private fun row(pages: Int): GetReadingJournalHistoryQuery.Data.Reading_journal =
-        GetReadingJournalHistoryQuery.Data.Reading_journal(
-            __typename = "reading_journals",
-            action_at = "2024-01-01T10:00:00+00:00",
-            metadata = mapOf("progress_pages" to pages),
-        )
+    private fun row(pages: Int): GetReadingJournalHistoryQuery.Data.Reading_journal = GetReadingJournalHistoryQuery.Data.Reading_journal(
+        __typename = "reading_journals",
+        action_at = "2024-01-01T10:00:00+00:00",
+        metadata = mapOf("progress_pages" to pages),
+    )
 
     private fun expectedEntity(
         bookId: Int,

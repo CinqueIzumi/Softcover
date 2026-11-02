@@ -52,6 +52,7 @@ class AllBooksCollectorTest {
         enabledStatusesFlow = MutableStateFlow(emptySet())
         enabledListIdsFlow = MutableStateFlow(emptySet())
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -152,31 +153,33 @@ class AllBooksCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `keeps books on an enabled status and the always-visible currently-reading status`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val reading = stubBook(
-                    id = 1,
-                    status = BookStatus.Reading,
-                )
-                val read = stubBook(
-                    id = 2,
-                    status = BookStatus.Read,
-                )
-                val wantToRead = stubBook(
-                    id = 3,
-                    status = BookStatus.WantToRead,
-                )
-                val job = launchCollector()
+        fun `keeps books on an enabled status and the always-visible currently-reading status`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val reading = stubBook(
+                id = 1,
+                status = BookStatus.Reading,
+            )
 
-                // ----- Act -----
-                enabledStatusesFlow.value = setOf(BookStatus.Read.code)
-                booksFlow.value = listOf(reading, read, wantToRead)
+            val read = stubBook(
+                id = 2,
+                status = BookStatus.Read,
+            )
 
-                // ----- Assert -----
-                stateFlow.value.booksByTab.getValue("all") shouldBe listOf(reading, read)
-                job.cancel()
-            }
+            val wantToRead = stubBook(
+                id = 3,
+                status = BookStatus.WantToRead,
+            )
+
+            val job = launchCollector()
+
+            // ----- Act -----
+            enabledStatusesFlow.value = setOf(BookStatus.Read.code)
+            booksFlow.value = listOf(reading, read, wantToRead)
+
+            // ----- Assert -----
+            stateFlow.value.booksByTab.getValue("all") shouldBe listOf(reading, read)
+            job.cancel()
+        }
 
         @Test
         fun `drops books with no status unless they are on an enabled list`() = runTest(UnconfinedTestDispatcher()) {
@@ -185,10 +188,12 @@ class AllBooksCollectorTest {
                 id = 1,
                 status = null,
             )
+
             val onEnabledList = stubBook(
                 id = 2,
                 status = null,
             )
+
             val job = launchCollector()
 
             // ----- Act -----
@@ -196,6 +201,7 @@ class AllBooksCollectorTest {
                 listId = 10,
                 bookId = 2,
             )
+
             listsFlow.value = listOf(list)
             enabledListIdsFlow.value = setOf(10)
             booksFlow.value = listOf(unshelved, onEnabledList)
@@ -212,6 +218,7 @@ class AllBooksCollectorTest {
                 id = 1,
                 status = BookStatus.Read,
             )
+
             val job = launchCollector()
 
             // ----- Act -----
@@ -219,6 +226,7 @@ class AllBooksCollectorTest {
                 listId = 10,
                 bookId = 1,
             )
+
             listsFlow.value = listOf(list)
             enabledListIdsFlow.value = emptySet()
             booksFlow.value = listOf(book)
@@ -229,51 +237,53 @@ class AllBooksCollectorTest {
         }
 
         @Test
-        fun `a book on an enabled list shows even when its status is not enabled`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val book = stubBook(
-                    id = 1,
-                    status = BookStatus.Read,
-                )
-                val job = launchCollector()
+        fun `a book on an enabled list shows even when its status is not enabled`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val book = stubBook(
+                id = 1,
+                status = BookStatus.Read,
+            )
 
-                // ----- Act -----
-                val list = listWith(
-                    listId = 10,
-                    bookId = 1,
-                )
-                listsFlow.value = listOf(list)
-                enabledListIdsFlow.value = setOf(10)
-                booksFlow.value = listOf(book)
+            val job = launchCollector()
 
-                // ----- Assert -----
-                stateFlow.value.booksByTab.getValue("all") shouldBe listOf(book)
-                job.cancel()
-            }
+            // ----- Act -----
+            val list = listWith(
+                listId = 10,
+                bookId = 1,
+            )
+
+            listsFlow.value = listOf(list)
+            enabledListIdsFlow.value = setOf(10)
+            booksFlow.value = listOf(book)
+
+            // ----- Assert -----
+            stateFlow.value.booksByTab.getValue("all") shouldBe listOf(book)
+            job.cancel()
+        }
 
         @Test
-        fun `the first emission marks the library as loaded and keeps other tabs`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val other = stubBook(
-                    id = 9,
-                    status = BookStatus.Read,
-                )
-                stateFlow.value = LibraryUiState(
-                    booksByTab = persistentMapOf("status-3" to persistentListOf(other)),
-                    isLoading = true,
-                )
-                val job = launchCollector()
+        fun `the first emission marks the library as loaded and keeps other tabs`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val other = stubBook(
+                id = 9,
+                status = BookStatus.Read,
+            )
 
-                // ----- Act -----
-                booksFlow.value = emptyList()
+            stateFlow.value = LibraryUiState(
+                booksByTab = persistentMapOf("status-3" to persistentListOf(other)),
+                isLoading = true,
+            )
 
-                // ----- Assert -----
-                stateFlow.value.isLoading shouldBe false
-                stateFlow.value.booksByTab.getValue("status-3") shouldBe listOf(other)
-                job.cancel()
-            }
+            val job = launchCollector()
+
+            // ----- Act -----
+            booksFlow.value = emptyList()
+
+            // ----- Assert -----
+            stateFlow.value.isLoading shouldBe false
+            stateFlow.value.booksByTab.getValue("status-3") shouldBe listOf(other)
+            job.cancel()
+        }
 
         @Test
         fun `re-queries when the persisted All tab sort changes`() = runTest(UnconfinedTestDispatcher()) {
@@ -295,6 +305,7 @@ class AllBooksCollectorTest {
                     direction = SortDirection.DESCENDING,
                 )
             }
+
             job.cancel()
         }
     }

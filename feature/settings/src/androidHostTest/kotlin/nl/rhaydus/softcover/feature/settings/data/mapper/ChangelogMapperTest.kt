@@ -326,6 +326,7 @@ class ChangelogMapperTest {
                 month = 3,
                 day = 14,
             )
+
             entry.blocks.map { it.plainText() } shouldBe listOf("Added shelves")
         }
 
@@ -431,6 +432,7 @@ class ChangelogMapperTest {
                 month = 3,
                 day = 14,
             )
+
             entries[1].releaseDate.shouldBeNull()
         }
     }

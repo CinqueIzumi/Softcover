@@ -29,6 +29,7 @@ class OnProgressTabClickActionTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -38,13 +39,16 @@ class OnProgressTabClickActionTest {
 
     private fun stubDependencies(testScope: TestScope): BookDetailDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<BookDetailDependencies>(relaxed = true).also { mock ->
             every {
                 mock.coroutineScope
             } returns testScope
+
             every {
                 mock.mainDispatcher
             } returns dispatcher
+
             every {
                 mock.launch(any())
             } answers { callOriginal() }

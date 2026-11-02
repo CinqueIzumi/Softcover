@@ -9,8 +9,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnActiveFilterChipClickedAction
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryFilterChipRow

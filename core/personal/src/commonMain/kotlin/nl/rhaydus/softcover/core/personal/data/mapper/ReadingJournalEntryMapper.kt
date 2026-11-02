@@ -38,12 +38,11 @@ internal fun toProgressHistoryEntity(
     )
 }
 
-internal fun ProgressHistoryEntity.toReadingJournalEntry(timeZone: TimeZone): ReadingJournalEntry =
-    ReadingJournalEntry(
-        date = Instant.fromEpochMilliseconds(actionAtEpochMillis).toLocalDateTime(timeZone).date,
-        pages = pages,
-        seconds = seconds,
-    )
+internal fun ProgressHistoryEntity.toReadingJournalEntry(timeZone: TimeZone): ReadingJournalEntry = ReadingJournalEntry(
+    date = Instant.fromEpochMilliseconds(actionAtEpochMillis).toLocalDateTime(timeZone).date,
+    pages = pages,
+    seconds = seconds,
+)
 
 private fun Map<*, *>.intValueOrNull(key: String): Int? = when (val value = this[key]) {
     is Number -> value.toInt()

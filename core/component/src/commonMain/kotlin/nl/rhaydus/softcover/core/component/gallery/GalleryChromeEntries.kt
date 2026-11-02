@@ -227,6 +227,7 @@ internal val chromeEntries: ImmutableList<GalleryEntry> = persistentListOf(
                         text = buildAnnotatedString {
                             withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append("Bold ") }
                             withStyle(SpanStyle(fontStyle = FontStyle.Italic)) { append("italic ") }
+
                             withStyle(SpanStyle(textDecoration = TextDecoration.Underline)) {
                                 append("underline")
                             }

@@ -34,6 +34,7 @@ class InitializeBookWithIdActionTest {
         fetchBookByIdUseCase = mockk()
         stateFlow = MutableStateFlow(buildBookDetailUiState())
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
@@ -43,6 +44,7 @@ class InitializeBookWithIdActionTest {
 
     private fun stubDependencies(testScope: TestScope): BookDetailDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<BookDetailDependencies>(relaxed = true).also { mock ->
             every {
                 mock.fetchBookByIdUseCase
@@ -69,12 +71,15 @@ class InitializeBookWithIdActionTest {
         every {
             this@mockk.id
         } returns id
+
         every {
             this@mockk.editions
         } returns editions
+
         every {
             this@mockk.title
         } returns "Piranesi"
+
         every {
             this@mockk.userBook
         } returns null
@@ -87,10 +92,12 @@ class InitializeBookWithIdActionTest {
             // ----- Arrange -----
             val bookId = 42
             val expectedEditions = listOf<BookEdition>(mockk(), mockk())
+
             val expectedBook = stubBook(
                 id = bookId,
                 editions = expectedEditions,
             )
+
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -146,6 +153,7 @@ class InitializeBookWithIdActionTest {
             dependencies = stubDependencies(this)
 
             var loadingAtInvocation: Boolean? = null
+
             coEvery {
                 fetchBookByIdUseCase(id = bookId)
             } coAnswers {

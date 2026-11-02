@@ -47,6 +47,7 @@ class OnUpdateTimeProgressClickActionTest {
     @BeforeEach
     fun setUp() {
         updateBookProgress = mockk(relaxed = true)
+
         coEvery {
             updateBookProgress(
                 book = any(),
@@ -54,8 +55,10 @@ class OnUpdateTimeProgressClickActionTest {
                 newSeconds = any(),
             )
         } returns Result.success(null)
+
         stateFlow = MutableStateFlow(ReadingScreenUiState())
         localVariablesFlow = MutableStateFlow(ReadingLocalVariables())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
@@ -88,24 +91,25 @@ class OnUpdateTimeProgressClickActionTest {
     private fun stubBookWithAudioSeconds(
         audioSeconds: Int?,
         id: Int = 99,
-    ): Book =
-        mockk<Book>().also { book ->
-            val edition = mockk<BookEdition>().also { e ->
-                every {
-                    e.audioSeconds
-                } returns audioSeconds
-            }
-
+    ): Book = mockk<Book>().also { book ->
+        val edition = mockk<BookEdition>().also { e ->
             every {
-                book.id
-            } returns id
-            every {
-                book.currentEdition
-            } returns edition
-            every {
-                book.userBook
-            } returns null
+                e.audioSeconds
+            } returns audioSeconds
         }
+
+        every {
+            book.id
+        } returns id
+
+        every {
+            book.currentEdition
+        } returns edition
+
+        every {
+            book.userBook
+        } returns null
+    }
 
     @Nested
     inner class Execute {
@@ -122,6 +126,7 @@ class OnUpdateTimeProgressClickActionTest {
                     seconds = "5",
                 ),
             )
+
             val dependencies = stubDependencies(this)
 
             val action = OnUpdateTimeProgressClickAction(
@@ -149,7 +154,9 @@ class OnUpdateTimeProgressClickActionTest {
                 bookToUpdate = null,
                 progressSheet = openProgressSheet,
             )
+
             val dependencies = stubDependencies(this)
+
             val action = OnUpdateTimeProgressClickAction(
                 hours = "1",
                 minutes = "0",
@@ -170,6 +177,7 @@ class OnUpdateTimeProgressClickActionTest {
                     any(),
                 )
             }
+
             stateFlow.value.progressSheet shouldBe openProgressSheet
         }
 
@@ -179,6 +187,7 @@ class OnUpdateTimeProgressClickActionTest {
             val book = stubBookWithAudioSeconds(audioSeconds = 7200)
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
+
             // 1*3600 + 2*60 + 3 = 3723
             val action = OnUpdateTimeProgressClickAction(
                 hours = "1",
@@ -212,11 +221,14 @@ class OnUpdateTimeProgressClickActionTest {
                 21,
                 0,
             )
+
             val book = stubBookWithAudioSeconds(audioSeconds = 7200)
+
             stateFlow.value = ReadingScreenUiState(
                 bookToUpdate = book,
                 readAt = readAt,
             )
+
             val dependencies = stubDependencies(this)
 
             coEvery {
@@ -255,6 +267,7 @@ class OnUpdateTimeProgressClickActionTest {
             val book = stubBookWithAudioSeconds(audioSeconds = 3600)
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
+
             // 0*3600 + 0*60 + 30 = 30
             val action = OnUpdateTimeProgressClickAction(
                 hours = "abc",
@@ -283,6 +296,7 @@ class OnUpdateTimeProgressClickActionTest {
             val book = stubBookWithAudioSeconds(audioSeconds = 3600)
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
+
             val action = OnUpdateTimeProgressClickAction(
                 hours = "-2",
                 minutes = "30",
@@ -311,6 +325,7 @@ class OnUpdateTimeProgressClickActionTest {
             val book = stubBookWithAudioSeconds(audioSeconds = audioSeconds)
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
+
             // 2*3600 + 0 + 0 = 7200, clamped to 3600
             val action = OnUpdateTimeProgressClickAction(
                 hours = "2",
@@ -339,6 +354,7 @@ class OnUpdateTimeProgressClickActionTest {
             val book = stubBookWithAudioSeconds(audioSeconds = null)
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
+
             // total = 0 (null), so entered.coerceAtLeast(0) = 3600
             val action = OnUpdateTimeProgressClickAction(
                 hours = "1",
@@ -368,6 +384,7 @@ class OnUpdateTimeProgressClickActionTest {
                 audioSeconds = 7200,
                 id = 5,
             )
+
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
 
@@ -401,6 +418,7 @@ class OnUpdateTimeProgressClickActionTest {
                 audioSeconds = 7200,
                 id = 5,
             )
+
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
 
@@ -434,6 +452,7 @@ class OnUpdateTimeProgressClickActionTest {
                 audioSeconds = 7200,
                 id = 5,
             )
+
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
 
@@ -468,6 +487,7 @@ class OnUpdateTimeProgressClickActionTest {
                 audioSeconds = 7200,
                 id = 5,
             )
+
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
 
@@ -501,6 +521,7 @@ class OnUpdateTimeProgressClickActionTest {
                 audioSeconds = 7200,
                 id = 5,
             )
+
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
 
@@ -531,10 +552,12 @@ class OnUpdateTimeProgressClickActionTest {
         fun `cancels the prior job for the same book id and stores a new one`() = runTest {
             // ----- Arrange -----
             val bookId = 5
+
             val book = stubBookWithAudioSeconds(
                 audioSeconds = 7200,
                 id = bookId,
             )
+
             val priorJob = Job()
 
             localVariablesFlow.value = ReadingLocalVariables(

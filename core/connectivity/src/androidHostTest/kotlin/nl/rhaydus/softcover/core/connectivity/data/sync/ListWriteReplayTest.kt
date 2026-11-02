@@ -28,6 +28,7 @@ class ListWriteReplayTest {
     fun setUp() {
         listsRemoteDataSource = mockk()
         listsLocalDataSource = mockk()
+
         replay = ListWriteReplay(
             listsRemoteDataSource = listsRemoteDataSource,
             listsLocalDataSource = listsLocalDataSource,
@@ -80,6 +81,7 @@ class ListWriteReplayTest {
                 listName = "Science Fiction",
                 privacy = PrivacySetting.PRIVATE,
             )
+
             val created = BookList(
                 id = 1,
                 name = "Science Fiction",
@@ -103,6 +105,7 @@ class ListWriteReplayTest {
 
             // ----- Assert -----
             result shouldBe ReplayOutcome.SYNCED
+
             coVerify(exactly = 1) {
                 listsRemoteDataSource.createList(
                     name = "Science Fiction",
@@ -120,6 +123,7 @@ class ListWriteReplayTest {
                     listName = "Science Fiction",
                     privacy = null,
                 )
+
                 val created = BookList(
                     id = 1,
                     name = "Science Fiction",
@@ -143,12 +147,14 @@ class ListWriteReplayTest {
 
                 // ----- Assert -----
                 result shouldBe ReplayOutcome.SYNCED
+
                 coVerify(exactly = 1) {
                     listsRemoteDataSource.createList(
                         name = "Science Fiction",
                         privacy = PrivacySetting.PUBLIC,
                     )
                 }
+
                 coVerify(exactly = 1) {
                     listsLocalDataSource.cacheUserBookLists(lists = listOf(created))
                 }
@@ -158,56 +164,58 @@ class ListWriteReplayTest {
     @Nested
     inner class AddListBook {
         @Test
-        fun `adds the book remotely, clears the optimistic row and caches the real one, returning SYNCED`() =
-            runTest {
-                // ----- Arrange -----
-                val write = pendingListWrite(
-                    kind = PendingListWriteKind.ADD_LIST_BOOK,
+        fun `adds the book remotely, clears the optimistic row and caches the real one, returning SYNCED`() = runTest {
+            // ----- Arrange -----
+            val write = pendingListWrite(
+                kind = PendingListWriteKind.ADD_LIST_BOOK,
+                listId = 10,
+                bookId = 20,
+                editionId = 30,
+            )
+
+            val real = ListBook(
+                listBookId = 99,
+                listId = 10,
+                bookId = 20,
+                editionId = 30,
+            )
+
+            coEvery {
+                listsRemoteDataSource.addBookToList(
                     listId = 10,
                     bookId = 20,
                     editionId = 30,
                 )
-                val real = ListBook(
-                    listBookId = 99,
+            } returns real
+
+            coJustRun {
+                listsLocalDataSource.removeOptimisticListBook(
                     listId = 10,
                     bookId = 20,
-                    editionId = 30,
                 )
-
-                coEvery {
-                    listsRemoteDataSource.addBookToList(
-                        listId = 10,
-                        bookId = 20,
-                        editionId = 30,
-                    )
-                } returns real
-
-                coJustRun {
-                    listsLocalDataSource.removeOptimisticListBook(
-                        listId = 10,
-                        bookId = 20,
-                    )
-                }
-
-                coJustRun {
-                    listsLocalDataSource.cacheListBook(book = real)
-                }
-
-                // ----- Act -----
-                val result = replay(payload = write)
-
-                // ----- Assert -----
-                result shouldBe ReplayOutcome.SYNCED
-                coVerify(exactly = 1) {
-                    listsLocalDataSource.removeOptimisticListBook(
-                        listId = 10,
-                        bookId = 20,
-                    )
-                }
-                coVerify(exactly = 1) {
-                    listsLocalDataSource.cacheListBook(book = real)
-                }
             }
+
+            coJustRun {
+                listsLocalDataSource.cacheListBook(book = real)
+            }
+
+            // ----- Act -----
+            val result = replay(payload = write)
+
+            // ----- Assert -----
+            result shouldBe ReplayOutcome.SYNCED
+
+            coVerify(exactly = 1) {
+                listsLocalDataSource.removeOptimisticListBook(
+                    listId = 10,
+                    bookId = 20,
+                )
+            }
+
+            coVerify(exactly = 1) {
+                listsLocalDataSource.cacheListBook(book = real)
+            }
+        }
     }
 
     @Nested
@@ -222,12 +230,14 @@ class ListWriteReplayTest {
                 editionId = 30,
                 listBookId = 40,
             )
+
             val snapshot = ListBook(
                 listBookId = 40,
                 listId = 10,
                 bookId = 20,
                 editionId = 30,
             )
+
             val updatedList = BookList(
                 id = 10,
                 name = "My List",
@@ -248,6 +258,7 @@ class ListWriteReplayTest {
 
             // ----- Assert -----
             result shouldBe ReplayOutcome.SYNCED
+
             coVerify(exactly = 1) {
                 listsLocalDataSource.cacheUserBookLists(lists = listOf(updatedList))
             }
@@ -279,6 +290,7 @@ class ListWriteReplayTest {
 
             // ----- Assert -----
             result shouldBe ReplayOutcome.SYNCED
+
             coVerify(exactly = 1) {
                 listsRemoteDataSource.updateListBookPositions(
                     listId = 10,

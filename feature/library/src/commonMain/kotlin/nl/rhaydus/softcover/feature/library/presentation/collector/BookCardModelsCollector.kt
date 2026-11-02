@@ -195,6 +195,7 @@ private fun BookCardModelsSnapshot.toEditionCards(
         if (editionsByTab[tab.id]?.isEmpty() == true && isLoading) return@forEach
 
         val editions = editionsByTab[tab.id]?.let { displayEditionsByTab[tab.id] ?: it } ?: return@forEach
+
         val listId = (tab as? LibraryTab.CustomList)?.listId
 
         val rearranging = isEditionListRearranging(

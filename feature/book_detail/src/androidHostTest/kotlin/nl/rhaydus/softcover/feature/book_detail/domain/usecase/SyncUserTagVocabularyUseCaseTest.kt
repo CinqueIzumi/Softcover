@@ -20,6 +20,7 @@ class SyncUserTagVocabularyUseCaseTest {
     fun setUp() {
         userTagVocabularyRepository = mockk()
         getUserIdUseCase = mockk()
+
         useCase = SyncUserTagVocabularyUseCase(
             userTagVocabularyRepository = userTagVocabularyRepository,
             getUserIdUseCase = getUserIdUseCase,

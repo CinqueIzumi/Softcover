@@ -6,7 +6,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
-import nl.rhaydus.softcover.core.presentation.navigation.TransientNavArg
+import nl.rhaydus.toad.navigation.TransientNavArg
 
 /**
  * The full-screen cover viewer. It carries one already-mapped [CoverUiModel] rather than the book's

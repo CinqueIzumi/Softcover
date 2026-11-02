@@ -13,19 +13,18 @@ class ExternalNavigationCodecTest {
     @Nested
     inner class RoundTrip {
         @TestFactory
-        fun `every tab destination survives a round trip`(): List<DynamicTest> =
-            TabDestination.entries.map { destination ->
-                DynamicTest.dynamicTest(destination.name) {
-                    // ----- Arrange -----
-                    val request = ExternalNavigationRequest.OpenTab(destination = destination)
+        fun `every tab destination survives a round trip`(): List<DynamicTest> = TabDestination.entries.map { destination ->
+            DynamicTest.dynamicTest(destination.name) {
+                // ----- Arrange -----
+                val request = ExternalNavigationRequest.OpenTab(destination = destination)
 
-                    // ----- Act -----
-                    val parsed = parseExternalNavigationRequest(uri = request.toUriString())
+                // ----- Act -----
+                val parsed = parseExternalNavigationRequest(uri = request.toUriString())
 
-                    // ----- Assert -----
-                    parsed shouldBe request
-                }
+                // ----- Assert -----
+                parsed shouldBe request
             }
+        }
 
         @Test
         fun `the focus mode request survives a round trip`() {
@@ -121,34 +120,33 @@ class ExternalNavigationCodecTest {
     @Nested
     inner class Rejection {
         @TestFactory
-        fun `malformed uris are rejected`(): List<DynamicTest> =
-            mapOf(
-                "wrong scheme" to "https://open/tab/library",
-                "wrong host" to "softcover://close/tab/library",
-                "no prefix" to "tab/library",
-                "unknown tab name" to "softcover://open/tab/nowhere",
-                "non-integer book id" to "softcover://open/book/abc",
-                "tab with trailing segment" to "softcover://open/tab/library/extra",
-                "book with trailing segment" to "softcover://open/book/42/extra",
-                "book with an unknown sub-route" to "softcover://open/book/1/other",
-                "verdict with non-integer book id" to "softcover://open/book/x/verdict",
-                "verdict with trailing segment" to "softcover://open/book/1/verdict/x",
-                "focus with trailing segment" to "softcover://open/focus/extra",
-                "tab without name" to "softcover://open/tab",
-                "book without id" to "softcover://open/book",
-                "no segments" to "softcover://open/",
-                "unknown kind" to "softcover://open/shelf/1",
-            ).map { (label, input) ->
-                DynamicTest.dynamicTest(label) {
-                    // ----- Arrange -----
-                    val uri = input
+        fun `malformed uris are rejected`(): List<DynamicTest> = mapOf(
+            "wrong scheme" to "https://open/tab/library",
+            "wrong host" to "softcover://close/tab/library",
+            "no prefix" to "tab/library",
+            "unknown tab name" to "softcover://open/tab/nowhere",
+            "non-integer book id" to "softcover://open/book/abc",
+            "tab with trailing segment" to "softcover://open/tab/library/extra",
+            "book with trailing segment" to "softcover://open/book/42/extra",
+            "book with an unknown sub-route" to "softcover://open/book/1/other",
+            "verdict with non-integer book id" to "softcover://open/book/x/verdict",
+            "verdict with trailing segment" to "softcover://open/book/1/verdict/x",
+            "focus with trailing segment" to "softcover://open/focus/extra",
+            "tab without name" to "softcover://open/tab",
+            "book without id" to "softcover://open/book",
+            "no segments" to "softcover://open/",
+            "unknown kind" to "softcover://open/shelf/1",
+        ).map { (label, input) ->
+            DynamicTest.dynamicTest(label) {
+                // ----- Arrange -----
+                val uri = input
 
-                    // ----- Act -----
-                    val parsed = parseExternalNavigationRequest(uri = uri)
+                // ----- Act -----
+                val parsed = parseExternalNavigationRequest(uri = uri)
 
-                    // ----- Assert -----
-                    parsed.shouldBeNull()
-                }
+                // ----- Assert -----
+                parsed.shouldBeNull()
             }
+        }
     }
 }

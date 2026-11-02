@@ -19,9 +19,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import nl.rhaydus.designsystem.layout.WindowWidthClass
 import nl.rhaydus.designsystem.layout.rememberWindowSizeClass
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryActiveFilterChips
 
 @OptIn(ExperimentalLayoutApi::class)

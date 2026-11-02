@@ -28,6 +28,7 @@ class OnFilterDraftTagSearchChangedActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -61,6 +62,7 @@ class OnFilterDraftTagSearchChangedActionTest {
                 filters = LibraryFilters(formats = persistentSetOf("Hardcover")),
                 tagSearch = "",
             )
+
             stateFlow.value = LibraryUiState(filterDraft = draft)
 
             // ----- Act -----

@@ -57,12 +57,15 @@ data class ReadingPaceForecast(
             if (total <= 0) return null
 
             val remainingUnits = total - current
+
             if (remainingUnits <= 0) return null
 
             val readingDayTotals = dailyUnitsRead.filter { it > 0 }
+
             if (readingDayTotals.isEmpty()) return null
 
             val avgPerReadingDay = readingDayTotals.average().toFloat()
+
             if (avgPerReadingDay <= 0f) return null
 
             val forecastReadingDays = ceil(remainingUnits / avgPerReadingDay).toInt()

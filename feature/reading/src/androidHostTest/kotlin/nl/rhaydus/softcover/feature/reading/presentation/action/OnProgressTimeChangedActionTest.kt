@@ -29,6 +29,7 @@ class OnProgressTimeChangedActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(ReadingScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ReadingLocalVariables()),
@@ -41,12 +42,12 @@ class OnProgressTimeChangedActionTest {
             status = BookStatus.Reading,
             reads = listOf(
                 UserBookRead(
-                id = 1,
-                currentPage = null,
-                currentSeconds = currentSeconds,
-                progress = 0f,
-                startedAt = null,
-                finishedAt = null,
+                    id = 1,
+                    currentPage = null,
+                    currentSeconds = currentSeconds,
+                    progress = 0f,
+                    startedAt = null,
+                    finishedAt = null,
                 ),
             ),
         ),
@@ -76,6 +77,7 @@ class OnProgressTimeChangedActionTest {
         fun `seeds the draft from the book position and applies the edited hours`() = runTest {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(bookToUpdate = bookAt(currentSeconds = 3725))
+
             val action = OnProgressTimeChangedAction(
                 unit = ProgressTimeUnit.HOURS,
                 text = "7",
@@ -100,6 +102,7 @@ class OnProgressTimeChangedActionTest {
         fun `clamps minutes above 59 down to 59`() = runTest {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(bookToUpdate = bookAt(currentSeconds = 0))
+
             val action = OnProgressTimeChangedAction(
                 unit = ProgressTimeUnit.MINUTES,
                 text = "99",
@@ -119,6 +122,7 @@ class OnProgressTimeChangedActionTest {
         fun `ignores text that is not a number`() = runTest {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(bookToUpdate = bookAt(currentSeconds = 3725))
+
             val action = OnProgressTimeChangedAction(
                 unit = ProgressTimeUnit.HOURS,
                 text = "abc",
@@ -143,10 +147,12 @@ class OnProgressTimeChangedActionTest {
                 minutes = "8",
                 seconds = "7",
             )
+
             stateFlow.value = ReadingScreenUiState(
                 bookToUpdate = bookAt(currentSeconds = 3725),
                 progressTimeDraft = stored,
             )
+
             val action = OnProgressTimeChangedAction(
                 unit = ProgressTimeUnit.SECONDS,
                 text = "30",
@@ -171,10 +177,12 @@ class OnProgressTimeChangedActionTest {
                 minutes = "8",
                 seconds = "7",
             )
+
             stateFlow.value = ReadingScreenUiState(
                 bookToUpdate = bookAt(currentSeconds = 3725),
                 progressTimeDraft = stale,
             )
+
             val action = OnProgressTimeChangedAction(
                 unit = ProgressTimeUnit.SECONDS,
                 text = "30",
@@ -199,6 +207,7 @@ class OnProgressTimeChangedActionTest {
         fun `treats a book without a recorded position as starting from zero`() = runTest {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(bookToUpdate = bookAt(currentSeconds = null))
+
             val action = OnProgressTimeChangedAction(
                 unit = ProgressTimeUnit.HOURS,
                 text = "2",

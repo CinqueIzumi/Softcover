@@ -49,6 +49,7 @@ class OnSetListRankedActionTest {
         setLibrarySortUseCase = mockk(relaxed = true)
         stateFlow = MutableStateFlow(LibraryUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -63,156 +64,156 @@ class OnSetListRankedActionTest {
         unmockkObject(SnackBarManager)
     }
 
-    private fun stubDependencies(): LibraryDependencies =
-        mockk<LibraryDependencies>(relaxed = true).also { mock ->
-            every {
-                mock.setListRankedUseCase
-            } returns setListRankedUseCase
-            every {
-                mock.setLibrarySortUseCase
-            } returns setLibrarySortUseCase
-        }
+    private fun stubDependencies(): LibraryDependencies = mockk<LibraryDependencies>(relaxed = true).also { mock ->
+        every {
+            mock.setListRankedUseCase
+        } returns setListRankedUseCase
+
+        every {
+            mock.setLibrarySortUseCase
+        } returns setLibrarySortUseCase
+    }
 
     @Nested
     inner class Execute {
         @Test
-        fun `ranked=true switches the sort to ORDER, writes ranked and nudges the open draft, with no snackbar`() =
-            runTest {
-                // ----- Arrange -----
-                val openDraft = LibraryArrangeDraft(
-                    tabId = tabId,
-                    sortMode = LibrarySortMode.DATE_ADDED,
-                    sortDirection = SortDirection.DESCENDING,
-                    gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
-                )
-                stateFlow.value = LibraryUiState(
-                    customLists = persistentListOf(
-                        BookList(
-                            id = listId,
-                            name = listName,
-                            slug = "favourites",
-                            books = emptyList(),
-                        ),
+        fun `ranked=true switches the sort to ORDER, writes ranked and nudges the open draft, with no snackbar`() = runTest {
+            // ----- Arrange -----
+            val openDraft = LibraryArrangeDraft(
+                tabId = tabId,
+                sortMode = LibrarySortMode.DATE_ADDED,
+                sortDirection = SortDirection.DESCENDING,
+                gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
+            )
+
+            stateFlow.value = LibraryUiState(
+                customLists = persistentListOf(
+                    BookList(
+                        id = listId,
+                        name = listName,
+                        slug = "favourites",
+                        books = emptyList(),
                     ),
-                    arrangeDraft = openDraft,
+                ),
+                arrangeDraft = openDraft,
+            )
+
+            coEvery {
+                setListRankedUseCase(
+                    listId = any(),
+                    ranked = any(),
                 )
+            } returns Result.success(Unit)
 
-                coEvery {
-                    setListRankedUseCase(
-                        listId = any(),
-                        ranked = any(),
-                    )
-                } returns Result.success(Unit)
+            val action = OnSetListRankedAction(
+                listId = listId,
+                ranked = true,
+            )
 
-                val action = OnSetListRankedAction(
+            // ----- Act -----
+            action.execute(
+                dependencies = stubDependencies(),
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                setLibrarySortUseCase(
+                    tabId = tabId,
+                    mode = LibrarySortMode.ORDER,
+                    direction = SortDirection.ASCENDING,
+                )
+            }
+
+            coVerify(exactly = 1) {
+                setListRankedUseCase(
                     listId = listId,
                     ranked = true,
                 )
+            }
 
-                // ----- Act -----
-                action.execute(
-                    dependencies = stubDependencies(),
-                    scope = scope,
-                )
+            stateFlow.value.arrangeDraft shouldBe openDraft.copy(
+                sortMode = LibrarySortMode.ORDER,
+                sortDirection = SortDirection.ASCENDING,
+            )
 
-                // ----- Assert -----
-                coVerify(exactly = 1) {
-                    setLibrarySortUseCase(
-                        tabId = tabId,
-                        mode = LibrarySortMode.ORDER,
-                        direction = SortDirection.ASCENDING,
-                    )
-                }
-
-                coVerify(exactly = 1) {
-                    setListRankedUseCase(
-                        listId = listId,
-                        ranked = true,
-                    )
-                }
-
-                stateFlow.value.arrangeDraft shouldBe openDraft.copy(
-                    sortMode = LibrarySortMode.ORDER,
-                    sortDirection = SortDirection.ASCENDING,
-                )
-
-                verify(exactly = 0) { SnackBarManager.showSnackbar(title = any()) }
+            verify(exactly = 0) { SnackBarManager.showSnackbar(title = any()) }
 
             eventChannel.tryReceive().getOrNull() shouldBe null
-            }
+        }
 
         @Test
-        fun `ranked=true failure rolls the sort and the open draft back and names the list in the snackbar`() =
-            runTest {
-                // ----- Arrange -----
-                val previousMode = LibrarySortMode.DATE_ADDED
-                val previousDirection = SortDirection.DESCENDING
-                val openDraft = LibraryArrangeDraft(
-                    tabId = tabId,
-                    sortMode = previousMode,
-                    sortDirection = previousDirection,
-                    gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
-                )
+        fun `ranked=true failure rolls the sort and the open draft back and names the list in the snackbar`() = runTest {
+            // ----- Arrange -----
+            val previousMode = LibrarySortMode.DATE_ADDED
+            val previousDirection = SortDirection.DESCENDING
 
-                stateFlow.value = LibraryUiState(
-                    sortModeByTab = persistentMapOf(tabId to previousMode),
-                    sortDirectionByTab = persistentMapOf(tabId to previousDirection),
-                    customLists = persistentListOf(
-                        BookList(
-                            id = listId,
-                            name = listName,
-                            slug = "favourites",
-                            books = emptyList(),
-                        ),
+            val openDraft = LibraryArrangeDraft(
+                tabId = tabId,
+                sortMode = previousMode,
+                sortDirection = previousDirection,
+                gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
+            )
+
+            stateFlow.value = LibraryUiState(
+                sortModeByTab = persistentMapOf(tabId to previousMode),
+                sortDirectionByTab = persistentMapOf(tabId to previousDirection),
+                customLists = persistentListOf(
+                    BookList(
+                        id = listId,
+                        name = listName,
+                        slug = "favourites",
+                        books = emptyList(),
                     ),
-                    arrangeDraft = openDraft,
+                ),
+                arrangeDraft = openDraft,
+            )
+
+            coEvery {
+                setListRankedUseCase(
+                    listId = any(),
+                    ranked = any(),
                 )
+            } returns Result.failure(RuntimeException("server error"))
 
-                coEvery {
-                    setListRankedUseCase(
-                        listId = any(),
-                        ranked = any(),
-                    )
-                } returns Result.failure(RuntimeException("server error"))
+            every {
+                SnackBarManager.showSnackbar(title = any())
+            } returns Unit
 
-                every {
-                    SnackBarManager.showSnackbar(title = any())
-                } returns Unit
+            val action = OnSetListRankedAction(
+                listId = listId,
+                ranked = true,
+            )
 
-                val action = OnSetListRankedAction(
-                    listId = listId,
-                    ranked = true,
+            // ----- Act -----
+            action.execute(
+                dependencies = stubDependencies(),
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                setLibrarySortUseCase(
+                    tabId = tabId,
+                    mode = previousMode,
+                    direction = previousDirection,
                 )
-
-                // ----- Act -----
-                action.execute(
-                    dependencies = stubDependencies(),
-                    scope = scope,
-                )
-
-                // ----- Assert -----
-                coVerify {
-                    setLibrarySortUseCase(
-                        tabId = tabId,
-                        mode = previousMode,
-                        direction = previousDirection,
-                    )
-                }
-
-                stateFlow.value.arrangeDraft shouldBe openDraft
-
-                verify {
-                    SnackBarManager.showSnackbar(
-                        title = match { title ->
-                            title.contains("turn on manual ordering") && title.contains(listName)
-                        },
-                    )
-                }
-
-                val sentEvent = eventChannel.tryReceive().getOrNull()
-                sentEvent.shouldBeInstanceOf<LibraryEvent.ListRankedChangeFailedEvent>()
-                eventChannel.tryReceive().getOrNull() shouldBe null
             }
+
+            stateFlow.value.arrangeDraft shouldBe openDraft
+
+            verify {
+                SnackBarManager.showSnackbar(
+                    title = match { title ->
+                        title.contains("turn on manual ordering") && title.contains(listName)
+                    },
+                )
+            }
+
+            val sentEvent = eventChannel.tryReceive().getOrNull()
+            sentEvent.shouldBeInstanceOf<LibraryEvent.ListRankedChangeFailedEvent>()
+            eventChannel.tryReceive().getOrNull() shouldBe null
+        }
 
         @Test
         fun `ranked=false writes only the ranked flag and leaves the sort and the open draft alone`() = runTest {
@@ -223,6 +224,7 @@ class OnSetListRankedActionTest {
                 sortDirection = SortDirection.DESCENDING,
                 gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
             )
+
             stateFlow.value = LibraryUiState(
                 customLists = persistentListOf(
                     BookList(
@@ -273,57 +275,56 @@ class OnSetListRankedActionTest {
         }
 
         @Test
-        fun `ranked=false failure path — snackbar contains turn off manual ordering, no sort rollback`() =
-            runTest {
-                // ----- Arrange -----
-                stateFlow.value = LibraryUiState(
-                    customLists = persistentListOf(
-                        BookList(
-                            id = listId,
-                            name = listName,
-                            slug = "favourites",
-                            books = emptyList(),
-                        ),
+        fun `ranked=false failure path — snackbar contains turn off manual ordering, no sort rollback`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(
+                customLists = persistentListOf(
+                    BookList(
+                        id = listId,
+                        name = listName,
+                        slug = "favourites",
+                        books = emptyList(),
                     ),
+                ),
+            )
+
+            coEvery {
+                setListRankedUseCase(
+                    listId = any(),
+                    ranked = any(),
                 )
+            } returns Result.failure(RuntimeException("server error"))
 
-                coEvery {
-                    setListRankedUseCase(
-                        listId = any(),
-                        ranked = any(),
-                    )
-                } returns Result.failure(RuntimeException("server error"))
+            every {
+                SnackBarManager.showSnackbar(title = any())
+            } returns Unit
 
-                every {
-                    SnackBarManager.showSnackbar(title = any())
-                } returns Unit
+            val action = OnSetListRankedAction(
+                listId = listId,
+                ranked = false,
+            )
 
-                val action = OnSetListRankedAction(
-                    listId = listId,
-                    ranked = false,
+            // ----- Act -----
+            action.execute(
+                dependencies = stubDependencies(),
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            verify {
+                SnackBarManager.showSnackbar(
+                    title = match { it.contains("turn off manual ordering") },
                 )
-
-                // ----- Act -----
-                action.execute(
-                    dependencies = stubDependencies(),
-                    scope = scope,
-                )
-
-                // ----- Assert -----
-                verify {
-                    SnackBarManager.showSnackbar(
-                        title = match { it.contains("turn off manual ordering") },
-                    )
-                }
-
-                coVerify(exactly = 0) {
-                    setLibrarySortUseCase(
-                        tabId = any(),
-                        mode = any(),
-                        direction = any(),
-                    )
-                }
             }
+
+            coVerify(exactly = 0) {
+                setLibrarySortUseCase(
+                    tabId = any(),
+                    mode = any(),
+                    direction = any(),
+                )
+            }
+        }
 
         @Test
         fun `list missing from state — snackbar text lacks the for suffix`() = runTest {

@@ -71,6 +71,7 @@ class RandomPickWidgetModelSourceTest {
                     imagesPending = true,
                 ),
             )
+
             val loadedCover = model(
                 picked(
                     cover = RandomPickWidgetUiModel.Cover.Loaded(mockk<Uri>()),
@@ -96,6 +97,7 @@ class RandomPickWidgetModelSourceTest {
                     imagesPending = false,
                 ),
             )
+
             val missing = model(
                 picked(
                     cover = RandomPickWidgetUiModel.Cover.Missing,

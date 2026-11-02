@@ -82,6 +82,7 @@ class SheetSessionTest {
                 model = sheet,
                 pending = 6,
             )
+
             val updated = sheet.copy(dismissLabel = "updated")
 
             // ----- Act -----

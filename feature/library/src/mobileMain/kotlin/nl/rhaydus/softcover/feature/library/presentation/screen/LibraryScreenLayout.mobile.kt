@@ -42,15 +42,14 @@ import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.sheet.modelOrNull
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
-import nl.rhaydus.softcover.core.presentation.model.LibraryTab as LibraryContentTab
 import nl.rhaydus.softcover.core.presentation.util.TabReselectScrollToTopEffect
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnRefreshAction
@@ -69,6 +68,7 @@ import nl.rhaydus.softcover.feature.library.presentation.screen.section.LibraryS
 import nl.rhaydus.softcover.feature.library.presentation.screen.section.LibrarySheets
 import nl.rhaydus.softcover.feature.library.presentation.screen.section.MastheadHeader
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.core.presentation.model.LibraryTab as LibraryContentTab
 
 @OptIn(
     ExperimentalMaterial3Api::class,
@@ -294,13 +294,13 @@ internal actual fun LibraryScreenLayout(
 
                         is LibraryContentTab.All,
                         is LibraryContentTab.Status,
-                            -> BookList(
-                                tab = tab,
-                                state = state,
-                                gridState = gridStateFor(tab.id),
-                                onBookClick = onBookClick,
-                                runAction = runAction,
-                            )
+                        -> BookList(
+                            tab = tab,
+                            state = state,
+                            gridState = gridStateFor(tab.id),
+                            onBookClick = onBookClick,
+                            runAction = runAction,
+                        )
 
                         null -> Unit
                     }

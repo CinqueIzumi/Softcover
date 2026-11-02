@@ -65,37 +65,38 @@ class RetryTransientFailuresTest {
         every {
             apolloClient.query(any<GetUserIdQuery>())
         } returns apolloCall
+
         every {
             apolloCall.fetchPolicy(any())
         } returns apolloCall
+
         every {
             apolloClient.mutation(any<RemoveUserBookMutation>())
         } returns apolloMutationCall
+
         every {
             NetworkAvailability.isOnline()
         } returns true
+
         every {
             SessionExpiredNotifier.notifySessionExpired()
         } returns Unit
     }
 
-    private fun dataResponse(): ApolloResponse<GetUserIdQuery.Data> =
-        ApolloResponse.Builder(
-            operation = query,
-            requestUuid = uuid4(),
-        ).data(successData).build()
+    private fun dataResponse(): ApolloResponse<GetUserIdQuery.Data> = ApolloResponse.Builder(
+        operation = query,
+        requestUuid = uuid4(),
+    ).data(successData).build()
 
-    private fun exceptionResponse(exception: ApolloException): ApolloResponse<GetUserIdQuery.Data> =
-        ApolloResponse.Builder(
-            operation = query,
-            requestUuid = uuid4(),
-        ).exception(exception).build()
+    private fun exceptionResponse(exception: ApolloException): ApolloResponse<GetUserIdQuery.Data> = ApolloResponse.Builder(
+        operation = query,
+        requestUuid = uuid4(),
+    ).exception(exception).build()
 
-    private fun mutationExceptionResponse(exception: ApolloException): ApolloResponse<RemoveUserBookMutation.Data> =
-        ApolloResponse.Builder(
-            operation = mutation,
-            requestUuid = uuid4(),
-        ).exception(exception).build()
+    private fun mutationExceptionResponse(exception: ApolloException): ApolloResponse<RemoveUserBookMutation.Data> = ApolloResponse.Builder(
+        operation = mutation,
+        requestUuid = uuid4(),
+    ).exception(exception).build()
 
     private fun httpException(
         statusCode: Int,
@@ -149,10 +150,12 @@ class RetryTransientFailuresTest {
                 "Retry-After",
                 "5",
             )
+
             val retryAfterException = httpException(
                 statusCode = 429,
                 headers = listOf(retryAfterHeader),
             )
+
             every {
                 apolloCall.toFlow()
             } returnsMany listOf(
@@ -190,6 +193,7 @@ class RetryTransientFailuresTest {
             every {
                 NetworkAvailability.isOnline()
             } returns false
+
             every {
                 apolloCall.toFlow()
             } returns flowOf(exceptionResponse(ApolloNetworkException(message = "no network")))

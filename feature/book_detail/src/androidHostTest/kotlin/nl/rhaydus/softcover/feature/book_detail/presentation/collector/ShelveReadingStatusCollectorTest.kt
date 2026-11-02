@@ -32,11 +32,13 @@ class ShelveReadingStatusCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk(relaxed = true)
     }
 
@@ -88,6 +90,7 @@ class ShelveReadingStatusCollectorTest {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState().copy(book = stubBook(progress = 10f))
             val collector = ShelveReadingStatusCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -126,6 +129,7 @@ class ShelveReadingStatusCollectorTest {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState().copy(book = stubBook(progress = 10f))
             val collector = ShelveReadingStatusCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

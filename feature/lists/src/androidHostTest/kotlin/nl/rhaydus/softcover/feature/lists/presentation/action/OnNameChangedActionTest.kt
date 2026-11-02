@@ -24,6 +24,7 @@ class OnNameChangedActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(CreateListUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalCreateListVariables()),
@@ -54,6 +55,7 @@ class OnNameChangedActionTest {
             val errorField = stateFlow.value.nameField.copy(
                 error = TextFieldError(message = "taken"),
             )
+
             stateFlow.value = stateFlow.value.copy(nameField = errorField)
             val action = OnNameChangedAction(newName = "Summer 2")
 

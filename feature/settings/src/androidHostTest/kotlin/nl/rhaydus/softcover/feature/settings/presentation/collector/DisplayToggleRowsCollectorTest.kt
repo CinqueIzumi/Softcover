@@ -37,6 +37,7 @@ class DisplayToggleRowsCollectorTest {
         shelfSwipeFlow = MutableStateFlow(true)
         readingStreakFlow = MutableStateFlow(true)
         stateFlow = MutableStateFlow(SettingsScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(SettingsLocalVariables()),
@@ -50,9 +51,11 @@ class DisplayToggleRowsCollectorTest {
         every {
             getThemeConfigurationUseCase()
         } returns themeConfigFlow
+
         every {
             getShelfSwipeEnabledAsFlowUseCase()
         } returns shelfSwipeFlow
+
         every {
             getReadingStreakEnabledAsFlowUseCase()
         } returns readingStreakFlow
@@ -61,9 +64,11 @@ class DisplayToggleRowsCollectorTest {
             every {
                 mock.getThemeConfigurationUseCase
             } returns getThemeConfigurationUseCase
+
             every {
                 mock.getShelfSwipeEnabledAsFlowUseCase
             } returns getShelfSwipeEnabledAsFlowUseCase
+
             every {
                 mock.getReadingStreakEnabledAsFlowUseCase
             } returns getReadingStreakEnabledAsFlowUseCase
@@ -76,53 +81,55 @@ class DisplayToggleRowsCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `checks the floating-bar row only while the bottom bar style is FLOATING`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val notFloating = BottomBarStyle.entries.first { it != BottomBarStyle.FLOATING }
-                val collector = DisplayToggleRowsCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-                val whileFloating = checkedByKey()[DisplayToggle.FLOATING_BOTTOM_BAR]
+        fun `checks the floating-bar row only while the bottom bar style is FLOATING`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val notFloating = BottomBarStyle.entries.first { it != BottomBarStyle.FLOATING }
+            val collector = DisplayToggleRowsCollector()
 
-                // ----- Act -----
-                themeConfigFlow.value = ThemeConfiguration(bottomBarStyle = notFloating)
-
-                // ----- Assert -----
-                whileFloating shouldBe true
-                checkedByKey()[DisplayToggle.FLOATING_BOTTOM_BAR] shouldBe false
-                job.cancel()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            val whileFloating = checkedByKey()[DisplayToggle.FLOATING_BOTTOM_BAR]
+
+            // ----- Act -----
+            themeConfigFlow.value = ThemeConfiguration(bottomBarStyle = notFloating)
+
+            // ----- Assert -----
+            whileFloating shouldBe true
+            checkedByKey()[DisplayToggle.FLOATING_BOTTOM_BAR] shouldBe false
+            job.cancel()
+        }
 
         @Test
-        fun `carries the shelf-swipe and reading-streak preferences into their own rows`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                shelfSwipeFlow.value = false
-                readingStreakFlow.value = true
-                val collector = DisplayToggleRowsCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-                val initial = checkedByKey()
+        fun `carries the shelf-swipe and reading-streak preferences into their own rows`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            shelfSwipeFlow.value = false
+            readingStreakFlow.value = true
+            val collector = DisplayToggleRowsCollector()
 
-                // ----- Act -----
-                shelfSwipeFlow.value = true
-                readingStreakFlow.value = false
-
-                // ----- Assert -----
-                initial[DisplayToggle.SHELF_SWIPE] shouldBe false
-                initial[DisplayToggle.READING_STREAK] shouldBe true
-                checkedByKey()[DisplayToggle.SHELF_SWIPE] shouldBe true
-                checkedByKey()[DisplayToggle.READING_STREAK] shouldBe false
-                job.cancel()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            val initial = checkedByKey()
+
+            // ----- Act -----
+            shelfSwipeFlow.value = true
+            readingStreakFlow.value = false
+
+            // ----- Assert -----
+            initial[DisplayToggle.SHELF_SWIPE] shouldBe false
+            initial[DisplayToggle.READING_STREAK] shouldBe true
+            checkedByKey()[DisplayToggle.SHELF_SWIPE] shouldBe true
+            checkedByKey()[DisplayToggle.READING_STREAK] shouldBe false
+            job.cancel()
+        }
     }
 }

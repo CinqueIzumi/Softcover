@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.feature.lists.presentation.state.LocalCreateListVari
 import nl.rhaydus.toad.UiAction
 
 internal sealed interface CreateListAction : UiAction<
-        CreateListDependencies,
-        CreateListUiState,
-        CreateListEvent,
-        LocalCreateListVariables,
-        >
+    CreateListDependencies,
+    CreateListUiState,
+    CreateListEvent,
+    LocalCreateListVariables,
+>

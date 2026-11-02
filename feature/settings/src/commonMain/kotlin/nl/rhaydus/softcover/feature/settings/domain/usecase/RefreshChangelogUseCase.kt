@@ -7,8 +7,7 @@ import nl.rhaydus.softcover.feature.settings.domain.repository.ChangelogReposito
 class RefreshChangelogUseCase(
     private val changelogRepository: ChangelogRepository,
 ) {
-    suspend operator fun invoke(force: Boolean = false): Result<Unit> =
-        runCatchingLogged(context = "Failed to refresh the changelog") {
-            changelogRepository.refreshChangelog(force = force)
-        }
+    suspend operator fun invoke(force: Boolean = false): Result<Unit> = runCatchingLogged(context = "Failed to refresh the changelog") {
+        changelogRepository.refreshChangelog(force = force)
+    }
 }

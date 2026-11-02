@@ -98,6 +98,7 @@ class ObserveReadingLifeUseCaseTest {
                 totalRatings = 20,
                 halfStarBuckets = List(9) { 0 },
             )
+
             val demographics = AuthorDemographics(
                 genderSlices = listOf(
                     GenderSlice(
@@ -113,6 +114,7 @@ class ObserveReadingLifeUseCaseTest {
                     unknownCount = 0,
                 ),
             )
+
             val data = profileData(
                 ratings = ratings,
                 authorDemographics = demographics,

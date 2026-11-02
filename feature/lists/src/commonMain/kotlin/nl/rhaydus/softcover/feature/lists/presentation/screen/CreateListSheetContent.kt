@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.sp
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.control.SegmentedControl
 import nl.rhaydus.softcover.core.component.control.SegmentedControlEvent
 import nl.rhaydus.softcover.core.component.divider.Divider
@@ -18,7 +19,6 @@ import nl.rhaydus.softcover.core.component.divider.DividerCenter
 import nl.rhaydus.softcover.core.component.field.TextField
 import nl.rhaydus.softcover.core.component.field.TextFieldEvent
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.lists.presentation.action.CreateListAction
 import nl.rhaydus.softcover.feature.lists.presentation.action.OnNameChangedAction

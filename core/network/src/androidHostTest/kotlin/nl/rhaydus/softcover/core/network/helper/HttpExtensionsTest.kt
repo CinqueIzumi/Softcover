@@ -45,6 +45,7 @@ class HttpExtensionsTest {
         engine = FakeHttpEngine()
 
         mockkObject(NetworkAvailability)
+
         every {
             NetworkAvailability.isOnline()
         } returns true
@@ -170,6 +171,7 @@ class HttpExtensionsTest {
             every {
                 NetworkAvailability.isOnline()
             } returnsMany listOf(true, false)
+
             engine.exceptionToThrow = ApolloNetworkException(message = "connection failed")
 
             // ----- Act & Assert -----

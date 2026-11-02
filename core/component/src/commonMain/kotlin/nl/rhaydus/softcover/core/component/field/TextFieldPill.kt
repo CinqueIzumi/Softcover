@@ -32,10 +32,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.conditional
+import nl.rhaydus.designsystem.theme.Corners
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.button.PillButton
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -49,12 +49,15 @@ internal fun PillTextField(
         TextFieldPillSize.Compact -> 42.dp
         TextFieldPillSize.Regular -> 48.dp
     }
+
     val horizontalPadding = Spacing.sm
     val iconSize = if (variant.size == TextFieldPillSize.Compact) 18.dp else 20.dp
+
     val textStyle = when (variant.size) {
         TextFieldPillSize.Compact -> MaterialTheme.typography.bodyMedium
         TextFieldPillSize.Regular -> MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium)
     }
+
     val container = when (variant.size) {
         TextFieldPillSize.Compact -> MaterialTheme.colorScheme.surfaceContainer
         TextFieldPillSize.Regular -> MaterialTheme.colorScheme.surfaceContainerHigh

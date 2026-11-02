@@ -30,6 +30,7 @@ class OnFloatingBarToggledActionTest {
     fun setUp() {
         setBottomBarStyleUseCase = mockk()
         stateFlow = MutableStateFlow(SettingsScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(SettingsLocalVariables()),
@@ -39,6 +40,7 @@ class OnFloatingBarToggledActionTest {
 
     private fun stubDependencies(testScope: TestScope): SettingsScreenDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<SettingsScreenDependencies>(relaxed = true).also { mock ->
             every {
                 mock.setBottomBarStyleUseCase

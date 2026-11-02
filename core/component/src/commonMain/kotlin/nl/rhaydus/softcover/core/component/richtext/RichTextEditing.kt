@@ -121,12 +121,14 @@ fun toggleMark(
 
     val normalized = normalizeMarks(marks = marks)
 
-    if (isRangeMarked(
+    val rangeMarked = isRangeMarked(
         marks = normalized,
         start = start,
         end = end,
         type = type,
-    )) {
+    )
+
+    if (rangeMarked) {
         val cleared = normalized.flatMap { mark ->
             if (mark.type != type || mark.end <= start || mark.start >= end) {
                 listOf(mark)
@@ -166,6 +168,7 @@ fun editorBufferToDocument(
             char = '\n',
             startIndex = lineStart,
         )
+
         val lineEnd = if (newline < 0) text.length else newline
 
         paragraphs.add(

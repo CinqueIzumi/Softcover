@@ -39,6 +39,7 @@ class ReadingLifeCollectorTest {
         observeReadingLifeUseCase = mockk()
         stateFlow = MutableStateFlow(ProfileUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalProfileVariables()),
@@ -52,6 +53,7 @@ class ReadingLifeCollectorTest {
 
     private fun stubDependencies(testScope: TestScope): ProfileDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<ProfileDependencies>(relaxed = true).also { mock ->
             every {
                 mock.observeReadingLifeUseCase
@@ -88,6 +90,7 @@ class ReadingLifeCollectorTest {
             val readingLife = buildReadingLife()
             val dependencies = stubDependencies(this)
             val collector = ReadingLifeCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -108,6 +111,7 @@ class ReadingLifeCollectorTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
             val collector = ReadingLifeCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -130,6 +134,7 @@ class ReadingLifeCollectorTest {
                 val readingLife = buildReadingLife(ratingBand = RatingBand.SUPERFAN)
                 val dependencies = stubDependencies(this)
                 val collector = ReadingLifeCollector()
+
                 val job = launch {
                     collector.onLaunch(
                         scope = scope,

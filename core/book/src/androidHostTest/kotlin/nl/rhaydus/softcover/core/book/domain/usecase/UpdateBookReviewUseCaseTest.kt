@@ -55,6 +55,7 @@ class UpdateBookReviewUseCaseTest {
                     hasSpoilers = any(),
                 )
             }
+
             coVerify(exactly = 0) { booksRepository.cacheBook(book = any()) }
         }
 
@@ -92,6 +93,7 @@ class UpdateBookReviewUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+
             coVerify(exactly = 1) {
                 booksRepository.updateBookReview(
                     book = inputBook,
@@ -99,6 +101,7 @@ class UpdateBookReviewUseCaseTest {
                     hasSpoilers = hasSpoilers,
                 )
             }
+
             coVerify(exactly = 1) { booksRepository.cacheBook(book = updatedBook) }
         }
     }

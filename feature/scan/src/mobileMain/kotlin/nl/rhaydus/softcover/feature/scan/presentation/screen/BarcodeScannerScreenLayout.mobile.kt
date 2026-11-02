@@ -15,11 +15,11 @@ import androidx.compose.ui.Modifier
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.field.TextFieldEvent
 import nl.rhaydus.softcover.core.component.sheet.isOpen
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.scan.presentation.component.BarcodeScanner
 import nl.rhaydus.softcover.feature.scan.presentation.state.IsbnOrigin
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState

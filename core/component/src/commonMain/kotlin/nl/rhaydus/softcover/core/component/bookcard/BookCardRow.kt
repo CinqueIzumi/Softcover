@@ -18,12 +18,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.modifier.skeletonMask
+import nl.rhaydus.designsystem.theme.Corners
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.selection.SelectionMark
 import nl.rhaydus.softcover.core.component.selection.SelectionMarkBackdrop
-import nl.rhaydus.softcover.core.component.state.skeletonMask
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 @Composable
@@ -61,7 +62,12 @@ internal fun BookCardRowLayout(
                 hoverWash = true,
             ),
     ) {
-        Divider(modifier = Modifier.skeletonMask(visible = isLoading))
+        Divider(
+            modifier = Modifier.skeletonMask(
+                visible = isLoading,
+                shape = Corners.xs,
+            ),
+        )
 
         Column(
             modifier = Modifier.padding(

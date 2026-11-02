@@ -169,6 +169,7 @@ private fun demographicCaption(
         "No ${breakdown.noCount}",
         "Unknown ${breakdown.unknownCount}".takeIf { breakdown.unknownCount > 0 },
     ).joinToString(separator = " · ")
+
     val total = if (hideUntaggedAuthors) {
         "of ${breakdown.total} tagged authors"
     } else {

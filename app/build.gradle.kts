@@ -6,7 +6,14 @@ plugins {
     // The build-type debug-routes binding (app/src/debug) implements the @Composable DebugRoutesContent
     // seam, so the application shell needs the Compose compiler to transform that override correctly.
     alias(libs.plugins.kotlin.compose)
-    id("softcover.android.r8-keep-contract")
+    id("rhaydus.android.r8-keep-contract")
+}
+
+// `:smoketest`'s keep rules apply to the test APK, not to the app's R8 run.
+r8KeepContract {
+    projectPackage = "nl.rhaydus.softcover"
+    databaseImplSuffix = "SoftcoverDatabase_Impl"
+    excludedProjectDirs = listOf("smoketest")
 }
 
 android {

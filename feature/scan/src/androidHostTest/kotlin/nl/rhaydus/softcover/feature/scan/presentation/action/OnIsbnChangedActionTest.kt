@@ -23,6 +23,7 @@ class OnIsbnChangedActionTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(ScanUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalScanVariables()),

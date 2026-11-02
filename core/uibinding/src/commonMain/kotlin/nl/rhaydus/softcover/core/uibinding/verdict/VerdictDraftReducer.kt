@@ -12,9 +12,13 @@ import nl.rhaydus.softcover.core.component.verdict.VerdictDraftEvent
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetUiModel
 
 /**
- * Folds one [VerdictDraftEvent] into the draft this model holds.
+ * Folds one [VerdictDraftEvent] into the draft this model holds, and leaves the sheet dismissible only
+ * while that draft still equals the one it opened with.
  */
-fun VerdictSheetUiModel.reduce(event: VerdictDraftEvent): VerdictSheetUiModel = when (event) {
+fun VerdictSheetUiModel.reduce(event: VerdictDraftEvent): VerdictSheetUiModel = foldDraft(event = event)
+    .withDismissibleFollowingDraft()
+
+private fun VerdictSheetUiModel.foldDraft(event: VerdictDraftEvent): VerdictSheetUiModel = when (event) {
     is VerdictDraftEvent.RatingChanged -> copy(rating = event.rating)
 
     is VerdictDraftEvent.ReviewEdited -> copy(
@@ -54,8 +58,13 @@ fun VerdictSheetUiModel.carryingDraftOf(previous: VerdictSheetUiModel?): Verdict
         review = previous.review,
         marks = previous.marks,
         spoilers = spoilers.copy(checked = previous.spoilers.checked),
-    ).withToolbarState()
+    )
+        .withToolbarState()
+        .withDismissibleFollowingDraft()
 }
+
+private fun VerdictSheetUiModel.withDismissibleFollowingDraft(): VerdictSheetUiModel =
+    copy(scaffold = scaffold.copy(dismissible = draft == opened))
 
 /** The draft review as the structured document that gets persisted. */
 fun VerdictSheetUiModel.draftReview(): RichTextUiModel {

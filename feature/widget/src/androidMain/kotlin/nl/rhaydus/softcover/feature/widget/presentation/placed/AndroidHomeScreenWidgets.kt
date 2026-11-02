@@ -118,6 +118,7 @@ internal class AndroidHomeScreenWidgets(
 
     private suspend fun queryPlaced(): List<PlacedHomeScreenWidget> {
         val manager = GlanceAppWidgetManager(context)
+
         val lists = runCatchingCancellable { getAllUserLists().firstOrNull().orEmpty() }
             .onFailure { error ->
                 AppLog.e(

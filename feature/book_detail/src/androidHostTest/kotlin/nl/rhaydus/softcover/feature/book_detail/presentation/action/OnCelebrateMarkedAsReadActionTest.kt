@@ -25,6 +25,7 @@ class OnCelebrateMarkedAsReadActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -60,6 +61,7 @@ class OnCelebrateMarkedAsReadActionTest {
                 dependencies = dependencies,
                 scope = scope,
             )
+
             action.execute(
                 dependencies = dependencies,
                 scope = scope,

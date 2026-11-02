@@ -14,8 +14,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.core.component.state.skeletonMask
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.motion
+import nl.rhaydus.designsystem.modifier.skeletonMask
+import nl.rhaydus.designsystem.theme.Corners
+import nl.rhaydus.designsystem.theme.motion
 
 /**
  * A determinate progress bar. A [fraction] outside 0..1 is clamped when drawn.
@@ -30,10 +31,12 @@ fun ProgressBar(
     isLoading: Boolean = false,
 ) {
     val valueChange = MaterialTheme.motion.valueChange
+
     val target = fraction.coerceIn(
         minimumValue = 0f,
         maximumValue = 1f,
     )
+
     val animatedFraction = remember { Animatable(initialValue = target) }
     var wasLoading by remember { mutableStateOf(isLoading) }
 
@@ -56,7 +59,10 @@ fun ProgressBar(
         modifier = modifier
             .fillMaxWidth()
             .height(height = 12.dp)
-            .skeletonMask(visible = isLoading),
+            .skeletonMask(
+                visible = isLoading,
+                shape = Corners.xs,
+            ),
         waveSpeed = 0.dp,
     )
 }

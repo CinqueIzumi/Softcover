@@ -171,6 +171,7 @@ internal actual fun ExploreScreenLayout(
                         .padding(bottom = rememberBottomBarPadding()),
                 )
             }
+
             return@Scaffold
         }
 

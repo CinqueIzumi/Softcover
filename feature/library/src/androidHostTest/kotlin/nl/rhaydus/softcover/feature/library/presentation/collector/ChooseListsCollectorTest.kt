@@ -43,6 +43,7 @@ class ChooseListsCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -100,6 +101,7 @@ class ChooseListsCollectorTest {
                 booksByTab = persistentMapOf("all" to persistentListOf(bookWithId(id = 1), bookWithId(id = 2))),
                 selectedBookIds = persistentSetOf(1, 2),
             )
+
             val job = launchCollector()
 
             // ----- Act -----
@@ -121,6 +123,7 @@ class ChooseListsCollectorTest {
                 selectedBookIds = persistentSetOf(1),
                 isChooseListsSheetRequested = true,
             )
+
             val job = launchCollector()
 
             // ----- Act -----
@@ -132,21 +135,20 @@ class ChooseListsCollectorTest {
         }
 
         @Test
-        fun `a closed session stays closed however the selection changes without a request`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val job = launchCollector()
+        fun `a closed session stays closed however the selection changes without a request`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val job = launchCollector()
 
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(
-                    booksByTab = persistentMapOf("all" to persistentListOf(bookWithId(id = 1))),
-                    selectedBookIds = persistentSetOf(1),
-                )
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                booksByTab = persistentMapOf("all" to persistentListOf(bookWithId(id = 1))),
+                selectedBookIds = persistentSetOf(1),
+            )
 
-                // ----- Assert -----
-                stateFlow.value.chooseListsSheet shouldBe SheetSession.Closed
-                job.cancel()
-            }
+            // ----- Assert -----
+            stateFlow.value.chooseListsSheet shouldBe SheetSession.Closed
+            job.cancel()
+        }
 
         @Test
         fun `a request with an empty selection leaves the session closed`() = runTest(UnconfinedTestDispatcher()) {
@@ -175,10 +177,12 @@ class ChooseListsCollectorTest {
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 val sheet = openChooseListsSession()
+
                 stateFlow.value = stateFlow.value.copy(
                     chooseListsSheet = sheet,
                     isChooseListsSheetRequested = true,
                 )
+
                 val job = launchCollector()
 
                 // ----- Act -----
@@ -206,6 +210,7 @@ class ChooseListsCollectorTest {
                     selectedBookIds = persistentSetOf(1),
                     isChooseListsSheetRequested = true,
                 )
+
                 val job = launchCollector()
                 val contentBefore = shownSheet()
 
@@ -230,6 +235,7 @@ class ChooseListsCollectorTest {
                     selectedBookIds = persistentSetOf(1),
                     isChooseListsSheetRequested = true,
                 )
+
                 val job = launchCollector()
 
                 // ----- Act -----
@@ -237,6 +243,7 @@ class ChooseListsCollectorTest {
                     chooseListsSheet = stateFlow.value.chooseListsSheet.requestClose(pending = CreateList),
                     isChooseListsSheetRequested = false,
                 )
+
                 stateFlow.value = stateFlow.value.copy(listsBeingMutated = persistentSetOf(10))
 
                 // ----- Assert -----
@@ -257,6 +264,7 @@ class ChooseListsCollectorTest {
                         pending = CreateList,
                     ),
                 )
+
                 val job = launchCollector()
 
                 // ----- Act -----
@@ -273,11 +281,13 @@ class ChooseListsCollectorTest {
         fun `jacket editions resolve through booksByTab and are capped at three`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val books = (1..5).map { id -> bookWithId(id = id) }
+
             stateFlow.value = stateFlow.value.copy(
                 booksByTab = persistentMapOf("all" to books.toImmutableList()),
                 selectedBookIds = persistentSetOf(1),
                 isChooseListsSheetRequested = true,
             )
+
             val job = launchCollector()
 
             // ----- Act -----
@@ -293,17 +303,20 @@ class ChooseListsCollectorTest {
         fun `a selected book with no edition still yields a jacket`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val withEdition = bookWithId(id = 1)
+
             val withoutEdition = PreviewData.baseBook.copy(
                 id = 2,
                 editions = emptyList(),
                 defaultEdition = null,
                 coverUrl = "https://example.com/cover.jpg",
             )
+
             stateFlow.value = stateFlow.value.copy(
                 booksByTab = persistentMapOf("all" to persistentListOf(withEdition, withoutEdition)),
                 selectedBookIds = persistentSetOf(1),
                 isChooseListsSheetRequested = true,
             )
+
             val job = launchCollector()
 
             // ----- Act -----
@@ -320,15 +333,18 @@ class ChooseListsCollectorTest {
             // ----- Arrange -----
             val book = bookWithId(id = 1)
             val owned = ownedList(id = 1)
+
             val custom = customList(
                 id = 2,
                 name = "Winter reading",
             )
+
             stateFlow.value = stateFlow.value.copy(
                 booksByTab = persistentMapOf("all" to persistentListOf(book)),
                 selectedBookIds = persistentSetOf(1),
                 isChooseListsSheetRequested = true,
             )
+
             val job = launchCollector()
 
             // ----- Act -----

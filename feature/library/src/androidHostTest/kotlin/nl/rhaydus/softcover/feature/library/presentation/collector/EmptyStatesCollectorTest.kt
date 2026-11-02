@@ -26,10 +26,12 @@ class EmptyStatesCollectorTest {
         fun `yields one entry per tab keyed by tab id`() {
             // ----- Arrange -----
             val dnf = LibraryTab.Status.of(UserBookStatus.DID_NOT_FINISH)
+
             val list = LibraryTab.CustomList(
                 listId = 3,
                 listName = "Classics",
             )
+
             val tabs = listOf(LibraryTab.All, dnf, list)
 
             // ----- Act -----
@@ -50,17 +52,20 @@ class EmptyStatesCollectorTest {
         fun `publishes empty states for the visible tabs and follows tab changes`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val stateFlow = MutableStateFlow(LibraryUiState())
+
             val scope = ActionScope(
                 stateFlow = stateFlow,
                 localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
                 eventChannel = Channel<LibraryEvent>(Channel.BUFFERED),
             )
+
             val job = launch {
                 EmptyStatesCollector().onLaunch(
                     scope = scope,
                     dependencies = mockk<LibraryDependencies>(relaxed = true),
                 )
             }
+
             val list = LibraryTab.CustomList(
                 listId = 9,
                 listName = "Sci-fi",

@@ -20,6 +20,7 @@ internal class OnActiveFilterChipClickedAction(
                 dependencies = dependencies,
                 scope = scope,
             )
+
             return
         }
 

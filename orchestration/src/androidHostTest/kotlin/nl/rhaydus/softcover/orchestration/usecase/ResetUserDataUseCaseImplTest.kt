@@ -26,6 +26,7 @@ class ResetUserDataUseCaseImplTest {
         booksRepository = mockk(relaxed = true)
         profileRepository = mockk(relaxed = true)
         networkCacheCleaner = mockk(relaxed = true)
+
         useCase = ResetUserDataUseCaseImpl(
             settingsRepository = settingsRepository,
             booksRepository = booksRepository,
@@ -46,6 +47,7 @@ class ResetUserDataUseCaseImplTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+
             coVerify {
                 settingsRepository.updateApiKey(key = "")
                 booksRepository.removeAllBooks()

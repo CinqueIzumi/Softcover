@@ -52,12 +52,14 @@ class ResumeIfPausedUseCaseTest {
 
             // ----- Assert -----
             result.getOrNull() shouldBe resumedBook
+
             coVerify(exactly = 1) {
                 booksRepository.markBookAsReading(
                     book = inputBook,
                     editionId = null,
                 )
             }
+
             coVerify(exactly = 1) { booksRepository.cacheBook(book = resumedBook) }
         }
 
@@ -75,12 +77,14 @@ class ResumeIfPausedUseCaseTest {
 
             // ----- Assert -----
             result.getOrNull() shouldBe inputBook
+
             coVerify(exactly = 0) {
                 booksRepository.markBookAsReading(
                     book = any(),
                     editionId = any(),
                 )
             }
+
             coVerify(exactly = 0) { booksRepository.cacheBook(book = any()) }
         }
 

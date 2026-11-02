@@ -28,20 +28,19 @@ internal data class TrendingSettingsLocalVariables(
         }
 }
 
-internal fun TrendingSettingsLocalVariables.withFeed(feed: TrendingFeed): TrendingSettingsLocalVariables =
-    when (feed) {
-        is TrendingFeed.Trending -> copy(
-            kind = TrendingFeedKind.Trending,
-            lastTrending = feed,
-        )
+internal fun TrendingSettingsLocalVariables.withFeed(feed: TrendingFeed): TrendingSettingsLocalVariables = when (feed) {
+    is TrendingFeed.Trending -> copy(
+        kind = TrendingFeedKind.Trending,
+        lastTrending = feed,
+    )
 
-        is TrendingFeed.Recent -> copy(
-            kind = TrendingFeedKind.Recent,
-            lastRecent = feed,
-        )
+    is TrendingFeed.Recent -> copy(
+        kind = TrendingFeedKind.Recent,
+        lastRecent = feed,
+    )
 
-        is TrendingFeed.Upcoming -> copy(
-            kind = TrendingFeedKind.Upcoming,
-            lastUpcoming = feed,
-        )
-    }
+    is TrendingFeed.Upcoming -> copy(
+        kind = TrendingFeedKind.Upcoming,
+        lastUpcoming = feed,
+    )
+}

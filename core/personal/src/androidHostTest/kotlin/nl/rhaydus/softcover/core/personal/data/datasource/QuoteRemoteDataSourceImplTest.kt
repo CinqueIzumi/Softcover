@@ -44,6 +44,7 @@ class QuoteRemoteDataSourceImplTest {
     @BeforeEach
     fun setUp() {
         apolloClient = mockk()
+
         dataSource = QuoteRemoteDataSourceImpl(
             apolloClient = apolloClient,
             getUserIdUseCase = mockk<GetUserIdUseCase>(),
@@ -104,6 +105,7 @@ class QuoteRemoteDataSourceImplTest {
             sent.entry shouldBe Optional.Present("A quote")
             sent.privacy_setting_id shouldBe 3
             sent.action_at shouldBe Optional.Present("2024-03-01T08:00:00Z")
+
             sent.metadata shouldBe Optional.Present(
                 mapOf(
                     "position" to mapOf(

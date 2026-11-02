@@ -24,13 +24,12 @@ internal class OnTabSelectedAction(
 // Switching tabs collapses selection mode — selection is anchored to the tab the user
 // long-pressed on, and silently carrying it across tabs (each of which has its own visible
 // set) makes the count subtitle lie.
-internal fun LibraryUiState.withTabSelected(tabId: String): LibraryUiState =
-    withSelectedBookIds(persistentSetOf()).copy(
-        selectedTabId = tabId,
-        selectionMode = false,
-        isBulkMoveMenuExpanded = false,
-        isBulkRemoveSheetRequested = false,
-        isChooseListsSheetRequested = false,
-        listsBeingMutated = persistentSetOf(),
-        isRearranging = false,
-    )
+internal fun LibraryUiState.withTabSelected(tabId: String): LibraryUiState = withSelectedBookIds(persistentSetOf()).copy(
+    selectedTabId = tabId,
+    selectionMode = false,
+    isBulkMoveMenuExpanded = false,
+    isBulkRemoveSheetRequested = false,
+    isChooseListsSheetRequested = false,
+    listsBeingMutated = persistentSetOf(),
+    isRearranging = false,
+)

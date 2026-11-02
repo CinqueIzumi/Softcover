@@ -18,7 +18,7 @@ import androidx.compose.ui.Modifier
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
+import nl.rhaydus.designsystem.theme.Spacing
 
 /**
  * The desktop scroll page: slots for an optional [topBar], [masthead] and docked [bottomBar] around a

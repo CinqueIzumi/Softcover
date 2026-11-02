@@ -138,6 +138,7 @@ class ReadingLifeShareCardMapperTest {
 
             // ----- Assert -----
             result.averageRating shouldBe 4.5
+
             result.averageRatingText shouldBe formatDecimalNumber(
                 value = 4.5,
                 fractionDigits = 1,

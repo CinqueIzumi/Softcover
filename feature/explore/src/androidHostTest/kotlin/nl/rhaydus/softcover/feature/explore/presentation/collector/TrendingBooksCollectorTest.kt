@@ -43,6 +43,7 @@ class TrendingBooksCollectorTest {
         observeTrendingFetchedAtUseCase = mockk()
         refreshTrendingBooksUseCase = mockk()
         stateFlow = MutableStateFlow(ExploreScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
@@ -89,6 +90,7 @@ class TrendingBooksCollectorTest {
             val collector = TrendingBooksCollector()
             fetchedAtFlow.value = Instant.fromEpochSeconds(1)
             trendingFlow.value = listOf(first)
+
             backgroundScope.launch {
                 collector.onLaunch(
                     scope = scope,
@@ -107,12 +109,14 @@ class TrendingBooksCollectorTest {
         fun `is loading while never fetched and a refresh is in flight`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val pending = CompletableDeferred<Result<Unit>>()
+
             coEvery {
                 refreshTrendingBooksUseCase(
                     period = any(),
                     maxAge = any(),
                 )
             } coAnswers { pending.await() }
+
             val collector = TrendingBooksCollector()
 
             // ----- Act -----
@@ -128,41 +132,45 @@ class TrendingBooksCollectorTest {
         }
 
         @Test
-        fun `stops loading once a fetched-at exists even while the refresh is in flight`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val pending = CompletableDeferred<Result<Unit>>()
-                coEvery {
-                    refreshTrendingBooksUseCase(
-                        period = any(),
-                        maxAge = any(),
-                    )
-                } coAnswers { pending.await() }
-                val collector = TrendingBooksCollector()
-                backgroundScope.launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                fetchedAtFlow.value = Instant.fromEpochSeconds(1)
-
-                // ----- Assert -----
-                stateFlow.value.loadingTrendingBooks shouldBe false
-            }
-
-        @Test
-        fun `is not loading when fetched with an empty list`() = runTest(UnconfinedTestDispatcher()) {
+        fun `stops loading once a fetched-at exists even while the refresh is in flight`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val pending = CompletableDeferred<Result<Unit>>()
+
             coEvery {
                 refreshTrendingBooksUseCase(
                     period = any(),
                     maxAge = any(),
                 )
             } coAnswers { pending.await() }
+
+            val collector = TrendingBooksCollector()
+
+            backgroundScope.launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            fetchedAtFlow.value = Instant.fromEpochSeconds(1)
+
+            // ----- Assert -----
+            stateFlow.value.loadingTrendingBooks shouldBe false
+        }
+
+        @Test
+        fun `is not loading when fetched with an empty list`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val pending = CompletableDeferred<Result<Unit>>()
+
+            coEvery {
+                refreshTrendingBooksUseCase(
+                    period = any(),
+                    maxAge = any(),
+                )
+            } coAnswers { pending.await() }
+
             fetchedAtFlow.value = Instant.fromEpochSeconds(1)
             trendingFlow.value = emptyList()
             val collector = TrendingBooksCollector()
@@ -188,6 +196,7 @@ class TrendingBooksCollectorTest {
                     maxAge = any(),
                 )
             } returns Result.failure(IllegalStateException("offline"))
+
             val collector = TrendingBooksCollector()
 
             // ----- Act -----

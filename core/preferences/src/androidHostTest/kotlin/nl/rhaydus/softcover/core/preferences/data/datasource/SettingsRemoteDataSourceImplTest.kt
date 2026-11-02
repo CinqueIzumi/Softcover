@@ -24,10 +24,10 @@ class SettingsRemoteDataSourceImplTest {
     @BeforeEach
     fun setUp() {
         apolloClient = mockk()
-        dataSource =
-            SettingsRemoteDataSourceImpl(
-                apolloClient = apolloClient,
-            )
+
+        dataSource = SettingsRemoteDataSourceImpl(
+            apolloClient = apolloClient,
+        )
     }
 
     companion object {
@@ -51,6 +51,7 @@ class SettingsRemoteDataSourceImplTest {
             // ----- Arrange -----
             val expectedId = 42
             val queryData = mockk<GetUserIdQuery.Data>()
+
             val meEntry = GetUserIdQuery.Data.Me(
                 __typename = "users",
                 id = expectedId,

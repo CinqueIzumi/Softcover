@@ -15,6 +15,7 @@ import org.koin.dsl.module
 actual val platformPreferencesModule: Module = module {
     single<AppSettingsDataStore> {
         val filesDir = androidContext().filesDir.path
+
         AppSettingsDataStore(
             store = createAppSettingsDataStore(FileSystem.SYSTEM) {
                 "$filesDir/datastore/app_settings.json".toPath()

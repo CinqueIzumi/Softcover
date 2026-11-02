@@ -32,6 +32,7 @@ class GetEditionsByBookIdUseCaseTest {
         fun `returns success with list of editions when repository succeeds`() = runTest {
             // ----- Arrange -----
             val bookId = 5
+
             val expectedEditions = listOf(
                 stubBookEdition(id = 10),
                 stubBookEdition(id = 11),

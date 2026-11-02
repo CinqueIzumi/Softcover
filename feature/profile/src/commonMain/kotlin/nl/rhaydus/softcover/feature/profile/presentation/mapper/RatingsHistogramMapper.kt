@@ -90,11 +90,10 @@ internal fun ratingsAverageUiModel(ratings: RatingsDistribution?): StatNumberUiM
  * The "How you score" header, with a headline chosen from [RatingBand] (average + distribution shape),
  * never from the bare average.
  */
-internal fun RatingBand.toRatingsHistogramHeader(): SectionHeaderUiModel.Section =
-    SectionHeaderUiModel.Section(
-        eyebrow = RATINGS_HISTOGRAM_EYEBROW,
-        headline = toRatingsHistogramHeadline(),
-    )
+internal fun RatingBand.toRatingsHistogramHeader(): SectionHeaderUiModel.Section = SectionHeaderUiModel.Section(
+    eyebrow = RATINGS_HISTOGRAM_EYEBROW,
+    headline = toRatingsHistogramHeadline(),
+)
 
 internal fun RatingBand.toRatingsHistogramCaption(): String = when (this) {
     RatingBand.GENEROUS ->

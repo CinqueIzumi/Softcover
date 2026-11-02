@@ -97,6 +97,7 @@ class TrendingFeedUseCasesTest {
         fun `a trending feed refreshes its period and reports that outcome`() = runTest {
             // ----- Arrange -----
             val failure = Result.failure<Unit>(IllegalStateException("down"))
+
             coEvery {
                 refreshTrendingBooks(
                     period = TrendingPeriod.Week,
@@ -118,6 +119,7 @@ class TrendingFeedUseCasesTest {
         fun `a recent feed refreshes its window and reports that outcome`() = runTest {
             // ----- Arrange -----
             val failure = Result.failure<Unit>(IllegalStateException("down"))
+
             coEvery {
                 refreshRecentBooks(
                     window = RecentWindow.Week,

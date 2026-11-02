@@ -43,6 +43,7 @@ class VerdictSheetCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -153,10 +154,12 @@ class VerdictSheetCollectorTest {
         fun `verdictSheet closes when the context is cleared`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             launchCollector()
+
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(),
                 verdictSheetContext = VerdictSheetContext.FINISHED,
             )
+
             stateFlow.value.verdictSheet shouldNotBe null
 
             // ----- Act -----
@@ -172,6 +175,7 @@ class VerdictSheetCollectorTest {
             val book = stubBook()
             val cover = buildCover()
             launchCollector()
+
             stateFlow.value = stateFlow.value.copy(
                 book = book,
                 verdictSheetContext = VerdictSheetContext.FINISHED,
@@ -189,51 +193,55 @@ class VerdictSheetCollectorTest {
         }
     
         @Test
-        fun `verdictSheet keeps the draft the reader edited when a cover resolves and rebuilds it`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val book = stubBook()
-                launchCollector()
-                stateFlow.value = stateFlow.value.copy(
-                    book = book,
-                    verdictSheetContext = VerdictSheetContext.FINISHED,
-                )
-                val edited = stateFlow.value.verdictSheet.shouldNotBeNull()
-                    .reduce(VerdictDraftEvent.RatingChanged(rating = 4.5))
-                    .reduce(VerdictDraftEvent.SpoilersToggled(checked = true))
-                stateFlow.value = stateFlow.value.copy(verdictSheet = edited)
+        fun `verdictSheet keeps the draft the reader edited when a cover resolves and rebuilds it`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val book = stubBook()
+            launchCollector()
 
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(verdictCover = buildCover())
+            stateFlow.value = stateFlow.value.copy(
+                book = book,
+                verdictSheetContext = VerdictSheetContext.FINISHED,
+            )
 
-                // ----- Assert -----
-                val sheet = stateFlow.value.verdictSheet.shouldNotBeNull()
-                sheet.rating shouldBe 4.5
-                sheet.spoilers.checked shouldBe true
-                sheet.scaffold.header.shouldNotBeNull().trailing.shouldNotBeNull()
-            }
+            val edited = stateFlow.value.verdictSheet.shouldNotBeNull()
+                .reduce(VerdictDraftEvent.RatingChanged(rating = 4.5))
+                .reduce(VerdictDraftEvent.SpoilersToggled(checked = true))
+
+            stateFlow.value = stateFlow.value.copy(verdictSheet = edited)
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(verdictCover = buildCover())
+
+            // ----- Assert -----
+            val sheet = stateFlow.value.verdictSheet.shouldNotBeNull()
+            sheet.rating shouldBe 4.5
+            sheet.spoilers.checked shouldBe true
+            sheet.scaffold.header.shouldNotBeNull().trailing.shouldNotBeNull()
+        }
 
         @Test
-        fun `verdictSheet starts from a fresh draft after it was closed and reopened`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val book = stubBook()
-                launchCollector()
-                stateFlow.value = stateFlow.value.copy(
-                    book = book,
-                    verdictSheetContext = VerdictSheetContext.FINISHED,
-                )
-                stateFlow.value = stateFlow.value.copy(
-                    verdictSheet = stateFlow.value.verdictSheet.shouldNotBeNull()
-                        .reduce(VerdictDraftEvent.RatingChanged(rating = 4.5)),
-                )
-                stateFlow.value = stateFlow.value.copy(verdictSheetContext = null)
+        fun `verdictSheet starts from a fresh draft after it was closed and reopened`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val book = stubBook()
+            launchCollector()
 
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(verdictSheetContext = VerdictSheetContext.FINISHED)
+            stateFlow.value = stateFlow.value.copy(
+                book = book,
+                verdictSheetContext = VerdictSheetContext.FINISHED,
+            )
 
-                // ----- Assert -----
-                stateFlow.value.verdictSheet.shouldNotBeNull().rating.shouldBeNull()
-            }
+            stateFlow.value = stateFlow.value.copy(
+                verdictSheet = stateFlow.value.verdictSheet.shouldNotBeNull()
+                    .reduce(VerdictDraftEvent.RatingChanged(rating = 4.5)),
+            )
+
+            stateFlow.value = stateFlow.value.copy(verdictSheetContext = null)
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(verdictSheetContext = VerdictSheetContext.FINISHED)
+
+            // ----- Assert -----
+            stateFlow.value.verdictSheet.shouldNotBeNull().rating.shouldBeNull()
+        }
     }
 }

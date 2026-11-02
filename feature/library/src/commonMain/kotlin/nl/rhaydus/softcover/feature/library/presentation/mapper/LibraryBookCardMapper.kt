@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.mapper
 
 import kotlinx.collections.immutable.persistentListOf
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardContent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardCover
 import nl.rhaydus.softcover.core.component.bookcard.BookCardDecorations
@@ -14,7 +15,6 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.component.transition.BookTransitionElement
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -43,6 +43,7 @@ internal fun Book.toBookCard(
 ): BookCardUiModel {
     val deadlineProgress = toDeadlineProgress(deadline)
     val badgedDeadline = deadlineProgress.takeUnless { isPaused }
+
     val deadlineSummary = deadlineProgress?.toDeadlineSummaryUiModel(
         dateStyle = dateStyle,
         isPaused = isPaused,
@@ -54,7 +55,7 @@ internal fun Book.toBookCard(
     when (layout) {
         LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY,
         LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY,
-            -> {
+        -> {
             variant = BookCardVariant.CoverOnly(
                 cover = BookCardCover(
                     model = toCoverUiModel(
@@ -64,6 +65,7 @@ internal fun Book.toBookCard(
                     badge = badgedDeadline?.toCountdownCoverOverlayUiModel(),
                 ),
             )
+
             decorations = gridDecorations(
                 selection = selection,
                 press = press,
@@ -72,7 +74,7 @@ internal fun Book.toBookCard(
 
         LibraryGridLayout.GRID_TWO_COLUMNS,
         LibraryGridLayout.GRID_THREE_COLUMNS,
-            -> {
+        -> {
             variant = BookCardVariant.Column(
                 cover = BookCardCover(
                     model = toCoverUiModel(
@@ -89,6 +91,7 @@ internal fun Book.toBookCard(
                     ),
                 ),
             )
+
             decorations = gridDecorations(
                 selection = selection,
                 press = press,
@@ -106,6 +109,7 @@ internal fun Book.toBookCard(
                 ),
                 trailing = badgedDeadline?.toBadgeUiModel()?.let { BookCardTrailing.Badge(model = it) },
             )
+
             decorations = BookCardDecorations(
                 selection = selection,
                 pressBehaviour = press,
@@ -140,6 +144,7 @@ internal fun Book.toBookCard(
                 ),
                 deadline = deadlineSummary,
             )
+
             decorations = BookCardDecorations(
                 progress = labelledProgress(),
                 selection = selection,
@@ -168,11 +173,11 @@ internal fun BookEdition.toEditionCard(
     val variant = when (layout) {
         LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY,
         LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY,
-            -> BookCardVariant.CoverOnly(cover = BookCardCover(model = toShelfEditionCover()))
+        -> BookCardVariant.CoverOnly(cover = BookCardCover(model = toShelfEditionCover()))
 
         LibraryGridLayout.GRID_TWO_COLUMNS,
         LibraryGridLayout.GRID_THREE_COLUMNS,
-            -> BookCardVariant.Column(
+        -> BookCardVariant.Column(
             cover = BookCardCover(model = toShelfEditionCover()),
             text = text,
         )

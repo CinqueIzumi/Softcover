@@ -29,6 +29,7 @@ class LoadUpdateProgressActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(UpdateProgressUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(UpdateProgressLocalVariables()),
@@ -50,6 +51,7 @@ class LoadUpdateProgressActionTest {
             every {
                 dependencies.getUserIdAsFlow()
             } returns flowOf(NO_USER_ID)
+
             every {
                 dependencies.getCurrentlyReadingUserBooks()
             } returns flowOf(listOf(stubBook(id = 7)))
@@ -71,6 +73,7 @@ class LoadUpdateProgressActionTest {
             every {
                 dependencies.getUserIdAsFlow()
             } returns flowOf(1)
+
             every {
                 dependencies.getCurrentlyReadingUserBooks()
             } returns flowOf(listOf(stubBook(id = 8)))
@@ -90,9 +93,11 @@ class LoadUpdateProgressActionTest {
         fun `loads the matching shelf book into the sheet without finishing`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 7)
+
             every {
                 dependencies.getUserIdAsFlow()
             } returns flowOf(1)
+
             every {
                 dependencies.getCurrentlyReadingUserBooks()
             } returns flowOf(listOf(stubBook(id = 8), book))
@@ -113,6 +118,7 @@ class LoadUpdateProgressActionTest {
             // ----- Arrange -----
             val loaded = stubBook(id = 7)
             stateFlow.value = UpdateProgressUiState(bookToUpdate = loaded)
+
             every {
                 dependencies.getUserIdAsFlow()
             } returns flowOf(NO_USER_ID)

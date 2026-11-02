@@ -3,16 +3,12 @@ package nl.rhaydus.softcover.core.designsystem.presentation.theme
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
 import nl.rhaydus.designsystem.editorial.EditorialTheme
-import nl.rhaydus.designsystem.haptics.LocalHaptics
-import nl.rhaydus.designsystem.haptics.rememberHaptics
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.designsystem.theme.RhaydusTheme
 
 /**
@@ -193,6 +189,7 @@ fun SoftcoverTheme(
             darkTheme = brightness.isDark,
         )
     }
+
     val colorScheme = dynamicScheme
         ?: softcoverColorScheme(
             brightness = brightness,
@@ -202,19 +199,14 @@ fun SoftcoverTheme(
     // EditorialTheme (designsystem-editorial) nests inside RhaydusTheme so that foundation editorial
     // components resolve the shared 9-role contract; Softcover's richer 15-role scale is provided in
     // parallel so app-specific screens that read editorialTypography directly are unaffected.
-    val playMotion = playDecorativeMotion()
-
     RhaydusTheme(
         colorScheme = colorScheme,
         typography = appTypography(),
-        motionScheme = if (playMotion) MotionScheme.expressive() else ReducedMotionScheme,
     ) {
         EditorialTheme(editorialTypography = softcoverFoundationEditorialTypography()) {
             CompositionLocalProvider(
                 LocalEditorialTypography provides defaultEditorialTypography(),
                 LocalSchemeBrightness provides brightness,
-                LocalHaptics provides rememberHaptics(),
-                LocalMotion provides if (playMotion) Motion.Full else Motion.Reduced,
                 content = content,
             )
         }

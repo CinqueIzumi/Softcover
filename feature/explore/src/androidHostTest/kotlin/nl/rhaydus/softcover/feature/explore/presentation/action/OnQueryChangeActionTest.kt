@@ -36,6 +36,7 @@ class OnQueryChangeActionTest {
         searchForNameUseCase = mockk()
         stateFlow = MutableStateFlow(ExploreScreenUiState())
         localVariablesFlow = MutableStateFlow(ExploreLocalVariables())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
@@ -45,6 +46,7 @@ class OnQueryChangeActionTest {
 
     private fun stubDependencies(testScope: TestScope): ExploreDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<ExploreDependencies>(relaxed = true).also { mock ->
             every {
                 mock.searchForNameUseCase
@@ -70,6 +72,7 @@ class OnQueryChangeActionTest {
         fun `a non-empty query starts a debounced search and resets the stale search state`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
+
             stateFlow.value = stateFlow.value.copy(
                 searchError = "previous error",
                 activeMoodFilter = MoodTag(
@@ -167,6 +170,7 @@ class OnQueryChangeActionTest {
         fun `an empty query drops the results, error, mood filter and search job`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
+
             stateFlow.value = stateFlow.value.copy(
                 queriedBooks = persistentListOf(mockk()),
                 searchError = "previous error",

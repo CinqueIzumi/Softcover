@@ -34,9 +34,6 @@ private val LIST_TAB = LibraryTab.CustomList(
 private val SidebarRowUiModel<String>.selected: Boolean
     get() = (variant as? SidebarRowVariant.Destination)?.selected == true
 
-private val SidebarRowUiModel<String>.longPressable: Boolean
-    get() = (variant as? SidebarRowVariant.Destination)?.longPressable == true
-
 class ShelfSidebarCollectorTest {
     private lateinit var dependencies: LibraryDependencies
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
@@ -47,11 +44,13 @@ class ShelfSidebarCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk(relaxed = true)
     }
 
@@ -134,7 +133,9 @@ class ShelfSidebarCollectorTest {
                 visibleTabs = persistentListOf(ALL_TAB),
                 selectedTabId = ALL_TAB.id,
             )
+
             val collector = ShelfSidebarCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -157,7 +158,9 @@ class ShelfSidebarCollectorTest {
                 visibleTabs = persistentListOf(ALL_TAB, READING_TAB),
                 selectedTabId = ALL_TAB.id,
             )
+
             val collector = ShelfSidebarCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -171,6 +174,7 @@ class ShelfSidebarCollectorTest {
             // ----- Assert -----
             stateFlow.value.shelfSidebar.sections.flatMap { it.rows }
                 .single { it.selected }.key shouldBe READING_TAB.id
+
             job.cancel()
         }
 
@@ -181,13 +185,16 @@ class ShelfSidebarCollectorTest {
                 visibleTabs = persistentListOf(ALL_TAB),
                 selectedTabId = ALL_TAB.id,
             )
+
             val collector = ShelfSidebarCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
                     dependencies = dependencies,
                 )
             }
+
             val sidebarAfterFirstEmit = stateFlow.value.shelfSidebar
 
             // ----- Act -----

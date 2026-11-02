@@ -24,11 +24,12 @@ class OnGalleryPaletteSelectedActionTest {
         ComponentGalleryUiState,
         ComponentGalleryEvent,
         ComponentGalleryLocalVariables,
-        >
+    >
 
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(ComponentGalleryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ComponentGalleryLocalVariables()),
@@ -38,6 +39,7 @@ class OnGalleryPaletteSelectedActionTest {
 
     private fun stubDependencies(testScope: TestScope): ComponentGalleryDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<ComponentGalleryDependencies>(relaxed = true).also { mock ->
             every {
                 mock.coroutineScope

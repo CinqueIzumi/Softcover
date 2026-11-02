@@ -47,6 +47,7 @@ internal class RecentlyLovedCardsCollector : ProfileCollector {
         }
 
         val loved = books.take(RECENTLY_LOVED_CARD_COUNT)
+
         if (loved.isEmpty()) return flowOf(BookCardSet.empty())
 
         return dependencies.observeBooksByIdsUseCase(loved.map { it.bookId }).map { libraryBooks ->

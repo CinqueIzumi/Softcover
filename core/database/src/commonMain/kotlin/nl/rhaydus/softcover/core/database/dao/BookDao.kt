@@ -324,15 +324,18 @@ interface BookDao {
             editions = book.editions,
             existingRefs = getEditionImageRefsByEditionIds(editionIds = book.editions.map { it.id }),
         )
+
         insertEditions(editionPlan.entities)
 
         // Insert authors (deduplicated)
         val allAuthors = (book.authors + book.editions.flatMap { it.authors })
             .distinctBy { it.name }
+
         insertAuthors(allAuthors.map { it.toEntity() })
 
         // Resolve IDs
         val authorEntities = getAuthorsByName(allAuthors.map { it.name })
+
         val authorIdsByName = authorEntities.associateBy(
             { it.name },
             { it.id },
@@ -443,6 +446,7 @@ interface BookDao {
             editions = editions,
             existingRefs = getEditionImageRefsByEditionIds(editionIds = editions.map { it.id }),
         )
+
         insertEditions(plan.entities)
 
         val allAuthors = editions.flatMap { it.authors }.distinctBy { it.name }
@@ -451,6 +455,7 @@ interface BookDao {
 
         insertAuthors(allAuthors.map { it.toEntity() })
         val authorEntities = getAuthorsByName(allAuthors.map { it.name })
+
         val authorIdsByName = authorEntities.associateBy(
             { it.name },
             { it.id },
@@ -674,6 +679,7 @@ interface BookDao {
         val rankedIdSet = rankedIds.toSet()
 
         deleteTrendingBooks(period = period)
+
         upsertTrending(
             rows = rankedIds.mapIndexed { rank, bookId ->
                 TrendingBookEntity(
@@ -683,6 +689,7 @@ interface BookDao {
                 )
             },
         )
+
         upsertTrendingMeta(
             meta = TrendingMetaEntity(
                 period = period,
@@ -842,6 +849,7 @@ interface BookDao {
         deleteUserBookByUserBookId(userBookId)
 
         if (countListBooksForBook(bookId = bookId) > 0) return
+
         if (countTrendingForBook(bookId = bookId) > 0) return
 
         clearBookAuthors(bookId)

@@ -28,6 +28,7 @@ class SearchTopBarCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(ExploreScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
@@ -50,6 +51,7 @@ class SearchTopBarCollectorTest {
         fun `searchTopBar mirrors searchText, searchFocused and isLoading from state`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = SearchTopBarCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -72,6 +74,7 @@ class SearchTopBarCollectorTest {
                 isLoading = true,
                 eyebrow = discoverEyebrow(isRefreshing = false),
             )
+
             job.cancel()
         }
 
@@ -79,6 +82,7 @@ class SearchTopBarCollectorTest {
         fun `active is false at the FEED phase`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = SearchTopBarCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -98,6 +102,7 @@ class SearchTopBarCollectorTest {
         fun `active is true at the FOCUS phase`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = SearchTopBarCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -117,6 +122,7 @@ class SearchTopBarCollectorTest {
         fun `active is true at the LOADING phase`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = SearchTopBarCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -136,6 +142,7 @@ class SearchTopBarCollectorTest {
         fun `active is true at the RESULTS phase driven by search text`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = SearchTopBarCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -155,6 +162,7 @@ class SearchTopBarCollectorTest {
         fun `active is true at the RESULTS phase driven by an active mood filter`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = SearchTopBarCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -174,6 +182,7 @@ class SearchTopBarCollectorTest {
         fun `eyebrow isRefreshing follows isRefreshing in state`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = SearchTopBarCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -196,24 +205,25 @@ class SearchTopBarCollectorTest {
         @Test
         fun `an unrelated state change leaving every derived input equal does not emit a new model`() =
             runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = SearchTopBarCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
+                // ----- Arrange -----
+                val collector = SearchTopBarCollector()
+
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                stateFlow.value = stateFlow.value.copy(searchText = "fantasy")
+                val modelAfterFirstEmission = stateFlow.value.searchTopBar
+
+                // ----- Act -----
+                stateFlow.value = stateFlow.value.copy(sortMode = ExploreSortMode.POPULARITY)
+
+                // ----- Assert -----
+                stateFlow.value.searchTopBar shouldBeSameInstanceAs modelAfterFirstEmission
+                job.cancel()
             }
-
-            stateFlow.value = stateFlow.value.copy(searchText = "fantasy")
-            val modelAfterFirstEmission = stateFlow.value.searchTopBar
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(sortMode = ExploreSortMode.POPULARITY)
-
-            // ----- Assert -----
-            stateFlow.value.searchTopBar shouldBeSameInstanceAs modelAfterFirstEmission
-            job.cancel()
-        }
     }
 }

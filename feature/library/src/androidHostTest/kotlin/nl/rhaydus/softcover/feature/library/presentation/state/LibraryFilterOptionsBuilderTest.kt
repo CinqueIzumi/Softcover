@@ -33,6 +33,7 @@ class LibraryFilterOptionsBuilderTest {
                 id = 1,
                 tags = listOf(tagScifi, tagFiction),
             )
+
             val book2 = buildBook(
                 id = 2,
                 tags = listOf(tagFiction),
@@ -61,6 +62,7 @@ class LibraryFilterOptionsBuilderTest {
                     ),
                 ),
             )
+
             val book2 = buildBook(
                 id = 2,
                 editions = listOf(
@@ -109,10 +111,12 @@ class LibraryFilterOptionsBuilderTest {
                 id = 1,
                 releaseYear = 2019,
             )
+
             val book2 = buildBook(
                 id = 2,
                 releaseYear = 2021,
             )
+
             val book3 = buildBook(
                 id = 3,
                 releaseYear = 2019,
@@ -132,10 +136,12 @@ class LibraryFilterOptionsBuilderTest {
                 id = 1,
                 releaseYear = 2021,
             )
+
             val book2 = buildBook(
                 id = 2,
                 releaseYear = -1,
             )
+
             val book3 = buildBook(
                 id = 3,
                 releaseYear = 0,
@@ -226,11 +232,13 @@ class LibraryFilterOptionsBuilderTest {
                 name = "Fantasy",
                 category = TagCategory.GENRE,
             )
+
             val tagMood = Tag(
                 id = 3,
                 name = "Hopeful",
                 category = TagCategory.MOOD,
             )
+
             val tagWarning = Tag(
                 id = 4,
                 name = "Violence",
@@ -294,10 +302,12 @@ class LibraryFilterOptionsBuilderTest {
                     id = 1,
                     finishedYear = 2019,
                 )
+
                 val book2 = buildBook(
                     id = 2,
                     finishedYear = 2021,
                 )
+
                 val book3 = buildBook(
                     id = 3,
                     finishedYear = 2019,
@@ -324,6 +334,7 @@ class LibraryFilterOptionsBuilderTest {
                 id = 1,
                 bookId = 10,
             )
+
             val book = buildBook(
                 id = 10,
                 tags = listOf(tagFiction),
@@ -347,6 +358,7 @@ class LibraryFilterOptionsBuilderTest {
                 bookId = 10,
                 format = "ebook",
             )
+
             val edition2 = buildEdition(
                 id = 2,
                 bookId = 10,
@@ -388,6 +400,7 @@ class LibraryFilterOptionsBuilderTest {
                 id = 1,
                 bookId = 10,
             )
+
             val book = buildBook(
                 id = 10,
                 releaseYear = 2022,

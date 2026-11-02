@@ -173,6 +173,7 @@ class ReadingScreenUiStateTest {
         fun `is the built masthead once loaded`() {
             // ----- Arrange -----
             val built = PageMastheadUiModel(title = "Built")
+
             val state = ReadingScreenUiState(
                 isLoading = false,
                 masthead = built,
@@ -221,6 +222,7 @@ class ReadingScreenUiStateTest {
                 title = "Built",
                 size = PageMastheadSize.Compact,
             )
+
             val state = ReadingScreenUiState(
                 isLoading = false,
                 compactMasthead = built,
@@ -250,6 +252,7 @@ class ReadingScreenUiStateTest {
         fun `is the real set once loaded`() {
             // ----- Arrange -----
             val alsoReading = loadedAlsoReading()
+
             val state = ReadingScreenUiState(
                 isLoading = false,
                 alsoReading = alsoReading,
@@ -278,6 +281,7 @@ class ReadingScreenUiStateTest {
         fun `is the real header once loaded`() {
             // ----- Arrange -----
             val header = loadedHeader()
+
             val state = ReadingScreenUiState(
                 isLoading = false,
                 alsoReadingHeader = header,
@@ -332,6 +336,7 @@ class ReadingScreenUiStateTest {
         fun `is the real model once loaded`() {
             // ----- Arrange -----
             val model = loadedModel()
+
             val state = ReadingScreenUiState(
                 isLoading = false,
                 featuredBookModel = model,
@@ -363,6 +368,7 @@ class ReadingScreenUiStateTest {
         fun `is the real progress once loaded`() {
             // ----- Arrange -----
             val progress = loadedProgress()
+
             val state = ReadingScreenUiState(
                 isLoading = false,
                 featuredProgress = progress,
@@ -391,6 +397,7 @@ class ReadingScreenUiStateTest {
         fun `is the real summary once loaded`() {
             // ----- Arrange -----
             val summary = loadedDeadlineSummary()
+
             val state = ReadingScreenUiState(
                 isLoading = false,
                 featuredDeadlineSummary = summary,
@@ -419,6 +426,7 @@ class ReadingScreenUiStateTest {
         fun `is the real nudge once loaded`() {
             // ----- Arrange -----
             val nudge = loadedNudge()
+
             val state = ReadingScreenUiState(
                 isLoading = false,
                 featuredPaceNudge = nudge,

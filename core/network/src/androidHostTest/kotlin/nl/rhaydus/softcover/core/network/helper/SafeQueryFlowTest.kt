@@ -57,7 +57,7 @@ class SafeQueryFlowTest {
     @BeforeEach
     fun setUp() {
         apolloClient = mockk()
-        @Suppress("UNCHECKED_CAST")
+
         apolloCall = mockk<ApolloCall<GetUserIdQuery.Data>>()
 
         mockkObject(SessionExpiredNotifier)
@@ -68,48 +68,45 @@ class SafeQueryFlowTest {
         every {
             apolloClient.query(any<GetUserIdQuery>())
         } returns apolloCall
+
         every {
             apolloCall.fetchPolicy(any())
         } returns apolloCall
+
         every {
             SessionExpiredNotifier.notifySessionExpired()
         } returns Unit
     }
 
-    private fun dataResponse(data: GetUserIdQuery.Data): ApolloResponse<GetUserIdQuery.Data> =
-        ApolloResponse.Builder(
-            operation = query,
-            requestUuid = uuid4(),
-        ).data(data).build()
+    private fun dataResponse(data: GetUserIdQuery.Data): ApolloResponse<GetUserIdQuery.Data> = ApolloResponse.Builder(
+        operation = query,
+        requestUuid = uuid4(),
+    ).data(data).build()
 
-    private fun errorResponse(errors: List<Error>): ApolloResponse<GetUserIdQuery.Data> =
-        ApolloResponse.Builder(
-            operation = query,
-            requestUuid = uuid4(),
-        ).errors(errors).build()
+    private fun errorResponse(errors: List<Error>): ApolloResponse<GetUserIdQuery.Data> = ApolloResponse.Builder(
+        operation = query,
+        requestUuid = uuid4(),
+    ).errors(errors).build()
 
-    private fun exceptionResponse(ex: ApolloException): ApolloResponse<GetUserIdQuery.Data> =
-        ApolloResponse.Builder(
-            operation = query,
-            requestUuid = uuid4(),
-        ).exception(ex).build()
+    private fun exceptionResponse(ex: ApolloException): ApolloResponse<GetUserIdQuery.Data> = ApolloResponse.Builder(
+        operation = query,
+        requestUuid = uuid4(),
+    ).exception(ex).build()
 
-    private fun httpException(statusCode: Int): ApolloHttpException =
-        ApolloHttpException(
-            statusCode = statusCode,
-            headers = emptyList(),
-            body = Buffer(),
-            message = "HTTP $statusCode",
-        )
+    private fun httpException(statusCode: Int): ApolloHttpException = ApolloHttpException(
+        statusCode = statusCode,
+        headers = emptyList(),
+        body = Buffer(),
+        message = "HTTP $statusCode",
+    )
 
     private fun networkException(message: String = "connection failed"): ApolloNetworkException =
         ApolloNetworkException(message = message)
 
-    private fun cacheMissException(): CacheMissException =
-        CacheMissException(
-            key = "QUERY_ROOT",
-            fieldName = "me",
-        )
+    private fun cacheMissException(): CacheMissException = CacheMissException(
+        key = "QUERY_ROOT",
+        fieldName = "me",
+    )
 
     @Nested
     inner class SuccessfulEmissions {
@@ -118,6 +115,7 @@ class SafeQueryFlowTest {
             // ----- Arrange -----
             val cacheResponse = dataResponse(cacheData)
             val networkResponse = dataResponse(networkData)
+
             every {
                 apolloCall.toFlow()
             } returns flowOf(
@@ -138,6 +136,7 @@ class SafeQueryFlowTest {
             // ----- Arrange -----
             val cacheMissResponse = exceptionResponse(cacheMissException())
             val networkResponse = dataResponse(networkData)
+
             every {
                 apolloCall.toFlow()
             } returns flowOf(
@@ -160,6 +159,7 @@ class SafeQueryFlowTest {
             // ----- Arrange -----
             val cacheResponse = dataResponse(cacheData)
             val authExResponse = exceptionResponse(httpException(401))
+
             every {
                 apolloCall.toFlow()
             } returns flowOf(
@@ -180,6 +180,7 @@ class SafeQueryFlowTest {
         fun `no data emitted then HTTP 403 — throws InvalidTokenException and notifies session expired`() = runTest {
             // ----- Arrange -----
             val authExResponse = exceptionResponse(httpException(403))
+
             every {
                 apolloCall.toFlow()
             } returns flowOf(authExResponse)
@@ -201,7 +202,9 @@ class SafeQueryFlowTest {
             every {
                 NetworkAvailability.isOnline()
             } returns false
+
             val networkExResponse = exceptionResponse(networkException())
+
             every {
                 apolloCall.toFlow()
             } returns flowOf(networkExResponse)
@@ -218,7 +221,9 @@ class SafeQueryFlowTest {
             every {
                 NetworkAvailability.isOnline()
             } returns true
+
             val networkExResponse = exceptionResponse(networkException())
+
             every {
                 apolloCall.toFlow()
             } returns flowOf(networkExResponse)
@@ -233,6 +238,7 @@ class SafeQueryFlowTest {
         fun `no data emitted, transient HTTP 503 — throws ServerUnavailableException`() = runTest {
             // ----- Arrange -----
             val transientExResponse = exceptionResponse(httpException(503))
+
             every {
                 apolloCall.toFlow()
             } returns flowOf(transientExResponse)
@@ -250,6 +256,7 @@ class SafeQueryFlowTest {
         fun `no data emitted, HTTP 400 (non-retryable) — throws UnexpectedApiException`() = runTest {
             // ----- Arrange -----
             val badRequestExResponse = exceptionResponse(httpException(400))
+
             every {
                 apolloCall.toFlow()
             } returns flowOf(badRequestExResponse)
@@ -265,6 +272,7 @@ class SafeQueryFlowTest {
             // ----- Arrange -----
             val graphqlError = Error.Builder(message = "something went wrong").build()
             val graphqlErrorResponse = errorResponse(listOf(graphqlError))
+
             every {
                 apolloCall.toFlow()
             } returns flowOf(graphqlErrorResponse)

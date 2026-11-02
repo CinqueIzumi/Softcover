@@ -79,6 +79,7 @@ private fun DrawScope.drawTrack(geometry: WavyProgressGeometry) {
             x = geometry.trackStart,
             y = centerY,
         )
+
         lineTo(
             x = geometry.trackEnd,
             y = centerY,
@@ -128,6 +129,7 @@ private fun DrawScope.indicatorPath(geometry: WavyProgressGeometry): Path {
                 x = geometry.indicatorStart,
                 y = centerY,
             )
+
             lineTo(
                 x = geometry.indicatorEnd,
                 y = centerY,

@@ -221,25 +221,24 @@ class UserTagsRemoteDataSourceImplTest {
             tag: String,
             category: String?,
             aggregateCount: Int?,
-        ): FindUserTagVocabularyQuery.Data.Tag =
-            FindUserTagVocabularyQuery.Data.Tag(
-                __typename = "tags",
-                id = 1L,
-                tag = tag,
-                tag_category = FindUserTagVocabularyQuery.Data.Tag.Tag_category(
-                    __typename = "tag_categories",
-                    category = category,
-                ),
-                taggings_aggregate = FindUserTagVocabularyQuery.Data.Tag.Taggings_aggregate(
-                    __typename = "taggings_aggregate",
-                    aggregate = aggregateCount?.let {
-                        FindUserTagVocabularyQuery.Data.Tag.Taggings_aggregate.Aggregate(
-                            __typename = "taggings_aggregate_fields",
-                            count = it,
-                        )
-                    },
-                ),
-            )
+        ): FindUserTagVocabularyQuery.Data.Tag = FindUserTagVocabularyQuery.Data.Tag(
+            __typename = "tags",
+            id = 1L,
+            tag = tag,
+            tag_category = FindUserTagVocabularyQuery.Data.Tag.Tag_category(
+                __typename = "tag_categories",
+                category = category,
+            ),
+            taggings_aggregate = FindUserTagVocabularyQuery.Data.Tag.Taggings_aggregate(
+                __typename = "taggings_aggregate",
+                aggregate = aggregateCount?.let {
+                    FindUserTagVocabularyQuery.Data.Tag.Taggings_aggregate.Aggregate(
+                        __typename = "taggings_aggregate_fields",
+                        count = it,
+                    )
+                },
+            ),
+        )
 
         @Test
         fun `fetches a single short page and maps counts from each tag's aggregate`() = runTest {
@@ -308,6 +307,7 @@ class UserTagsRemoteDataSourceImplTest {
                 namePrefix = "page1",
                 sharedAggregateCount = 2,
             )
+
             val page2Tags = buildTagsPage(
                 size = 40,
                 namePrefix = "page2",

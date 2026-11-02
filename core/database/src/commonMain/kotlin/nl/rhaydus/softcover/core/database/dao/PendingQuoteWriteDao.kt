@@ -11,8 +11,8 @@ interface PendingQuoteWriteDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(entity: PendingQuoteWriteEntity)
 
-    @Query("SELECT * FROM pending_quote_writes WHERE attempts < :maxAttempts ORDER BY enqueuedAt ASC, localId ASC")
-    suspend fun getPending(maxAttempts: Int = 5): List<PendingQuoteWriteEntity>
+    @Query("SELECT * FROM pending_quote_writes ORDER BY enqueuedAt ASC, localId ASC")
+    suspend fun getPending(): List<PendingQuoteWriteEntity>
 
     @Query("DELETE FROM pending_quote_writes WHERE localId = :localId")
     suspend fun delete(localId: Long)

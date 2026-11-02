@@ -40,8 +40,8 @@ internal suspend fun executeSearch(
 
     result
         .onSuccess {
-            scope.setState {
-                it.copy(
+            scope.setState { state ->
+                state.copy(
                     isLoading = false,
                     loadingMoreQueriedBooks = false,
                 )

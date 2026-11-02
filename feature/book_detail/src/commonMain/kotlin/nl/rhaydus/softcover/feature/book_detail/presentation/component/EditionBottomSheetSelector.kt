@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import nl.rhaydus.designsystem.component.InlineErrorState
 import nl.rhaydus.designsystem.editorial.component.EditorialSearchField
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
@@ -27,7 +28,6 @@ import nl.rhaydus.softcover.core.component.state.EmptyStateEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.EditionSheetEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.EditionSheetUiModel

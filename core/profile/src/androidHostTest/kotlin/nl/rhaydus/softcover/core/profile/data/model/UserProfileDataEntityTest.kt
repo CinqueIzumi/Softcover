@@ -123,6 +123,7 @@ class UserProfileDataEntityTest {
                     4,
                 ),
             )
+
             val model = minimalModel(dates = dates)
 
             // ----- Act -----
@@ -179,6 +180,7 @@ class UserProfileDataEntityTest {
                     30,
                 ),
             )
+
             val model = minimalModel(dates = dates)
 
             // ----- Act -----
@@ -256,6 +258,7 @@ class UserProfileDataEntityTest {
                   "readingStreak": 5
                 }
             """.trimIndent()
+
             val lenientJson = Json { ignoreUnknownKeys = true }
 
             // ----- Act -----
@@ -300,6 +303,7 @@ class UserProfileDataEntityTest {
                   }
                 }
             """.trimIndent()
+
             val lenientJson = Json { ignoreUnknownKeys = true }
 
             // ----- Act -----
@@ -307,6 +311,7 @@ class UserProfileDataEntityTest {
                 UserProfileDataEntity.serializer(),
                 legacyJson,
             )
+
             val model = entity.toModel()
 
             // ----- Assert -----
@@ -394,6 +399,7 @@ class UserProfileDataEntityTest {
                   ]
                 }
             """.trimIndent()
+
             val lenientJson = Json { ignoreUnknownKeys = true }
 
             // ----- Act -----

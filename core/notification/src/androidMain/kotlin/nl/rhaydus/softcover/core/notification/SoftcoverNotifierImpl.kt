@@ -49,10 +49,12 @@ internal class SoftcoverNotifierImpl(
             .setContentText(content.body)
             .setStyle(NotificationCompat.BigTextStyle().bigText(content.body))
             .setAutoCancel(true)
-            .setColor(ContextCompat.getColor(
-                context,
-                appearance.accentColor.resId,
-            ),)
+            .setColor(
+                ContextCompat.getColor(
+                    context,
+                    appearance.accentColor.resId,
+                ),
+            )
             .setColorized(false)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 

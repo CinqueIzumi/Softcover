@@ -16,6 +16,7 @@ internal class OnExternalLinkClickAction(val key: String) : BookDetailAction {
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
         val isbn: String = scope.currentState.displayedEdition?.searchIsbn ?: return
+
         val url: String = when (key) {
             BOOKSHOP_KEY -> "https://bookshop.org/search?keywords=$isbn"
             AMAZON_KEY -> "https://www.amazon.com/s?k=$isbn"

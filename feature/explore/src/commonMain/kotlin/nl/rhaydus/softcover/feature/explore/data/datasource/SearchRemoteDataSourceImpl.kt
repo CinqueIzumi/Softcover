@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.feature.explore.data.datasource
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Optional
 import com.apollographql.cache.normalized.FetchPolicy
-import kotlin.time.Clock
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,17 +12,13 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
 import nl.rhaydus.softcover.GetBooksByGenreTagQuery
-import nl.rhaydus.softcover.GetBooksByGenreTagQuery.Data.Taggable_count.Book.Companion.bookDetailFragment as genreBookDetailFragment
 import nl.rhaydus.softcover.GetBooksByIdsQuery
 import nl.rhaydus.softcover.GetBooksByIdsQuery.Data.Book.Companion.bookDetailFragment
 import nl.rhaydus.softcover.GetBooksByMoodTagQuery
-import nl.rhaydus.softcover.GetBooksByMoodTagQuery.Data.Taggable_count.Book.Companion.bookDetailFragment as moodBookDetailFragment
 import nl.rhaydus.softcover.GetFeaturedUpcomingReleaseQuery
-import nl.rhaydus.softcover.GetFeaturedUpcomingReleaseQuery.Data.Book.Companion.bookDetailFragment as featuredBookDetailFragment
 import nl.rhaydus.softcover.GetIdsForQuery
 import nl.rhaydus.softcover.GetMoodTagsQuery
 import nl.rhaydus.softcover.GetNextBookInSeriesQuery
-import nl.rhaydus.softcover.GetNextBookInSeriesQuery.Data.Book_series.Book.Companion.bookDetailFragment as nextInSeriesBookDetailFragment
 import nl.rhaydus.softcover.GetNextBooksInSeriesQuery
 import nl.rhaydus.softcover.core.book.data.mapper.toBook
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -37,6 +32,11 @@ import nl.rhaydus.softcover.feature.explore.domain.model.SeriesContinuationSeed
 import nl.rhaydus.softcover.type.Book_series_bool_exp
 import nl.rhaydus.softcover.type.Float8_comparison_exp
 import nl.rhaydus.softcover.type.Int_comparison_exp
+import kotlin.time.Clock
+import nl.rhaydus.softcover.GetBooksByGenreTagQuery.Data.Taggable_count.Book.Companion.bookDetailFragment as genreBookDetailFragment
+import nl.rhaydus.softcover.GetBooksByMoodTagQuery.Data.Taggable_count.Book.Companion.bookDetailFragment as moodBookDetailFragment
+import nl.rhaydus.softcover.GetFeaturedUpcomingReleaseQuery.Data.Book.Companion.bookDetailFragment as featuredBookDetailFragment
+import nl.rhaydus.softcover.GetNextBookInSeriesQuery.Data.Book_series.Book.Companion.bookDetailFragment as nextInSeriesBookDetailFragment
 
 private const val MOOD_BOOKS_LIMIT = 25
 
@@ -169,6 +169,7 @@ internal class SearchRemoteDataSourceImpl(
 
     override suspend fun fetchFeaturedUpcomingRelease(): Book? {
         val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+
         val maxDate = today.plus(
             FEATURED_RELEASE_WINDOW_DAYS,
             DateTimeUnit.DAY,
@@ -233,6 +234,7 @@ internal class SearchRemoteDataSourceImpl(
         // can shrink a full page below MOOD_BOOKS_LIMIT and would otherwise signal end-of-results
         // one page too early.
         _queriedBooksHasMore.update { response.taggable_counts.size >= MOOD_BOOKS_LIMIT }
+
         _queriedBooks.update { previous ->
             (if (page > 1) previous + books else books).distinctBy { it.id }
         }

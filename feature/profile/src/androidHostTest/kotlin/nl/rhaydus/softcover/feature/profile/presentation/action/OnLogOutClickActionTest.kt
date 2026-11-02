@@ -32,6 +32,7 @@ class OnLogOutClickActionTest {
         dependencies = mockk<ProfileDependencies>(relaxed = true)
         stateFlow = MutableStateFlow(ProfileUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalProfileVariables()),
@@ -60,6 +61,7 @@ class OnLogOutClickActionTest {
                 model = openScaffold.requestingClose(),
                 pending = LogOut,
             )
+
             coVerify(exactly = 0) { resetUserDataUseCase() }
             eventChannel.tryReceive().getOrNull() shouldBe null
         }

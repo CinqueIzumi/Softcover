@@ -27,6 +27,7 @@ class ResolveBookByIsbnUseCaseTest {
     fun setUp() {
         booksRepository = mockk()
         fetchBookByIdUseCase = mockk()
+
         useCase = ResolveBookByIsbnUseCase(
             booksRepository = booksRepository,
             fetchBookByIdUseCase = fetchBookByIdUseCase,
@@ -56,6 +57,7 @@ class ResolveBookByIsbnUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+
             result.getOrNull() shouldBe IsbnLookupResult.Found(
                 book = book,
                 editionId = editionId,

@@ -20,6 +20,7 @@ class ChipToneStyleTest {
                 scheme,
                 selected = true,
             )
+
             val unselected = tone.style(
                 scheme,
                 selected = false,
@@ -43,6 +44,7 @@ class ChipToneStyleTest {
                 scheme,
                 selected = true,
             )
+
             val unselected = tone.style(
                 scheme,
                 selected = false,

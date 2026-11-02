@@ -20,9 +20,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
-import nl.rhaydus.softcover.core.component.modifier.tactileToggleable
+import nl.rhaydus.designsystem.modifier.pressScaleToggleable
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
@@ -38,6 +38,7 @@ fun <K> ToggleRow(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
+
     val wash by animateColorAsState(
         targetValue = if (isPressed) {
             MaterialTheme.colorScheme.surfaceContainer
@@ -51,7 +52,7 @@ fun <K> ToggleRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .tactileToggleable(
+            .pressScaleToggleable(
                 value = model.checked,
                 onValueChange = { checked ->
                     onEvent(ToggleEvent.Toggled(checked = checked))

@@ -3,6 +3,8 @@ package nl.rhaydus.softcover.feature.widget.presentation.render
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.scale
 import kotlinx.coroutines.ensureActive
 import kotlin.coroutines.coroutineContext
 import kotlin.math.roundToInt
@@ -33,14 +35,14 @@ internal suspend fun renderBackdrop(
 
     coroutineContext.ensureActive()
 
-    val opaque = Bitmap.createBitmap(
-        widthPx,
-        heightPx,
-        Bitmap.Config.ARGB_8888,
+    val opaque = createBitmap(
+        width = widthPx,
+        height = heightPx,
     )
 
     Canvas(opaque).apply {
         drawColor(Color.WHITE)
+
         drawBitmap(
             fitted,
             0f,
@@ -145,19 +147,15 @@ private fun shrink(
     var current = bitmap
 
     while (current.width / 2 >= widthPx && current.height / 2 >= heightPx) {
-        current = Bitmap.createScaledBitmap(
-            current,
-            current.width / 2,
-            current.height / 2,
-            true,
+        current = current.scale(
+            width = current.width / 2,
+            height = current.height / 2,
         )
     }
 
-    return Bitmap.createScaledBitmap(
-        current,
-        widthPx,
-        heightPx,
-        true,
+    return current.scale(
+        width = widthPx,
+        height = heightPx,
     )
 }
 

@@ -18,16 +18,11 @@ internal fun NavigationRailBar(modifier: Modifier = Modifier) {
 
     NavigationRail(modifier = modifier) {
         navItems.forEach { item ->
-            val iconPainter = item.tab.options.icon ?: return@forEach
-
             NavigationRailItem(
                 selected = item.selected,
                 onClick = { onNavItemClick(item) },
                 icon = {
-                    NavItemIcon(
-                        item = item,
-                        painter = iconPainter,
-                    )
+                    NavItemIcon(item = item)
                 },
                 label = { SoftcoverText(text = item.tab.options.title) },
             )

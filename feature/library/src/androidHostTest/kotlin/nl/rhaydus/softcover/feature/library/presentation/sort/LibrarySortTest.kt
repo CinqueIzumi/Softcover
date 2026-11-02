@@ -251,6 +251,7 @@ class LibrarySortTest {
                         1,
                     ),
                 )
+
                 val nullDate = buildEdition(id = 2).copy(releaseDate = null)
 
                 // ----- Act -----
@@ -373,6 +374,7 @@ class LibrarySortTest {
             fun `modes without an in-memory edition sort return the list unchanged`() {
                 // ----- Arrange -----
                 val editions = listOf(buildEdition(id = 2), buildEdition(id = 1))
+
                 val modes = listOf(
                     LibrarySortMode.DATE_FINISHED,
                     LibrarySortMode.RATING,

@@ -35,6 +35,7 @@ class BookTransitionKeyBuilderTest {
                 element = element,
                 bookId = 42,
             )
+
             val second = bookTransitionKey(
                 element = element,
                 bookId = 42,
@@ -54,6 +55,7 @@ class BookTransitionKeyBuilderTest {
                 element = element,
                 bookId = 1,
             )
+
             val second = bookTransitionKey(
                 element = element,
                 bookId = 2,
@@ -105,6 +107,7 @@ class BookTransitionKeyBuilderTest {
                 bookId = 42,
                 surface = "rail",
             )
+
             val grid = bookTransitionKey(
                 element = element,
                 bookId = 42,
@@ -126,6 +129,7 @@ class BookTransitionKeyBuilderTest {
                 bookId = 42,
                 surface = null,
             )
+
             val surfaced = bookTransitionKey(
                 element = element,
                 bookId = 42,

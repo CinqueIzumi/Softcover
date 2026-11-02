@@ -36,6 +36,7 @@ class PublishedDocumentCacheTest {
         remoteDataSource = mockk()
         localDataSource = mockk(relaxed = true)
         bundledDataSource = mockk()
+
         cache = PublishedDocumentCache(
             remoteDataSource = remoteDataSource,
             localDataSource = localDataSource,
@@ -75,6 +76,7 @@ class PublishedDocumentCacheTest {
             every {
                 localDataSource.observeCachedDocument(key = PublishedDocumentKey.ROADMAP)
             } returns flowOf(null)
+
             coEvery {
                 bundledDataSource.readBundledDocument(key = PublishedDocumentKey.ROADMAP)
             } returns bundled
@@ -97,6 +99,7 @@ class PublishedDocumentCacheTest {
             every {
                 localDataSource.observeCachedDocument(key = PublishedDocumentKey.ROADMAP)
             } returns cacheFlow
+
             coEvery {
                 bundledDataSource.readBundledDocument(key = PublishedDocumentKey.ROADMAP)
             } returns bundled
@@ -143,6 +146,7 @@ class PublishedDocumentCacheTest {
             coEvery {
                 localDataSource.getCachedAtEpochMillis(key = PublishedDocumentKey.ROADMAP)
             } returns staleFetch
+
             coEvery {
                 remoteDataSource.fetchMarkdown(key = PublishedDocumentKey.ROADMAP)
             } returns "# Roadmap"
@@ -165,6 +169,7 @@ class PublishedDocumentCacheTest {
             coEvery {
                 localDataSource.getCachedAtEpochMillis(key = PublishedDocumentKey.ROADMAP)
             } returns null
+
             coEvery {
                 remoteDataSource.fetchMarkdown(key = PublishedDocumentKey.ROADMAP)
             } returns "# Roadmap"
@@ -189,6 +194,7 @@ class PublishedDocumentCacheTest {
             coEvery {
                 localDataSource.getCachedAtEpochMillis(key = PublishedDocumentKey.ROADMAP)
             } returns recentFetch
+
             coEvery {
                 remoteDataSource.fetchMarkdown(key = PublishedDocumentKey.ROADMAP)
             } returns "# Roadmap"
@@ -213,6 +219,7 @@ class PublishedDocumentCacheTest {
             coEvery {
                 localDataSource.getCachedAtEpochMillis(key = PublishedDocumentKey.ROADMAP)
             } returns null
+
             coEvery {
                 remoteDataSource.fetchMarkdown(key = PublishedDocumentKey.ROADMAP)
             } returns markdown
@@ -242,6 +249,7 @@ class PublishedDocumentCacheTest {
             coEvery {
                 localDataSource.getCachedAtEpochMillis(key = PublishedDocumentKey.ROADMAP)
             } returns null
+
             coEvery {
                 remoteDataSource.fetchMarkdown(key = PublishedDocumentKey.ROADMAP)
             } returns "# Roadmap"
@@ -260,6 +268,7 @@ class PublishedDocumentCacheTest {
                     fetchedAtEpochMillis = capture(stamp),
                 )
             }
+
             val after = Clock.System.now().toEpochMilliseconds()
             (stamp.captured in before..after) shouldBe true
         }
@@ -272,6 +281,7 @@ class PublishedDocumentCacheTest {
             coEvery {
                 localDataSource.getCachedAtEpochMillis(key = PublishedDocumentKey.ROADMAP)
             } returns null
+
             coEvery {
                 remoteDataSource.fetchMarkdown(key = PublishedDocumentKey.ROADMAP)
             } throws error
@@ -279,9 +289,9 @@ class PublishedDocumentCacheTest {
             // ----- Act & Assert -----
             shouldThrow<IllegalStateException> {
                 cache.refresh(
-                key = PublishedDocumentKey.ROADMAP,
-                force = false,
-            )
+                    key = PublishedDocumentKey.ROADMAP,
+                    force = false,
+                )
             }
 
             coVerify(exactly = 0) {
@@ -304,6 +314,7 @@ class PublishedDocumentCacheTest {
             every {
                 localDataSource.observeCachedDocument(key = PublishedDocumentKey.CHANGELOG)
             } returns flowOf(null)
+
             coEvery {
                 bundledDataSource.readBundledDocument(key = PublishedDocumentKey.CHANGELOG)
             } returns bundled
@@ -327,9 +338,11 @@ class PublishedDocumentCacheTest {
             coEvery {
                 localDataSource.getCachedAtEpochMillis(key = PublishedDocumentKey.ROADMAP)
             } returns now - ONE_HOUR_MILLIS
+
             coEvery {
                 localDataSource.getCachedAtEpochMillis(key = PublishedDocumentKey.CHANGELOG)
             } returns now - 7 * ONE_HOUR_MILLIS
+
             coEvery {
                 remoteDataSource.fetchMarkdown(key = PublishedDocumentKey.CHANGELOG)
             } returns "# Changelog"
@@ -348,6 +361,7 @@ class PublishedDocumentCacheTest {
                     fetchedAtEpochMillis = any(),
                 )
             }
+
             coVerify(exactly = 0) {
                 remoteDataSource.fetchMarkdown(key = PublishedDocumentKey.ROADMAP)
             }
@@ -361,6 +375,7 @@ class PublishedDocumentCacheTest {
             coEvery {
                 localDataSource.getCachedAtEpochMillis(key = PublishedDocumentKey.CHANGELOG)
             } returns now - ONE_HOUR_MILLIS
+
             coEvery {
                 localDataSource.getCachedAtEpochMillis(key = PublishedDocumentKey.ROADMAP)
             } returns null
@@ -398,6 +413,7 @@ class PublishedDocumentCacheTest {
                     fetchedAtEpochMillis = any(),
                 )
             }
+
             coVerify(exactly = 0) {
                 localDataSource.cacheDocument(
                     key = PublishedDocumentKey.ROADMAP,

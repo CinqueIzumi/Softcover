@@ -39,11 +39,13 @@ class FilterDraftChipsCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk<LibraryDependencies>(relaxed = true).also { mock ->
             every {
                 mock.defaultDispatcher
@@ -54,33 +56,34 @@ class FilterDraftChipsCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `filterSheet footer follows the selection's result count and clear-all state`() =
-            runTest(testDispatcher) {
-                // ----- Arrange -----
-                val collector = FilterDraftChipsCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+        fun `filterSheet footer follows the selection's result count and clear-all state`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val collector = FilterDraftChipsCollector()
 
-                // ----- Act -----
-                stateFlow.value = LibraryUiState(
-                    filterDraft = LibraryFilterDraft(
-                        tabId = "all",
-                        filters = LibraryFilters(formats = persistentSetOf("ebook")),
-                    ),
-                    booksByTab = persistentMapOf("all" to persistentListOf()),
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-
-                // ----- Assert -----
-                stateFlow.value.filterSheet.scaffold shouldBe filterSheetScaffoldFor(
-                    resultCount = 0,
-                    filtersActive = true,
-                )
-                job.cancel()
             }
+
+            // ----- Act -----
+            stateFlow.value = LibraryUiState(
+                filterDraft = LibraryFilterDraft(
+                    tabId = "all",
+                    filters = LibraryFilters(formats = persistentSetOf("ebook")),
+                ),
+                booksByTab = persistentMapOf("all" to persistentListOf()),
+            )
+
+            // ----- Assert -----
+            stateFlow.value.filterSheet.scaffold shouldBe filterSheetScaffoldFor(
+                resultCount = 0,
+                filtersActive = true,
+            )
+
+            job.cancel()
+        }
 
         @Test
         fun `filterSheet is left untouched while the sheet is closed`() = runTest(testDispatcher) {
@@ -89,10 +92,13 @@ class FilterDraftChipsCollectorTest {
                 resultCount = 8,
                 filtersActive = true,
             )
+
             stateFlow.value = LibraryUiState(
                 filterSheet = LibraryUiState().filterSheet.copy(scaffold = seeded),
             )
+
             val collector = FilterDraftChipsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -116,11 +122,13 @@ class FilterDraftChipsCollectorTest {
                 name = "Fiction",
                 category = TagCategory.GENRE,
             )
+
             val tagScifi = Tag(
                 id = 2,
                 name = "Sci-Fi",
                 category = TagCategory.GENRE,
             )
+
             val chips = LibraryFilterChips(
                 tagChips = listOf(
                     ChipUiModel(
@@ -133,13 +141,16 @@ class FilterDraftChipsCollectorTest {
                     ) to LibraryFilterValue.Tag(tag = tagScifi),
                 ).toChipSet(),
             )
+
             val collector = FilterDraftChipsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
                     dependencies = dependencies,
                 )
             }
+
             stateFlow.value = LibraryUiState(
                 filterDraft = LibraryFilterDraft(tabId = "all"),
                 filterChipsByTab = persistentMapOf("all" to chips),
@@ -156,27 +167,29 @@ class FilterDraftChipsCollectorTest {
         }
 
         @Test
-        fun `unrelated state change that leaves the snapshot equal does not retrigger recompute`() =
-            runTest(testDispatcher) {
-                // ----- Arrange -----
-                val collector = FilterDraftChipsCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-                stateFlow.value = LibraryUiState(
-                    filterDraft = LibraryFilterDraft(tabId = "all"),
+        fun `unrelated state change that leaves the snapshot equal does not retrigger recompute`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val collector = FilterDraftChipsCollector()
+
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-                val selectionAfterFirstEmit = stateFlow.value.filterSheet.selection
-
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(isArrangeSheetExpanded = true)
-
-                // ----- Assert -----
-                (stateFlow.value.filterSheet.selection === selectionAfterFirstEmit) shouldBe true
-                job.cancel()
             }
+
+            stateFlow.value = LibraryUiState(
+                filterDraft = LibraryFilterDraft(tabId = "all"),
+            )
+
+            val selectionAfterFirstEmit = stateFlow.value.filterSheet.selection
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(isArrangeSheetExpanded = true)
+
+            // ----- Assert -----
+            (stateFlow.value.filterSheet.selection === selectionAfterFirstEmit) shouldBe true
+            job.cancel()
+        }
     }
 }

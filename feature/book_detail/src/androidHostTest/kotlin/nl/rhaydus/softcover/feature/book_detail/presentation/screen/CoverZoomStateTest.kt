@@ -31,6 +31,7 @@ class CoverZoomStateTest {
             // ----- Arrange -----
             val state = CoverZoomState()
             state.containerSize = containerSize
+
             state.zoomBy(
                 factor = DOUBLE_TAP_SCALE,
                 pan = Offset(
@@ -80,6 +81,7 @@ class CoverZoomStateTest {
             // ----- Arrange -----
             val state = CoverZoomState()
             state.containerSize = containerSize
+
             val hugePan = Offset(
                 x = 100_000f,
                 y = -100_000f,
@@ -97,6 +99,7 @@ class CoverZoomStateTest {
                 currentScale = DOUBLE_TAP_SCALE,
                 containerSize = containerSize,
             )
+
             state.offset shouldBe expected
         }
 

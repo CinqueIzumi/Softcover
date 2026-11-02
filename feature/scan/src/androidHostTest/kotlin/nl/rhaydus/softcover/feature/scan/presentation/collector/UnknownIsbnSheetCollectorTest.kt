@@ -38,11 +38,13 @@ class UnknownIsbnSheetCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(ScanUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalScanVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk(relaxed = true)
     }
 
@@ -68,10 +70,12 @@ class UnknownIsbnSheetCollectorTest {
             // ----- Assert -----
             val model = stateFlow.value.unknownIsbnSheet.modelOrNull.shouldNotBeNull()
             model.isbn shouldBe ISBN
+
             model.scaffold shouldBe unknownIsbnSheetScaffoldFor(
                 isAdding = false,
                 isImportPending = false,
             )
+
             stateFlow.value.unknownIsbnSheet.isClosing shouldBe false
         }
 
@@ -91,9 +95,9 @@ class UnknownIsbnSheetCollectorTest {
             // ----- Assert -----
             stateFlow.value.unknownIsbnSheet.modelOrNull.shouldNotBeNull().scaffold shouldBe
                 unknownIsbnSheetScaffoldFor(
-                isAdding = true,
-                isImportPending = false,
-            )
+                    isAdding = true,
+                    isImportPending = false,
+                )
         }
 
         @Test
@@ -125,11 +129,12 @@ class UnknownIsbnSheetCollectorTest {
                 isAdding = true,
                 isImportPending = false,
             )
+
             stateFlow.value.unknownIsbnSheet.modelOrNull.shouldNotBeNull().scaffold shouldBe
                 unknownIsbnSheetScaffoldFor(
-                isAdding = false,
-                isImportPending = false,
-            )
+                    isAdding = false,
+                    isImportPending = false,
+                )
         }
 
         @Test
@@ -168,6 +173,7 @@ class UnknownIsbnSheetCollectorTest {
             launchCollector()
             stateFlow.update { it.copy(unknownIsbn = ISBN) }
             stateFlow.update { it.copy(isAddingBook = true) }
+
             val pending = ResolvedScan(
                 book = PreviewData.baseBook,
                 editionId = 3,
@@ -185,30 +191,31 @@ class UnknownIsbnSheetCollectorTest {
             // ----- Assert -----
             val session = stateFlow.value.unknownIsbnSheet
             session.isClosing shouldBe true
+
             session.modelOrNull.shouldNotBeNull().scaffold shouldBe
                 unknownIsbnSheetScaffoldFor(
-                isAdding = true,
-                isImportPending = false,
-            ).requestingClose()
+                    isAdding = true,
+                    isImportPending = false,
+                ).requestingClose()
+
             session.dismissed() shouldBe pending
         }
 
         @Test
-        fun `opens a fresh session when a new isbn is requested after the sheet started closing`() =
-            runTest(testDispatcher) {
-                // ----- Arrange -----
-                launchCollector()
-                stateFlow.update { it.copy(unknownIsbn = ISBN) }
-                stateFlow.update { it.copy(unknownIsbn = null) }
+        fun `opens a fresh session when a new isbn is requested after the sheet started closing`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            launchCollector()
+            stateFlow.update { it.copy(unknownIsbn = ISBN) }
+            stateFlow.update { it.copy(unknownIsbn = null) }
 
-                // ----- Act -----
-                stateFlow.update { it.copy(unknownIsbn = OTHER_ISBN) }
+            // ----- Act -----
+            stateFlow.update { it.copy(unknownIsbn = OTHER_ISBN) }
 
-                // ----- Assert -----
-                val session = stateFlow.value.unknownIsbnSheet
-                session.isClosing shouldBe false
-                session.modelOrNull.shouldNotBeNull().isbn shouldBe OTHER_ISBN
-            }
+            // ----- Assert -----
+            val session = stateFlow.value.unknownIsbnSheet
+            session.isClosing shouldBe false
+            session.modelOrNull.shouldNotBeNull().isbn shouldBe OTHER_ISBN
+        }
 
         @Test
         fun `keeps the pending scan when it rewrites the scaffold`() = runTest(testDispatcher) {
@@ -217,13 +224,16 @@ class UnknownIsbnSheetCollectorTest {
                 book = PreviewData.baseBook,
                 editionId = null,
             )
+
             launchCollector()
             stateFlow.update { it.copy(unknownIsbn = ISBN) }
             val openModel = stateFlow.value.unknownIsbnSheet.modelOrNull.shouldNotBeNull()
+
             val openWithPending = SheetSession.Open(
                 model = openModel,
                 pending = pending,
             )
+
             stateFlow.update { it.copy(unknownIsbnSheet = openWithPending) }
 
             // ----- Act -----
@@ -249,13 +259,15 @@ class UnknownIsbnSheetCollectorTest {
             val modelAfter = session.modelOrNull.shouldNotBeNull()
             modelAfter shouldNotBe modelBefore
             modelAfter.isbn shouldBe ISBN
+
             modelAfter.scaffold shouldBe unknownIsbnSheetScaffoldFor(
                 isAdding = false,
                 isImportPending = true,
             )
+
             session.isClosing shouldBe false
         }
-}
+    }
 
     private companion object {
         const val ISBN = "9780451524935"

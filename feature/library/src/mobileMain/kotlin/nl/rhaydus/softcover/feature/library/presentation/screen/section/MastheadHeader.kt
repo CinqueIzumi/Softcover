@@ -28,16 +28,16 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import kotlin.math.floor
 import nl.rhaydus.designsystem.editorial.component.PullToRefreshEyebrow
+import nl.rhaydus.designsystem.modifier.pressScaleClickable
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.header.MastheadSubtitle
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
-import nl.rhaydus.softcover.core.component.modifier.tactileClickable
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import kotlin.math.floor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,7 +66,11 @@ internal fun MastheadHeader(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = Spacing.gutter, end = Spacing.xs, top = Spacing.xs),
+            .padding(
+                start = Spacing.gutter,
+                end = Spacing.xs,
+                top = Spacing.xs,
+            ),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -88,9 +92,11 @@ internal fun MastheadHeader(
                 .layout { measurable, constraints ->
                     val placeable = measurable.measure(constraints)
                     onCollapsibleSized(placeable.height)
+
                     val visibleHeight = (placeable.height * (1f - collapseFraction()))
                         .toInt()
                         .coerceAtLeast(0)
+
                     layout(placeable.width, visibleHeight) {
                         placeable.place(
                             0,
@@ -112,7 +118,7 @@ internal fun MastheadHeader(
                 // Shelves sheet, replacing the retired pill tab row.
                 Row(
                     modifier = Modifier
-                        .tactileClickable(onClick = onTitleClick)
+                        .pressScaleClickable(onClick = onTitleClick)
                         .padding(end = Spacing.md),
                     verticalAlignment = Alignment.Top,
                 ) {
@@ -165,6 +171,7 @@ private fun ShelfTitleCrossfade(
     modifier: Modifier = Modifier,
 ) {
     val currentPosition by rememberUpdatedState(pagePosition)
+
     val fromIndex by remember {
         derivedStateOf { floor(currentPosition()).toInt() }
     }

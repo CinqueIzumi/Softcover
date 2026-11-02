@@ -22,6 +22,7 @@ internal class ShuffleCallback : ActionCallback, KoinComponent {
         val appWidgetId = GlanceAppWidgetManager(context).getAppWidgetId(glanceId)
 
         val wantToRead = dependencies.getWantToReadUserBooks().firstOrNull() ?: return
+
         val lists = dependencies.getAllUserLists().firstOrNull() ?: return
 
         dependencies.shuffleRandomPick(

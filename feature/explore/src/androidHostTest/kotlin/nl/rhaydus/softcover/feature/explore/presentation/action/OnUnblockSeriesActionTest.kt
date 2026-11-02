@@ -37,6 +37,7 @@ class OnUnblockSeriesActionTest {
         undoContinueSeriesDismissalUseCase = mockk()
         dismissContinueSeriesUseCase = mockk(relaxed = true)
         stateFlow = MutableStateFlow(HiddenSuggestionsUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(HiddenSuggestionsLocalVariables()),
@@ -68,6 +69,7 @@ class OnUnblockSeriesActionTest {
 
     private fun stubDependencies(testScope: TestScope): HiddenSuggestionsDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<HiddenSuggestionsDependencies>(relaxed = true).also { mock ->
             every {
                 mock.undoContinueSeriesDismissalUseCase

@@ -23,12 +23,11 @@ internal value class AppSettingsDataStore(val store: DataStore<AppSettingsEntity
 internal fun createAppSettingsDataStore(
     fileSystem: FileSystem,
     producePath: () -> Path,
-): DataStore<AppSettingsEntity> =
-    DataStoreFactory.create(
-        storage = OkioStorage(
-            fileSystem = fileSystem,
-            serializer = AppSettingsSerializer,
-            producePath = producePath,
-        ),
-        migrations = listOf(PausedShelfMigration),
-    )
+): DataStore<AppSettingsEntity> = DataStoreFactory.create(
+    storage = OkioStorage(
+        fileSystem = fileSystem,
+        serializer = AppSettingsSerializer,
+        producePath = producePath,
+    ),
+    migrations = listOf(PausedShelfMigration),
+)

@@ -58,7 +58,7 @@ internal data class LibraryVisibilitySettingsUiState(
             draftEnabledStatusCodes != persistedEnabledStatusCodes ||
                 draftEnabledListIds != persistedEnabledListIds ||
                 draftTabOrder != persistedTabOrder
-            )
+        )
 }
 
 internal fun LibraryVisibilitySettingsUiState.withOrderedEntries(): LibraryVisibilitySettingsUiState = copy(

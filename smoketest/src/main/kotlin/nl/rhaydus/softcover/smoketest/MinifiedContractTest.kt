@@ -21,6 +21,7 @@ class MinifiedContractTest {
     @Before
     fun loadAppClassLoader() {
         val context = InstrumentationRegistry.getInstrumentation().context
+
         val appInfo = context.packageManager.getApplicationInfo(
             APP_PACKAGE,
             0,

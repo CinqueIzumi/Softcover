@@ -34,6 +34,7 @@ class HideUntaggedAuthorsCollectorTest {
         getHideUntaggedAuthorsAsFlowUseCase = mockk()
         stateFlow = MutableStateFlow(ProfileUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalProfileVariables()),
@@ -47,6 +48,7 @@ class HideUntaggedAuthorsCollectorTest {
 
     private fun stubDependencies(testScope: TestScope): ProfileDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<ProfileDependencies>(relaxed = true).also { mock ->
             every {
                 mock.getHideUntaggedAuthorsAsFlowUseCase
@@ -73,6 +75,7 @@ class HideUntaggedAuthorsCollectorTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
             val collector = HideUntaggedAuthorsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -93,6 +96,7 @@ class HideUntaggedAuthorsCollectorTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
             val collector = HideUntaggedAuthorsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

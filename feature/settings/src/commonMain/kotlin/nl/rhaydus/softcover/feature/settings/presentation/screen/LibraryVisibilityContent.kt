@@ -9,8 +9,8 @@ import androidx.compose.ui.Modifier
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.header.SectionHeader
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.LibraryTabsGroupHeader
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.ReorderableTabsGroup

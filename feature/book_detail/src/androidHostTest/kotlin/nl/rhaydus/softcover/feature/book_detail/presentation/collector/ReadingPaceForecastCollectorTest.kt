@@ -45,6 +45,7 @@ class ReadingPaceForecastCollectorTest {
         observeReadingJournalHistoryUseCase = mockk()
         refreshReadingJournalHistoryUseCase = mockk()
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -105,6 +106,7 @@ class ReadingPaceForecastCollectorTest {
                 this@mockk.audioSeconds
             } returns audioSeconds
         }
+
         val userBookRead = mockk<UserBookRead> {
             every {
                 this@mockk.currentPage
@@ -118,6 +120,7 @@ class ReadingPaceForecastCollectorTest {
                 this@mockk.startedAt
             } returns startedAt
         }
+
         val userBook = mockk<UserBook> {
             every {
                 this@mockk.status
@@ -166,6 +169,7 @@ class ReadingPaceForecastCollectorTest {
                     pages = 90,
                 ),
             )
+
             stateFlow.value = buildBookDetailUiState().copy(book = stubBook(currentPage = 90))
             val collector = ReadingPaceForecastCollector()
 
@@ -199,6 +203,7 @@ class ReadingPaceForecastCollectorTest {
                     seconds = 3600,
                 ),
             )
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = stubBook(
                     pages = null,
@@ -206,6 +211,7 @@ class ReadingPaceForecastCollectorTest {
                     currentSeconds = 3600,
                 ),
             )
+
             val collector = ReadingPaceForecastCollector()
 
             // ----- Act -----
@@ -233,14 +239,17 @@ class ReadingPaceForecastCollectorTest {
                     pages = 50,
                 ),
             )
+
             stateFlow.value = buildBookDetailUiState().copy(book = stubBook(currentPage = 100))
             val collector = ReadingPaceForecastCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
                     dependencies = dependencies,
                 )
             }
+
             val forecastBefore = stateFlow.value.readingPaceForecast.shouldNotBeNull()
 
             // ----- Act -----
@@ -268,6 +277,7 @@ class ReadingPaceForecastCollectorTest {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState().copy(book = stubBook(currentPage = 10))
             val collector = ReadingPaceForecastCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -282,6 +292,7 @@ class ReadingPaceForecastCollectorTest {
             coVerify(exactly = 1) {
                 refreshReadingJournalHistoryUseCase(bookId = 1)
             }
+
             job.cancel()
         }
 
@@ -290,6 +301,7 @@ class ReadingPaceForecastCollectorTest {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState().copy(book = stubBook(id = 1))
             val collector = ReadingPaceForecastCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -304,9 +316,11 @@ class ReadingPaceForecastCollectorTest {
             coVerify(exactly = 1) {
                 refreshReadingJournalHistoryUseCase(bookId = 1)
             }
+
             coVerify(exactly = 1) {
                 refreshReadingJournalHistoryUseCase(bookId = 2)
             }
+
             job.cancel()
         }
 
@@ -316,12 +330,14 @@ class ReadingPaceForecastCollectorTest {
             coEvery {
                 refreshReadingJournalHistoryUseCase(bookId = any())
             } returns Result.failure(IllegalStateException("offline"))
+
             historyFlow(1).value = listOf(
                 entry(
                     day = 1,
                     pages = 25,
                 ),
             )
+
             stateFlow.value = buildBookDetailUiState().copy(book = stubBook(currentPage = 0))
             val collector = ReadingPaceForecastCollector()
 
@@ -348,6 +364,7 @@ class ReadingPaceForecastCollectorTest {
                     pages = 25,
                 ),
             )
+
             stateFlow.value = buildBookDetailUiState().copy(book = stubBook(status = BookStatus.WantToRead))
             val collector = ReadingPaceForecastCollector()
 
@@ -361,12 +378,15 @@ class ReadingPaceForecastCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.readingPaceForecast shouldBe null
+
             verify(exactly = 0) {
                 observeReadingJournalHistoryUseCase(bookId = any())
             }
+
             coVerify(exactly = 0) {
                 refreshReadingJournalHistoryUseCase(bookId = any())
             }
+
             job.cancel()
         }
 
@@ -379,8 +399,10 @@ class ReadingPaceForecastCollectorTest {
                     pages = 25,
                 ),
             )
+
             stateFlow.value = buildBookDetailUiState().copy(book = stubBook(currentPage = 0))
             val collector = ReadingPaceForecastCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -413,12 +435,14 @@ class ReadingPaceForecastCollectorTest {
                     pages = 30,
                 ),
             )
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = stubBook(
                     currentPage = 30,
                     startedAt = "2026-01-10",
                 ),
             )
+
             val collector = ReadingPaceForecastCollector()
 
             // ----- Act -----
@@ -453,12 +477,14 @@ class ReadingPaceForecastCollectorTest {
                     pages = 30,
                 ),
             )
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = stubBook(
                     currentPage = 30,
                     startedAt = null,
                 ),
             )
+
             val collector = ReadingPaceForecastCollector()
 
             // ----- Act -----

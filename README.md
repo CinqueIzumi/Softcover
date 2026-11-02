@@ -139,7 +139,7 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 | [Compose Stability Analyzer](https://github.com/skydoves/compose-stability-analyzer) | 0.9.0 | Per-module Compose stability baselines, gated by `stabilityCheck` |
 | [Kover](https://github.com/Kotlin/kotlinx-kover) | 0.9.8 | Code-coverage reports, aggregated at the root for Codecov |
 
-#### Foundation ([`nl.rhaydus`](https://central.sonatype.com/search?q=nl.rhaydus), 0.3.1 — first-party shared libraries, resolved from Maven Central by default, or locally via `foundation.local=true`)
+#### Foundation (`nl.rhaydus`, v0.4.0 — first-party shared libraries, built from the `foundation/` git submodule)
 | Library | Purpose |
 |---|---|
 | `nl.rhaydus:toad` | TOAD presentation runtime — `ToadScreenModel`, `UiState` / `UiAction` / `UiEvent`, `Collector`, `ActionDependencies` |
@@ -149,10 +149,11 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 | `nl.rhaydus:designsystem-core` | Brand-agnostic Compose skeleton — theme scaffold (`RhaydusTheme`), layout primitives, modifiers, the button family, adaptive/desktop components, the `RhaydusIconResource` token |
 | `nl.rhaydus:designsystem-editorial` | Editorial design language — the typography role contract + editorial components |
 | `nl.rhaydus:designsystem-image` | Coil-based async image components |
-| `nl.rhaydus:ktlint-rules` | Custom ktlint ruleset (the mechanizable layout rules + gate) |
+| `nl.rhaydus:ktlint-rules` | Custom ktlint formatter (the auto-fixing layout rules) |
 | `nl.rhaydus:detekt-rules` | Custom type-resolved detekt ruleset + the shared detekt baseline config |
+| `nl.rhaydus:konsist-rules` | Konsist assertions for declaration and architecture rules |
 
-These replace what was previously vendored in the app — the local TOAD runtime, the local `:ktlint-rules` module, and the duplicated design-system components/seams. Softcover keeps only its brand layer (tokens, the `SoftcoverIcon` catalog, brand components like `Cover`) on top. See [`docs/rhaydus/0.3.1/CAPABILITIES.md`](docs/rhaydus/0.3.1/CAPABILITIES.md).
+Softcover keeps only its brand layer (tokens, the `SoftcoverIcon` catalog, brand components like `Cover`) on top. See [`foundation/docs/CAPABILITIES.md`](foundation/docs/CAPABILITIES.md).
 
 #### Data & Networking
 | Technology | Version | Purpose |
@@ -234,10 +235,16 @@ flowchart LR
 - A Hardcover.app account and API token
 
 ### Build & Run
+The foundation lives in a git submodule, so clone with submodules (or fetch them in an existing clone):
+```bash
+git clone --recurse-submodules <repo-url>
+git submodule update --init      # existing clone
+```
+
 ```bash
 ./gradlew assembleDebug          # Build a debug APK
 ./gradlew assembleRelease        # Build a release APK
-./gradlew test                   # Run :app / :desktopApp / :detekt-rules unit tests only
+./gradlew test                   # Run :app / :desktopApp / :konsist unit tests only
 ./gradlew testAndroidHostTest --continue   # Run the KMP module unit tests
 ./gradlew :app:test              # Run unit tests for the app module
 ./gradlew :smoketest:pixelApi36MinifiedAndroidTest   # Device suite on the R8-minified app (managed emulator; needs HARDCOVER_SMOKE_TOKEN or hardcover.apiToken in local.properties)
@@ -295,7 +302,7 @@ Softcover is being actively redesigned. **What's coming, by version, lives in [R
 | [docs/reference/module-structure.md](docs/reference/module-structure.md) | Module tiers, allowed dependency directions, and where new code belongs |
 | [docs/reference/design-system.md](docs/reference/design-system.md) | Color roles, editorial typography, layout primitives, components, and patterns |
 | [docs/reference/code-style.md](docs/reference/code-style.md) | Naming, layout, and whitespace conventions |
-| [docs/rhaydus/0.3.1/](docs/rhaydus/0.3.1/CAPABILITIES.md) | The `nl.rhaydus` foundation conventions (architecture, TOAD, code style, design-system) + capabilities index — the source of truth the local docs defer to |
+| [foundation/docs/](foundation/docs/CAPABILITIES.md) | The `nl.rhaydus` foundation conventions (architecture, TOAD, code style, design-system) + capabilities index — the source of truth the local docs defer to |
 | [CHANGELOG.md](CHANGELOG.md) | Per-version release notes — the source for the in-app What's new page and each GitHub Release |
 | [ROADMAP.md](ROADMAP.md) | Public, user-facing roadmap — generated from the open GitHub milestones; never hand-edited |
 | [docs/working/](docs/working/) | Working notes — audits and reviews kept alongside the code (planned work lives in GitHub Issues) |

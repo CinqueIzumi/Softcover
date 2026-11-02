@@ -7,16 +7,16 @@ import nl.rhaydus.toad.ToadScreenModel
 class MotionDebugScreenModel(
     appDispatchers: AppDispatchers,
 ) : ToadScreenModel<
-    MotionDebugUiState,
-    MotionDebugEvent,
-    MotionDebugDependencies,
-    MotionDebugCollector,
-    MotionDebugLocalVariables,
+        MotionDebugUiState,
+        MotionDebugEvent,
+        MotionDebugDependencies,
+        MotionDebugCollector,
+        MotionDebugLocalVariables,
     >(
-    initialState = MotionDebugUiState(),
-    initialLocalVariables = MotionDebugLocalVariables(),
-    initializers = emptyList(),
-) {
+        initialState = MotionDebugUiState(),
+        initialLocalVariables = MotionDebugLocalVariables(),
+        initializers = emptyList(),
+    ) {
     override val dependencies = MotionDebugDependencies(
         mainDispatcher = appDispatchers.main,
         coroutineScope = screenModelScope,

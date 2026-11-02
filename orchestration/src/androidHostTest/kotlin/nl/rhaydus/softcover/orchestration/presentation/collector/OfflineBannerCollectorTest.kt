@@ -39,21 +39,29 @@ class OfflineBannerCollectorTest {
     fun setUp() {
         isOnline = MutableStateFlow(true)
         val provider = mockk<NetworkAvailabilityProvider>()
+
         every {
             provider.isOnline
         } returns isOnline
+
         val offlineCopy = mockk<OfflineCopy>()
+
         coEvery {
             offlineCopy.banner()
         } returns banner
+
         dependencies = mockk(relaxed = true)
+
         every {
             dependencies.offlineCopy
         } returns offlineCopy
+
         every {
             dependencies.networkAvailabilityProvider
         } returns provider
+
         stateFlow = MutableStateFlow(RootUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(RootLocalVariables),
@@ -67,6 +75,7 @@ class OfflineBannerCollectorTest {
         fun `banner visibility follows connectivity toggles`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = OfflineBannerCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

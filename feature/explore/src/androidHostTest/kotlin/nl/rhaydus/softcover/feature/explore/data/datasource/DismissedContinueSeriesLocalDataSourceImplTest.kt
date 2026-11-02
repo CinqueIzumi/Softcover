@@ -22,9 +22,11 @@ class DismissedContinueSeriesLocalDataSourceImplTest {
         every {
             dao.observeDismissedSeriesIds()
         } returns flowOf(emptyList())
+
         every {
             dao.observeDismissedBooks()
         } returns flowOf(emptyList())
+
         every {
             dao.observeDismissedSeries()
         } returns flowOf(emptyList())

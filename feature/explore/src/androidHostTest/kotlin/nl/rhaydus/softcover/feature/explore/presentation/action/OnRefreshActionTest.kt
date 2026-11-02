@@ -32,6 +32,7 @@ class OnRefreshActionTest {
         refreshTrendingBooksUseCase = mockk()
         refreshTrigger = MutableStateFlow(0L)
         stateFlow = MutableStateFlow(ExploreScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
@@ -98,9 +99,9 @@ class OnRefreshActionTest {
             // ----- Arrange -----
             coEvery {
                 refreshTrendingBooksUseCase(
-                period = any(),
-                maxAge = any(),
-            )
+                    period = any(),
+                    maxAge = any(),
+                )
             } returns Result.failure(IllegalStateException("offline"))
 
             // ----- Act -----

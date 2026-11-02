@@ -73,11 +73,13 @@ class FeaturedBookMapperTest {
         @Test
         fun `carries the series text across`() {
             // ----- Arrange -----
-            val subject = book(bookSeries = BookSeries(
-                id = 1,
-                name = "The Saga",
-                amountOfBooks = 3,
-            ),)
+            val subject = book(
+                bookSeries = BookSeries(
+                    id = 1,
+                    name = "The Saga",
+                    amountOfBooks = 3,
+                ),
+            )
 
             // ----- Act -----
             val result = subject.toFeaturedBookUiModel()
@@ -105,13 +107,15 @@ class FeaturedBookMapperTest {
         fun `joins the current edition authors`() {
             // ----- Arrange -----
             val subject = book(
-                defaultEdition = edition(authors = listOf(Author(
-                    1,
-                    "Ann",
-                ), Author(
-                    2,
-                    "Bob",
-                ),),),
+                defaultEdition = edition(
+                    authors = listOf(Author(
+                        1,
+                        "Ann",
+                    ), Author(
+                        2,
+                        "Bob",
+                    ),),
+                ),
             )
 
             // ----- Act -----

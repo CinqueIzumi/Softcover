@@ -38,6 +38,7 @@ class OnBulkRemoveFromLibraryActionTest {
     fun setUp() {
         undoableBookRemover = mockk()
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -65,12 +66,11 @@ class OnBulkRemoveFromLibraryActionTest {
         userBook = null,
     )
 
-    private fun stubDependencies(): LibraryDependencies =
-        mockk<LibraryDependencies>(relaxed = true).also { mock ->
-            every {
-                mock.undoableBookRemover
-            } returns undoableBookRemover
-        }
+    private fun stubDependencies(): LibraryDependencies = mockk<LibraryDependencies>(relaxed = true).also { mock ->
+        every {
+            mock.undoableBookRemover
+        } returns undoableBookRemover
+    }
 
     @Nested
     inner class Execute {
@@ -79,6 +79,7 @@ class OnBulkRemoveFromLibraryActionTest {
             // ----- Arrange -----
             val selectedBook = buildBook(id = 1)
             val unselectedBook = buildBook(id = 2)
+
             stateFlow.value = LibraryUiState(
                 selectionMode = true,
                 selectedBookIds = persistentSetOf(1),
@@ -114,6 +115,7 @@ class OnBulkRemoveFromLibraryActionTest {
             val selectedBook1 = buildBook(id = 1)
             val selectedBook2 = buildBook(id = 2)
             val explicitBook = buildBook(id = 99)
+
             stateFlow.value = LibraryUiState(
                 selectedBookIds = persistentSetOf(1, 2),
                 booksByTab = persistentMapOf(tabKey to persistentListOf(selectedBook1, selectedBook2, explicitBook)),
@@ -140,11 +142,13 @@ class OnBulkRemoveFromLibraryActionTest {
         fun `keeps the bulk remove sheet requested with progress on while the stage runs`() = runTest {
             // ----- Arrange -----
             val book = buildBook(id = 1)
+
             stateFlow.value = LibraryUiState(
                 selectedBookIds = persistentSetOf(1),
                 booksByTab = persistentMapOf(tabKey to persistentListOf(book)),
                 isBulkRemoveSheetRequested = true,
             )
+
             var stateDuringRemoval: LibraryUiState? = null
 
             coEvery {
@@ -173,6 +177,7 @@ class OnBulkRemoveFromLibraryActionTest {
         fun `a failed stage still resets selection and withdraws the sheet request`() = runTest {
             // ----- Arrange -----
             val book = buildBook(id = 1)
+
             stateFlow.value = LibraryUiState(
                 selectionMode = true,
                 selectedBookIds = persistentSetOf(1),
@@ -222,34 +227,34 @@ class OnBulkRemoveFromLibraryActionTest {
         }
 
         @Test
-        fun `a successful stage also withdraws the choose-lists request and keeps its create-list request`() =
-            runTest {
-                // ----- Arrange -----
-                val book = buildBook(id = 1)
-                stateFlow.value = LibraryUiState(
-                    selectionMode = true,
-                    selectedBookIds = persistentSetOf(1),
-                    booksByTab = persistentMapOf(tabKey to persistentListOf(book)),
-                    isBulkRemoveSheetRequested = true,
-                    chooseListsSheet = openChooseListsSession(pending = CreateList),
-                )
+        fun `a successful stage also withdraws the choose-lists request and keeps its create-list request`() = runTest {
+            // ----- Arrange -----
+            val book = buildBook(id = 1)
 
-                coEvery {
-                    undoableBookRemover.remove(books = listOf(book))
-                } returns Result.success(Unit)
+            stateFlow.value = LibraryUiState(
+                selectionMode = true,
+                selectedBookIds = persistentSetOf(1),
+                booksByTab = persistentMapOf(tabKey to persistentListOf(book)),
+                isBulkRemoveSheetRequested = true,
+                chooseListsSheet = openChooseListsSession(pending = CreateList),
+            )
 
-                val action = OnBulkRemoveFromLibraryAction(explicitBookIds = null)
+            coEvery {
+                undoableBookRemover.remove(books = listOf(book))
+            } returns Result.success(Unit)
 
-                // ----- Act -----
-                action.execute(
-                    dependencies = stubDependencies(),
-                    scope = scope,
-                )
+            val action = OnBulkRemoveFromLibraryAction(explicitBookIds = null)
 
-                // ----- Assert -----
-                stateFlow.value.isChooseListsSheetRequested shouldBe false
-                stateFlow.value.chooseListsSheet.dismissed() shouldBe CreateList
-            }
+            // ----- Act -----
+            action.execute(
+                dependencies = stubDependencies(),
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.isChooseListsSheetRequested shouldBe false
+            stateFlow.value.chooseListsSheet.dismissed() shouldBe CreateList
+        }
 
         @Test
         fun `leaves the bulk remove session closed when nothing is shown and nothing resolves`() = runTest {

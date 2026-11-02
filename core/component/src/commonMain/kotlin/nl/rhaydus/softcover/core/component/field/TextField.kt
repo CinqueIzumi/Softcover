@@ -19,10 +19,10 @@ import androidx.compose.ui.semantics.error
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
-import nl.rhaydus.softcover.core.component.modifier.rememberShakeTrigger
-import nl.rhaydus.softcover.core.component.modifier.shakeOnError
+import nl.rhaydus.designsystem.modifier.rememberShakeTrigger
+import nl.rhaydus.designsystem.modifier.shakeOnError
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 @Composable
 fun TextField(

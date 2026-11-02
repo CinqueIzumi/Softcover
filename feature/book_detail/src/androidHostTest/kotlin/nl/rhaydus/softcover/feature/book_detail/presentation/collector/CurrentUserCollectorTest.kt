@@ -32,16 +32,19 @@ class CurrentUserCollectorTest {
     fun setUp() {
         profileFlow = MutableStateFlow(null)
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         val observeUserProfileDataUseCase = mockk<ObserveUserProfileDataUseCase> {
             every {
                 this@mockk.invoke()
             } returns profileFlow
         }
+
         dependencies = mockk<BookDetailDependencies>(relaxed = true).also {
             every {
                 it.observeUserProfileDataUseCase
@@ -116,6 +119,7 @@ class CurrentUserCollectorTest {
                 username = "frodo",
                 profileImageUrl = "https://example.com/frodo.png",
             )
+
             launchCollector()
 
             // ----- Act -----

@@ -29,6 +29,7 @@ class ProgressHistoryDaoTest {
             builder = Room.inMemoryDatabaseBuilder(context = context),
             queryContext = testDispatcher,
         )
+
         dao = database.progressHistoryDao()
     }
 
@@ -65,6 +66,7 @@ class ProgressHistoryDaoTest {
                     pages = 3,
                 ),
             )
+
             dao.insert(
                 entity = row(
                     bookId = 1,
@@ -72,6 +74,7 @@ class ProgressHistoryDaoTest {
                     pages = 1,
                 ),
             )
+
             dao.insert(
                 entity = row(
                     bookId = 1,
@@ -101,6 +104,7 @@ class ProgressHistoryDaoTest {
                     pages = 2,
                 ),
             )
+
             dao.insert(
                 entity = row(
                     bookId = 1,
@@ -108,6 +112,7 @@ class ProgressHistoryDaoTest {
                     pages = 1,
                 ),
             )
+
             dao.insert(
                 entity = row(
                     bookId = 1,
@@ -137,6 +142,7 @@ class ProgressHistoryDaoTest {
                     pages = 1,
                 ),
             )
+
             dao.insert(
                 entity = row(
                     bookId = 2,
@@ -176,6 +182,7 @@ class ProgressHistoryDaoTest {
                     pages = 1,
                 ),
             )
+
             dao.insert(
                 entity = row(
                     bookId = 1,
@@ -184,6 +191,7 @@ class ProgressHistoryDaoTest {
                     pending = true,
                 ),
             )
+
             dao.insert(
                 entity = row(
                     bookId = 2,
@@ -212,6 +220,7 @@ class ProgressHistoryDaoTest {
                     pages = 1,
                 ),
             )
+
             dao.insert(
                 entity = row(
                     bookId = 2,
@@ -247,6 +256,7 @@ class ProgressHistoryDaoTest {
                     pages = 1,
                 ),
             )
+
             dao.insert(
                 entity = row(
                     bookId = 1,
@@ -276,6 +286,7 @@ class ProgressHistoryDaoTest {
                     pages = 1,
                 ),
             )
+
             val racingId = dao.insert(
                 entity = row(
                     bookId = 1,
@@ -288,6 +299,7 @@ class ProgressHistoryDaoTest {
             // ----- Act -----
             val snapshot = listOf(snapshottedId)
             dao.markSynced(localId = racingId)
+
             dao.replaceSynced(
                 syncedIdsBeforeFetch = snapshot,
                 entities = emptyList(),
@@ -341,6 +353,7 @@ class ProgressHistoryDaoTest {
                     pending = true,
                 ),
             )
+
             dao.insert(
                 entity = row(
                     bookId = 1,
@@ -373,6 +386,7 @@ class ProgressHistoryDaoTest {
                     pages = 1,
                 ),
             )
+
             dao.insert(
                 entity = row(
                     bookId = 1,

@@ -13,10 +13,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import nl.rhaydus.designsystem.component.LocalModalSheetForm
 import nl.rhaydus.designsystem.model.ModalSheetForm
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipFlow
 import nl.rhaydus.softcover.core.component.header.SectionHeader
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareSheetEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareTagPickerUiModel
 

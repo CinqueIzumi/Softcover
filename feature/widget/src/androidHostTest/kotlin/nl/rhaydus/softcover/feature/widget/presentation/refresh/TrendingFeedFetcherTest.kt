@@ -50,6 +50,7 @@ class TrendingFeedFetcherTest {
                 feeds = listOf(week, upcoming),
                 maxAge = 3.hours,
             )
+
             runCurrent()
 
             // ----- Assert -----
@@ -59,6 +60,7 @@ class TrendingFeedFetcherTest {
                     maxAge = 3.hours,
                 )
             }
+
             coVerify(exactly = 1) {
                 refreshTrendingFeed(
                     feed = upcoming,
@@ -76,6 +78,7 @@ class TrendingFeedFetcherTest {
                     maxAge = any(),
                 )
             } returns Result.failure(IllegalStateException("down"))
+
             coEvery {
                 refreshTrendingFeed(
                     feed = upcoming,
@@ -88,6 +91,7 @@ class TrendingFeedFetcherTest {
                 feeds = listOf(week, upcoming),
                 maxAge = 3.hours,
             )
+
             runCurrent()
 
             // ----- Assert -----
@@ -108,6 +112,7 @@ class TrendingFeedFetcherTest {
                     maxAge = any(),
                 )
             } returns Result.success(Unit)
+
             coEvery {
                 renderer.renderAll(widget)
             } returns Unit
@@ -117,6 +122,7 @@ class TrendingFeedFetcherTest {
                 feeds = listOf(week, upcoming),
                 maxAge = 3.hours,
             )
+
             runCurrent()
 
             // ----- Assert -----
@@ -132,12 +138,14 @@ class TrendingFeedFetcherTest {
                     maxAge = any(),
                 )
             } returns Result.failure(IllegalStateException("down"))
+
             coEvery {
                 refreshTrendingFeed(
                     feed = upcoming,
                     maxAge = any(),
                 )
             } returns Result.success(Unit)
+
             coEvery {
                 renderer.renderAll(widget)
             } returns Unit
@@ -147,6 +155,7 @@ class TrendingFeedFetcherTest {
                 feeds = listOf(week, upcoming),
                 maxAge = 3.hours,
             )
+
             runCurrent()
 
             // ----- Assert -----

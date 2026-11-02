@@ -8,24 +8,23 @@ import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 
 private const val FALLBACK_TITLE = "this book"
 
-fun endSessionPauseSheetScaffold(bookTitle: String?): SheetScaffoldUiModel =
-    SheetScaffoldUiModel(
-        header = SheetHeaderUiModel(
-            section = SectionHeaderUiModel.Section(
-                eyebrow = "Reading session",
-                headline = "End this session?",
-                description = "You're mid-session with ${bookTitle ?: FALLBACK_TITLE}. " +
-                    "Pausing the book ends the session and saves your reading time.",
-            ),
+fun endSessionPauseSheetScaffold(bookTitle: String?): SheetScaffoldUiModel = SheetScaffoldUiModel(
+    header = SheetHeaderUiModel(
+        section = SectionHeaderUiModel.Section(
+            eyebrow = "Reading session",
+            headline = "End this session?",
+            description = "You're mid-session with ${bookTitle ?: FALLBACK_TITLE}. " +
+                "Pausing the book ends the session and saves your reading time.",
         ),
-        footer = SheetFooterUiModel.Stacked(
-            primary = SheetFooterButton(
-                label = "End session and pause",
-                dismissesSheet = true,
-            ),
-            secondary = SheetFooterButton(
-                label = "Keep reading",
-                dismissesSheet = true,
-            ),
+    ),
+    footer = SheetFooterUiModel.Stacked(
+        primary = SheetFooterButton(
+            label = "End session and pause",
+            dismissesSheet = true,
         ),
-    )
+        secondary = SheetFooterButton(
+            label = "Keep reading",
+            dismissesSheet = true,
+        ),
+    ),
+)

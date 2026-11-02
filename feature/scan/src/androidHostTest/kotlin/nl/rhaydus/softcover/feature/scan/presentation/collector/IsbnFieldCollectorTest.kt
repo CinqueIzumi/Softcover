@@ -28,11 +28,13 @@ class IsbnFieldCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(ScanUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalScanVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk(relaxed = true)
     }
 
@@ -48,20 +50,19 @@ class IsbnFieldCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `disables the field while an ISBN is resolving and re-enables it once the lookup finishes`() =
-            runTest(testDispatcher) {
-                // ----- Arrange -----
-                launchCollector()
+        fun `disables the field while an ISBN is resolving and re-enables it once the lookup finishes`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            launchCollector()
 
-                // ----- Act -----
-                stateFlow.update { it.copy(isResolving = true) }
-                val enabledWhileResolving = stateFlow.value.isbnField.enabled
-                stateFlow.update { it.copy(isResolving = false) }
+            // ----- Act -----
+            stateFlow.update { it.copy(isResolving = true) }
+            val enabledWhileResolving = stateFlow.value.isbnField.enabled
+            stateFlow.update { it.copy(isResolving = false) }
 
-                // ----- Assert -----
-                enabledWhileResolving shouldBe false
-                stateFlow.value.isbnField.enabled shouldBe true
-            }
+            // ----- Assert -----
+            enabledWhileResolving shouldBe false
+            stateFlow.value.isbnField.enabled shouldBe true
+        }
 
         @Test
         fun `disables the field while a book is being added`() = runTest(testDispatcher) {
@@ -79,6 +80,7 @@ class IsbnFieldCollectorTest {
         fun `keeps the field disabled while only one of the two flags clears`() = runTest(testDispatcher) {
             // ----- Arrange -----
             launchCollector()
+
             stateFlow.update {
                 it.copy(
                     isResolving = true,

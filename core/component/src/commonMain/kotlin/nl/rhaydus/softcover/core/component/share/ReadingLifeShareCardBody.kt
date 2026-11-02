@@ -35,12 +35,12 @@ import androidx.compose.ui.unit.sp
 import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.designsystem.component.StarRatingInput
 import nl.rhaydus.designsystem.image.RhaydusShimmerImage
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerInk
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.tabularFigures
 
@@ -305,6 +305,7 @@ private fun ReadingLifeRidgeline(monthlyPages: ImmutableList<Int>) {
                 path = areaPath,
                 color = areaColor,
             )
+
             drawPath(
                 path = linePath,
                 color = lineColor,

@@ -40,11 +40,13 @@ class UnreleasedBadgeCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk(relaxed = true)
     }
 
@@ -137,6 +139,7 @@ class UnreleasedBadgeCollectorTest {
                 // ----- Arrange -----
                 val bookDate = daysFromToday(-30)
                 val editionDate = daysFromToday(30)
+
                 stateFlow.value = buildBookDetailUiState().copy(
                     book = stubBook(bookDate),
                     previewEdition = editionReleasing(editionDate),
@@ -157,6 +160,7 @@ class UnreleasedBadgeCollectorTest {
                 // ----- Arrange -----
                 val bookDate = daysFromToday(30)
                 val editionDate = daysFromToday(60)
+
                 stateFlow.value = buildBookDetailUiState().copy(
                     book = stubBook(bookDate),
                     previewEdition = editionReleasing(editionDate),
@@ -176,6 +180,7 @@ class UnreleasedBadgeCollectorTest {
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 val date = daysFromToday(30)
+
                 stateFlow.value = buildBookDetailUiState().copy(
                     book = stubBook(date),
                     previewEdition = editionReleasing(date),
@@ -195,6 +200,7 @@ class UnreleasedBadgeCollectorTest {
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 val bookDate = daysFromToday(60)
+
                 stateFlow.value = buildBookDetailUiState().copy(
                     book = stubBook(bookDate),
                     previewEdition = editionReleasing(daysFromToday(30)),
@@ -210,22 +216,21 @@ class UnreleasedBadgeCollectorTest {
             }
 
         @Test
-        fun `clears badge and caption when the edition is in the past and the book is released`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                stateFlow.value = buildBookDetailUiState().copy(
-                    book = stubBook(daysFromToday(-60)),
-                    previewEdition = editionReleasing(daysFromToday(-30)),
-                )
+        fun `clears badge and caption when the edition is in the past and the book is released`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = buildBookDetailUiState().copy(
+                book = stubBook(daysFromToday(-60)),
+                previewEdition = editionReleasing(daysFromToday(-30)),
+            )
 
-                // ----- Act -----
-                val job = launchCollector()
+            // ----- Act -----
+            val job = launchCollector()
 
-                // ----- Assert -----
-                stateFlow.value.unreleasedBadge shouldBe null
-                stateFlow.value.releaseCaption shouldBe null
-                job.cancel()
-            }
+            // ----- Assert -----
+            stateFlow.value.unreleasedBadge shouldBe null
+            stateFlow.value.releaseCaption shouldBe null
+            job.cancel()
+        }
 
         @Test
         fun `updates badge and caption when the displayed edition changes`() = runTest(UnconfinedTestDispatcher()) {

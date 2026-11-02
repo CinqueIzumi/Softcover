@@ -10,14 +10,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
@@ -167,7 +167,7 @@ internal fun ReorderableTabsGroup(
                                 reorderHaptics.lift(fromIndex = index)
                             },
                             onDragStopped = {
-                                val currentIdx = workingOrder.indexOfFirst { it.id == entry.id }
+                                val currentIdx = workingOrder.indexOfFirst { tab -> tab.id == entry.id }
 
                                 var residualOffsetY = dragOffsetY
 
@@ -195,6 +195,7 @@ internal fun ReorderableTabsGroup(
 
                                         workingOrder = workingOrder.toMutableList().also { list ->
                                             val moving = list.removeAt(currentIdx)
+
                                             list.add(
                                                 targetIdx,
                                                 moving,
@@ -203,7 +204,7 @@ internal fun ReorderableTabsGroup(
 
                                         runAction(
                                             OnReorderLibraryTabsAction(
-                                                newOrderedIds = workingOrder.map { it.id },
+                                                newOrderedIds = workingOrder.map { tab -> tab.id },
                                             ),
                                         )
                                     }

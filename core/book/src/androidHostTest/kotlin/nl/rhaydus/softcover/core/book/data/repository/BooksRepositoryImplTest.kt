@@ -57,7 +57,6 @@ import nl.rhaydus.softcover.core.domain.model.UpcomingWindow
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
-import java.util.TimeZone as JavaTimeZone
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -68,6 +67,7 @@ import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
+import java.util.TimeZone as JavaTimeZone
 
 class BooksRepositoryImplTest {
     private lateinit var booksRemoteDataSource: BooksRemoteDataSource
@@ -88,6 +88,7 @@ class BooksRepositoryImplTest {
         progressHistoryLocalDataSource = mockk(relaxed = true)
 
         val dispatcher = UnconfinedTestDispatcher()
+
         appDispatchers = AppDispatchers(
             main = dispatcher,
             io = dispatcher,
@@ -389,6 +390,7 @@ class BooksRepositoryImplTest {
             val userId = 20
             val movedUserBookId = 7
             val status = UserBookStatus.CURRENTLY_READING
+
             val movedBook: Book = mockk(relaxed = true) {
                 every {
                     this@mockk.userBook
@@ -683,6 +685,7 @@ class BooksRepositoryImplTest {
 
             // ----- Act -----
             gate.complete(Unit)
+
             joinAll(
                 first,
                 second,
@@ -1016,6 +1019,7 @@ class BooksRepositoryImplTest {
 
             val bookId = 7
             val cachedEditions = listOf(mockk<BookEdition>(relaxed = true), mockk<BookEdition>(relaxed = true))
+
             val localBook = mockk<Book>(relaxed = true) {
                 every {
                     this@mockk.editions
@@ -1138,6 +1142,7 @@ class BooksRepositoryImplTest {
                 every {
                     this@mockk.userBook
                 } returns null
+
                 every {
                     this@mockk.id
                 } returns canonicalId
@@ -1167,10 +1172,12 @@ class BooksRepositoryImplTest {
 
             coVerifyOrder {
                 booksLocalDataSource.cacheBook(book = canonicalBook)
+
                 booksLocalDataSource.redirectBookId(
                     oldId = missingId,
                     newId = canonicalId,
                 )
+
                 booksLocalDataSource.deleteOrphanBooks()
             }
         }
@@ -1251,6 +1258,7 @@ class BooksRepositoryImplTest {
                 every {
                     this@mockk.userBook
                 } returns null
+
                 every {
                     this@mockk.currentEdition
                 } returns currentEdition
@@ -1298,9 +1306,11 @@ class BooksRepositoryImplTest {
                 every {
                     this@mockk.userBook
                 } returns null
+
                 every {
                     this@mockk.currentEdition
                 } returns null
+
                 every {
                     this@mockk.editions
                 } returns listOf(firstEdition)
@@ -1371,9 +1381,11 @@ class BooksRepositoryImplTest {
                 every {
                     this@mockk.userBook
                 } returns null
+
                 every {
                     this@mockk.currentEdition
                 } returns null
+
                 every {
                     this@mockk.editions
                 } returns emptyList()
@@ -1503,10 +1515,12 @@ class BooksRepositoryImplTest {
         fun `happy path — writes optimistic snapshot, calls remote with book id, caches result and returns it`() = runTest {
             // ----- Arrange -----
             val bookId = 11
+
             val book = mockk<Book>(relaxed = true) {
                 every {
                     this@mockk.id
                 } returns bookId
+
                 every {
                     this@mockk.userBook
                 } returns stubUserBookWithStatus(
@@ -1514,6 +1528,7 @@ class BooksRepositoryImplTest {
                     status = BookStatus.Reading,
                 )
             }
+
             val remoteBook = stubBook(userBookId = 5)
 
             coEvery {
@@ -1546,10 +1561,12 @@ class BooksRepositoryImplTest {
             // ----- Arrange -----
             val bookId = 11
             val editionId = 55
+
             val book = mockk<Book>(relaxed = true) {
                 every {
                     this@mockk.id
                 } returns bookId
+
                 every {
                     this@mockk.userBook
                 } returns stubUserBookWithStatus(
@@ -1557,6 +1574,7 @@ class BooksRepositoryImplTest {
                     status = BookStatus.Reading,
                 )
             }
+
             val remoteBook = stubBook(userBookId = 5)
 
             coEvery {
@@ -1585,14 +1603,17 @@ class BooksRepositoryImplTest {
         fun `optimistic write is skipped when book has no userBook`() = runTest {
             // ----- Arrange -----
             val bookId = 11
+
             val book = mockk<Book>(relaxed = true) {
                 every {
                     this@mockk.id
                 } returns bookId
+
                 every {
                     this@mockk.userBook
                 } returns null
             }
+
             val remoteBook = stubBook(userBookId = null)
 
             coEvery {
@@ -1615,10 +1636,12 @@ class BooksRepositoryImplTest {
         fun `failure path — rolls back via cacheBook(snapshot) and rethrows`() = runTest {
             // ----- Arrange -----
             val bookId = 11
+
             val book = mockk<Book>(relaxed = true) {
                 every {
                     this@mockk.id
                 } returns bookId
+
                 every {
                     this@mockk.userBook
                 } returns stubUserBookWithStatus(
@@ -1626,6 +1649,7 @@ class BooksRepositoryImplTest {
                     status = BookStatus.Reading,
                 )
             }
+
             val snapshot = stubBook(userBookId = 5)
             val remoteError = RuntimeException("network error")
 
@@ -1655,10 +1679,12 @@ class BooksRepositoryImplTest {
         fun `cancellation — rethrows CancellationException without invoking rollback`() = runTest {
             // ----- Arrange -----
             val bookId = 11
+
             val book = mockk<Book>(relaxed = true) {
                 every {
                     this@mockk.id
                 } returns bookId
+
                 every {
                     this@mockk.userBook
                 } returns stubUserBookWithStatus(
@@ -1666,6 +1692,7 @@ class BooksRepositoryImplTest {
                     status = BookStatus.Reading,
                 )
             }
+
             val snapshot = stubBook(userBookId = 5)
 
             coEvery {
@@ -1702,6 +1729,7 @@ class BooksRepositoryImplTest {
                 updatedAt = "2026-01-01T10:00:00",
                 event = "some_existing_event",
             )
+
             val userBook = UserBook(
                 id = 1,
                 status = BookStatus.WantToRead,
@@ -1718,6 +1746,7 @@ class BooksRepositoryImplTest {
                 journals = listOf(existingJournal),
                 reads = emptyList(),
             )
+
             val book = Book(
                 id = 42,
                 title = "Test Book",
@@ -1735,6 +1764,7 @@ class BooksRepositoryImplTest {
                 isCompilation = false,
                 userBook = userBook,
             )
+
             val expectedBook = stubBook(userBookId = 1)
             val slot = slot<Book>()
 
@@ -1781,9 +1811,11 @@ class BooksRepositoryImplTest {
 
             // ----- Assert -----
             result shouldBe expectedBook
+
             coVerify(exactly = 0) {
                 booksLocalDataSource.cacheBook(book = book)
             }
+
             coVerify(exactly = 1) {
                 booksRemoteDataSource.markBookAsReading(
                     book = book,
@@ -1797,11 +1829,13 @@ class BooksRepositoryImplTest {
             // ----- Arrange -----
             val bookId = 42
             val remoteError = RuntimeException("network failure")
+
             val book = mockk<Book>(relaxed = true) {
                 every {
                     this@mockk.id
                 } returns bookId
             }
+
             val snapshot = mockk<Book>(relaxed = true) {
                 every {
                     this@mockk.id
@@ -1834,6 +1868,7 @@ class BooksRepositoryImplTest {
         fun `markBookAsReading does not call cacheBook with snapshot when no prior cached book exists`() = runTest {
             // ----- Arrange -----
             val bookId = 42
+
             val book = mockk<Book>(relaxed = true) {
                 every {
                     this@mockk.id
@@ -1864,11 +1899,13 @@ class BooksRepositoryImplTest {
         fun `markBookAsReading cancellation — optimistic write occurs but snapshot rollback is not invoked`() = runTest {
             // ----- Arrange -----
             val bookId = 42
+
             val book = mockk<Book>(relaxed = true) {
                 every {
                     this@mockk.id
                 } returns bookId
             }
+
             val snapshot = stubBook(userBookId = 1)
 
             coEvery {
@@ -1987,62 +2024,61 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `markBookAsPaused writes an optimistic Paused status without a journal event and returns the remote book`() =
-            runTest {
-                // ----- Arrange -----
-                val book = statusBook(status = BookStatus.Reading)
-                val remoteBook = stubBook(userBookId = 7)
-                val slot = slot<Book>()
+        fun `markBookAsPaused writes an optimistic Paused status without a journal event and returns the remote book`() = runTest {
+            // ----- Arrange -----
+            val book = statusBook(status = BookStatus.Reading)
+            val remoteBook = stubBook(userBookId = 7)
+            val slot = slot<Book>()
 
-                coEvery {
-                    booksRemoteDataSource.markBookAsPaused(
-                        book = book,
-                        editionId = any(),
-                    )
-                } returns remoteBook
+            coEvery {
+                booksRemoteDataSource.markBookAsPaused(
+                    book = book,
+                    editionId = any(),
+                )
+            } returns remoteBook
 
-                coEvery {
-                    booksLocalDataSource.cacheBook(book = capture(slot))
-                } returns Unit
+            coEvery {
+                booksLocalDataSource.cacheBook(book = capture(slot))
+            } returns Unit
 
-                // ----- Act -----
-                val result = repository.markBookAsPaused(book = book)
+            // ----- Act -----
+            val result = repository.markBookAsPaused(book = book)
 
-                // ----- Assert -----
-                result shouldBe remoteBook
-                val capturedUserBook = slot.captured.userBook.shouldNotBeNull()
-                capturedUserBook.status shouldBe BookStatus.Paused
-                capturedUserBook.journals shouldBe listOf(existingJournal)
-            }
+            // ----- Assert -----
+            result shouldBe remoteBook
+            val capturedUserBook = slot.captured.userBook.shouldNotBeNull()
+            capturedUserBook.status shouldBe BookStatus.Paused
+            capturedUserBook.journals shouldBe listOf(existingJournal)
+        }
 
         @Test
-        fun `markBookAsPaused skips the optimistic write for an already Paused book but still calls remote`() =
-            runTest {
-                // ----- Arrange -----
-                val book = statusBook(status = BookStatus.Paused)
-                val remoteBook = stubBook(userBookId = 7)
+        fun `markBookAsPaused skips the optimistic write for an already Paused book but still calls remote`() = runTest {
+            // ----- Arrange -----
+            val book = statusBook(status = BookStatus.Paused)
+            val remoteBook = stubBook(userBookId = 7)
 
-                coEvery {
-                    booksRemoteDataSource.markBookAsPaused(
-                        book = book,
-                        editionId = any(),
-                    )
-                } returns remoteBook
+            coEvery {
+                booksRemoteDataSource.markBookAsPaused(
+                    book = book,
+                    editionId = any(),
+                )
+            } returns remoteBook
 
-                // ----- Act -----
-                repository.markBookAsPaused(book = book)
+            // ----- Act -----
+            repository.markBookAsPaused(book = book)
 
-                // ----- Assert -----
-                coVerify(exactly = 0) {
-                    booksLocalDataSource.cacheBook(book = any())
-                }
-                coVerify(exactly = 1) {
-                    booksRemoteDataSource.markBookAsPaused(
-                        book = book,
-                        editionId = any(),
-                    )
-                }
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                booksLocalDataSource.cacheBook(book = any())
             }
+
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.markBookAsPaused(
+                    book = book,
+                    editionId = any(),
+                )
+            }
+        }
 
         @Test
         fun `markBookAsPaused forwards editionId to the remote data source`() = runTest {
@@ -2073,39 +2109,40 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `markBookAsPaused restores the snapshot and rethrows on a non-transient failure without queueing`() =
-            runTest {
-                // ----- Arrange -----
-                val book = statusBook(status = BookStatus.Reading)
-                val snapshot = stubBook(userBookId = 7)
-                val remoteError = RuntimeException("rejected")
+        fun `markBookAsPaused restores the snapshot and rethrows on a non-transient failure without queueing`() = runTest {
+            // ----- Arrange -----
+            val book = statusBook(status = BookStatus.Reading)
+            val snapshot = stubBook(userBookId = 7)
+            val remoteError = RuntimeException("rejected")
 
-                coEvery {
-                    booksLocalDataSource.getBookById(id = book.id)
-                } returns snapshot
+            coEvery {
+                booksLocalDataSource.getBookById(id = book.id)
+            } returns snapshot
 
-                coEvery {
-                    booksRemoteDataSource.markBookAsPaused(
-                        book = book,
-                        editionId = any(),
-                    )
-                } throws remoteError
+            coEvery {
+                booksRemoteDataSource.markBookAsPaused(
+                    book = book,
+                    editionId = any(),
+                )
+            } throws remoteError
 
-                // ----- Act -----
-                val caught = runCatching { repository.markBookAsPaused(book = book) }
+            // ----- Act -----
+            val caught = runCatching { repository.markBookAsPaused(book = book) }
 
-                // ----- Assert -----
-                caught.exceptionOrNull() shouldBe remoteError
-                coVerify(exactly = 1) {
-                    booksLocalDataSource.cacheBook(book = snapshot)
-                }
-                coVerify(exactly = 0) {
-                    offlineSync.enqueueStatusUpdate(
-                        book = any(),
-                        status = any(),
-                    )
-                }
+            // ----- Assert -----
+            caught.exceptionOrNull() shouldBe remoteError
+
+            coVerify(exactly = 1) {
+                booksLocalDataSource.cacheBook(book = snapshot)
             }
+
+            coVerify(exactly = 0) {
+                offlineSync.enqueueStatusUpdate(
+                    book = any(),
+                    status = any(),
+                )
+            }
+        }
 
         @Test
         fun `markBookAsPaused rethrows cancellation without rollback or queueing`() = runTest {
@@ -2135,6 +2172,7 @@ class BooksRepositoryImplTest {
             coVerify(exactly = 0) {
                 booksLocalDataSource.cacheBook(book = snapshot)
             }
+
             coVerify(exactly = 0) {
                 offlineSync.enqueueStatusUpdate(
                     book = any(),
@@ -2161,12 +2199,14 @@ class BooksRepositoryImplTest {
             // ----- Assert -----
             result shouldBe slot.captured
             result.userBook.shouldNotBeNull().status shouldBe BookStatus.Paused
+
             coVerify(exactly = 1) {
                 offlineSync.enqueueStatusUpdate(
                     book = result,
                     status = UserBookStatus.PAUSED,
                 )
             }
+
             coVerify(exactly = 0) {
                 booksRemoteDataSource.markBookAsPaused(
                     book = any(),
@@ -2176,38 +2216,39 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `markBookAsPaused queues SET_STATUS and keeps the optimistic book when remote throws a transient error`() =
-            runTest {
-                // ----- Arrange -----
-                val book = statusBook(status = BookStatus.Reading)
-                val slot = slot<Book>()
+        fun `markBookAsPaused queues SET_STATUS and keeps the optimistic book when remote throws a transient error`() = runTest {
+            // ----- Arrange -----
+            val book = statusBook(status = BookStatus.Reading)
+            val slot = slot<Book>()
 
-                coEvery {
-                    booksLocalDataSource.cacheBook(book = capture(slot))
-                } returns Unit
+            coEvery {
+                booksLocalDataSource.cacheBook(book = capture(slot))
+            } returns Unit
 
-                coEvery {
-                    booksRemoteDataSource.markBookAsPaused(
-                        book = book,
-                        editionId = any(),
-                    )
-                } throws ServerUnavailableException(message = "502")
+            coEvery {
+                booksRemoteDataSource.markBookAsPaused(
+                    book = book,
+                    editionId = any(),
+                )
+            } throws ServerUnavailableException(message = "502")
 
-                // ----- Act -----
-                val result = repository.markBookAsPaused(book = book)
+            // ----- Act -----
+            val result = repository.markBookAsPaused(book = book)
 
-                // ----- Assert -----
-                result shouldBe slot.captured
-                coVerify(exactly = 1) {
-                    offlineSync.enqueueStatusUpdate(
-                        book = result,
-                        status = UserBookStatus.PAUSED,
-                    )
-                }
-                coVerify(exactly = 1) {
-                    booksLocalDataSource.cacheBook(book = any())
-                }
+            // ----- Assert -----
+            result shouldBe slot.captured
+
+            coVerify(exactly = 1) {
+                offlineSync.enqueueStatusUpdate(
+                    book = result,
+                    status = UserBookStatus.PAUSED,
+                )
             }
+
+            coVerify(exactly = 1) {
+                booksLocalDataSource.cacheBook(book = any())
+            }
+        }
 
         @Test
         fun `markBookAsPaused for an off-shelf book stays online-only and rolls back when offline`() = runTest {
@@ -2249,6 +2290,7 @@ class BooksRepositoryImplTest {
                 status = BookStatus.None,
                 isShelved = false,
             )
+
             val error = ServerUnavailableException(message = "502")
 
             coEvery {
@@ -2263,6 +2305,7 @@ class BooksRepositoryImplTest {
 
             // ----- Assert -----
             caught.exceptionOrNull() shouldBe error
+
             coVerify(exactly = 0) {
                 offlineSync.enqueueStatusUpdate(
                     book = any(),
@@ -2272,31 +2315,32 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `markBookAsWantToRead when offline queues SET_STATUS for a shelved book without calling remote`() =
-            runTest {
-                // ----- Arrange -----
-                goOffline()
+        fun `markBookAsWantToRead when offline queues SET_STATUS for a shelved book without calling remote`() = runTest {
+            // ----- Arrange -----
+            goOffline()
 
-                val book = statusBook(status = BookStatus.Reading)
+            val book = statusBook(status = BookStatus.Reading)
 
-                // ----- Act -----
-                val result = repository.markBookAsWantToRead(book = book)
+            // ----- Act -----
+            val result = repository.markBookAsWantToRead(book = book)
 
-                // ----- Assert -----
-                result.userBook.shouldNotBeNull().status shouldBe BookStatus.WantToRead
-                coVerify(exactly = 1) {
-                    offlineSync.enqueueStatusUpdate(
-                        book = result,
-                        status = UserBookStatus.WANT_TO_READ,
-                    )
-                }
-                coVerify(exactly = 0) {
-                    booksRemoteDataSource.markBookAsWantToRead(
-                        bookId = any(),
-                        editionId = any(),
-                    )
-                }
+            // ----- Assert -----
+            result.userBook.shouldNotBeNull().status shouldBe BookStatus.WantToRead
+
+            coVerify(exactly = 1) {
+                offlineSync.enqueueStatusUpdate(
+                    book = result,
+                    status = UserBookStatus.WANT_TO_READ,
+                )
             }
+
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.markBookAsWantToRead(
+                    bookId = any(),
+                    editionId = any(),
+                )
+            }
+        }
 
         @Test
         fun `markBookAsWantToRead queues SET_STATUS when remote throws a transient error`() = runTest {
@@ -2315,6 +2359,7 @@ class BooksRepositoryImplTest {
 
             // ----- Assert -----
             result.userBook.shouldNotBeNull().status shouldBe BookStatus.WantToRead
+
             coVerify(exactly = 1) {
                 offlineSync.enqueueStatusUpdate(
                     book = result,
@@ -2343,6 +2388,7 @@ class BooksRepositoryImplTest {
 
             // ----- Assert -----
             caught.exceptionOrNull().shouldNotBeNull()
+
             coVerify(exactly = 0) {
                 offlineSync.enqueueStatusUpdate(
                     book = any(),
@@ -2352,31 +2398,32 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `markBookAsReading when offline queues SET_STATUS for a shelved book without calling remote`() =
-            runTest {
-                // ----- Arrange -----
-                goOffline()
+        fun `markBookAsReading when offline queues SET_STATUS for a shelved book without calling remote`() = runTest {
+            // ----- Arrange -----
+            goOffline()
 
-                val book = statusBook(status = BookStatus.Paused)
+            val book = statusBook(status = BookStatus.Paused)
 
-                // ----- Act -----
-                val result = repository.markBookAsReading(book = book)
+            // ----- Act -----
+            val result = repository.markBookAsReading(book = book)
 
-                // ----- Assert -----
-                result.userBook.shouldNotBeNull().status shouldBe BookStatus.Reading
-                coVerify(exactly = 1) {
-                    offlineSync.enqueueStatusUpdate(
-                        book = result,
-                        status = UserBookStatus.CURRENTLY_READING,
-                    )
-                }
-                coVerify(exactly = 0) {
-                    booksRemoteDataSource.markBookAsReading(
-                        book = any(),
-                        editionId = any(),
-                    )
-                }
+            // ----- Assert -----
+            result.userBook.shouldNotBeNull().status shouldBe BookStatus.Reading
+
+            coVerify(exactly = 1) {
+                offlineSync.enqueueStatusUpdate(
+                    book = result,
+                    status = UserBookStatus.CURRENTLY_READING,
+                )
             }
+
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.markBookAsReading(
+                    book = any(),
+                    editionId = any(),
+                )
+            }
+        }
 
         @Test
         fun `markBookAsReading queues SET_STATUS when remote throws a transient error`() = runTest {
@@ -2395,6 +2442,7 @@ class BooksRepositoryImplTest {
 
             // ----- Assert -----
             result.userBook.shouldNotBeNull().status shouldBe BookStatus.Reading
+
             coVerify(exactly = 1) {
                 offlineSync.enqueueStatusUpdate(
                     book = result,
@@ -2425,6 +2473,7 @@ class BooksRepositoryImplTest {
 
             // ----- Assert -----
             caught.exceptionOrNull().shouldNotBeNull()
+
             coVerify(exactly = 0) {
                 offlineSync.enqueueStatusUpdate(
                     book = any(),
@@ -2478,6 +2527,7 @@ class BooksRepositoryImplTest {
         fun `writes the optimistic rating to the local cache and returns the remote book`() = runTest {
             // ----- Arrange -----
             val newRating = 4.5
+
             val userBook = stubUserBookWithRating(
                 id = 5,
                 rating = 3.0,
@@ -2504,6 +2554,7 @@ class BooksRepositoryImplTest {
                 isCompilation = false,
                 userBook = userBook,
             )
+
             val remoteBook = stubBook(userBookId = 5)
             val capturedBooks = mutableListOf<Book>()
 
@@ -2538,10 +2589,12 @@ class BooksRepositoryImplTest {
             // ----- Arrange -----
             val bookId = 10
             val newRating = 4.5
+
             val book = mockk<Book>(relaxed = true) {
                 every {
                     this@mockk.id
                 } returns bookId
+
                 every {
                     this@mockk.userBook
                 } returns stubUserBookWithRating(
@@ -2549,6 +2602,7 @@ class BooksRepositoryImplTest {
                     rating = 3.0,
                 )
             }
+
             val snapshot = stubBook(userBookId = 5)
             val remoteError = RuntimeException("network failure")
 
@@ -2588,10 +2642,12 @@ class BooksRepositoryImplTest {
             // ----- Arrange -----
             val bookId = 10
             val newRating = 4.5
+
             val book = mockk<Book>(relaxed = true) {
                 every {
                     this@mockk.id
                 } returns bookId
+
                 every {
                     this@mockk.userBook
                 } returns stubUserBookWithRating(
@@ -2599,6 +2655,7 @@ class BooksRepositoryImplTest {
                     rating = 3.0,
                 )
             }
+
             val snapshot = stubBook(userBookId = 5)
 
             every {
@@ -2638,6 +2695,7 @@ class BooksRepositoryImplTest {
             val userBookId = 5
             val bookId = 10
             val newRating = 4.5
+
             val book = Book(
                 id = bookId,
                 title = "Test Book",
@@ -2658,6 +2716,7 @@ class BooksRepositoryImplTest {
                     rating = 3.0,
                 ),
             )
+
             val snapshot = stubBook(userBookId = userBookId)
 
             every {
@@ -2704,6 +2763,7 @@ class BooksRepositoryImplTest {
             val userBookId = 5
             val bookId = 10
             val newRating = 4.5
+
             val book = Book(
                 id = bookId,
                 title = "Test Book",
@@ -2724,6 +2784,7 @@ class BooksRepositoryImplTest {
                     rating = 3.0,
                 ),
             )
+
             val snapshot = stubBook(userBookId = userBookId)
 
             every {
@@ -2770,6 +2831,7 @@ class BooksRepositoryImplTest {
             val userBookId = 5
             val bookId = 10
             val newRating = 4.5
+
             val book = Book(
                 id = bookId,
                 title = "Test Book",
@@ -2879,6 +2941,7 @@ class BooksRepositoryImplTest {
                         status = BookStatus.Reading,
                     ),
                 )
+
                 val remoteBook = stubBook(userBookId = userBookId)
                 val capturedBooks = mutableListOf<Book>()
 
@@ -2959,14 +3022,17 @@ class BooksRepositoryImplTest {
             // ----- Arrange -----
             val userBookId = 5
             val bookId = 10
+
             val book = mockk<Book>(relaxed = true) {
                 every {
                     this@mockk.id
                 } returns bookId
+
                 every {
                     this@mockk.userBook
                 } returns stubUserBookForReview(id = userBookId)
             }
+
             val remoteBook = stubBook(userBookId = userBookId)
 
             every {
@@ -3015,6 +3081,7 @@ class BooksRepositoryImplTest {
             val userBookId = 5
             val body = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Great offline read")))))
             val hasSpoilers = true
+
             val book = Book(
                 id = 10,
                 title = "Test Book",
@@ -3081,6 +3148,7 @@ class BooksRepositoryImplTest {
             val bookId = 10
             val body = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Review written while falsely online")))))
             val hasSpoilers = false
+
             val book = Book(
                 id = bookId,
                 title = "Test Book",
@@ -3098,6 +3166,7 @@ class BooksRepositoryImplTest {
                 isCompilation = false,
                 userBook = stubUserBookForReview(id = userBookId),
             )
+
             val snapshot = Book(
                 id = bookId,
                 title = "Test Book",
@@ -3173,6 +3242,7 @@ class BooksRepositoryImplTest {
             val bookId = 10
             val body = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Review written while falsely online")))))
             val hasSpoilers = false
+
             val book = Book(
                 id = bookId,
                 title = "Test Book",
@@ -3190,6 +3260,7 @@ class BooksRepositoryImplTest {
                 isCompilation = false,
                 userBook = stubUserBookForReview(id = userBookId),
             )
+
             val snapshot = Book(
                 id = bookId,
                 title = "Test Book",
@@ -3265,14 +3336,17 @@ class BooksRepositoryImplTest {
             val bookId = 10
             val body = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Review that will fail")))))
             val hasSpoilers = true
+
             val book = mockk<Book>(relaxed = true) {
                 every {
                     this@mockk.id
                 } returns bookId
+
                 every {
                     this@mockk.userBook
                 } returns stubUserBookForReview(id = userBookId)
             }
+
             val snapshot = stubBook(userBookId = userBookId)
             val remoteError = RuntimeException("network failure")
 
@@ -3363,6 +3437,7 @@ class BooksRepositoryImplTest {
                         status = BookStatus.Reading,
                     ),
                 )
+
                 val remoteBook = stubBook(userBookId = userBookId)
                 val capturedBooks = mutableListOf<Book>()
 
@@ -3411,6 +3486,7 @@ class BooksRepositoryImplTest {
                 bookId = 1,
                 userBookId = 11,
             )
+
             val cached = stagedBook(
                 bookId = 1,
                 userBookId = 11,
@@ -3462,6 +3538,7 @@ class BooksRepositoryImplTest {
                 bookId = 1,
                 userBookId = 11,
             )
+
             val second = stagedBook(
                 bookId = 2,
                 userBookId = 22,
@@ -3519,6 +3596,7 @@ class BooksRepositoryImplTest {
                 bookId = 1,
                 userBookId = 11,
             )
+
             val localError = RuntimeException("disk full")
 
             coEvery {
@@ -3533,6 +3611,7 @@ class BooksRepositoryImplTest {
             val caught = runCatching {
                 repository.stageBookRemoval(books = listOf(book))
             }
+
             repository.cacheBook(book = book)
 
             // ----- Assert -----
@@ -3550,6 +3629,7 @@ class BooksRepositoryImplTest {
                 bookId = 1,
                 userBookId = 11,
             )
+
             val localError = RuntimeException("read failed")
 
             coEvery {
@@ -3560,6 +3640,7 @@ class BooksRepositoryImplTest {
             val caught = runCatching {
                 repository.stageBookRemoval(books = listOf(book))
             }
+
             repository.cacheBook(book = book)
 
             // ----- Assert -----
@@ -3584,6 +3665,7 @@ class BooksRepositoryImplTest {
                 bookId = 1,
                 userBookId = 11,
             )
+
             val staged = StagedBookRemoval(
                 books = listOf(snapshot),
                 snapshots = listOf(snapshot),
@@ -3609,6 +3691,7 @@ class BooksRepositoryImplTest {
                 bookId = 1,
                 userBookId = 11,
             )
+
             val staged = StagedBookRemoval(
                 books = listOf(snapshot),
                 snapshots = listOf(snapshot),
@@ -3637,6 +3720,7 @@ class BooksRepositoryImplTest {
                 bookId = 1,
                 userBookId = 11,
             )
+
             val staged = StagedBookRemoval(
                 books = listOf(snapshot),
                 snapshots = listOf(snapshot),
@@ -3665,6 +3749,7 @@ class BooksRepositoryImplTest {
                 bookId = 1,
                 userBookId = 11,
             )
+
             val restoreError = RuntimeException("restore failed")
 
             coEvery {
@@ -3699,6 +3784,7 @@ class BooksRepositoryImplTest {
                 bookId = 1,
                 userBookId = 11,
             )
+
             val staged = StagedBookRemoval(
                 books = listOf(book),
                 snapshots = listOf(book),
@@ -3738,6 +3824,7 @@ class BooksRepositoryImplTest {
                 bookId = 1,
                 userBookId = 11,
             )
+
             val staged = StagedBookRemoval(
                 books = listOf(book),
                 snapshots = listOf(book),
@@ -3773,6 +3860,7 @@ class BooksRepositoryImplTest {
                 bookId = 1,
                 userBookId = 11,
             )
+
             val staged = StagedBookRemoval(
                 books = listOf(book),
                 snapshots = listOf(book),
@@ -3807,10 +3895,12 @@ class BooksRepositoryImplTest {
                 bookId = 1,
                 userBookId = 11,
             )
+
             val succeeding = stagedBook(
                 bookId = 2,
                 userBookId = 22,
             )
+
             val staged = StagedBookRemoval(
                 books = listOf(failing, succeeding),
                 snapshots = listOf(failing, succeeding),
@@ -3846,6 +3936,7 @@ class BooksRepositoryImplTest {
                 bookId = 1,
                 userBookId = 11,
             )
+
             val staged = StagedBookRemoval(
                 books = listOf(book),
                 snapshots = listOf(book),
@@ -3879,6 +3970,7 @@ class BooksRepositoryImplTest {
                 bookId = 1,
                 userBookId = 11,
             )
+
             val staged = StagedBookRemoval(
                 books = listOf(book),
                 snapshots = listOf(book),
@@ -3909,6 +4001,7 @@ class BooksRepositoryImplTest {
                 bookId = 1,
                 userBookId = 11,
             )
+
             val staged = StagedBookRemoval(
                 books = listOf(book),
                 snapshots = listOf(book),
@@ -3995,6 +4088,7 @@ class BooksRepositoryImplTest {
                 bookId = 1,
                 userBookId = 11,
             )
+
             val other = stagedBook(
                 bookId = 2,
                 userBookId = 22,
@@ -4043,10 +4137,12 @@ class BooksRepositoryImplTest {
         fun `refreshUserBooks leaves a staged book out of the cached batch`() = runTest {
             // ----- Arrange -----
             val userId = 20
+
             val stagedBook = stagedBook(
                 bookId = 1,
                 userBookId = 11,
             )
+
             val otherBook = stagedBook(
                 bookId = 2,
                 userBookId = 22,
@@ -4090,6 +4186,7 @@ class BooksRepositoryImplTest {
                 bookId = 1,
                 userBookId = 11,
             )
+
             val otherBook = stagedBook(
                 bookId = 2,
                 userBookId = 22,
@@ -4585,6 +4682,7 @@ class BooksRepositoryImplTest {
                 updatedAt = "2026-01-01T10:00:00",
                 event = "user_book_read_started",
             )
+
             val userBook = UserBook(
                 id = 1,
                 status = BookStatus.Reading,
@@ -4601,6 +4699,7 @@ class BooksRepositoryImplTest {
                 journals = listOf(existingJournal),
                 reads = emptyList(),
             )
+
             val userBookRead = UserBookRead(
                 id = 1,
                 currentPage = 50,
@@ -4609,6 +4708,7 @@ class BooksRepositoryImplTest {
                 startedAt = null,
                 finishedAt = null,
             )
+
             val book = Book(
                 id = 42,
                 title = "Test Book",
@@ -4626,6 +4726,7 @@ class BooksRepositoryImplTest {
                 isCompilation = false,
                 userBook = userBook.copy(reads = listOf(userBookRead)),
             )
+
             val slot = slot<Book>()
 
             every {
@@ -4663,16 +4764,19 @@ class BooksRepositoryImplTest {
         fun `updateBookProgress when online and remote throws non-offline error restores snapshot to local cache and rethrows`() = runTest {
             // ----- Arrange -----
             val bookId = 42
+
             val book = mockk<Book>(relaxed = true) {
                 every {
                     this@mockk.id
                 } returns bookId
             }
+
             val snapshot = mockk<Book>(relaxed = true) {
                 every {
                     this@mockk.id
                 } returns bookId
             }
+
             val remoteError = RuntimeException("network failure")
 
             every {
@@ -4712,11 +4816,13 @@ class BooksRepositoryImplTest {
         fun `updateBookProgress when online and remote throws OfflineException does NOT restore snapshot`() = runTest {
             // ----- Arrange -----
             val bookId = 42
+
             val book = mockk<Book>(relaxed = true) {
                 every {
                     this@mockk.id
                 } returns bookId
             }
+
             val snapshot = mockk<Book>(relaxed = true) {
                 every {
                     this@mockk.id
@@ -4760,11 +4866,13 @@ class BooksRepositoryImplTest {
         fun `updateBookProgress when online and remote throws ServerUnavailableException does NOT restore snapshot`() = runTest {
             // ----- Arrange -----
             val bookId = 42
+
             val book = mockk<Book>(relaxed = true) {
                 every {
                     this@mockk.id
                 } returns bookId
             }
+
             val snapshot = mockk<Book>(relaxed = true) {
                 every {
                     this@mockk.id
@@ -4836,6 +4944,7 @@ class BooksRepositoryImplTest {
                 startedAt = "2026-07-21",
                 finishedAt = null,
             )
+
             val book = readingBook(read = placeholderRead)
             val cached = slot<Book>()
             stubInsertPending(localId = 9L)
@@ -4895,6 +5004,7 @@ class BooksRepositoryImplTest {
                 startedAt = "2026-07-21",
                 finishedAt = null,
             )
+
             val book = readingBook(read = realRead)
             val remoteBook = stubBook(userBookId = 1)
             stubInsertPending(localId = 9L)
@@ -5019,9 +5129,11 @@ class BooksRepositoryImplTest {
 
             // ----- Assert -----
             result shouldBe expectedBook
+
             coVerify(exactly = 0) {
                 booksLocalDataSource.cacheBook(book = any())
             }
+
             coVerify(exactly = 1) {
                 booksRemoteDataSource.markBookAsRead(
                     book = book,
@@ -5037,6 +5149,7 @@ class BooksRepositoryImplTest {
                 updatedAt = "2026-01-01T10:00:00",
                 event = "user_book_read_started",
             )
+
             val userBook = UserBook(
                 id = 1,
                 status = BookStatus.Reading,
@@ -5053,6 +5166,7 @@ class BooksRepositoryImplTest {
                 journals = listOf(existingJournal),
                 reads = emptyList(),
             )
+
             val userBookRead = UserBookRead(
                 id = 1,
                 currentPage = 50,
@@ -5061,6 +5175,7 @@ class BooksRepositoryImplTest {
                 startedAt = null,
                 finishedAt = null,
             )
+
             val book = Book(
                 id = 42,
                 title = "Test Book",
@@ -5078,6 +5193,7 @@ class BooksRepositoryImplTest {
                 isCompilation = false,
                 userBook = userBook.copy(reads = listOf(userBookRead)),
             )
+
             val slot = slot<Book>()
 
             every {
@@ -5113,6 +5229,7 @@ class BooksRepositoryImplTest {
             // ----- Arrange -----
             val actionAt = "2026-07-21T21:00:00Z"
             val expectedFinishedAt = Instant.parse(actionAt).toLocalDateTime(TimeZone.currentSystemDefault()).date.toString()
+
             val userBook = UserBook(
                 id = 1,
                 status = BookStatus.Reading,
@@ -5129,6 +5246,7 @@ class BooksRepositoryImplTest {
                 journals = emptyList(),
                 reads = emptyList(),
             )
+
             val userBookRead = UserBookRead(
                 id = 1,
                 currentPage = 50,
@@ -5137,6 +5255,7 @@ class BooksRepositoryImplTest {
                 startedAt = null,
                 finishedAt = null,
             )
+
             val book = Book(
                 id = 42,
                 title = "Test Book",
@@ -5154,6 +5273,7 @@ class BooksRepositoryImplTest {
                 isCompilation = false,
                 userBook = userBook.copy(reads = listOf(userBookRead)),
             )
+
             val slot = slot<Book>()
 
             every {
@@ -5186,16 +5306,19 @@ class BooksRepositoryImplTest {
         fun `markBookAsRead when online and remote throws non-offline error restores snapshot to local cache and rethrows`() = runTest {
             // ----- Arrange -----
             val bookId = 42
+
             val book = mockk<Book>(relaxed = true) {
                 every {
                     this@mockk.id
                 } returns bookId
             }
+
             val snapshot = mockk<Book>(relaxed = true) {
                 every {
                     this@mockk.id
                 } returns bookId
             }
+
             val remoteError = RuntimeException("network failure")
 
             every {
@@ -5228,11 +5351,13 @@ class BooksRepositoryImplTest {
         fun `markBookAsRead when online and remote throws OfflineException does NOT restore snapshot`() = runTest {
             // ----- Arrange -----
             val bookId = 42
+
             val book = mockk<Book>(relaxed = true) {
                 every {
                     this@mockk.id
                 } returns bookId
             }
+
             val snapshot = mockk<Book>(relaxed = true) {
                 every {
                     this@mockk.id
@@ -5272,11 +5397,13 @@ class BooksRepositoryImplTest {
             runTest {
                 // ----- Arrange -----
                 val bookId = 42
+
                 val book = mockk<Book>(relaxed = true) {
                     every {
                         this@mockk.id
                     } returns bookId
                 }
+
                 val snapshot = mockk<Book>(relaxed = true) {
                     every {
                         this@mockk.id
@@ -5532,6 +5659,7 @@ class BooksRepositoryImplTest {
             coVerify(exactly = 0) {
                 booksRemoteDataSource.fetchTrendingBookIds(period = TrendingPeriod.Week)
             }
+
             coVerify(exactly = 0) {
                 booksLocalDataSource.replaceTrendingBooks(
                     period = TrendingPeriod.Week,
@@ -5687,6 +5815,7 @@ class BooksRepositoryImplTest {
             coVerify(exactly = 1) {
                 booksRemoteDataSource.fetchBooksByIds(ids = listOf(1, 2))
             }
+
             coVerify(exactly = 1) {
                 booksLocalDataSource.replaceTrendingBooks(
                     period = TrendingPeriod.Week,
@@ -5724,6 +5853,7 @@ class BooksRepositoryImplTest {
             coVerify(exactly = 1) {
                 booksRemoteDataSource.fetchBooksByIds(ids = listOf(2))
             }
+
             coVerify(exactly = 1) {
                 booksLocalDataSource.replaceTrendingBooks(
                     period = TrendingPeriod.Week,
@@ -5755,6 +5885,7 @@ class BooksRepositoryImplTest {
             coVerify(exactly = 0) {
                 booksRemoteDataSource.fetchBooksByIds(ids = any())
             }
+
             coVerify(exactly = 1) {
                 booksLocalDataSource.replaceTrendingBooks(
                     period = TrendingPeriod.Week,
@@ -5804,6 +5935,7 @@ class BooksRepositoryImplTest {
             val second = launch { refreshWeek(maxAge = 1.hours) }
             runCurrent()
             gate.complete(Unit)
+
             joinAll(
                 first,
                 second,
@@ -5813,6 +5945,7 @@ class BooksRepositoryImplTest {
             coVerify(exactly = 1) {
                 booksRemoteDataSource.fetchTrendingBookIds(period = TrendingPeriod.Week)
             }
+
             coVerify(exactly = 1) {
                 booksLocalDataSource.replaceTrendingBooks(
                     period = TrendingPeriod.Week,
@@ -5843,6 +5976,7 @@ class BooksRepositoryImplTest {
                 period = TrendingPeriod.Week,
                 maxAge = 1.hours,
             )
+
             repository.refreshTrendingBooks(
                 period = TrendingPeriod.Month,
                 maxAge = 1.hours,
@@ -5852,6 +5986,7 @@ class BooksRepositoryImplTest {
             coVerify(exactly = 0) {
                 booksRemoteDataSource.fetchTrendingBookIds(period = TrendingPeriod.Week)
             }
+
             coVerify(exactly = 1) {
                 booksRemoteDataSource.fetchTrendingBookIds(period = TrendingPeriod.Month)
             }
@@ -5882,15 +6017,18 @@ class BooksRepositoryImplTest {
                     maxAge = Duration.ZERO,
                 )
             }
+
             val month = launch {
                 repository.refreshTrendingBooks(
                     period = TrendingPeriod.Month,
                     maxAge = Duration.ZERO,
                 )
             }
+
             runCurrent()
             val startedBeforeRelease = started.toList()
             gate.complete(Unit)
+
             joinAll(
                 week,
                 month,
@@ -5923,6 +6061,7 @@ class BooksRepositoryImplTest {
 
             // ----- Assert -----
             thrown shouldBe error
+
             coVerify(exactly = 0) {
                 booksLocalDataSource.replaceTrendingBooks(
                     period = TrendingPeriod.Week,
@@ -5982,6 +6121,7 @@ class BooksRepositoryImplTest {
                     limit = any(),
                 )
             }
+
             coVerify(exactly = 0) {
                 booksLocalDataSource.replaceUpcomingBooks(
                     window = any(),
@@ -6089,63 +6229,66 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `an empty API result keeps only the cached books released after today and records the fetch time`() =
-            runTest {
-                // ----- Arrange -----
-                val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
-                val released = upcomingBook(
-                    id = 1,
-                    releaseDate = today.plus(DatePeriod(days = -1)),
-                )
-                val releasedToday = upcomingBook(
-                    id = 2,
-                    releaseDate = today,
-                )
-                val tomorrow = upcomingBook(
-                    id = 3,
-                    releaseDate = today.plus(DatePeriod(days = 1)),
-                )
-                val undated = upcomingBook(
-                    id = 4,
-                    releaseDate = null,
-                )
+        fun `an empty API result keeps only the cached books released after today and records the fetch time`() = runTest {
+            // ----- Arrange -----
+            val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
 
-                coEvery {
-                    booksLocalDataSource.getUpcomingFetchedAt(window = window)
-                } returns Clock.System.now() - 2.hours
+            val released = upcomingBook(
+                id = 1,
+                releaseDate = today.plus(DatePeriod(days = -1)),
+            )
 
-                coEvery {
-                    booksLocalDataSource.getUpcomingBooks(window = window)
-                } returns listOf(
-                    released,
-                    releasedToday,
-                    tomorrow,
-                    undated,
-                )
+            val releasedToday = upcomingBook(
+                id = 2,
+                releaseDate = today,
+            )
 
-                coEvery {
-                    booksRemoteDataSource.fetchUpcomingBookIds(
-                        window = window,
-                        limit = any(),
-                    )
-                } returns emptyList()
+            val tomorrow = upcomingBook(
+                id = 3,
+                releaseDate = today.plus(DatePeriod(days = 1)),
+            )
 
-                // ----- Act -----
-                repository.refreshUpcomingBooks(
+            val undated = upcomingBook(
+                id = 4,
+                releaseDate = null,
+            )
+
+            coEvery {
+                booksLocalDataSource.getUpcomingFetchedAt(window = window)
+            } returns Clock.System.now() - 2.hours
+
+            coEvery {
+                booksLocalDataSource.getUpcomingBooks(window = window)
+            } returns listOf(
+                released,
+                releasedToday,
+                tomorrow,
+                undated,
+            )
+
+            coEvery {
+                booksRemoteDataSource.fetchUpcomingBookIds(
                     window = window,
-                    maxAge = 1.hours,
+                    limit = any(),
                 )
+            } returns emptyList()
 
-                // ----- Assert -----
-                coVerify(exactly = 1) {
-                    booksLocalDataSource.replaceUpcomingBooks(
-                        window = window,
-                        requestedIds = listOf(3, 4),
-                        books = emptyList(),
-                        fetchedAt = any(),
-                    )
-                }
+            // ----- Act -----
+            repository.refreshUpcomingBooks(
+                window = window,
+                maxAge = 1.hours,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksLocalDataSource.replaceUpcomingBooks(
+                    window = window,
+                    requestedIds = listOf(3, 4),
+                    books = emptyList(),
+                    fetchedAt = any(),
+                )
             }
+        }
 
         @Test
         fun `checks maxAge against the requested window's fetch time only`() = runTest {
@@ -6170,6 +6313,7 @@ class BooksRepositoryImplTest {
                 window = UpcomingWindow.Month,
                 maxAge = 1.hours,
             )
+
             repository.refreshUpcomingBooks(
                 window = UpcomingWindow.Year,
                 maxAge = 1.hours,
@@ -6182,6 +6326,7 @@ class BooksRepositoryImplTest {
                     limit = any(),
                 )
             }
+
             coVerify(exactly = 1) {
                 booksRemoteDataSource.fetchUpcomingBookIds(
                     window = UpcomingWindow.Year,
@@ -6239,6 +6384,7 @@ class BooksRepositoryImplTest {
                     limit = any(),
                 )
             }
+
             coVerify(exactly = 0) {
                 booksLocalDataSource.replaceRecentBooks(
                     window = any(),
@@ -6319,18 +6465,22 @@ class BooksRepositoryImplTest {
             // ----- Arrange -----
             val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
             val windowStart = today.plus(DatePeriod(months = -3))
+
             val beforeWindow = recentBook(
                 id = 1,
                 releaseDate = windowStart.plus(DatePeriod(days = -1)),
             )
+
             val onWindowStart = recentBook(
                 id = 2,
                 releaseDate = windowStart,
             )
+
             val dayAfterWindowStart = recentBook(
                 id = 3,
                 releaseDate = windowStart.plus(DatePeriod(days = 1)),
             )
+
             val undated = recentBook(
                 id = 4,
                 releaseDate = null,
@@ -6396,6 +6546,7 @@ class BooksRepositoryImplTest {
                 window = RecentWindow.Month,
                 maxAge = 1.hours,
             )
+
             repository.refreshRecentBooks(
                 window = RecentWindow.SixMonths,
                 maxAge = 1.hours,
@@ -6408,6 +6559,7 @@ class BooksRepositoryImplTest {
                     limit = any(),
                 )
             }
+
             coVerify(exactly = 1) {
                 booksRemoteDataSource.fetchRecentBookIds(
                     window = RecentWindow.SixMonths,
@@ -6539,6 +6691,7 @@ class BooksRepositoryImplTest {
         fun `a locally stamped entry sorts after a server entry from earlier the same UTC evening`() = runTest {
             // ----- Arrange -----
             JavaTimeZone.setDefault(JavaTimeZone.getTimeZone("Pacific/Pago_Pago"))
+
             val serverEntry = ReadingJournal(
                 updatedAt = "2026-07-21T20:59:59.999999",
                 event = JournalEventType.StatusFinished.eventName,
@@ -6559,6 +6712,7 @@ class BooksRepositoryImplTest {
         fun `a locally stamped entry sorts before a server entry from later the same UTC evening`() = runTest {
             // ----- Arrange -----
             JavaTimeZone.setDefault(JavaTimeZone.getTimeZone("Pacific/Kiritimati"))
+
             val serverEntry = ReadingJournal(
                 updatedAt = "2026-07-21T21:00:00.500000",
                 event = JournalEventType.StatusFinished.eventName,
@@ -6729,6 +6883,7 @@ class BooksRepositoryImplTest {
                     newPage = 80,
                 )
             }
+
             runCurrent()
             val refresh = async { racingRepository.refreshUserBooks(userId = userId) }
             runCurrent()

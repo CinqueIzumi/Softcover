@@ -63,16 +63,19 @@ class BookDeadlineMappersTest {
 
             // ----- Assert -----
             result.bookId shouldBe 42
+
             result.deadlineDate shouldBe LocalDate(
                 2026,
                 7,
                 15,
             )
+
             result.setAt shouldBe LocalDate(
                 2026,
                 4,
                 20,
             )
+
             result.initialPerDay shouldBe 12.5f
             result.unit shouldBe DeadlineUnit.PAGES
         }

@@ -28,6 +28,7 @@ internal class UserBooksFlowCollector : BookDetailCollector {
 
                 scope.setState { state ->
                     val currentBook = state.book ?: return@setState state
+
                     val overlaid = currentBook.overlay(localBook)
 
                     if (overlaid == currentBook) state else state.withBook(book = overlaid)

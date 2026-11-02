@@ -34,6 +34,7 @@ class BookDeadlinesCollectorTest {
         deadlinesFlow = MutableSharedFlow()
         observeAllBookDeadlinesUseCase = mockk()
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -76,6 +77,7 @@ class BookDeadlinesCollectorTest {
             val secondMap = mapOf(2 to buildDeadline(bookId = 2), 3 to buildDeadline(bookId = 3))
 
             val collector = BookDeadlinesCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

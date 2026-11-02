@@ -71,6 +71,7 @@ internal class BookListsCollector : LibraryCollector {
                 val retainedKeys = collected.editionsPerList.keys
                 val strippedEditions = state.editionsByTab.filterKeys { it in retainedKeys }
                 val strippedAddedAt = state.addedAtByTab.filterKeys { it in retainedKeys }
+
                 state.copy(
                     editionsByTab = strippedEditions.toPersistentMap().putAll(collected.editionsPerList),
                     addedAtByTab = strippedAddedAt.toPersistentMap().putAll(collected.addedAtPerList),

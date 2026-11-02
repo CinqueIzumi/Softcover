@@ -27,6 +27,7 @@ internal class CurrentlyReadingImages(
         coverHeightDp: Int,
     ): Uri? {
         val source = book.coverSource() ?: return null
+
         val sizePx = (coverHeightDp * density).roundToInt()
 
         return store.uriFor(

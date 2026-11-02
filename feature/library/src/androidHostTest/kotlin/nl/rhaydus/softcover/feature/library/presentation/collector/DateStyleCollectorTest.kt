@@ -32,6 +32,7 @@ class DateStyleCollectorTest {
         dateStyleFlow = MutableSharedFlow()
         getDateStyleAsFlowUseCase = mockk()
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -55,6 +56,7 @@ class DateStyleCollectorTest {
         fun `updates dateStyle to the latest value when flow emits multiple times`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = DateStyleCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

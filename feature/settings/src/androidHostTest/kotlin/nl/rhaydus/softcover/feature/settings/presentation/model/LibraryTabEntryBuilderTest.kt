@@ -85,6 +85,7 @@ class LibraryTabEntryBuilderTest {
                 LibraryTabEntry.CustomList::class,
                 LibraryTabEntry.CustomList::class,
             )
+
             entries.filterIsInstance<LibraryTabEntry.Status>().map { it.status } shouldBe listOf(
                 UserBookStatus.CURRENTLY_READING,
                 UserBookStatus.PAUSED,
@@ -92,6 +93,7 @@ class LibraryTabEntryBuilderTest {
                 UserBookStatus.READ,
                 UserBookStatus.DID_NOT_FINISH,
             )
+
             entries.filterIsInstance<LibraryTabEntry.CustomList>().map { it.listName } shouldBe listOf(
                 "alpha",
                 "Middle",
@@ -115,6 +117,7 @@ class LibraryTabEntryBuilderTest {
                     name = "Beta",
                 ),
             )
+
             val order = listOf(
                 "list-2",
                 "status-${UserBookStatus.READ.code}",
@@ -173,10 +176,12 @@ class LibraryTabEntryBuilderTest {
 
             // ----- Assert -----
             entries[1].id shouldBe "list-2"
+
             entries.filterIsInstance<LibraryTabEntry.CustomList>().map { it.listId } shouldBe listOf(
                 2,
                 1,
             )
+
             entries.size shouldBe 8
         }
 
@@ -193,6 +198,7 @@ class LibraryTabEntryBuilderTest {
                     name = "Beta",
                 ),
             )
+
             val order = listOf(
                 "list-2",
                 "list-1",
@@ -225,6 +231,7 @@ class LibraryTabEntryBuilderTest {
                 UserBookStatus.READ.code to 11,
                 UserBookStatus.DID_NOT_FINISH.code to 2,
             )
+
             val list = stubBookList(
                 id = 1,
                 name = "MyList",
@@ -246,6 +253,7 @@ class LibraryTabEntryBuilderTest {
             allEntry.count shouldBe 21
 
             val statuses = entries.filterIsInstance<LibraryTabEntry.Status>()
+
             statuses.map { it.count } shouldBe listOf(
                 3,
                 6,
@@ -253,6 +261,7 @@ class LibraryTabEntryBuilderTest {
                 11,
                 2,
             )
+
             statuses.forAll { it.isReorderable shouldBe true }
             statuses.filterNot { it.status == UserBookStatus.CURRENTLY_READING }.forAll { it.canHide shouldBe true }
             statuses.first { it.status == UserBookStatus.CURRENTLY_READING }.canHide shouldBe false
@@ -313,6 +322,7 @@ class LibraryTabEntryBuilderTest {
             val currentlyReading = entries
                 .filterIsInstance<LibraryTabEntry.Status>()
                 .single { it.status == UserBookStatus.CURRENTLY_READING }
+
             currentlyReading.statusVisibilityToggle.shouldBeNull()
             entries[0].visibilityToggle.shouldBeNull()
         }

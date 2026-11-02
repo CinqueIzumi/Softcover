@@ -77,6 +77,7 @@ class TrendingCoverSizeTest {
                 showsPageRow = false,
                 fontScale = 1f,
             )
+
             val atLargerScale = trendingCoverHeightDp(
                 widgetHeightDp = widgetHeightDp,
                 widgetWidthDp = widgetWidthDp,
@@ -101,6 +102,7 @@ class TrendingCoverSizeTest {
                 showsPageRow = false,
                 fontScale = 1f,
             )
+
             val atLargerScale = trendingCoverHeightDp(
                 widgetHeightDp = widgetHeightDp,
                 widgetWidthDp = widgetWidthDp,

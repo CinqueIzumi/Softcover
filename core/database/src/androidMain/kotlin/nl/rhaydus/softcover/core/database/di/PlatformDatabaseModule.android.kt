@@ -15,6 +15,7 @@ actual val platformDatabaseModule: Module = module {
         // not resolve names through the Context, so we hand it the same databases-dir path the
         // previous builder used — preserving the existing `books.db` store.
         val databasePath = context.getDatabasePath("books.db").absolutePath
+
         SoftcoverDatabase.build(
             builder = Room.databaseBuilder(
                 context = context,

@@ -40,6 +40,7 @@ class OnMarkBookAsPausedClickActionTest {
         pauseBookUseCase = mockk()
         eventChannel = Channel(Channel.BUFFERED)
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -179,6 +180,7 @@ class OnMarkBookAsPausedClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.endSessionPauseRequested shouldBe true
+
             coVerify(exactly = 0) {
                 pauseBookUseCase(
                     book = any(),
@@ -319,11 +321,13 @@ class OnMarkBookAsPausedClickActionTest {
         fun `forwards the preview edition id as editionId`() = runTest {
             // ----- Arrange -----
             val book = stubBook()
+
             val preview = mockk<BookEdition>().also {
                 every {
                     it.id
                 } returns 55
             }
+
             stateFlow.value = buildBookDetailUiState().copy(previewEdition = preview)
             dependencies = stubDependencies(this)
 
@@ -353,6 +357,7 @@ class OnMarkBookAsPausedClickActionTest {
         fun `sends the scanned edition id even when a preview is set`() = runTest {
             // ----- Arrange -----
             val book = stubBook()
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = stubStateBook(
                     editions = listOf(stubEdition(id = 555)),
@@ -361,6 +366,7 @@ class OnMarkBookAsPausedClickActionTest {
                 previewEdition = stubEdition(id = 55),
                 scannedEditionId = 555,
             )
+
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -389,6 +395,7 @@ class OnMarkBookAsPausedClickActionTest {
         fun `falls back to the book's current edition id when off-shelf without preview or scan`() = runTest {
             // ----- Arrange -----
             val book = stubBook()
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = stubStateBook(
                     editions = emptyList(),
@@ -396,6 +403,7 @@ class OnMarkBookAsPausedClickActionTest {
                 ),
                 previewEdition = null,
             )
+
             dependencies = stubDependencies(this)
 
             coEvery {

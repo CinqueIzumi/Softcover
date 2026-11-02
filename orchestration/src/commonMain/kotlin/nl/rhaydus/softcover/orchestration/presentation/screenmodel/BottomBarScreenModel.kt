@@ -11,10 +11,10 @@ import nl.rhaydus.toad.ToadScreenModel
 internal class BottomBarScreenModel(
     appDispatchers: AppDispatchers,
 ) : ToadScreenModel<BottomBarUiState, BottomBarEvent, BottomBarDependencies, BottomBarCollector, BottomBarLocalVariables>(
-    initialState = BottomBarUiState(),
-    initialLocalVariables = BottomBarLocalVariables,
-    initializers = emptyList(),
-) {
+        initialState = BottomBarUiState(),
+        initialLocalVariables = BottomBarLocalVariables,
+        initializers = emptyList(),
+    ) {
     override val dependencies = BottomBarDependencies(
         coroutineScope = screenModelScope,
         mainDispatcher = appDispatchers.main,

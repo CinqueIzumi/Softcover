@@ -43,12 +43,12 @@ import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import kotlinx.coroutines.launch
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.tabularFigures
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnboardingAction
@@ -217,7 +217,10 @@ private fun FirstIntroScreen(
             style = MaterialTheme.editorialTypography.quoteGlyph.copy(fontSize = 340.sp),
             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
             modifier = Modifier
-                .offset(x = -Spacing.lg, y = 96.dp)
+                .offset(
+                    x = -Spacing.lg,
+                    y = 96.dp,
+                )
                 .clearAndSetSemantics {},
         )
 

@@ -32,6 +32,7 @@ class UpdateApiKeyUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+
             coVerify {
                 settingsRepository.updateApiKey(key = key)
             }

@@ -38,6 +38,7 @@ class QuoteFetcherTest {
             coEvery {
                 refreshAllQuotes()
             } returns Result.success(Unit)
+
             coEvery {
                 renderer.renderAll(widget)
             } returns Unit
@@ -57,6 +58,7 @@ class QuoteFetcherTest {
             coEvery {
                 refreshAllQuotes()
             } returns Result.failure(IllegalStateException("down"))
+
             coEvery {
                 renderer.renderAll(widget)
             } returns Unit

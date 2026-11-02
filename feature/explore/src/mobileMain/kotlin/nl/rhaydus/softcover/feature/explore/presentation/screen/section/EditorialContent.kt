@@ -16,7 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRefreshAction

@@ -25,12 +25,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.divider.VerticalDivider
 import nl.rhaydus.softcover.core.component.state.OfflineEmptyStatePlaceholder
 import nl.rhaydus.softcover.core.component.topbar.EditorialTopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.layout.bottomChromePadding
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookDetailOverlays
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookHero

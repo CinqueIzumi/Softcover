@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.widget.presentation.util
 
 import androidx.compose.ui.unit.DpSize
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
+import nl.rhaydus.designsystem.theme.Spacing
 
 internal const val TALL_HEIGHT_DP = 150
 internal const val TALLEST_HEIGHT_DP = 180

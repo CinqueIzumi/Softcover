@@ -16,13 +16,13 @@ import androidx.compose.ui.Modifier
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.component.state.EmptyStateEvent
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberPrefetchingBookCardEventHandler
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
@@ -51,6 +51,7 @@ internal fun EmptyCurrentlyReadingScreen(
     // Mirrors CoverModelsCollector's own trendingBooks.firstOrNull(): the tile model is built there.
     val trendingBook = trendingBooks.firstOrNull()
     val showAdaptive = pickUpNext.isEmpty.not() || trendingTile != null
+
     val onPickUpNextEvent = rememberPrefetchingBookCardEventHandler(
         set = pickUpNext,
     ) { event, book ->
@@ -75,7 +76,10 @@ internal fun EmptyCurrentlyReadingScreen(
             } else {
                 Modifier
                     .fillMaxSize()
-                    .padding(horizontal = Spacing.gutter, vertical = Spacing.xl)
+                    .padding(
+                        horizontal = Spacing.gutter,
+                        vertical = Spacing.xl,
+                    )
             },
             onEvent = { event ->
                 when (event) {

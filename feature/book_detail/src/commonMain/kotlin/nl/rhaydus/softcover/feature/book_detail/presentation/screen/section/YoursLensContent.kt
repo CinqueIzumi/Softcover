@@ -7,10 +7,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.callout.Callout
 import nl.rhaydus.softcover.core.component.verdict.VerdictBlock
 import nl.rhaydus.softcover.core.component.verdict.VerdictBlockEvent
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.uibinding.verdict.VerdictSheetContext
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnOpenVerdictSheetAction

@@ -23,11 +23,10 @@ internal value class SearchHistoryDataStore(val store: DataStore<SearchHistoryEn
 internal fun createSearchHistoryDataStore(
     fileSystem: FileSystem,
     producePath: () -> Path,
-): DataStore<SearchHistoryEntity> =
-    DataStoreFactory.create(
-        storage = OkioStorage(
-            fileSystem = fileSystem,
-            serializer = SearchHistorySerializer,
-            producePath = producePath,
-        ),
-    )
+): DataStore<SearchHistoryEntity> = DataStoreFactory.create(
+    storage = OkioStorage(
+        fileSystem = fileSystem,
+        serializer = SearchHistorySerializer,
+        producePath = producePath,
+    ),
+)

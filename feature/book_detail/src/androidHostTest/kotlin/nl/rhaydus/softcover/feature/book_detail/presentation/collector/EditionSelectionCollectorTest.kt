@@ -43,11 +43,13 @@ class EditionSelectionCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk(relaxed = true)
     }
 
@@ -93,10 +95,12 @@ class EditionSelectionCollectorTest {
         fun `sets ownedCoverBadge when the displayed edition is owned`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val displayed = buildEdition(id = 1)
+
             stateFlow.value = buildBookDetailUiState().copy(
                 previewEdition = displayed,
                 userLists = persistentListOf(buildOwnedList(editionId = displayed.id)),
             )
+
             val collector = EditionSelectionCollector()
 
             // ----- Act -----
@@ -117,10 +121,12 @@ class EditionSelectionCollectorTest {
             // ----- Arrange -----
             val displayed = buildEdition(id = 1)
             val ownedElsewhere = buildEdition(id = 2)
+
             stateFlow.value = buildBookDetailUiState().copy(
                 previewEdition = displayed,
                 userLists = persistentListOf(buildOwnedList(editionId = ownedElsewhere.id)),
             )
+
             val collector = EditionSelectionCollector()
 
             // ----- Act -----
@@ -142,6 +148,7 @@ class EditionSelectionCollectorTest {
             stateFlow.value = buildBookDetailUiState().copy(
                 previewEdition = buildEdition(id = 1).copy(pages = 200),
             )
+
             val collector = EditionSelectionCollector()
 
             // ----- Act -----
@@ -158,6 +165,7 @@ class EditionSelectionCollectorTest {
                 length = "200",
                 isAudiobook = false,
             )
+
             job.cancel()
         }
 
@@ -185,7 +193,9 @@ class EditionSelectionCollectorTest {
             stateFlow.value = buildBookDetailUiState().copy(
                 previewEdition = buildEdition(id = 1).copy(pages = 200),
             )
+
             val collector = EditionSelectionCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -202,6 +212,7 @@ class EditionSelectionCollectorTest {
                 length = "450",
                 isAudiobook = false,
             )
+
             job.cancel()
         }
     }

@@ -1,0 +1,3 @@
+- [Arrange/Filter draft-commit pattern traps](project_arrange_filter_draft_commit_pattern.md) — a live nudge into an open draft needs its own failure rollback; async collector-derived chips can blank-flash on sheet open
+- [ChipSet double `.chips` field](project_chipset_double_chips_field.md) — a wrapper's own `chips`/`fooChips` field holding a `ChipSet<P>` forces `.chips.chips` at render sites; flag readability, suggest Iterable/isEmpty on ChipSet
+- [R9 citation covers R10 ground](architecture_r9_citation_covers_r10_ground.md) — "off the composition (R9)" on a stored UiState model list is house shorthand, not a wrong rule number

@@ -34,6 +34,7 @@ class OnRetrySearchActionTest {
         searchForNameUseCase = mockk()
         stateFlow = MutableStateFlow(ExploreScreenUiState())
         localVariablesFlow = MutableStateFlow(ExploreLocalVariables())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
@@ -43,6 +44,7 @@ class OnRetrySearchActionTest {
 
     private fun stubDependencies(testScope: TestScope): ExploreDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<ExploreDependencies>(relaxed = true).also { mock ->
             every {
                 mock.searchForNameUseCase
@@ -68,6 +70,7 @@ class OnRetrySearchActionTest {
         fun `sets isLoading to true and clears searchError before executing the search`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
+
             stateFlow.value = stateFlow.value.copy(
                 searchText = "dune",
                 searchError = "previous error",
@@ -101,6 +104,7 @@ class OnRetrySearchActionTest {
         fun `drops a pending load-more spinner before executing the search`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
+
             stateFlow.value = stateFlow.value.copy(
                 searchText = "dune",
                 loadingMoreQueriedBooks = true,
@@ -155,6 +159,7 @@ class OnRetrySearchActionTest {
                     sortMode = ExploreSortMode.RELEVANCE,
                 )
             }
+
             localVariablesFlow.value.queryJob.shouldNotBeNull()
         }
 
@@ -162,6 +167,7 @@ class OnRetrySearchActionTest {
         fun `on success leaves searchError as null and sets isLoading to false`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
+
             stateFlow.value = stateFlow.value.copy(
                 searchText = "dune",
                 searchError = "previous error",

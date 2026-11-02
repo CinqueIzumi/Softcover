@@ -28,11 +28,13 @@ class MoodTagsCollectorTest {
     fun setUp() {
         getMoodTagsUseCase = mockk()
         stateFlow = MutableStateFlow(ExploreScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk<ExploreDependencies>(relaxed = true).also { mock ->
             every {
                 mock.getMoodTagsUseCase
@@ -55,6 +57,7 @@ class MoodTagsCollectorTest {
             coEvery {
                 getMoodTagsUseCase()
             } returns Result.success(listOf(moodTag))
+
             val collector = MoodTagsCollector()
 
             // ----- Act -----
@@ -74,6 +77,7 @@ class MoodTagsCollectorTest {
             coEvery {
                 getMoodTagsUseCase()
             } returns Result.failure(RuntimeException("network error"))
+
             val collector = MoodTagsCollector()
 
             // ----- Act -----

@@ -71,12 +71,6 @@ public fun nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTy
   params:
 
 @Composable
-public fun nl.rhaydus.softcover.core.designsystem.presentation.theme.motion(): nl.rhaydus.softcover.core.designsystem.presentation.theme.Motion
-  skippable: true
-  restartable: true
-  params:
-
-@Composable
 internal fun nl.rhaydus.softcover.core.designsystem.presentation.theme.softcoverFoundationEditorialTypography(): nl.rhaydus.designsystem.editorial.EditorialTypography
   skippable: true
   restartable: true

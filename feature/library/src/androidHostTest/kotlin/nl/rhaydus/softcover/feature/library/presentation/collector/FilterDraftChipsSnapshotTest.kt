@@ -68,6 +68,7 @@ class FilterDraftChipsSnapshotTest {
         fun `compute resolves chips for the draft's own tab out of filterChipsByTab`() {
             // ----- Arrange -----
             val ebookValue = LibraryFilterValue.Format(value = "ebook")
+
             val chips = LibraryFilterChips(
                 formatChips = listOf(
                     ChipUiModel(
@@ -76,6 +77,7 @@ class FilterDraftChipsSnapshotTest {
                     ) to ebookValue,
                 ).toChipSet(),
             )
+
             val snapshot = FilterDraftChipsSnapshot(
                 draft = LibraryFilterDraft(tabId = "read"),
                 filterChipsByTab = persistentMapOf(
@@ -106,11 +108,13 @@ class FilterDraftChipsSnapshotTest {
                     it.releaseYear
                 } returns 2020
             }
+
             val nonMatchingBook = mockk<Book>(relaxed = true).also {
                 every {
                     it.releaseYear
                 } returns 2019
             }
+
             val snapshot = FilterDraftChipsSnapshot(
                 draft = LibraryFilterDraft(
                     tabId = "all",

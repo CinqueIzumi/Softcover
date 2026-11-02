@@ -17,11 +17,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import nl.rhaydus.designsystem.layout.ExpandableFlowRow
 import nl.rhaydus.designsystem.layout.FlowRowExpansion
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
@@ -80,6 +80,8 @@ internal fun TagsSection(
                     Spacer(modifier = Modifier.height(Spacing.sm))
 
                     ExpandableFlowRow(
+                        itemCount = group.chips.size,
+                        key = { index -> group.chips[index].key },
                         modifier = Modifier.animateContentSize(
                             animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
                         ),
@@ -108,19 +110,15 @@ internal fun TagsSection(
                                 },
                             )
                         },
-                    ) {
-                        group.chips.forEach { chip ->
-                            key(chip.key) {
-                                Chip(
-                                    model = chip,
-                                    onEvent = { event ->
-                                        if (event is ChipEvent.Clicked) {
-                                            runAction(OnRevealTagSpoilerAction(key = event.key))
-                                        }
-                                    },
-                                )
-                            }
-                        }
+                    ) { index ->
+                        Chip(
+                            model = group.chips[index],
+                            onEvent = { event ->
+                                if (event is ChipEvent.Clicked) {
+                                    runAction(OnRevealTagSpoilerAction(key = event.key))
+                                }
+                            },
+                        )
                     }
                 }
             }

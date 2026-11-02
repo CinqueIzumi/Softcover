@@ -70,6 +70,7 @@ data class Book(
     val seriesText: String?
         get() {
             val series = bookSeries ?: return null
+
             val display = positionInSeriesDisplay ?: return series.name
 
             return "#$display of ${series.amountOfBooks} in ${series.name}"

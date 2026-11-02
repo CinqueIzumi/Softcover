@@ -42,6 +42,7 @@ fun CoverOverlay(
                 CoverOverlayCorner.TopStart -> Alignment.TopStart
                 CoverOverlayCorner.TopEnd -> Alignment.TopEnd
             }
+
             val inset = when (model.badge.size) {
                 BadgeSize.Compact -> 6.dp
                 BadgeSize.Regular -> 8.dp

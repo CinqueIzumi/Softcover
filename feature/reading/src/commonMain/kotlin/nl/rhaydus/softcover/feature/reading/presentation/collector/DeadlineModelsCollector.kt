@@ -44,6 +44,7 @@ internal class DeadlineModelsCollector : ReadingCollector {
                 }.toMap()
 
                 val featuredId = snapshot.featuredBook?.id
+
                 val isFeaturedPlanTodayDismissed =
                     snapshot.dismissedPlanTodayByBook[featuredId] == snapshot.today.toString()
 

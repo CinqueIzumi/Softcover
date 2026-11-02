@@ -19,15 +19,15 @@ internal val LibraryGridLayout.chip: LibraryLayoutChip
     get() = when (this) {
         LibraryGridLayout.GRID_TWO_COLUMNS,
         LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY,
-            -> LibraryLayoutChip.GRID_TWO
+        -> LibraryLayoutChip.GRID_TWO
 
         LibraryGridLayout.GRID_THREE_COLUMNS,
         LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY,
-            -> LibraryLayoutChip.GRID_THREE
+        -> LibraryLayoutChip.GRID_THREE
 
         LibraryGridLayout.LIST_COMPACT,
         LibraryGridLayout.LIST_LARGE,
-            -> LibraryLayoutChip.LIST
+        -> LibraryLayoutChip.LIST
     }
 
 /**
@@ -51,13 +51,13 @@ internal val LibraryGridLayout.showsTitles: Boolean
     get() = when (this) {
         LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY,
         LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY,
-            -> false
+        -> false
 
         LibraryGridLayout.GRID_TWO_COLUMNS,
         LibraryGridLayout.GRID_THREE_COLUMNS,
         LibraryGridLayout.LIST_COMPACT,
         LibraryGridLayout.LIST_LARGE,
-            -> true
+        -> true
     }
 
 /**
@@ -67,13 +67,13 @@ internal val LibraryGridLayout.showsTitles: Boolean
 internal fun LibraryGridLayout.withTitlesShown(show: Boolean): LibraryGridLayout = when (this) {
     LibraryGridLayout.GRID_TWO_COLUMNS,
     LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY,
-        -> if (show) LibraryGridLayout.GRID_TWO_COLUMNS else LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY
+    -> if (show) LibraryGridLayout.GRID_TWO_COLUMNS else LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY
 
     LibraryGridLayout.GRID_THREE_COLUMNS,
     LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY,
-        -> if (show) LibraryGridLayout.GRID_THREE_COLUMNS else LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY
+    -> if (show) LibraryGridLayout.GRID_THREE_COLUMNS else LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY
 
     LibraryGridLayout.LIST_COMPACT,
     LibraryGridLayout.LIST_LARGE,
-        -> this
+    -> this
 }

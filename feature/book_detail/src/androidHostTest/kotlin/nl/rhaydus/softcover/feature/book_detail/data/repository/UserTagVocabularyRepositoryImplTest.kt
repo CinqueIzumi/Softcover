@@ -28,6 +28,7 @@ class UserTagVocabularyRepositoryImplTest {
     fun setUp() {
         remoteDataSource = mockk()
         localDataSource = mockk(relaxed = true)
+
         repository = UserTagVocabularyRepositoryImpl(
             remoteDataSource = remoteDataSource,
             localDataSource = localDataSource,

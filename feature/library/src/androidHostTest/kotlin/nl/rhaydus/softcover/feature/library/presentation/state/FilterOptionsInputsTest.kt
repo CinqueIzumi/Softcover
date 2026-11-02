@@ -106,6 +106,7 @@ class FilterOptionsInputsTest {
                 id = 1,
                 finishedYear = 2021,
             )
+
             val inputs = FilterOptionsInputs(
                 booksByTab = mapOf(readTabId to listOf(book)),
                 editionsByTab = emptyMap(),
@@ -126,6 +127,7 @@ class FilterOptionsInputsTest {
                 id = 1,
                 finishedYear = 2021,
             )
+
             val inputs = FilterOptionsInputs(
                 booksByTab = mapOf("all" to listOf(book)),
                 editionsByTab = emptyMap(),
@@ -146,10 +148,12 @@ class FilterOptionsInputsTest {
                 id = 1,
                 bookId = 1,
             )
+
             val book = buildBook(
                 id = 1,
                 finishedYear = 2021,
             )
+
             val inputs = FilterOptionsInputs(
                 booksByTab = emptyMap(),
                 editionsByTab = mapOf(readTabId to listOf(edition)),
@@ -168,10 +172,12 @@ class FilterOptionsInputsTest {
             // ----- Arrange -----
             val book = buildBook(id = 1)
             val editionBook = buildBook(id = 2)
+
             val edition = buildEdition(
                 id = 2,
                 bookId = 2,
             )
+
             val inputs = FilterOptionsInputs(
                 booksByTab = mapOf("all" to listOf(book)),
                 editionsByTab = mapOf("list-1" to listOf(edition)),

@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiSt
 import nl.rhaydus.toad.UiAction
 
 internal sealed interface ExploreAction : UiAction<
-        ExploreDependencies,
-        ExploreScreenUiState,
-        ExploreEvent,
-        ExploreLocalVariables,
-        >
+    ExploreDependencies,
+    ExploreScreenUiState,
+    ExploreEvent,
+    ExploreLocalVariables,
+>

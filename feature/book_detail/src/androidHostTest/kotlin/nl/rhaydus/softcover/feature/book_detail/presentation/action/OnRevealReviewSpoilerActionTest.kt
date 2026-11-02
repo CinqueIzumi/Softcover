@@ -29,6 +29,7 @@ class OnRevealReviewSpoilerActionTest {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(buildBookDetailUiState())
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
@@ -58,6 +59,7 @@ class OnRevealReviewSpoilerActionTest {
             stateFlow.value = buildBookDetailUiState().copy(
                 reviews = persistentListOf(review(id = 1), review(id = 2), review(id = 3)),
             )
+
             val action = OnRevealReviewSpoilerAction(reviewId = 2)
 
             // ----- Act -----

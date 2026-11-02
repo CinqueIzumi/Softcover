@@ -28,6 +28,7 @@ class OnProgressMinutesSteppedActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(ReadingScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ReadingLocalVariables()),
@@ -40,12 +41,12 @@ class OnProgressMinutesSteppedActionTest {
             status = BookStatus.Reading,
             reads = listOf(
                 UserBookRead(
-                id = 1,
-                currentPage = null,
-                currentSeconds = currentSeconds,
-                progress = 0f,
-                startedAt = null,
-                finishedAt = null,
+                    id = 1,
+                    currentPage = null,
+                    currentSeconds = currentSeconds,
+                    progress = 0f,
+                    startedAt = null,
+                    finishedAt = null,
                 ),
             ),
         ),
@@ -98,6 +99,7 @@ class OnProgressMinutesSteppedActionTest {
                 bookToUpdate = bookAt(currentSeconds = 3725),
                 progressTimeDraft = draftWithMinutes("0"),
             )
+
             val action = OnProgressMinutesSteppedAction(delta = -1)
 
             // ----- Act -----
@@ -117,6 +119,7 @@ class OnProgressMinutesSteppedActionTest {
                 bookToUpdate = bookAt(currentSeconds = 3725),
                 progressTimeDraft = draftWithMinutes("59"),
             )
+
             val action = OnProgressMinutesSteppedAction(delta = 1)
 
             // ----- Act -----
@@ -136,6 +139,7 @@ class OnProgressMinutesSteppedActionTest {
                 bookToUpdate = bookAt(currentSeconds = 3725),
                 progressTimeDraft = draftWithMinutes(""),
             )
+
             val action = OnProgressMinutesSteppedAction(delta = 1)
 
             // ----- Act -----
@@ -155,6 +159,7 @@ class OnProgressMinutesSteppedActionTest {
                 bookToUpdate = bookAt(currentSeconds = 3725),
                 progressTimeDraft = draftWithMinutes("40").copy(forSeconds = 100),
             )
+
             val action = OnProgressMinutesSteppedAction(delta = 1)
 
             // ----- Act -----

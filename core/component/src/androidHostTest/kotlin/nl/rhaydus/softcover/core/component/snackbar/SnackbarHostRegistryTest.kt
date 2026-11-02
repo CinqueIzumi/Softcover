@@ -24,6 +24,7 @@ class SnackbarHostRegistryTest {
             // ----- Arrange -----
             val registry = SnackbarHostRegistry()
             val token = Any()
+
             registry.register(
                 token = token,
                 level = 0,
@@ -42,10 +43,12 @@ class SnackbarHostRegistryTest {
             val registry = SnackbarHostRegistry()
             val first = Any()
             val second = Any()
+
             registry.register(
                 token = first,
                 level = 0,
             )
+
             registry.register(
                 token = second,
                 level = 0,
@@ -64,10 +67,11 @@ class SnackbarHostRegistryTest {
         fun `an unregistered token is never topmost`() {
             // ----- Arrange -----
             val registry = SnackbarHostRegistry()
+
             registry.register(
-            token = Any(),
-            level = 0,
-        )
+                token = Any(),
+                level = 0,
+            )
 
             // ----- Act -----
             val result = registry.isTopmost(Any())
@@ -85,10 +89,12 @@ class SnackbarHostRegistryTest {
             val registry = SnackbarHostRegistry()
             val first = Any()
             val second = Any()
+
             registry.register(
                 token = first,
                 level = 0,
             )
+
             registry.register(
                 token = second,
                 level = 0,
@@ -109,14 +115,17 @@ class SnackbarHostRegistryTest {
             val first = Any()
             val middle = Any()
             val top = Any()
+
             registry.register(
                 token = first,
                 level = 0,
             )
+
             registry.register(
                 token = middle,
                 level = 0,
             )
+
             registry.register(
                 token = top,
                 level = 0,
@@ -135,6 +144,7 @@ class SnackbarHostRegistryTest {
             // ----- Arrange -----
             val registry = SnackbarHostRegistry()
             val token = Any()
+
             registry.register(
                 token = token,
                 level = 0,
@@ -156,10 +166,12 @@ class SnackbarHostRegistryTest {
             val registry = SnackbarHostRegistry()
             val high = Any()
             val low = Any()
+
             registry.register(
                 token = high,
                 level = 2,
             )
+
             registry.register(
                 token = low,
                 level = 1,
@@ -180,10 +192,12 @@ class SnackbarHostRegistryTest {
             val registry = SnackbarHostRegistry()
             val first = Any()
             val second = Any()
+
             registry.register(
                 token = first,
                 level = 1,
             )
+
             registry.register(
                 token = second,
                 level = 1,
@@ -204,10 +218,12 @@ class SnackbarHostRegistryTest {
             val registry = SnackbarHostRegistry()
             val high = Any()
             val low = Any()
+
             registry.register(
                 token = low,
                 level = 1,
             )
+
             registry.register(
                 token = high,
                 level = 2,
@@ -245,6 +261,7 @@ class SnackbarHostRegistryTest {
             // ----- Arrange -----
             val registry = SnackbarHostRegistry()
             val data = Any()
+
             registry.remainingMillis(
                 data = data,
                 durationMillis = 4_000L,
@@ -266,6 +283,7 @@ class SnackbarHostRegistryTest {
         fun `a new instance resets the start`() {
             // ----- Arrange -----
             val registry = SnackbarHostRegistry()
+
             registry.remainingMillis(
                 data = Any(),
                 durationMillis = 4_000L,
@@ -288,6 +306,7 @@ class SnackbarHostRegistryTest {
             // ----- Arrange -----
             val registry = SnackbarHostRegistry()
             val data = Any()
+
             registry.remainingMillis(
                 data = data,
                 durationMillis = 4_000L,

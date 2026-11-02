@@ -15,14 +15,17 @@ private val DIAGONAL_LOWER_HALF: Shape = GenericShape { size, _ ->
         0f,
         size.height,
     )
+
     lineTo(
         size.width,
         0f,
     )
+
     lineTo(
         size.width,
         size.height,
     )
+
     close()
 }
 

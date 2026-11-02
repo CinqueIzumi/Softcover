@@ -130,6 +130,7 @@ class SearchLocalDataSourceImplTest {
             val result = transformSlot.captured(
                 SearchHistoryEntity(previousQueries = listOf("kotlin", "android", "compose")),
             )
+
             result.previousQueries shouldBe listOf("kotlin", "compose")
         }
     }

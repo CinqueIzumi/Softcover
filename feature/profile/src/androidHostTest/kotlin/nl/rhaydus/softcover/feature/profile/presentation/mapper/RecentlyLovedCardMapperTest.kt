@@ -39,11 +39,10 @@ class RecentlyLovedCardMapperTest {
         monthLabel = monthLabel,
     )
 
-    private fun LovedBook.toCard(libraryBook: Book? = null): BookCardUiModel =
-        RecentlyLovedEntry(
-            loved = this,
-            libraryBook = libraryBook,
-        ).toRecentlyLovedCard()
+    private fun LovedBook.toCard(libraryBook: Book? = null): BookCardUiModel = RecentlyLovedEntry(
+        loved = this,
+        libraryBook = libraryBook,
+    ).toRecentlyLovedCard()
 
     private fun libraryBook(
         id: Int,
@@ -54,9 +53,11 @@ class RecentlyLovedCardMapperTest {
             every {
                 this@mockk.id
             } returns 99
+
             every {
                 url
             } returns editionUrl
+
             every {
                 localImagePath
             } returns null
@@ -66,15 +67,19 @@ class RecentlyLovedCardMapperTest {
             every {
                 this@mockk.id
             } returns id
+
             every {
                 title
             } returns "Library title"
+
             every {
                 currentEdition
             } returns edition
+
             every {
                 defaultEdition
             } returns null
+
             every {
                 this@mockk.coverUrl
             } returns coverUrl
@@ -232,6 +237,7 @@ class RecentlyLovedCardMapperTest {
                 bookId = 7,
                 coverUrl = "https://example.com/profile.jpg",
             )
+
             val library = libraryBook(
                 id = 7,
                 editionUrl = "https://example.com/picked.jpg",
@@ -243,6 +249,7 @@ class RecentlyLovedCardMapperTest {
             // ----- Assert -----
             cover.source.shouldNotBeNull().shouldBeInstanceOf<CoverSource.Remote>().url shouldBe
                 "https://example.com/picked.jpg"
+
             cover.sharedTransitionKey shouldBe bookTransitionKey(
                 element = BookTransitionElement.Cover,
                 bookId = 7,
@@ -256,6 +263,7 @@ class RecentlyLovedCardMapperTest {
                 title = "Dune",
                 ratingStars = 4.5,
             )
+
             val library = libraryBook(
                 id = 7,
                 editionUrl = "https://example.com/picked.jpg",
@@ -266,6 +274,7 @@ class RecentlyLovedCardMapperTest {
 
             // ----- Assert -----
             text.title shouldBe "Dune"
+
             text.supportingLines.first() shouldBe listOf(
                 BookCardLinePart.Rating(
                     label = "4.5",
@@ -304,6 +313,7 @@ class RecentlyLovedCardMapperTest {
                 element = BookTransitionElement.Title,
                 bookId = 42,
             )
+
             column.cover.shouldNotBeNull().model.sharedTransitionKey shouldBe bookTransitionKey(
                 element = BookTransitionElement.Cover,
                 bookId = 42,

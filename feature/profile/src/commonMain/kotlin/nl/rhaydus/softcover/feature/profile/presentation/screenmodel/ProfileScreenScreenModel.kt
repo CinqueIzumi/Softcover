@@ -17,20 +17,20 @@ import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
 import nl.rhaydus.toad.ToadScreenModel
 
 internal class ProfileScreenScreenModel(
-    private val observeUserProfileDataUseCase: ObserveUserProfileDataUseCase,
-    private val observeReadingLifeUseCase: ObserveReadingLifeUseCase,
-    private val refreshUserProfileDataUseCase: RefreshUserProfileDataUseCase,
-    private val resetUserDataUseCase: ResetUserDataUseCase,
-    private val getHideUntaggedAuthorsAsFlowUseCase: GetHideUntaggedAuthorsAsFlowUseCase,
-    private val setHideUntaggedAuthorsUseCase: SetHideUntaggedAuthorsUseCase,
-    private val observeBooksByIdsUseCase: ObserveBooksByIdsUseCase,
+    observeUserProfileDataUseCase: ObserveUserProfileDataUseCase,
+    observeReadingLifeUseCase: ObserveReadingLifeUseCase,
+    refreshUserProfileDataUseCase: RefreshUserProfileDataUseCase,
+    resetUserDataUseCase: ResetUserDataUseCase,
+    getHideUntaggedAuthorsAsFlowUseCase: GetHideUntaggedAuthorsAsFlowUseCase,
+    setHideUntaggedAuthorsUseCase: SetHideUntaggedAuthorsUseCase,
+    observeBooksByIdsUseCase: ObserveBooksByIdsUseCase,
     dispatchers: AppDispatchers,
     initializers: List<ProfileCollector>,
 ) : ToadScreenModel<ProfileUiState, ProfileEvent, ProfileDependencies, ProfileCollector, LocalProfileVariables>(
-    initializers = initializers,
-    initialState = ProfileUiState(),
-    initialLocalVariables = LocalProfileVariables(),
-) {
+        initializers = initializers,
+        initialState = ProfileUiState(),
+        initialLocalVariables = LocalProfileVariables(),
+    ) {
     override val dependencies: ProfileDependencies = ProfileDependencies(
         observeUserProfileDataUseCase = observeUserProfileDataUseCase,
         observeReadingLifeUseCase = observeReadingLifeUseCase,

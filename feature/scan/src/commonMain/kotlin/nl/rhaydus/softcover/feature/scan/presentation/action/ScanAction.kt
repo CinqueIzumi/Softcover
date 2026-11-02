@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
 import nl.rhaydus.toad.UiAction
 
 internal sealed interface ScanAction : UiAction<
-        ScanDependencies,
-        ScanUiState,
-        ScanEvent,
-        LocalScanVariables,
-        >
+    ScanDependencies,
+    ScanUiState,
+    ScanEvent,
+    LocalScanVariables,
+>

@@ -37,6 +37,7 @@ class OnShowEditEditionSheetClickActionTest {
         getEditionsByBookIdUseCase = mockk()
         stateFlow = MutableStateFlow(buildBookDetailUiState())
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
@@ -46,6 +47,7 @@ class OnShowEditEditionSheetClickActionTest {
 
     private fun stubDependencies(testScope: TestScope): BookDetailDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<BookDetailDependencies>(relaxed = true).also { mock ->
             every {
                 mock.getEditionsByBookIdUseCase
@@ -95,10 +97,12 @@ class OnShowEditEditionSheetClickActionTest {
             // ----- Arrange -----
             val bookId = 42
             val currentEdition = stubEdition(id = 7)
+
             val book = stubBook(
                 id = bookId,
                 currentEdition = currentEdition,
             )
+
             stateFlow.value = buildBookDetailUiState().copy(book = book)
             dependencies = stubDependencies(this)
 
@@ -250,10 +254,12 @@ class OnShowEditEditionSheetClickActionTest {
             // ----- Arrange -----
             val bookId = 5
             val book = stubBook(id = bookId)
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
                 editionSheetRequested = false,
             )
+
             localVariablesFlow.value = BookDetailLocalVariables(editionsLoadedForBookId = bookId)
             dependencies = stubDependencies(this)
 
@@ -319,10 +325,12 @@ class OnShowEditEditionSheetClickActionTest {
         fun `clears editionsError when a retry succeeds`() = runTest {
             // ----- Arrange -----
             val bookId = 99
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = stubBook(id = bookId),
                 editionsError = "Couldn't load the editions.",
             )
+
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -343,10 +351,12 @@ class OnShowEditEditionSheetClickActionTest {
         fun `clears editionsError at the start of a retry while the fetch is in flight`() = runTest {
             // ----- Arrange -----
             val bookId = 99
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = stubBook(id = bookId),
                 editionsError = "Couldn't load the editions.",
             )
+
             dependencies = stubDependencies(this)
 
             var errorAtInvocation: String? = "unset"
@@ -408,6 +418,7 @@ class OnShowEditEditionSheetClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.editionSheetRequested shouldBe false
+
             coVerify(exactly = 0) {
                 getEditionsByBookIdUseCase(bookId = any())
             }

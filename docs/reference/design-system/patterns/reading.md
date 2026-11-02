@@ -36,7 +36,7 @@
   `primary` dot, an unread day a faint track dot, today slightly larger (ringed when unread).
 - A "Most recent first" caption beside an italic "N days running" streak, omitted when today was missed.
 - The dot is binary, from the Hardcover reading-journal dates, never reading sessions.
-- The row is one `tactileClickable` target (`select`) opening a per-day breakdown sheet. With no activity
+- The row is one `pressScaleClickable` target (`select`) opening a per-day breakdown sheet. With no activity
   in the window the strip is omitted.
 
 ### Reading featured-hero card

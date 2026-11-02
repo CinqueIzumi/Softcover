@@ -55,8 +55,10 @@ class AddBookByIsbnUseCase(
                 a = backoff,
                 b = IMPORT_WAIT_BUDGET - waited,
             )
+
             delay(pause)
             waited += pause
+
             backoff = minOf(
                 a = backoff * 2,
                 b = MAX_IMPORT_BACKOFF,

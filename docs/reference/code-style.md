@@ -1,65 +1,14 @@
 # Code Style Guide
 
-The shared Kotlin code style is governed by the foundation [`docs/rhaydus/0.3.1/code-style.md`](../rhaydus/0.3.1/code-style.md) (enforced by the `nl.rhaydus:ktlint-rules` ruleset + the type-resolved `nl.rhaydus:detekt-rules` ruleset). Read it first — it is the source of truth for naming, project structure, one-declaration-per-file, enums, data classes, boolean negation, visibility, if/else, Compose, comments, code organization, argument/property layout, whitespace, import ordering, data flow, dependencies, and test class / unit test structure.
+The shared Kotlin code style is governed by the foundation [`foundation/docs/code-style.md`](../../foundation/docs/code-style.md) (enforced by the `nl.rhaydus:ktlint-rules` ruleset + the type-resolved `nl.rhaydus:detekt-rules` ruleset). Read it first — it is the source of truth for naming, project structure, one-declaration-per-file, enums, data classes, boolean negation, visibility, if/else, Compose, comments, code organization, argument/property layout, whitespace, import ordering, data flow, dependencies, and test class / unit test structure.
 
 This file keeps only Softcover-specific deltas.
-
-## Formatting (Softcover deltas)
-
-### Trailing lambda over a multi-line body — no brace glomming
-
-The foundation §Argument and Property Layout exempts a trailing lambda from the one-per-line rule
-and its examples show the inline glommed form (e.g. `scope.setState { it.copy(link = …) }`,
-`.onFailure { AppLog.e(…) }`). **Softcover tightens this:** when a trailing lambda's body is a
-**multi-line** construct — a wrapped multi-argument call, a multi-line `it.copy(...)`,
-`AppLog.e(...)`, `async { call(...) }`, etc. — the lambda's opening `{` and closing `}` each go on
-their own line. Never glom the closer as `) }`.
-
-```kotlin
-// Bad — closing paren + brace glommed onto one line.
-scope.setState { it.copy(
-    hiddenBooks = books,
-    initialized = true,
-) }
-
-.onFailure { AppLog.e(
-    it,
-    "Failed to unblock book $bookId",
-) }
-
-// Good — braces on their own lines.
-scope.setState {
-    it.copy(
-        hiddenBooks = books,
-        initialized = true,
-    )
-}
-
-.onFailure {
-    AppLog.e(
-        it,
-        "Failed to unblock book $bookId",
-    )
-}
-```
-
-A trailing lambda whose body **fits on one line** stays inline (`repository.observe { it.first() }`),
-and a single-argument call inside a trailing lambda is not forced to wrap. Only the multi-line body
-case is affected.
-
-**Not yet tool-enforced.** `.editorconfig` disables ktlint's standard ruleset, and the foundation
-`nl.rhaydus:ktlint-rules` multi-arg wrapping rule currently *exempts* trailing-lambda calls (and even
-produces the glommed `) }` when it wraps a call inside one), so `ktlintCheck` does **not** catch this
-today — it is enforced by the guide + review. The un-glommed form is stable under `ktlintFormat`
-(verified: the formatter never collapses it back). This rule is filed as a foundation ktlint-rule
-candidate — see [`../working/foundation-upstream-candidates.md`](../working/foundation-upstream-candidates.md);
-once that rule lands it will auto-fix and gate the whole codebase.
 
 ## Events
 
 A feature's `UiEvent` variants are nested inside its sealed `<Name>Event.kt` and referenced as
 `<Name>Event.<Variant>Event`, never one file per variant. This picks the co-located option of
-[§Sealed hierarchy variants](../rhaydus/0.3.1/code-style.md#one-declaration-per-file).
+[§Sealed hierarchy variants](../../foundation/docs/code-style.md#one-declaration-per-file).
 
 ## Null safety
 
@@ -71,19 +20,8 @@ unwrap with Kotest `shouldNotBeNull()`. detekt `UnsafeCallOnNullableType` gates 
 No tool gates these, so review checks them by hand in every touched file. The reviewer does not run
 `styleCheck`; the brief states the gate result.
 
-- **Blank line between sibling composables, `Spacer` included** ([foundation §Compose](../rhaydus/0.3.1/code-style.md#compose)) — tooling misses it inside nested `Column` / `Row` / `Box` / `LazyColumn` scopes.
-- **Every multi-line construct is its own paragraph** ([§Paragraph rule](../rhaydus/0.3.1/code-style.md#paragraph-rule-for-multi-line-constructs)) — ktlint only handles the blank lines next to braces.
-- **Guard-clause spacing** ([§Guard clauses](../rhaydus/0.3.1/code-style.md#guard-clauses)) — blank line after the extraction, between guards, and after the last guard, so each guard reads as one step.
-- **No `) }` on a multi-line trailing-lambda body** ([above](#trailing-lambda-over-a-multi-line-body--no-brace-glomming)) — grep touched files for `^\s*\)\s*\}`, since ktlint's wrapping produces the glommed form itself.
-- **A 2+-argument `Modifier` call wraps one-per-line too**, e.g. `.padding(horizontal = …, vertical = …)` ([§Argument and Property Layout](../rhaydus/0.3.1/code-style.md#argument-and-property-layout)) — the ktlint rule exempts `Modifier` chains, but the guide has no such carve-out.
-- **Spacing reads a `Spacing` token** — the dp passed to `padding`, `PaddingValues`, `contentPadding`, `Arrangement.spacedBy`, `offset` or a `Spacer`'s `height` / `width` / `size` (0, 64 and 96 stay literal); the `RawSpacingDp` detekt rule gates it once the sweep enables it. Component sizes, strokes and borders stay inline `.dp` at the use site and are never hoisted into file-level `private val` constants.
-- **Corners read a `Corners` token** — the radius of a corner shape (`RoundedCornerShape`, `CutCornerShape`, their `Absolute*` forms) or a `CornerSize`, including `percent = 50` pills (`0.dp` stays literal); true circles keep `CircleShape`, partial corners derive from a step via `.copy(...)`; the `RawCornerDp` detekt rule gates it. Sizes stay inline `.dp`.
-- **Haptics read `LocalHaptics.current`** — only `SoftcoverTheme` calls `rememberHaptics()`; the `RememberHapticsOutsideTheme` detekt rule gates importing it anywhere else.
-- **Imports follow the IDE layout `*,java.**,javax.**,kotlin.**,^`** (pinned as `ij_kotlin_imports_layout` in `.editorconfig`; replaces [§Import Ordering](../rhaydus/0.3.1/code-style.md#import-ordering)'s groups) — one ASCII-sorted block, then `java.*`, `javax.*`, `kotlin.*`, aliases last, no blank lines. ktlint only sorts `nl.rhaydus.*` among themselves; run Optimize Imports after a bulk import rewrite.
-- **Every `@Test` sits in a `@Nested inner class`, one per function under test** ([§Test Class Organization](../rhaydus/0.3.1/code-style.md#test-class-organization)) — keeps a test file navigable by function.
-- **AAA markers are exactly `// ----- Arrange -----` / `Act` / `Assert`** ([§Unit Test Structure](../rhaydus/0.3.1/code-style.md#unit-test-structure)) — every test then splits into its three phases at the same markers.
-- **`kotlin.time.Instant`, never `kotlinx.datetime.Instant`.** The latter is a deprecated typealias; no
-  gate catches the import, since both resolve and compile.
+- **One `@Nested inner class` per function under test** ([§Test Class Organization](../../foundation/docs/code-style.md#test-class-organization)) — Konsist gates the nesting, not what each class groups.
+- **A true circle keeps `CircleShape`; a partial corner derives from a `Corners` step via `.copy(...)`** — `RawCornerDp` gates raw radii, not which shape is the right one.
 - **A KDoc link to a symbol the file does not import is `[Symbol][fully.qualified.Name]`, never
   downgraded to backticks.** After a file split or rename, grep the repo for the old filename — no gate
   catches a stale link.
@@ -100,10 +38,10 @@ The layered error model (data sources/repositories throw, use cases return `Resu
 
 - **Apollo network calls use the `safeQuery()` and `safeMutation()` extension functions** — the shared HTTP-client wrapping the foundation refers to is Apollo here. `safeQuery` takes an optional `FetchPolicy`; see [architecture.md](architecture.md) for the cache/fetch-policy behavior. A **plain-HTTP** fetch (a raw file, not a GraphQL operation) uses `HttpEngine.safeGetText(url)` from the same `helper/` package, which raises the same typed `ApiException` kinds — never a bare transport exception, and never a hand-rolled status check at the call site.
 - **Apollo errors are thrown as typed `ApiException` subtypes** (sealed root in `:core:domain/exception`), *not* `RuntimeException`: retryable transports as `RetryableSyncException` (`OfflineException` / `ServerUnavailableException`), auth rejections as `InvalidTokenException`, and every other Apollo failure as `UnexpectedApiException`. The seam never decides user-facing copy — that is a presentation concern (below).
-- **Use cases wrap their body in `runCatchingLogged { … }`, never bare `runCatching`.** Both helpers are provided by the foundation `nl.rhaydus:core-common` (package `nl.rhaydus.common`). `runCatchingCancellable` is the cancellation-aware `runCatching` — it re-throws `CancellationException` instead of capturing it (bare `runCatching` swallows it and breaks structured concurrency). `runCatchingLogged` composes that primitive with a single `AppLog.e` on failure, so **every use-case failure is logged once, at the source** — never silently dropped, even when the caller discards the `Result` (fire-and-forget) or omits the presentation fold. Optional `context` labels the log line. A bare `runCatching` in a `*UseCase*.kt` is flagged by the foundation `nl.rhaydus:ktlint-rules` `use-case-run-catching` rule. `runCatchingCancellable` is a pure primitive (no logging, no app coupling); it and `runCatchingLogged` are the adopted F4/F5 foundation candidates — see [`../working/foundation-upstream-candidates.md`](../working/foundation-upstream-candidates.md).
+- **Use cases wrap their body in `runCatchingLogged { … }`, never bare `runCatching`.** Both helpers are provided by the foundation `nl.rhaydus:core-common` (package `nl.rhaydus.common`). `runCatchingCancellable` is the cancellation-aware `runCatching` — it re-throws `CancellationException` instead of capturing it (bare `runCatching` swallows it and breaks structured concurrency). `runCatchingLogged` composes that primitive with a single `AppLog.e` on failure, so **every use-case failure is logged once, at the source** — never silently dropped, even when the caller discards the `Result` (fire-and-forget) or omits the presentation fold. Optional `context` labels the log line. A bare `runCatching` in a `*UseCase*.kt` is flagged by the foundation detekt rule `rhaydus:UseCaseRunCatching`. `runCatchingCancellable` is a pure primitive (no logging, no app coupling); it and `runCatchingLogged` are the adopted F4/F5 foundation candidates.
 - **User-facing error copy is authored in presentation, never the data layer.** `Throwable.toUserMessage()` (in `:core:designsystem` `presentation/error/`) maps the failure *kind* to a message (null for `InvalidTokenException`, handled by the re-auth dialog, and for non-API throwables); the `Result<T>.onApiFailure()` fold helper there shows the snackbar. It is **surface-only**: the failure was already logged at the use-case boundary by `runCatchingLogged`, so it does not log again — which is what makes a forgotten fold safe (a missing `.onApiFailure()` costs at most a toast, never a swallowed or unlogged failure). A presentation fold reports an API failure with `.onApiFailure()`, not a bare `.onFailure { AppLog.e(...) }`. Data sources / repositories / use cases must not call it (it drives `SnackBarManager`).
 - **`AppLog` (the Kermit-backed logging facade in `nl.rhaydus:core-common`) is the logger** — never `println` or `Log.*`. It exposes `i` / `w` / `e` (message and throwable variants). The app enables it once at startup via `AppLog.install(tag = "Softcover", debug = …)` (in `SoftCoverApp` / desktop `Main`).
-- **Blank line around an `AppLog.e(...)` log.** An `AppLog.e(...)` error log is its own paragraph: leave a blank line between it and the following code. This is the Softcover instance of the foundation's generic "blank line after an error log" rule — the foundation `nl.rhaydus:ktlint-rules` `BlankLineAfterStatementRule` keys on `AppLog.e`.
+- **Blank line around an `AppLog.e(...)` log.** An `AppLog.e(...)` error log is its own paragraph: leave a blank line between it and the following code. This is the Softcover instance of the foundation's §Super calls and error logs rule; the foundation `nl.rhaydus:ktlint-rules` `statement-paragraph` rule keys on `AppLog.e` and auto-fixes it.
 - **A terminal flow read must never be able to crash the app.** `.first()` / `.single()` throw `NoSuchElementException` on an empty flow, and *every* terminal operator (`.first`, `.firstOrNull`, `.single`, `.collect`, …) re-throws an upstream error (a failing DataStore / network / Apollo / repository flow). So a bare `.first()` / `.single()` on such a flow — e.g. reading a preference one-shot inside a `UiAction` — is a crash risk: an empty or erroring source takes the app down. The rule is **crash-safety, not "always use a `Collector`"** — pick whichever fits:
   - **Guard the one-shot read** when a snapshot is genuinely what you want: `.firstOrNull()` with a sensible default, wrapped so the throw cannot escape (a `.catch {}` on the flow, or `runCatchingCancellable`). A bare `.first()` with nothing catching it is the defect.
   - **Consume it reactively** when the value should track the source over the screen's lifetime: a TOAD `Collector` that folds the flow into `UiState` (the established pattern for every preference fed into a screen, e.g. `DateStyleCollector`). This also sidesteps the empty/error throw entirely.

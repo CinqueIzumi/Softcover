@@ -13,12 +13,14 @@ class RandomPickCoverSizeTest {
         fun `a stacked size uses the random pick eyebrow and foot`() {
             // ----- Arrange -----
             val heightDp = 320
+
             val sizes = listOf(
                 DpSize(
                     width = 160.dp,
                     height = heightDp.dp,
                 ),
             )
+
             val expected = stackedCoverHeightDp(
                 heightDp = heightDp,
                 eyebrowDp = randomPickEyebrowDp(heightDp),

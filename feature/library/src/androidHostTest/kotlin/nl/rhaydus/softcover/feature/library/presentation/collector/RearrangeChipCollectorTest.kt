@@ -38,11 +38,13 @@ class RearrangeChipCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk<LibraryDependencies>(relaxed = true).also { mock ->
             every {
                 mock.defaultDispatcher
@@ -56,6 +58,7 @@ class RearrangeChipCollectorTest {
         fun `a tab present in displayBooksByTab but absent from booksByTab gets no chip`() = runTest(testDispatcher) {
             // ----- Arrange -----
             val collector = RearrangeChipCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -82,6 +85,7 @@ class RearrangeChipCollectorTest {
                 listId = 10,
                 listName = "Winter reading",
             )
+
             val rankedList = BookList(
                 id = 10,
                 name = "Winter reading",
@@ -89,7 +93,9 @@ class RearrangeChipCollectorTest {
                 ranked = true,
                 books = emptyList(),
             )
+
             val collector = RearrangeChipCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -112,30 +118,31 @@ class RearrangeChipCollectorTest {
         }
 
         @Test
-        fun `unrelated state change that leaves the snapshot equal does not retrigger recompute`() =
-            runTest(testDispatcher) {
-                // ----- Arrange -----
-                val collector = RearrangeChipCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+        fun `unrelated state change that leaves the snapshot equal does not retrigger recompute`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val collector = RearrangeChipCollector()
 
-                stateFlow.value = LibraryUiState(
-                    visibleTabs = persistentListOf(readingTab),
-                    sortModeByTab = persistentMapOf(readingTab.id to LibrarySortMode.MANUAL),
-                    displayBooksByTab = persistentMapOf(readingTab.id to List(2) { mockk<Book>() }.toImmutableList()),
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-                val chipByTabAfterFirstEmit = stateFlow.value.rearrangeChipByTab
-
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(isArrangeSheetExpanded = true)
-
-                // ----- Assert -----
-                (stateFlow.value.rearrangeChipByTab === chipByTabAfterFirstEmit) shouldBe true
-                job.cancel()
             }
+
+            stateFlow.value = LibraryUiState(
+                visibleTabs = persistentListOf(readingTab),
+                sortModeByTab = persistentMapOf(readingTab.id to LibrarySortMode.MANUAL),
+                displayBooksByTab = persistentMapOf(readingTab.id to List(2) { mockk<Book>() }.toImmutableList()),
+            )
+
+            val chipByTabAfterFirstEmit = stateFlow.value.rearrangeChipByTab
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(isArrangeSheetExpanded = true)
+
+            // ----- Assert -----
+            (stateFlow.value.rearrangeChipByTab === chipByTabAfterFirstEmit) shouldBe true
+            job.cancel()
+        }
     }
 }

@@ -57,6 +57,7 @@ class ProfileChartsCollectorTest {
         observeUserProfileDataUseCase = mockk()
         getHideUntaggedAuthorsAsFlowUseCase = mockk()
         stateFlow = MutableStateFlow(ProfileUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalProfileVariables()),
@@ -78,6 +79,7 @@ class ProfileChartsCollectorTest {
 
     private fun stubDependencies(testScope: TestScope): ProfileDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<ProfileDependencies>(relaxed = true).also { mock ->
             every {
                 mock.observeReadingLifeUseCase
@@ -172,278 +174,292 @@ class ProfileChartsCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `one write sets the genre ranking, the charts and the demographics together`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val demographics = buildDemographics()
-                val genres = buildGenres()
-                val dependencies = stubDependencies(this)
-                val job = launch {
-                    ProfileChartsCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+        fun `one write sets the genre ranking, the charts and the demographics together`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val demographics = buildDemographics()
+            val genres = buildGenres()
+            val dependencies = stubDependencies(this)
 
-                // ----- Act -----
-                hideFlow.emit(false)
-                profileDataFlow.emit(buildProfileData())
-                readingLifeFlow.emit(
-                    buildReadingLife(
-                        demographics = demographics,
-                        genres = genres,
-                    ),
+            val job = launch {
+                ProfileChartsCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
+            }
 
-                // ----- Assert -----
-                stateFlow.value.genreRanking shouldBe genreRankingUiModel(genres)
-                stateFlow.value.genderBreakdown shouldBe genderBreakdownUiModel(
+            // ----- Act -----
+            hideFlow.emit(false)
+            profileDataFlow.emit(buildProfileData())
+
+            readingLifeFlow.emit(
+                buildReadingLife(
                     demographics = demographics,
-                    hideUntaggedAuthors = false,
-                )
-                stateFlow.value.bipocBreakdown shouldBe demographicBreakdownUiModel(
-                    breakdown = demographics.bipocBreakdown,
-                    hideUntaggedAuthors = false,
-                )
-                stateFlow.value.lgbtqBreakdown shouldBe demographicBreakdownUiModel(
-                    breakdown = demographics.lgbtqBreakdown,
-                    hideUntaggedAuthors = false,
-                )
-                stateFlow.value.hasGenres shouldBe true
-                stateFlow.value.genreScopeCaption shouldBe genreScopeCaption(taggedBookCount = genres.taggedBookCount)
-                job.cancel()
-            }
+                    genres = genres,
+                ),
+            )
+
+            // ----- Assert -----
+            stateFlow.value.genreRanking shouldBe genreRankingUiModel(genres)
+
+            stateFlow.value.genderBreakdown shouldBe genderBreakdownUiModel(
+                demographics = demographics,
+                hideUntaggedAuthors = false,
+            )
+
+            stateFlow.value.bipocBreakdown shouldBe demographicBreakdownUiModel(
+                breakdown = demographics.bipocBreakdown,
+                hideUntaggedAuthors = false,
+            )
+
+            stateFlow.value.lgbtqBreakdown shouldBe demographicBreakdownUiModel(
+                breakdown = demographics.lgbtqBreakdown,
+                hideUntaggedAuthors = false,
+            )
+
+            stateFlow.value.hasGenres shouldBe true
+            stateFlow.value.genreScopeCaption shouldBe genreScopeCaption(taggedBookCount = genres.taggedBookCount)
+            job.cancel()
+        }
 
         @Test
-        fun `maps the ratings chart and average once both reading life and profile have arrived`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val ratings = RatingsDistribution(
-                    average = 4.2,
-                    totalRatings = 9,
-                    halfStarBuckets = listOf(0, 0, 1, 0, 2, 0, 3, 0, 3),
+        fun `maps the ratings chart and average once both reading life and profile have arrived`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val ratings = RatingsDistribution(
+                average = 4.2,
+                totalRatings = 9,
+                halfStarBuckets = listOf(0, 0, 1, 0, 2, 0, 3, 0, 3),
+            )
+
+            val dependencies = stubDependencies(this)
+
+            val job = launch {
+                ProfileChartsCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-                val dependencies = stubDependencies(this)
-                val job = launch {
-                    ProfileChartsCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                hideFlow.emit(false)
-                profileDataFlow.emit(buildProfileData())
-                readingLifeFlow.emit(buildReadingLife(ratings = ratings))
-
-                // ----- Assert -----
-                stateFlow.value.ratingsChart shouldBe ratingsChartUiModel(ratings)
-                stateFlow.value.ratingsAverage shouldBe ratingsAverageUiModel(ratings)
-                stateFlow.value.ratingsChart.isLoading shouldBe false
-                stateFlow.value.ratingsAverage.isLoading shouldBe false
-                stateFlow.value.ratingsAverage.variant shouldBe StatNumberVariant.Average
-                job.cancel()
             }
+
+            // ----- Act -----
+            hideFlow.emit(false)
+            profileDataFlow.emit(buildProfileData())
+            readingLifeFlow.emit(buildReadingLife(ratings = ratings))
+
+            // ----- Assert -----
+            stateFlow.value.ratingsChart shouldBe ratingsChartUiModel(ratings)
+            stateFlow.value.ratingsAverage shouldBe ratingsAverageUiModel(ratings)
+            stateFlow.value.ratingsChart.isLoading shouldBe false
+            stateFlow.value.ratingsAverage.isLoading shouldBe false
+            stateFlow.value.ratingsAverage.variant shouldBe StatNumberVariant.Average
+            job.cancel()
+        }
 
         @Test
-        fun `ratings stay loading when only the reading life has arrived`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val dependencies = stubDependencies(this)
-                val job = launch {
-                    ProfileChartsCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+        fun `ratings stay loading when only the reading life has arrived`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val dependencies = stubDependencies(this)
 
-                // ----- Act -----
-                hideFlow.emit(false)
-                readingLifeFlow.emit(buildReadingLife(ratings = RatingsDistribution(average = 3.0)))
-
-                // ----- Assert -----
-                stateFlow.value.ratingsChart.isLoading shouldBe true
-                stateFlow.value.ratingsAverage.isLoading shouldBe true
-                job.cancel()
+            val job = launch {
+                ProfileChartsCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            // ----- Act -----
+            hideFlow.emit(false)
+            readingLifeFlow.emit(buildReadingLife(ratings = RatingsDistribution(average = 3.0)))
+
+            // ----- Assert -----
+            stateFlow.value.ratingsChart.isLoading shouldBe true
+            stateFlow.value.ratingsAverage.isLoading shouldBe true
+            job.cancel()
+        }
 
         @Test
-        fun `stays loading when only the reading life has arrived`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val initial = stateFlow.value
-                val dependencies = stubDependencies(this)
-                val job = launch {
-                    ProfileChartsCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+        fun `stays loading when only the reading life has arrived`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val initial = stateFlow.value
+            val dependencies = stubDependencies(this)
 
-                // ----- Act -----
-                hideFlow.emit(false)
-                readingLifeFlow.emit(buildReadingLife())
-
-                // ----- Assert -----
-                stateFlow.value.genreRanking shouldBe initial.genreRanking
-                stateFlow.value.genderBreakdown shouldBe initial.genderBreakdown
-                stateFlow.value.bipocBreakdown shouldBe initial.bipocBreakdown
-                stateFlow.value.lgbtqBreakdown shouldBe initial.lgbtqBreakdown
-                stateFlow.value.hasGenres shouldBe initial.hasGenres
-                stateFlow.value.genreScopeCaption shouldBe initial.genreScopeCaption
-                job.cancel()
+            val job = launch {
+                ProfileChartsCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            // ----- Act -----
+            hideFlow.emit(false)
+            readingLifeFlow.emit(buildReadingLife())
+
+            // ----- Assert -----
+            stateFlow.value.genreRanking shouldBe initial.genreRanking
+            stateFlow.value.genderBreakdown shouldBe initial.genderBreakdown
+            stateFlow.value.bipocBreakdown shouldBe initial.bipocBreakdown
+            stateFlow.value.lgbtqBreakdown shouldBe initial.lgbtqBreakdown
+            stateFlow.value.hasGenres shouldBe initial.hasGenres
+            stateFlow.value.genreScopeCaption shouldBe initial.genreScopeCaption
+            job.cancel()
+        }
 
         @Test
-        fun `stays loading when only the profile data has arrived`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val initial = stateFlow.value
-                val dependencies = stubDependencies(this)
-                val job = launch {
-                    ProfileChartsCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+        fun `stays loading when only the profile data has arrived`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val initial = stateFlow.value
+            val dependencies = stubDependencies(this)
 
-                // ----- Act -----
-                hideFlow.emit(false)
-                profileDataFlow.emit(buildProfileData())
-
-                // ----- Assert -----
-                stateFlow.value.genreRanking shouldBe initial.genreRanking
-                stateFlow.value.genderBreakdown shouldBe initial.genderBreakdown
-                stateFlow.value.bipocBreakdown shouldBe initial.bipocBreakdown
-                stateFlow.value.lgbtqBreakdown shouldBe initial.lgbtqBreakdown
-                stateFlow.value.hasGenres shouldBe initial.hasGenres
-                stateFlow.value.genreScopeCaption shouldBe initial.genreScopeCaption
-                job.cancel()
+            val job = launch {
+                ProfileChartsCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            // ----- Act -----
+            hideFlow.emit(false)
+            profileDataFlow.emit(buildProfileData())
+
+            // ----- Assert -----
+            stateFlow.value.genreRanking shouldBe initial.genreRanking
+            stateFlow.value.genderBreakdown shouldBe initial.genderBreakdown
+            stateFlow.value.bipocBreakdown shouldBe initial.bipocBreakdown
+            stateFlow.value.lgbtqBreakdown shouldBe initial.lgbtqBreakdown
+            stateFlow.value.hasGenres shouldBe initial.hasGenres
+            stateFlow.value.genreScopeCaption shouldBe initial.genreScopeCaption
+            job.cancel()
+        }
 
         @Test
-        fun `stays loading when the reading life is null`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val initial = stateFlow.value
-                val dependencies = stubDependencies(this)
-                val job = launch {
-                    ProfileChartsCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+        fun `stays loading when the reading life is null`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val initial = stateFlow.value
+            val dependencies = stubDependencies(this)
 
-                // ----- Act -----
-                hideFlow.emit(false)
-                profileDataFlow.emit(buildProfileData())
-                readingLifeFlow.emit(null)
-
-                // ----- Assert -----
-                stateFlow.value.genreRanking shouldBe initial.genreRanking
-                stateFlow.value.genderBreakdown shouldBe initial.genderBreakdown
-                job.cancel()
+            val job = launch {
+                ProfileChartsCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            // ----- Act -----
+            hideFlow.emit(false)
+            profileDataFlow.emit(buildProfileData())
+            readingLifeFlow.emit(null)
+
+            // ----- Assert -----
+            stateFlow.value.genreRanking shouldBe initial.genreRanking
+            stateFlow.value.genderBreakdown shouldBe initial.genderBreakdown
+            job.cancel()
+        }
 
         @Test
-        fun `writes the tagged-only charts and demographics when untagged authors are hidden`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val demographics = buildDemographics()
-                val tagged = demographics.excludingUntaggedAuthors()
-                val dependencies = stubDependencies(this)
-                val job = launch {
-                    ProfileChartsCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+        fun `writes the tagged-only charts and demographics when untagged authors are hidden`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val demographics = buildDemographics()
+            val tagged = demographics.excludingUntaggedAuthors()
+            val dependencies = stubDependencies(this)
 
-                // ----- Act -----
-                hideFlow.emit(true)
-                profileDataFlow.emit(buildProfileData())
-                readingLifeFlow.emit(buildReadingLife(demographics = demographics))
-
-                // ----- Assert -----
-                stateFlow.value.genderBreakdown shouldBe genderBreakdownUiModel(
-                    demographics = tagged,
-                    hideUntaggedAuthors = true,
+            val job = launch {
+                ProfileChartsCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-                stateFlow.value.bipocBreakdown shouldBe demographicBreakdownUiModel(
-                    breakdown = tagged.bipocBreakdown,
-                    hideUntaggedAuthors = true,
-                )
-                stateFlow.value.lgbtqBreakdown shouldBe demographicBreakdownUiModel(
-                    breakdown = tagged.lgbtqBreakdown,
-                    hideUntaggedAuthors = true,
-                )
-                job.cancel()
             }
+
+            // ----- Act -----
+            hideFlow.emit(true)
+            profileDataFlow.emit(buildProfileData())
+            readingLifeFlow.emit(buildReadingLife(demographics = demographics))
+
+            // ----- Assert -----
+            stateFlow.value.genderBreakdown shouldBe genderBreakdownUiModel(
+                demographics = tagged,
+                hideUntaggedAuthors = true,
+            )
+
+            stateFlow.value.bipocBreakdown shouldBe demographicBreakdownUiModel(
+                breakdown = tagged.bipocBreakdown,
+                hideUntaggedAuthors = true,
+            )
+
+            stateFlow.value.lgbtqBreakdown shouldBe demographicBreakdownUiModel(
+                breakdown = tagged.lgbtqBreakdown,
+                hideUntaggedAuthors = true,
+            )
+
+            job.cancel()
+        }
 
         @Test
-        fun `does not exclude untaggeds from the genre ranking when untagged authors are hidden`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val genres = buildGenres()
-                val dependencies = stubDependencies(this)
-                val job = launch {
-                    ProfileChartsCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+        fun `does not exclude untaggeds from the genre ranking when untagged authors are hidden`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val genres = buildGenres()
+            val dependencies = stubDependencies(this)
 
-                // ----- Act -----
-                hideFlow.emit(true)
-                profileDataFlow.emit(buildProfileData())
-                readingLifeFlow.emit(buildReadingLife(genres = genres))
-
-                // ----- Assert -----
-                stateFlow.value.genreRanking shouldBe genreRankingUiModel(genres)
-                job.cancel()
+            val job = launch {
+                ProfileChartsCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            // ----- Act -----
+            hideFlow.emit(true)
+            profileDataFlow.emit(buildProfileData())
+            readingLifeFlow.emit(buildReadingLife(genres = genres))
+
+            // ----- Assert -----
+            stateFlow.value.genreRanking shouldBe genreRankingUiModel(genres)
+            job.cancel()
+        }
 
         @Test
-        fun `rebuilds the charts and demographics when the hide flag flips on`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val demographics = buildDemographics()
-                val tagged = demographics.excludingUntaggedAuthors()
-                val dependencies = stubDependencies(this)
-                val job = launch {
-                    ProfileChartsCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-                hideFlow.emit(false)
-                profileDataFlow.emit(buildProfileData())
-                readingLifeFlow.emit(buildReadingLife(demographics = demographics))
+        fun `rebuilds the charts and demographics when the hide flag flips on`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val demographics = buildDemographics()
+            val tagged = demographics.excludingUntaggedAuthors()
+            val dependencies = stubDependencies(this)
 
-                // ----- Act -----
-                hideFlow.emit(true)
-
-                // ----- Assert -----
-                stateFlow.value.genderBreakdown shouldBe genderBreakdownUiModel(
-                    demographics = tagged,
-                    hideUntaggedAuthors = true,
+            val job = launch {
+                ProfileChartsCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-                stateFlow.value.bipocBreakdown shouldBe demographicBreakdownUiModel(
-                    breakdown = tagged.bipocBreakdown,
-                    hideUntaggedAuthors = true,
-                )
-                stateFlow.value.lgbtqBreakdown shouldBe demographicBreakdownUiModel(
-                    breakdown = tagged.lgbtqBreakdown,
-                    hideUntaggedAuthors = true,
-                )
-                job.cancel()
             }
+
+            hideFlow.emit(false)
+            profileDataFlow.emit(buildProfileData())
+            readingLifeFlow.emit(buildReadingLife(demographics = demographics))
+
+            // ----- Act -----
+            hideFlow.emit(true)
+
+            // ----- Assert -----
+            stateFlow.value.genderBreakdown shouldBe genderBreakdownUiModel(
+                demographics = tagged,
+                hideUntaggedAuthors = true,
+            )
+
+            stateFlow.value.bipocBreakdown shouldBe demographicBreakdownUiModel(
+                breakdown = tagged.bipocBreakdown,
+                hideUntaggedAuthors = true,
+            )
+
+            stateFlow.value.lgbtqBreakdown shouldBe demographicBreakdownUiModel(
+                breakdown = tagged.lgbtqBreakdown,
+                hideUntaggedAuthors = true,
+            )
+
+            job.cancel()
+        }
 
         @Test
         fun `hasGenres is false and the caption drops the book count when there are no genre slices`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 val dependencies = stubDependencies(this)
+
                 val job = launch {
                     ProfileChartsCollector().onLaunch(
                         scope = scope,
@@ -463,27 +479,27 @@ class ProfileChartsCollectorTest {
             }
 
         @Test
-        fun `leaves the genre fields untouched when untagged authors are hidden`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val genres = buildGenres()
-                val dependencies = stubDependencies(this)
-                val job = launch {
-                    ProfileChartsCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+        fun `leaves the genre fields untouched when untagged authors are hidden`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val genres = buildGenres()
+            val dependencies = stubDependencies(this)
 
-                // ----- Act -----
-                hideFlow.emit(true)
-                profileDataFlow.emit(buildProfileData())
-                readingLifeFlow.emit(buildReadingLife(genres = genres))
-
-                // ----- Assert -----
-                stateFlow.value.hasGenres shouldBe true
-                stateFlow.value.genreScopeCaption shouldBe genreScopeCaption(taggedBookCount = 4)
-                job.cancel()
+            val job = launch {
+                ProfileChartsCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            // ----- Act -----
+            hideFlow.emit(true)
+            profileDataFlow.emit(buildProfileData())
+            readingLifeFlow.emit(buildReadingLife(genres = genres))
+
+            // ----- Assert -----
+            stateFlow.value.hasGenres shouldBe true
+            stateFlow.value.genreScopeCaption shouldBe genreScopeCaption(taggedBookCount = 4)
+            job.cancel()
+        }
     }
 }

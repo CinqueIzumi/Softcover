@@ -30,6 +30,7 @@ internal fun wavyProgressGeometry(
         minimumValue = 0f,
         maximumValue = 1f,
     )
+
     val strokeWidth = 4f * density
     val capInset = strokeWidth / 2f
     val gapSize = 4f * density
@@ -50,6 +51,7 @@ internal fun wavyProgressGeometry(
     } else {
         0f
     }
+
     val trackSpacing = if (isHeadVisible) gap + capInset * 2f else gap
 
     var stopSize = strokeWidth
@@ -61,6 +63,7 @@ internal fun wavyProgressGeometry(
             0f,
             stopSize - (progressX - stopX),
         )
+
         stopX = progressX
     }
 
