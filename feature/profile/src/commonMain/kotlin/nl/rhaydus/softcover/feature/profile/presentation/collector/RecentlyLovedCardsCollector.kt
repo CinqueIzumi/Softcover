@@ -48,6 +48,7 @@ internal class RecentlyLovedCardsCollector : StatsAtlasCollector {
         }
 
         val loved = books.take(RECENTLY_LOVED_CARD_COUNT)
+
         if (loved.isEmpty()) return flowOf(BookCardSet.empty())
 
         return dependencies.observeBooksByIdsUseCase(loved.map { it.bookId }).map { libraryBooks ->
@@ -57,6 +58,7 @@ internal class RecentlyLovedCardsCollector : StatsAtlasCollector {
                 .mapNotNull { book ->
                     val libraryBook = byId[book.bookId]?.takeIf { it.userBook != null }
                         ?: return@mapNotNull null
+
                     val entry = RecentlyLovedEntry(
                         loved = book,
                         libraryBook = libraryBook,

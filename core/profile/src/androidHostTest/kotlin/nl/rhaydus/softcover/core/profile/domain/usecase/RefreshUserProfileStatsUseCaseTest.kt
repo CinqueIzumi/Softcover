@@ -35,9 +35,11 @@ class RefreshUserProfileStatsUseCaseTest {
         statsRefreshGate = ProfileRefreshGate()
         hasSyncedReadBooksThisSessionUseCase = mockk()
         refreshLibraryUseCase = mockk()
+
         every {
             hasSyncedReadBooksThisSessionUseCase()
         } returns true
+
         useCase = RefreshUserProfileStatsUseCase(
             profileRepository = profileRepository,
             statsRefreshGate = statsRefreshGate,
@@ -103,38 +105,42 @@ class RefreshUserProfileStatsUseCaseTest {
             coEvery {
                 profileRepository.fetchUserProfileSnapshot()
             } returns snapshot()
+
             coEvery {
                 profileRepository.cacheUserProfileIdentity(snapshot = any())
             } returns Unit
         }
 
         @Test
-        fun `refreshes the Read books after caching the identity when this session has not synced them`() =
-            runTest {
-                // ----- Arrange -----
-                arrangeSuccessfulIdentity()
-                every {
-                    hasSyncedReadBooksThisSessionUseCase()
-                } returns false
-                coEvery {
-                    refreshLibraryUseCase(scope = readScope)
-                } returns Result.success(Unit)
+        fun `refreshes the Read books after caching the identity when this session has not synced them`() = runTest {
+            // ----- Arrange -----
+            arrangeSuccessfulIdentity()
 
-                // ----- Act -----
-                val result = useCase()
+            every {
+                hasSyncedReadBooksThisSessionUseCase()
+            } returns false
 
-                // ----- Assert -----
-                result.isSuccess shouldBe true
-                coVerifyOrder {
-                    profileRepository.cacheUserProfileIdentity(snapshot = any())
-                    refreshLibraryUseCase(scope = readScope)
-                }
+            coEvery {
+                refreshLibraryUseCase(scope = readScope)
+            } returns Result.success(Unit)
+
+            // ----- Act -----
+            val result = useCase()
+
+            // ----- Assert -----
+            result.isSuccess shouldBe true
+
+            coVerifyOrder {
+                profileRepository.cacheUserProfileIdentity(snapshot = any())
+                refreshLibraryUseCase(scope = readScope)
             }
+        }
 
         @Test
         fun `skips the Read books refresh when this session has already synced them`() = runTest {
             // ----- Arrange -----
             arrangeSuccessfulIdentity()
+
             every {
                 hasSyncedReadBooksThisSessionUseCase()
             } returns true
@@ -152,9 +158,11 @@ class RefreshUserProfileStatsUseCaseTest {
             // ----- Arrange -----
             val exception = RuntimeException("library refresh failed")
             arrangeSuccessfulIdentity()
+
             every {
                 hasSyncedReadBooksThisSessionUseCase()
             } returns false
+
             coEvery {
                 refreshLibraryUseCase(scope = readScope)
             } returns Result.failure(exception)
@@ -171,9 +179,11 @@ class RefreshUserProfileStatsUseCaseTest {
         fun `a failed Read books refresh leaves the gate open so the next invoke retries`() = runTest {
             // ----- Arrange -----
             arrangeSuccessfulIdentity()
+
             every {
                 hasSyncedReadBooksThisSessionUseCase()
             } returns false
+
             coEvery {
                 refreshLibraryUseCase(scope = readScope)
             } returnsMany listOf(
@@ -198,6 +208,7 @@ class RefreshUserProfileStatsUseCaseTest {
             coEvery {
                 profileRepository.fetchUserProfileSnapshot()
             } returns snapshot()
+
             coEvery {
                 profileRepository.cacheUserProfileIdentity(snapshot = any())
             } returns Unit
@@ -227,6 +238,7 @@ class RefreshUserProfileStatsUseCaseTest {
                 fetchCallCount++
                 if (fetchCallCount == 1) throw RuntimeException("network error") else snapshot()
             }
+
             coEvery {
                 profileRepository.cacheUserProfileIdentity(snapshot = any())
             } returns Unit

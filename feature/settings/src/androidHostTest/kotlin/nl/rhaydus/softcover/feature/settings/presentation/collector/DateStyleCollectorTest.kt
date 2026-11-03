@@ -36,6 +36,7 @@ class DateStyleCollectorTest {
         dateStyleFlow = MutableSharedFlow()
         getDateStyleAsFlowUseCase = mockk()
         stateFlow = MutableStateFlow(SettingsScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(SettingsLocalVariables()),
@@ -59,6 +60,7 @@ class DateStyleCollectorTest {
         fun `updates dateStyleRows to the latest value when flow emits multiple times`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = DateStyleCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -79,12 +81,14 @@ class DateStyleCollectorTest {
         fun `every row carries its style's formatted example for today`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = DateStyleCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
                     dependencies = dependencies,
                 )
             }
+
             val dayBefore = Clock.System.todayIn(TimeZone.currentSystemDefault())
 
             // ----- Act -----
@@ -93,9 +97,11 @@ class DateStyleCollectorTest {
             // ----- Assert -----
             val dayAfter = Clock.System.todayIn(TimeZone.currentSystemDefault())
             val actual = stateFlow.value.dateStyleRows.map { it.key to it.example }
+
             val acceptable = setOf(dayBefore, dayAfter).map { day ->
                 DateStyle.entries.map { it to it.format(day) }
             }
+
             acceptable shouldContain actual
             job.cancel()
         }

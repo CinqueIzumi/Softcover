@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
+import nl.rhaydus.designsystem.theme.Spacing
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable

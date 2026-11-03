@@ -63,6 +63,7 @@ internal fun buildLibraryFilterSheetSelection(
         filters = draft.filters,
         section = draft.yourTagsSection,
     )
+
     val hardcoverTags = buildTagSourceSummary(
         source = TagSource.HARDCOVER,
         options = options,

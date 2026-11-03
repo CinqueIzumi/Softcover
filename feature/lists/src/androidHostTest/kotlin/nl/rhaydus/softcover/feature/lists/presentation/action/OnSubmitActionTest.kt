@@ -49,11 +49,13 @@ class OnSubmitActionTest {
     fun setUp() {
         createListUseCase = mockk()
         stateFlow = MutableStateFlow(CreateListUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalCreateListVariables()),
             eventChannel = eventChannel,
         )
+
         dependencies = mockk<CreateListDependencies>(relaxed = true).also { mock ->
             every {
                 mock.createListUseCase
@@ -81,6 +83,7 @@ class OnSubmitActionTest {
                     privacy = any(),
                 )
             }
+
             eventChannel.tryReceive().getOrNull() shouldBe null
         }
 
@@ -119,6 +122,7 @@ class OnSubmitActionTest {
                 )
             } coAnswers {
                 enabledDuringCall = stateFlow.value.nameField.enabled
+
                 bookList(
                     id = 1,
                     name = "Summer",

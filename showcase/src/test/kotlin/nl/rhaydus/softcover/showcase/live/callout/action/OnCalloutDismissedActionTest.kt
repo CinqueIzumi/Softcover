@@ -26,6 +26,7 @@ class OnCalloutDismissedActionTest {
     @BeforeEach
     fun setUp() {
         dependencies = mockk(relaxed = true)
+
         stateFlow = MutableStateFlow(
             CalloutLiveUiState(
                 topBar = calloutLiveTopBar(),
@@ -33,7 +34,9 @@ class OnCalloutDismissedActionTest {
                 callouts = liveCallouts(),
             ),
         )
+
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(CalloutLiveLocalVariables()),

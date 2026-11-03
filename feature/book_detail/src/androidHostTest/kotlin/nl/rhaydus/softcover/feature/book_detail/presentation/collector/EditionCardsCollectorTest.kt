@@ -33,11 +33,13 @@ class EditionCardsCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk(relaxed = true)
     }
 
@@ -58,6 +60,7 @@ class EditionCardsCollectorTest {
                     buildEdition(id = 2),
                 ),
             )
+
             val collector = EditionCardsCollector()
 
             // ----- Act -----
@@ -74,6 +77,7 @@ class EditionCardsCollectorTest {
                 BookCardKey.Edition(editionId = 1),
                 BookCardKey.Edition(editionId = 2),
             )
+
             headerEyebrow() shouldBe "3 EDITIONS"
             job.cancel()
         }
@@ -88,6 +92,7 @@ class EditionCardsCollectorTest {
                 ),
                 editionSearchQuery = "penguin",
             )
+
             val collector = EditionCardsCollector()
 
             // ----- Act -----
@@ -113,7 +118,9 @@ class EditionCardsCollectorTest {
                 ),
                 selectedEditionId = 1,
             )
+
             val collector = EditionCardsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -135,6 +142,7 @@ class EditionCardsCollectorTest {
         fun `trails a tracking badge on the displayed edition`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val displayed = buildEdition(id = 2)
+
             stateFlow.value = buildBookDetailUiState().copy(
                 editions = persistentListOf(
                     buildEdition(id = 1),
@@ -142,6 +150,7 @@ class EditionCardsCollectorTest {
                 ),
                 previewEdition = displayed,
             )
+
             val collector = EditionCardsCollector()
 
             // ----- Act -----
@@ -156,6 +165,7 @@ class EditionCardsCollectorTest {
             val trailing = stateFlow.value.editionCards.map {
                 it.variant.shouldBeInstanceOf<BookCardVariant.Row>().trailing
             }
+
             trailing[0] shouldBe null
             trailing[1].shouldNotBeNull()
             job.cancel()
@@ -167,6 +177,7 @@ class EditionCardsCollectorTest {
             stateFlow.value = buildBookDetailUiState().copy(
                 editions = persistentListOf(),
             )
+
             val collector = EditionCardsCollector()
 
             // ----- Act -----
@@ -194,6 +205,7 @@ class EditionCardsCollectorTest {
                 ),
                 editionSearchQuery = "tor",
             )
+
             val collector = EditionCardsCollector()
 
             // ----- Act -----

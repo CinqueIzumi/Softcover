@@ -13,7 +13,7 @@ internal fun hapticChipEvents(onChipEvent: (ChipEvent) -> Unit): (ChipEvent) -> 
         when (event) {
             is ChipEvent.Clicked,
             is ChipEvent.Dismissed,
-                -> haptics.select()
+            -> haptics.select()
 
             is ChipEvent.SpoilerToggled -> Unit
         }

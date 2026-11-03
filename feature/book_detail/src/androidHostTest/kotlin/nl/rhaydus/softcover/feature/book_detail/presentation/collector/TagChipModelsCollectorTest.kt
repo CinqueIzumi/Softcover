@@ -38,6 +38,7 @@ class TagChipModelsCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -68,7 +69,9 @@ class TagChipModelsCollectorTest {
                     category = TagCategory.MOOD,
                 ),
             )
+
             val collector = TagChipModelsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -90,214 +93,231 @@ class TagChipModelsCollectorTest {
         }
 
         @Test
-        fun `groups community tags into Genre, Mood, Other tags, Content warning in that order`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val tags = listOf(
-                    Tag(
-                        id = 1,
-                        name = "Mystery",
-                        category = TagCategory.CONTENT_WARNING,
-                    ),
-                    Tag(
-                        id = 2,
-                        name = "Sci-fi",
-                        category = TagCategory.GENRE,
-                    ),
-                    Tag(
-                        id = 3,
-                        name = "Dark",
-                        category = TagCategory.MOOD,
-                    ),
-                    Tag(
-                        id = 4,
-                        name = "Misc",
-                        category = TagCategory.TAG,
-                    ),
-                    Tag(
-                        id = 5,
-                        name = "Other",
-                        category = TagCategory.OTHER,
-                    ),
-                )
-                val book = stubBook(tags)
-                val collector = TagChipModelsCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+        fun `groups community tags into Genre, Mood, Other tags, Content warning in that order`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val tags = listOf(
+                Tag(
+                    id = 1,
+                    name = "Mystery",
+                    category = TagCategory.CONTENT_WARNING,
+                ),
+                Tag(
+                    id = 2,
+                    name = "Sci-fi",
+                    category = TagCategory.GENRE,
+                ),
+                Tag(
+                    id = 3,
+                    name = "Dark",
+                    category = TagCategory.MOOD,
+                ),
+                Tag(
+                    id = 4,
+                    name = "Misc",
+                    category = TagCategory.TAG,
+                ),
+                Tag(
+                    id = 5,
+                    name = "Other",
+                    category = TagCategory.OTHER,
+                ),
+            )
 
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(book = book)
+            val book = stubBook(tags)
+            val collector = TagChipModelsCollector()
 
-                // ----- Assert -----
-                stateFlow.value.communityTagGroups.map { it.label } shouldBe listOf(
-                    "Genre",
-                    "Mood",
-                    "Other tags",
-                    "Content warning",
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-                job.cancel()
             }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(book = book)
+
+            // ----- Assert -----
+            stateFlow.value.communityTagGroups.map { it.label } shouldBe listOf(
+                "Genre",
+                "Mood",
+                "Other tags",
+                "Content warning",
+            )
+
+            job.cancel()
+        }
 
         @Test
-        fun `TAG tags form an Other tags group of plain chips by count descending`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val tags = (1..6).map { i ->
-                    Tag(
-                        id = i,
-                        name = "tag-$i",
-                        category = TagCategory.TAG,
-                        count = i * 10,
-                    )
-                }
-                val book = stubBook(tags)
-                val collector = TagChipModelsCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(book = book)
-
-                // ----- Assert -----
-                val group = stateFlow.value.communityTagGroups.single { it.label == "Other tags" }
-                group.chips.map { it.label } shouldBe listOf(
-                    "tag-6",
-                    "tag-5",
-                    "tag-4",
-                    "tag-3",
-                    "tag-2",
-                    "tag-1",
+        fun `TAG tags form an Other tags group of plain chips by count descending`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val tags = (1..6).map { i ->
+                Tag(
+                    id = i,
+                    name = "tag-$i",
+                    category = TagCategory.TAG,
+                    count = i * 10,
                 )
-                group.chips.all { it.tone == ChipTone.Tonal } shouldBe true
-                group.chips.all { it.interaction == ChipInteraction.Inert } shouldBe true
-                job.cancel()
             }
+
+            val book = stubBook(tags)
+            val collector = TagChipModelsCollector()
+
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(book = book)
+
+            // ----- Assert -----
+            val group = stateFlow.value.communityTagGroups.single { it.label == "Other tags" }
+
+            group.chips.map { it.label } shouldBe listOf(
+                "tag-6",
+                "tag-5",
+                "tag-4",
+                "tag-3",
+                "tag-2",
+                "tag-1",
+            )
+
+            group.chips.all { it.tone == ChipTone.Tonal } shouldBe true
+            group.chips.all { it.interaction == ChipInteraction.Inert } shouldBe true
+            job.cancel()
+        }
 
         @Test
-        fun `a category with more than five tags keeps every one ordered by count descending`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val tags = (1..6).map { i ->
-                    Tag(
-                        id = i,
-                        name = "genre-$i",
-                        category = TagCategory.GENRE,
-                        count = i * 10,
-                    )
-                }
-                val book = stubBook(tags)
-                val collector = TagChipModelsCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(book = book)
-
-                // ----- Assert -----
-                val genreGroup = stateFlow.value.communityTagGroups.single { it.label == "Genre" }
-                genreGroup.chips.map { it.label } shouldBe listOf(
-                    "genre-6",
-                    "genre-5",
-                    "genre-4",
-                    "genre-3",
-                    "genre-2",
-                    "genre-1",
+        fun `a category with more than five tags keeps every one ordered by count descending`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val tags = (1..6).map { i ->
+                Tag(
+                    id = i,
+                    name = "genre-$i",
+                    category = TagCategory.GENRE,
+                    count = i * 10,
                 )
-                job.cancel()
             }
+
+            val book = stubBook(tags)
+            val collector = TagChipModelsCollector()
+
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(book = book)
+
+            // ----- Assert -----
+            val genreGroup = stateFlow.value.communityTagGroups.single { it.label == "Genre" }
+
+            genreGroup.chips.map { it.label } shouldBe listOf(
+                "genre-6",
+                "genre-5",
+                "genre-4",
+                "genre-3",
+                "genre-2",
+                "genre-1",
+            )
+
+            job.cancel()
+        }
 
         @Test
-        fun `content warning chips use the Spoiler variant while other categories use Tonal`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val tags = listOf(
-                    Tag(
-                        id = 1,
-                        name = "Death",
-                        category = TagCategory.CONTENT_WARNING,
-                    ),
-                    Tag(
-                        id = 2,
-                        name = "Adventure",
-                        category = TagCategory.GENRE,
-                    ),
-                    Tag(
-                        id = 3,
-                        name = "Tense",
-                        category = TagCategory.MOOD,
-                    ),
+        fun `content warning chips use the Spoiler variant while other categories use Tonal`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val tags = listOf(
+                Tag(
+                    id = 1,
+                    name = "Death",
+                    category = TagCategory.CONTENT_WARNING,
+                ),
+                Tag(
+                    id = 2,
+                    name = "Adventure",
+                    category = TagCategory.GENRE,
+                ),
+                Tag(
+                    id = 3,
+                    name = "Tense",
+                    category = TagCategory.MOOD,
+                ),
+            )
+
+            val book = stubBook(tags)
+            val collector = TagChipModelsCollector()
+
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-                val book = stubBook(tags)
-                val collector = TagChipModelsCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(book = book)
-
-                // ----- Assert -----
-                val groups = stateFlow.value.communityTagGroups
-                groups.single { it.label == "Content warning" }
-                    .chips.all { it.tone == ChipTone.Spoiler } shouldBe true
-                groups.single { it.label == "Genre" }
-                    .chips.none { it.tone == ChipTone.Spoiler } shouldBe true
-                groups.single { it.label == "Mood" }
-                    .chips.none { it.tone == ChipTone.Spoiler } shouldBe true
-                job.cancel()
             }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(book = book)
+
+            // ----- Assert -----
+            val groups = stateFlow.value.communityTagGroups
+
+            groups.single { it.label == "Content warning" }
+                .chips.all { it.tone == ChipTone.Spoiler } shouldBe true
+
+            groups.single { it.label == "Genre" }
+                .chips.none { it.tone == ChipTone.Spoiler } shouldBe true
+
+            groups.single { it.label == "Mood" }
+                .chips.none { it.tone == ChipTone.Spoiler } shouldBe true
+
+            job.cancel()
+        }
 
         @Test
-        fun `community chips are inert except a concealed content-warning chip`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val tags = listOf(
-                    Tag(
-                        id = 1,
-                        name = "Adventure",
-                        category = TagCategory.GENRE,
-                    ),
-                    Tag(
-                        id = 2,
-                        name = "Death",
-                        category = TagCategory.CONTENT_WARNING,
-                    ),
+        fun `community chips are inert except a concealed content-warning chip`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val tags = listOf(
+                Tag(
+                    id = 1,
+                    name = "Adventure",
+                    category = TagCategory.GENRE,
+                ),
+                Tag(
+                    id = 2,
+                    name = "Death",
+                    category = TagCategory.CONTENT_WARNING,
+                ),
+            )
+
+            val book = stubBook(tags)
+            val collector = TagChipModelsCollector()
+
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-                val book = stubBook(tags)
-                val collector = TagChipModelsCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(book = book)
-
-                // ----- Assert -----
-                val groups = stateFlow.value.communityTagGroups
-                groups.single { it.label == "Genre" }
-                    .chips.all { it.interaction == ChipInteraction.Inert } shouldBe true
-                groups.single { it.label == "Content warning" }
-                    .chips.all { it.interaction == ChipInteraction.Clickable } shouldBe true
-                job.cancel()
             }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(book = book)
+
+            // ----- Assert -----
+            val groups = stateFlow.value.communityTagGroups
+
+            groups.single { it.label == "Genre" }
+                .chips.all { it.interaction == ChipInteraction.Inert } shouldBe true
+
+            groups.single { it.label == "Content warning" }
+                .chips.all { it.interaction == ChipInteraction.Clickable } shouldBe true
+
+            job.cancel()
+        }
 
         @Test
         fun `a revealed content-warning chip is Tonal and Inert`() = runTest(UnconfinedTestDispatcher()) {
@@ -309,8 +329,10 @@ class TagChipModelsCollectorTest {
                     category = TagCategory.CONTENT_WARNING,
                 ),
             )
+
             val book = stubBook(tags)
             val collector = TagChipModelsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -346,8 +368,10 @@ class TagChipModelsCollectorTest {
                     category = TagCategory.CONTENT_WARNING,
                 ),
             )
+
             val book = stubBook(tags)
             val collector = TagChipModelsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -369,99 +393,102 @@ class TagChipModelsCollectorTest {
         }
 
         @Test
-        fun `tagEditorOpenerChip reads Add tags and Dashed when the user has no tags`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val collector = TagChipModelsCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+        fun `tagEditorOpenerChip reads Add tags and Dashed when the user has no tags`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = TagChipModelsCollector()
 
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(userTagsLoad = UserTagsLoad.Loaded)
-
-                // ----- Assert -----
-                stateFlow.value.tagEditorOpenerChip?.label shouldBe "Add tags"
-                job.cancel()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(userTagsLoad = UserTagsLoad.Loaded)
+
+            // ----- Assert -----
+            stateFlow.value.tagEditorOpenerChip?.label shouldBe "Add tags"
+            job.cancel()
+        }
 
         @Test
-        fun `tagEditorOpenerChip reads Edit tags once the user has at least one tag`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val userTags = persistentListOf(
-                    UserTag(
-                        name = "Fantasy",
-                        category = TagCategory.GENRE,
-                    ),
-                )
-                val collector = TagChipModelsCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+        fun `tagEditorOpenerChip reads Edit tags once the user has at least one tag`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val userTags = persistentListOf(
+                UserTag(
+                    name = "Fantasy",
+                    category = TagCategory.GENRE,
+                ),
+            )
 
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(
-                    userTags = userTags,
-                    userTagsLoad = UserTagsLoad.Loaded,
-                )
+            val collector = TagChipModelsCollector()
 
-                // ----- Assert -----
-                stateFlow.value.tagEditorOpenerChip?.label shouldBe "Edit tags"
-                job.cancel()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                userTags = userTags,
+                userTagsLoad = UserTagsLoad.Loaded,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.tagEditorOpenerChip?.label shouldBe "Edit tags"
+            job.cancel()
+        }
 
         @Test
-        fun `userTagEditorGroups follow EDITABLE_CATEGORIES order with a trailing Other group`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val userTags = persistentListOf(
-                    UserTag(
-                        name = "Zesty",
-                        category = TagCategory.OTHER,
-                    ),
-                    UserTag(
-                        name = "Grim",
-                        category = TagCategory.CONTENT_WARNING,
-                    ),
-                    UserTag(
-                        name = "Cozy",
-                        category = TagCategory.MOOD,
-                    ),
-                    UserTag(
-                        name = "Fantasy",
-                        category = TagCategory.GENRE,
-                    ),
-                )
-                val collector = TagChipModelsCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+        fun `userTagEditorGroups follow EDITABLE_CATEGORIES order with a trailing Other group`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val userTags = persistentListOf(
+                UserTag(
+                    name = "Zesty",
+                    category = TagCategory.OTHER,
+                ),
+                UserTag(
+                    name = "Grim",
+                    category = TagCategory.CONTENT_WARNING,
+                ),
+                UserTag(
+                    name = "Cozy",
+                    category = TagCategory.MOOD,
+                ),
+                UserTag(
+                    name = "Fantasy",
+                    category = TagCategory.GENRE,
+                ),
+            )
 
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(
-                    userTags = userTags,
-                    userTagsLoad = UserTagsLoad.Loaded,
-                )
+            val collector = TagChipModelsCollector()
 
-                // ----- Assert -----
-                stateFlow.value.userTagEditorGroups.map { it.label } shouldBe listOf(
-                    TagCategory.GENRE.label,
-                    TagCategory.MOOD.label,
-                    TagCategory.CONTENT_WARNING.label,
-                    TagCategory.OTHER.label,
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-                job.cancel()
             }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                userTags = userTags,
+                userTagsLoad = UserTagsLoad.Loaded,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.userTagEditorGroups.map { it.label } shouldBe listOf(
+                TagCategory.GENRE.label,
+                TagCategory.MOOD.label,
+                TagCategory.CONTENT_WARNING.label,
+                TagCategory.OTHER.label,
+            )
+
+            job.cancel()
+        }
 
         @Test
         fun `userTagEditorGroups omits editable categories with no tags and carries no Other group when empty`() =
@@ -473,7 +500,9 @@ class TagChipModelsCollectorTest {
                         category = TagCategory.GENRE,
                     ),
                 )
+
                 val collector = TagChipModelsCollector()
+
                 val job = launch {
                     collector.onLaunch(
                         scope = scope,
@@ -508,7 +537,9 @@ class TagChipModelsCollectorTest {
                         spoiler = true,
                     ),
                 )
+
                 val collector = TagChipModelsCollector()
+
                 val job = launch {
                     collector.onLaunch(
                         scope = scope,
@@ -532,38 +563,41 @@ class TagChipModelsCollectorTest {
             }
 
         @Test
-        fun `userTagByEditorChipKey resolves every editor chip key back to its UserTag`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val fantasy = UserTag(
-                    name = "Fantasy",
-                    category = TagCategory.GENRE,
-                )
-                val cozy = UserTag(
-                    name = "Cozy",
-                    category = TagCategory.MOOD,
-                )
-                val userTags = persistentListOf(fantasy, cozy)
-                val collector = TagChipModelsCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+        fun `userTagByEditorChipKey resolves every editor chip key back to its UserTag`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val fantasy = UserTag(
+                name = "Fantasy",
+                category = TagCategory.GENRE,
+            )
 
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(
-                    userTags = userTags,
-                    userTagsLoad = UserTagsLoad.Loaded,
-                )
+            val cozy = UserTag(
+                name = "Cozy",
+                category = TagCategory.MOOD,
+            )
 
-                // ----- Assert -----
-                stateFlow.value.userTagByEditorChipKey shouldBe mapOf(
-                    "GENRE:Fantasy" to fantasy,
-                    "MOOD:Cozy" to cozy,
+            val userTags = persistentListOf(fantasy, cozy)
+            val collector = TagChipModelsCollector()
+
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-                job.cancel()
             }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                userTags = userTags,
+                userTagsLoad = UserTagsLoad.Loaded,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.userTagByEditorChipKey shouldBe mapOf(
+                "GENRE:Fantasy" to fantasy,
+                "MOOD:Cozy" to cozy,
+            )
+
+            job.cancel()
+        }
     }
 }

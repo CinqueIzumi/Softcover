@@ -23,11 +23,10 @@ internal object ColorTokens {
         source = "ColorScheme",
     )
 
-    private fun softcoverScheme(theme: PresetTheme): ColorScheme =
-        softcoverColorScheme(
-            theme.brightness,
-            SpinePalette.SOFTCOVER,
-        )
+    private fun softcoverScheme(theme: PresetTheme): ColorScheme = softcoverColorScheme(
+        theme.brightness,
+        SpinePalette.SOFTCOVER,
+    )
 
     private fun schemeTokens(): List<Map<String, Any?>> {
         val byTheme = PresetTheme.entries.associateWith { schemeRoles(softcoverScheme(it)) }

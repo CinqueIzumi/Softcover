@@ -33,6 +33,7 @@ class BookDaoAuthorsTest {
             builder = Room.inMemoryDatabaseBuilder(context = context),
             queryContext = testDispatcher,
         )
+
         dao = database.bookDao()
     }
 
@@ -120,6 +121,7 @@ class BookDaoAuthorsTest {
                 id = 1,
                 name = "Writer",
             )
+
             val translator = author(
                 id = 2,
                 name = "Translator",
@@ -133,6 +135,7 @@ class BookDaoAuthorsTest {
                     nonPrimaryAuthorIds = setOf(2),
                 ),
             )
+
             val result = dao.observeBookById(id = 100).first()
                 .shouldNotBeNull()
                 .toModel()
@@ -151,6 +154,7 @@ class BookDaoAuthorsTest {
                 isBipoc = true,
                 gender = Gender.Female,
             )
+
             val second = author(
                 id = 2,
                 name = "Alex Smith",
@@ -171,78 +175,79 @@ class BookDaoAuthorsTest {
         }
 
         @Test
-        fun `an author on the book and on its edition is stored once with the book-level values`() =
-            runTest(testDispatcher) {
-                // ----- Arrange -----
-                val bookLevel = author(
-                    id = 1,
-                    name = "Octavia Butler",
-                    isBipoc = true,
-                    gender = Gender.Female,
-                )
-                val editionLevel = author(
-                    id = 1,
-                    name = "Octavia Butler",
-                )
+        fun `an author on the book and on its edition is stored once with the book-level values`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val bookLevel = author(
+                id = 1,
+                name = "Octavia Butler",
+                isBipoc = true,
+                gender = Gender.Female,
+            )
 
-                // ----- Act -----
-                dao.cacheBook(
-                    book = book(
-                        id = 100,
-                        authors = listOf(bookLevel),
-                        editions = listOf(
-                            edition(
-                                id = 10,
-                                bookId = 100,
-                                authors = listOf(editionLevel),
-                            ),
+            val editionLevel = author(
+                id = 1,
+                name = "Octavia Butler",
+            )
+
+            // ----- Act -----
+            dao.cacheBook(
+                book = book(
+                    id = 100,
+                    authors = listOf(bookLevel),
+                    editions = listOf(
+                        edition(
+                            id = 10,
+                            bookId = 100,
+                            authors = listOf(editionLevel),
                         ),
                     ),
-                )
+                ),
+            )
 
-                // ----- Assert -----
-                cachedAuthors(bookId = 100) shouldBe listOf(bookLevel)
-                editionAuthors(editionId = 10) shouldBe listOf(bookLevel)
-            }
+            // ----- Assert -----
+            cachedAuthors(bookId = 100) shouldBe listOf(bookLevel)
+            editionAuthors(editionId = 10) shouldBe listOf(bookLevel)
+        }
     }
 
     @Nested
     inner class CacheEditions {
         @Test
-        fun `keeps the demographics of edition authors and separates same-named authors`() =
-            runTest(testDispatcher) {
-                // ----- Arrange -----
-                dao.cacheBook(book = book(id = 100))
-                val first = author(
-                    id = 1,
-                    name = "Alex Smith",
-                    isLgbtq = true,
-                    gender = Gender.Other,
-                )
-                val second = author(
-                    id = 2,
-                    name = "Alex Smith",
-                )
+        fun `keeps the demographics of edition authors and separates same-named authors`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            dao.cacheBook(book = book(id = 100))
 
-                // ----- Act -----
-                dao.cacheEditions(
-                    editions = listOf(
-                        edition(
-                            id = 10,
-                            bookId = 100,
-                            authors = listOf(first),
-                        ),
-                        edition(
-                            id = 11,
-                            bookId = 100,
-                            authors = listOf(second),
-                        ),
+            val first = author(
+                id = 1,
+                name = "Alex Smith",
+                isLgbtq = true,
+                gender = Gender.Other,
+            )
+
+            val second = author(
+                id = 2,
+                name = "Alex Smith",
+            )
+
+            // ----- Act -----
+            dao.cacheEditions(
+                editions = listOf(
+                    edition(
+                        id = 10,
+                        bookId = 100,
+                        authors = listOf(first),
                     ),
-                )
+                    edition(
+                        id = 11,
+                        bookId = 100,
+                        authors = listOf(second),
+                    ),
+                ),
+            )
 
-                // ----- Assert -----
-                editionAuthors(editionId = 10) shouldBe listOf(first)
-                editionAuthors(editionId = 11) shouldBe listOf(second)
-            }
+            // ----- Assert -----
+            editionAuthors(editionId = 10) shouldBe listOf(first)
+            editionAuthors(editionId = 11) shouldBe listOf(second)
+        }
     }
 }

@@ -26,12 +26,11 @@ class ReadingLifeShareCardMapperTest {
         fun toReadingLifeShareCardUiModel(
             profile: UserProfileData,
             dayStreak: Int = 0,
-        ): ReadingLifeShareCardUiModel =
-            stats.toReadingLifeShareCardUiModel(
-                history = history,
-                profile = profile,
-                dayStreak = dayStreak,
-            )
+        ): ReadingLifeShareCardUiModel = stats.toReadingLifeShareCardUiModel(
+            history = history,
+            profile = profile,
+            dayStreak = dayStreak,
+        )
     }
 
     private fun life(
@@ -154,6 +153,7 @@ class ReadingLifeShareCardMapperTest {
 
             // ----- Assert -----
             result.averageRating shouldBe 4.5
+
             result.averageRatingText shouldBe formatDecimalNumber(
                 value = 4.5,
                 fractionDigits = 1,

@@ -9,11 +9,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntSize
 import nl.rhaydus.designsystem.layout.ExpandableFlowRow
 import nl.rhaydus.designsystem.layout.FlowRowExpansion
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.divider.Divider
@@ -21,7 +21,6 @@ import nl.rhaydus.softcover.core.component.field.TextField
 import nl.rhaydus.softcover.core.component.field.TextFieldEvent
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterSheetEvent
 import nl.rhaydus.softcover.feature.library.presentation.state.TagSourceSummary
@@ -110,17 +109,15 @@ private fun TagSourceTop(
             Spacer(modifier = Modifier.height(Spacing.sm))
 
             ExpandableFlowRow(
+                itemCount = summary.chosenChips.size,
+                key = { index -> summary.chosenChips[index].label },
                 horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
                 verticalArrangement = Arrangement.spacedBy(Spacing.xs),
-            ) {
-                summary.chosenChips.forEach { chip ->
-                    key(chip.label) {
-                        Chip(
-                            model = chip,
-                            onEvent = hapticChipEvent,
-                        )
-                    }
-                }
+            ) { index ->
+                Chip(
+                    model = summary.chosenChips[index],
+                    onEvent = hapticChipEvent,
+                )
             }
         }
 
@@ -166,20 +163,16 @@ private fun TagSourceBody(
         if (summary.categoryChips.isNotEmpty()) {
             Spacer(modifier = Modifier.height(Spacing.md))
 
-            FacetChipLine {
-                summary.categoryChips.forEach { chip ->
-                    Chip(
-                        model = chip,
-                        onEvent = { event ->
-                            when (event) {
-                                is ChipEvent.Clicked -> onCategoryClick(event.key)
-                                is ChipEvent.Dismissed -> Unit
-                                is ChipEvent.SpoilerToggled -> Unit
-                            }
-                        },
-                    )
-                }
-            }
+            FacetChipLine(
+                chips = summary.categoryChips,
+                onChipEvent = { event ->
+                    when (event) {
+                        is ChipEvent.Clicked -> onCategoryClick(event.key)
+                        is ChipEvent.Dismissed -> Unit
+                        is ChipEvent.SpoilerToggled -> Unit
+                    }
+                },
+            )
         }
 
         Spacer(modifier = Modifier.height(Spacing.md))
@@ -200,6 +193,8 @@ private fun TagSourceBody(
 
         if (summary.tagChips.isNotEmpty()) {
             ExpandableFlowRow(
+                itemCount = summary.tagChips.size,
+                key = { index -> summary.tagChips[index].key },
                 collapsedLines = 2,
                 expansion = FlowRowExpansion.Progressive(linesPerExpand = 2),
                 collapsible = true,
@@ -225,15 +220,11 @@ private fun TagSourceBody(
                         },
                     )
                 },
-            ) {
-                summary.tagChips.forEach { chip ->
-                    key(chip.key) {
-                        Chip(
-                            model = chip,
-                            onEvent = hapticChipEvent,
-                        )
-                    }
-                }
+            ) { index ->
+                Chip(
+                    model = summary.tagChips[index],
+                    onEvent = hapticChipEvent,
+                )
             }
         }
     }

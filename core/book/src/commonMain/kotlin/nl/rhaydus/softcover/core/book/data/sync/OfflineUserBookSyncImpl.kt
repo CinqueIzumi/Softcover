@@ -66,6 +66,7 @@ internal class OfflineUserBookSyncImpl(
         progressHistoryId: Long?,
     ): QueuedWrite {
         val userBook = checkNotNull(book.userBook) { "Cannot queue UPDATE_PROGRESS for book ${book.id}: no user book" }
+
         val userBookRead = checkNotNull(book.currentRead) {
             "Cannot queue UPDATE_PROGRESS for book ${book.id}: no user book read"
         }
@@ -284,6 +285,7 @@ internal class OfflineUserBookSyncImpl(
     ): List<Book> {
         val drained: Map<Int, Set<PendingUserBookWriteKind>> = userBookWriteDrainer.drain()
         val stillQueued: Map<Int, Set<PendingUserBookWriteKind>> = userBookWriteQueue.pendingKindsByUserBook()
+
         val syncedWrites: Map<Int, Set<PendingUserBookWriteKind>> = takeRetainedHints(drained = drained)
             .mergedWith(stillQueued)
 
@@ -342,7 +344,9 @@ internal class OfflineUserBookSyncImpl(
 
         return fetchedBooks.map { fetched ->
             val userBookId: Int = fetched.userBook?.id ?: return@map fetched
+
             val kinds: Set<PendingUserBookWriteKind> = syncedWrites[userBookId] ?: return@map fetched
+
             val snapshot: Book = snapshots[userBookId] ?: return@map fetched
 
             kinds
@@ -430,6 +434,7 @@ internal class OfflineUserBookSyncImpl(
 
     private fun Book.preserveReadStatus(snapshot: Book): Book {
         val snapshotUserBook: UserBook = snapshot.userBook ?: return this
+
         val fetchedUserBook: UserBook = userBook ?: return this
 
         val snapshotRead: UserBookRead? = snapshot.currentRead
@@ -452,7 +457,7 @@ internal class OfflineUserBookSyncImpl(
             fetchedUserBook.reads.none { it.id == snapshotRead.id }
 
         val missingSnapshotRead: List<UserBookRead> = if (isSnapshotReadMissing) {
-            listOfNotNull(snapshotRead)
+            listOf(snapshotRead)
         } else {
             emptyList()
         }
@@ -467,6 +472,7 @@ internal class OfflineUserBookSyncImpl(
 
     private fun Book.preserveStatus(snapshot: Book): Book {
         val snapshotUserBook: UserBook = snapshot.userBook ?: return this
+
         val fetchedUserBook: UserBook = userBook ?: return this
 
         return copy(userBook = fetchedUserBook.copy(status = snapshotUserBook.status))
@@ -474,6 +480,7 @@ internal class OfflineUserBookSyncImpl(
 
     private fun Book.preserveRating(snapshot: Book): Book {
         val snapshotUserBook: UserBook = snapshot.userBook ?: return this
+
         val fetchedUserBook: UserBook = userBook ?: return this
 
         return copy(userBook = fetchedUserBook.copy(rating = snapshotUserBook.rating))
@@ -481,6 +488,7 @@ internal class OfflineUserBookSyncImpl(
 
     private fun Book.preserveReview(snapshot: Book): Book {
         val snapshotUserBook: UserBook = snapshot.userBook ?: return this
+
         val fetchedUserBook: UserBook = userBook ?: return this
 
         return copy(

@@ -31,4 +31,12 @@
     <issue id="NewerVersionAvailable" severity="informational" />
     <issue id="GradleDependency" severity="informational" />
     <issue id="AndroidGradlePluginVersion" severity="informational" />
+    <!--
+      RestrictedApi fires thousands of times inside KSP-generated Room code (core/database/build/generated),
+      which calls library-group-restricted Room internals by design and is not ours to edit. Scoped to the
+      generated directory only, so a RestrictedApi in hand-written code still fails the build.
+    -->
+    <issue id="RestrictedApi">
+        <ignore path="**/build/generated/**" />
+    </issue>
 </lint>

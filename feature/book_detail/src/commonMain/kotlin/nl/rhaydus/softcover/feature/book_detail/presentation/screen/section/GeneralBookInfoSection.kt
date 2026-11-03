@@ -39,6 +39,10 @@ import androidx.compose.ui.unit.sp
 import nl.rhaydus.common.formatDecimalNumber
 import nl.rhaydus.designsystem.modifier.conditional
 import nl.rhaydus.designsystem.modifier.grayscale
+import nl.rhaydus.designsystem.modifier.pressScaleClickable
+import nl.rhaydus.designsystem.modifier.skeletonMask
+import nl.rhaydus.designsystem.theme.Corners
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.badge.Badge
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.cover.Cover
@@ -47,15 +51,11 @@ import nl.rhaydus.softcover.core.component.cover.shape
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerInk
 import nl.rhaydus.softcover.core.component.modifier.navSharedBounds
-import nl.rhaydus.softcover.core.component.modifier.tactileClickable
-import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.component.transition.BookTransitionKey
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalNavAnimatedVisibilityScope
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.HeroEditionUiModel
@@ -126,7 +126,7 @@ internal fun GeneralBookInfoSection(
         ) {
             Box(
                 modifier = if (isLoading.not()) {
-                    Modifier.testTag(BookDetailTestTags.COVER).tactileClickable(
+                    Modifier.testTag(BookDetailTestTags.COVER).pressScaleClickable(
                         onClick = onCoverClick,
                         hoverShape = heroCover?.variant?.shape() ?: RectangleShape,
                     )
@@ -226,6 +226,7 @@ internal fun GeneralBookInfoSection(
                 val editionUnknown = isLoading && heroEdition == null
                 val authorName = heroEdition?.authors.orEmpty()
                 val showReleased = releaseYear != null && releaseYear > 0 && unreleasedBadge == null
+
                 val bylineText = if (editionUnknown) {
                     null
                 } else {
@@ -322,7 +323,10 @@ internal fun GeneralBookInfoSection(
                                         tint = RatingGold,
                                         modifier = Modifier
                                             .size(16.dp)
-                                            .skeletonMask(visible = ratingUnknown),
+                                            .skeletonMask(
+                                                visible = ratingUnknown,
+                                                shape = Corners.xs,
+                                            ),
                                     )
                                 }
                             }

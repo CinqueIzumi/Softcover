@@ -24,9 +24,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
-import nl.rhaydus.softcover.core.component.modifier.tactileClickable
+import nl.rhaydus.designsystem.modifier.pressScaleClickable
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 /**
  * The plot-or-character slider. While unanswered it is a bare track: no fill and no thumb, but the slider
@@ -52,7 +52,7 @@ internal fun HowItReadBalance(
                     modifier = Modifier
                         .heightIn(min = 48.dp)
                         .pointerHandCursor()
-                        .tactileClickable(
+                        .pressScaleClickable(
                             onClick = { onEvent(HowItReadSheetEvent.BalanceCleared) },
                             role = Role.Button,
                         )
@@ -74,6 +74,7 @@ internal fun HowItReadBalance(
             value = value ?: 0.5f,
             modifier = Modifier.semantics {
                 contentDescription = model.label
+
                 if (value == null) {
                     stateDescription = model.unsetLabel
                 }

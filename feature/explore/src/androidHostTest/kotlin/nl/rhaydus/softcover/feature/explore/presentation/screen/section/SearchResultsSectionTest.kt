@@ -23,11 +23,10 @@ class SearchResultsSectionTest {
     private fun stateWith(
         cards: List<BookCardUiModel>,
         loadingMore: Boolean = false,
-    ): ExploreScreenUiState =
-        ExploreScreenUiState(
-            searchResults = BookCardSet.standIns(persistentListOf(*cards.toTypedArray())),
-            loadingMoreQueriedBooks = loadingMore,
-        )
+    ): ExploreScreenUiState = ExploreScreenUiState(
+        searchResults = BookCardSet.standIns(persistentListOf(*cards.toTypedArray())),
+        loadingMoreQueriedBooks = loadingMore,
+    )
 
     @Nested
     inner class ShowsSearchStandIns {

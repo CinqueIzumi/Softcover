@@ -21,6 +21,7 @@ internal fun Book.withProgress(
     newSeconds: Int?,
 ): Book {
     val existingRead = currentRead ?: return this
+
     val edition = currentEdition
 
     val totalPages = edition?.pages

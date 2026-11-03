@@ -127,6 +127,7 @@ class FieldMapperTest {
                 keyOf(variantName = "Numeral"),
                 fieldLiveState().fields.first { it.field.text == "272" }.field.key,
             )
+
             val freeKeys = keys.filterNot { it in validatedKeys }
 
             // ----- Act -----

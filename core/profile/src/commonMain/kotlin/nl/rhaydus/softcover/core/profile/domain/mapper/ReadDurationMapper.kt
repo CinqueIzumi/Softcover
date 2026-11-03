@@ -23,6 +23,7 @@ internal fun List<Book>.countExcludedReads(range: StatsRange): Int = sumOf { boo
 
 private fun UserBookRead.toReadDurationOrNull(book: Book): ReadDuration? {
     val startedOn = startedAt.toLocalDateOrNull() ?: return null
+
     val finishedOn = finishedAt.toLocalDateOrNull() ?: return null
 
     if (finishedAtPrecision != DatePrecision.DAY || finishedOn < startedOn) return null

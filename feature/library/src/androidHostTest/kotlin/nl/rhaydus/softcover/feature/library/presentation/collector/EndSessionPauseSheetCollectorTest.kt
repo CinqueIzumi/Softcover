@@ -36,11 +36,13 @@ class EndSessionPauseSheetCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk(relaxed = true)
     }
 
@@ -60,54 +62,54 @@ class EndSessionPauseSheetCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `opens the confirm titled after the session book when a pause is requested`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val job = launch {
-                    EndSessionPauseSheetCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-                val dune = buildBook(
-                    id = 1,
-                    title = "Dune",
+        fun `opens the confirm titled after the session book when a pause is requested`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val job = launch {
+                EndSessionPauseSheetCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-
-                // ----- Act -----
-                stateFlow.value = LibraryUiState(
-                    booksByTab = persistentMapOf(tabKey to persistentListOf(dune)),
-                    activeSessionBookId = 1,
-                    endSessionPauseBookIds = persistentSetOf(1),
-                )
-
-                // ----- Assert -----
-                stateFlow.value.endSessionPauseSheet.modelOrNull shouldBe endSessionPauseSheetScaffold(bookTitle = "Dune")
-                job.cancel()
             }
+
+            val dune = buildBook(
+                id = 1,
+                title = "Dune",
+            )
+
+            // ----- Act -----
+            stateFlow.value = LibraryUiState(
+                booksByTab = persistentMapOf(tabKey to persistentListOf(dune)),
+                activeSessionBookId = 1,
+                endSessionPauseBookIds = persistentSetOf(1),
+            )
+
+            // ----- Assert -----
+            stateFlow.value.endSessionPauseSheet.modelOrNull shouldBe endSessionPauseSheetScaffold(bookTitle = "Dune")
+            job.cancel()
+        }
 
         @Test
-        fun `falls back to a generic title when the session book is not loaded`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val job = launch {
-                    EndSessionPauseSheetCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                stateFlow.value = LibraryUiState(
-                    activeSessionBookId = 1,
-                    endSessionPauseBookIds = persistentSetOf(1),
+        fun `falls back to a generic title when the session book is not loaded`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val job = launch {
+                EndSessionPauseSheetCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-
-                // ----- Assert -----
-                stateFlow.value.endSessionPauseSheet.modelOrNull shouldBe
-                    endSessionPauseSheetScaffold(bookTitle = "this book")
-                job.cancel()
             }
+
+            // ----- Act -----
+            stateFlow.value = LibraryUiState(
+                activeSessionBookId = 1,
+                endSessionPauseBookIds = persistentSetOf(1),
+            )
+
+            // ----- Assert -----
+            stateFlow.value.endSessionPauseSheet.modelOrNull shouldBe
+                endSessionPauseSheetScaffold(bookTitle = "this book")
+
+            job.cancel()
+        }
 
         @Test
         fun `asks the open confirm to hide once the request is withdrawn`() = runTest(UnconfinedTestDispatcher()) {
@@ -118,6 +120,7 @@ class EndSessionPauseSheetCollectorTest {
                     dependencies = dependencies,
                 )
             }
+
             stateFlow.value = LibraryUiState(
                 activeSessionBookId = 1,
                 endSessionPauseBookIds = persistentSetOf(1),

@@ -23,12 +23,14 @@ class QuoteFetchTrackerTest {
             // ----- Act & Assert -----
             tracker.state.test {
                 awaitItem().shouldBeNull()
+
                 launch {
                     tracker.track {
                         release.await()
                         Result.success(Unit)
                     }
                 }
+
                 awaitItem() shouldBe QuoteFetchTracker.State.Running
                 release.complete(Unit)
                 awaitItem().shouldBeNull()
@@ -84,9 +86,11 @@ class QuoteFetchTrackerTest {
             // ----- Act & Assert -----
             tracker.state.test {
                 awaitItem().shouldBeNull()
+
                 val job = launch {
                     tracker.track { awaitCancellation() }
                 }
+
                 awaitItem() shouldBe QuoteFetchTracker.State.Running
                 job.cancel()
                 awaitItem().shouldBeNull()
@@ -115,12 +119,14 @@ class QuoteFetchTrackerTest {
             // ----- Arrange -----
             val tracker = QuoteFetchTracker()
             val release = CompletableDeferred<Unit>()
+
             launch {
                 tracker.track {
                     release.await()
                     Result.success(Unit)
                 }
             }
+
             runCurrent()
 
             // ----- Act -----
@@ -141,19 +147,23 @@ class QuoteFetchTrackerTest {
             // ----- Act & Assert -----
             tracker.state.test {
                 awaitItem().shouldBeNull()
+
                 launch {
                     tracker.track {
                         failFirst.await()
                         Result.failure(IllegalStateException("down"))
                     }
                 }
+
                 awaitItem() shouldBe QuoteFetchTracker.State.Running
+
                 launch {
                     tracker.track {
                         release.await()
                         Result.success(Unit)
                     }
                 }
+
                 runCurrent()
                 failFirst.complete(Unit)
                 runCurrent()
@@ -173,19 +183,23 @@ class QuoteFetchTrackerTest {
             // ----- Act & Assert -----
             tracker.state.test {
                 awaitItem().shouldBeNull()
+
                 launch {
                     tracker.track {
                         succeed.await()
                         Result.success(Unit)
                     }
                 }
+
                 awaitItem() shouldBe QuoteFetchTracker.State.Running
+
                 launch {
                     tracker.track {
                         fail.await()
                         Result.failure(IllegalStateException("down"))
                     }
                 }
+
                 runCurrent()
                 succeed.complete(Unit)
                 runCurrent()

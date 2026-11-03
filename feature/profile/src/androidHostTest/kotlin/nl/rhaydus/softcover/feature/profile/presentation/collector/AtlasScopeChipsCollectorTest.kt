@@ -110,38 +110,36 @@ class AtlasScopeChipsCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `defaults to the current year when the reader finished a book in it`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                historyFlow.value = historyOf(
-                    thisYear,
-                    2025,
-                )
+        fun `defaults to the current year when the reader finished a book in it`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            historyFlow.value = historyOf(
+                thisYear,
+                2025,
+            )
 
-                // ----- Act -----
-                val job = launchCollector()
+            // ----- Act -----
+            val job = launchCollector()
 
-                // ----- Assert -----
-                stateFlow.value.selectedScope shouldBe StatsScope.CalendarYear(thisYear)
-                job.cancel()
-            }
+            // ----- Assert -----
+            stateFlow.value.selectedScope shouldBe StatsScope.CalendarYear(thisYear)
+            job.cancel()
+        }
 
         @Test
-        fun `defaults to all time when the current year has no finished books`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                historyFlow.value = historyOf(
-                    2025,
-                    2024,
-                )
+        fun `defaults to all time when the current year has no finished books`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            historyFlow.value = historyOf(
+                2025,
+                2024,
+            )
 
-                // ----- Act -----
-                val job = launchCollector()
+            // ----- Act -----
+            val job = launchCollector()
 
-                // ----- Assert -----
-                stateFlow.value.selectedScope shouldBe StatsScope.AllTime
-                job.cancel()
-            }
+            // ----- Assert -----
+            stateFlow.value.selectedScope shouldBe StatsScope.AllTime
+            job.cancel()
+        }
 
         @Test
         fun `defaults to all time for a history with no years`() = runTest(UnconfinedTestDispatcher()) {
@@ -157,47 +155,48 @@ class AtlasScopeChipsCollectorTest {
         }
 
         @Test
-        fun `publishes the history with one chip per year and exactly one selected`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val history = historyOf(
-                    thisYear,
-                    2025,
-                )
-                historyFlow.value = history
+        fun `publishes the history with one chip per year and exactly one selected`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val history = historyOf(
+                thisYear,
+                2025,
+            )
 
-                // ----- Act -----
-                val job = launchCollector()
+            historyFlow.value = history
 
-                // ----- Assert -----
-                stateFlow.value.readingHistory shouldBe history
-                stateFlow.value.scopeChips.chips.map { it.label }.shouldContainExactly(
-                    "Last 30 days",
-                    "Last 6 months",
-                    "Last 12 months",
-                    "2026",
-                    "2025",
-                    "All time",
-                )
-                stateFlow.value.scopeChips.chips.filter { it.selected }.map { it.label }.shouldContainExactly("2026")
-                job.cancel()
-            }
+            // ----- Act -----
+            val job = launchCollector()
+
+            // ----- Assert -----
+            stateFlow.value.readingHistory shouldBe history
+
+            stateFlow.value.scopeChips.chips.map { it.label }.shouldContainExactly(
+                "Last 30 days",
+                "Last 6 months",
+                "Last 12 months",
+                "2026",
+                "2025",
+                "All time",
+            )
+
+            stateFlow.value.scopeChips.chips.filter { it.selected }.map { it.label }.shouldContainExactly("2026")
+            job.cancel()
+        }
 
         @Test
-        fun `publishes no history and keeps all time while the library is not backfilled`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                backfilledFlow.value = false
-                historyFlow.value = historyOf(thisYear)
+        fun `publishes no history and keeps all time while the library is not backfilled`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            backfilledFlow.value = false
+            historyFlow.value = historyOf(thisYear)
 
-                // ----- Act -----
-                val job = launchCollector()
+            // ----- Act -----
+            val job = launchCollector()
 
-                // ----- Assert -----
-                stateFlow.value.readingHistory.shouldBeNull()
-                stateFlow.value.selectedScope shouldBe StatsScope.AllTime
-                job.cancel()
-            }
+            // ----- Assert -----
+            stateFlow.value.readingHistory.shouldBeNull()
+            stateFlow.value.selectedScope shouldBe StatsScope.AllTime
+            job.cancel()
+        }
 
         @Test
         fun `applies the default once the backfill flag turns true`() = runTest(UnconfinedTestDispatcher()) {
@@ -215,23 +214,23 @@ class AtlasScopeChipsCollectorTest {
         }
 
         @Test
-        fun `a scope the reader picked is kept when the first history arrives`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                scope = buildScope(StatsAtlasLocalVariables(hasUserPickedScope = true))
-                stateFlow.value = stateFlow.value.copy(selectedScopeKey = statsScopeKey(StatsScope.CalendarYear(2025)))
-                historyFlow.value = historyOf(
-                    thisYear,
-                    2025,
-                )
+        fun `a scope the reader picked is kept when the first history arrives`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            scope = buildScope(StatsAtlasLocalVariables(hasUserPickedScope = true))
+            stateFlow.value = stateFlow.value.copy(selectedScopeKey = statsScopeKey(StatsScope.CalendarYear(2025)))
 
-                // ----- Act -----
-                val job = launchCollector()
+            historyFlow.value = historyOf(
+                thisYear,
+                2025,
+            )
 
-                // ----- Assert -----
-                stateFlow.value.selectedScope shouldBe StatsScope.CalendarYear(2025)
-                job.cancel()
-            }
+            // ----- Act -----
+            val job = launchCollector()
+
+            // ----- Assert -----
+            stateFlow.value.selectedScope shouldBe StatsScope.CalendarYear(2025)
+            job.cancel()
+        }
 
         @Test
         fun `a later history never overwrites the default`() = runTest(UnconfinedTestDispatcher()) {
@@ -251,23 +250,23 @@ class AtlasScopeChipsCollectorTest {
         }
 
         @Test
-        fun `falls back to all time when the selected year leaves the history`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                historyFlow.value = historyOf(
-                    thisYear,
-                    2025,
-                )
-                val job = launchCollector()
+        fun `falls back to all time when the selected year leaves the history`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            historyFlow.value = historyOf(
+                thisYear,
+                2025,
+            )
 
-                // ----- Act -----
-                historyFlow.value = historyOf(2025)
+            val job = launchCollector()
 
-                // ----- Assert -----
-                stateFlow.value.selectedScope shouldBe StatsScope.AllTime
-                stateFlow.value.scopeChips.chips.filter { it.selected }.map { it.label }.shouldContainExactly("All time")
-                job.cancel()
-            }
+            // ----- Act -----
+            historyFlow.value = historyOf(2025)
+
+            // ----- Assert -----
+            stateFlow.value.selectedScope shouldBe StatsScope.AllTime
+            stateFlow.value.scopeChips.chips.filter { it.selected }.map { it.label }.shouldContainExactly("All time")
+            job.cancel()
+        }
 
         @Test
         fun `keeps a selected rolling window when the history changes`() = runTest(UnconfinedTestDispatcher()) {
@@ -285,6 +284,7 @@ class AtlasScopeChipsCollectorTest {
             // ----- Assert -----
             stateFlow.value.selectedScope shouldBe
                 StatsScope.Rolling(StatsWindow.LAST_6_MONTHS)
+
             job.cancel()
         }
     }

@@ -34,6 +34,7 @@ class UserBookCacheGateTest {
     fun setUp() {
         booksLocalDataSource = mockk(relaxed = true)
         userTagsLocalDataSource = FakeUserTagsLocalDataSource()
+
         gate = UserBookCacheGate(
             booksLocalDataSource = booksLocalDataSource,
             userTagsLocalDataSource = userTagsLocalDataSource,
@@ -77,6 +78,7 @@ class UserBookCacheGateTest {
             // ----- Arrange -----
             val fetchGate = CompletableDeferred<List<Book>>()
             val windows = mutableListOf<RefreshWindow>()
+
             val refresh = openRefresh(
                 fetchGate = fetchGate,
                 windows = windows,
@@ -87,6 +89,7 @@ class UserBookCacheGateTest {
                 book = bookWithUserBook(userBookId = 7),
                 kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
             )
+
             fetchGate.complete(emptyList())
             refresh.await()
 
@@ -99,6 +102,7 @@ class UserBookCacheGateTest {
             // ----- Arrange -----
             val fetchGate = CompletableDeferred<List<Book>>()
             val windows = mutableListOf<RefreshWindow>()
+
             gate.cacheBook(
                 book = bookWithUserBook(userBookId = 7),
                 kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
@@ -109,6 +113,7 @@ class UserBookCacheGateTest {
                 fetchGate = fetchGate,
                 windows = windows,
             )
+
             fetchGate.complete(emptyList())
             refresh.await()
 
@@ -122,6 +127,7 @@ class UserBookCacheGateTest {
             val fetchGate = CompletableDeferred<List<Book>>()
             val windows = mutableListOf<RefreshWindow>()
             val book = bookWithUserBook(userBookId = 7)
+
             val refresh = openRefresh(
                 fetchGate = fetchGate,
                 windows = windows,
@@ -134,6 +140,7 @@ class UserBookCacheGateTest {
 
             // ----- Assert -----
             windows.single().writes.shouldBeEmpty()
+
             coVerify(exactly = 1) {
                 booksLocalDataSource.cacheBook(book = book)
             }
@@ -145,6 +152,7 @@ class UserBookCacheGateTest {
             val fetchGate = CompletableDeferred<List<Book>>()
             val windows = mutableListOf<RefreshWindow>()
             val book = bookWithUserBook(userBookId = 7)
+
             val refresh = openRefresh(
                 fetchGate = fetchGate,
                 windows = windows,
@@ -155,10 +163,12 @@ class UserBookCacheGateTest {
                 book = book,
                 kind = PendingUserBookWriteKind.UPDATE_RATING,
             )
+
             gate.cacheBook(
                 book = book,
                 kind = PendingUserBookWriteKind.SET_STATUS,
             )
+
             fetchGate.complete(emptyList())
             refresh.await()
 
@@ -176,6 +186,7 @@ class UserBookCacheGateTest {
             // ----- Arrange -----
             val fetchGate = CompletableDeferred<List<Book>>()
             val windows = mutableListOf<RefreshWindow>()
+
             val refresh = openRefresh(
                 fetchGate = fetchGate,
                 windows = windows,
@@ -186,11 +197,13 @@ class UserBookCacheGateTest {
                 book = bookWithUserBook(userBookId = 7),
                 kind = PendingUserBookWriteKind.MARK_AS_READ,
             )
+
             fetchGate.complete(emptyList())
             refresh.await()
 
             // ----- Assert -----
             windows.single().writes shouldBe mapOf(7 to setOf(PendingUserBookWriteKind.MARK_AS_READ))
+
             coVerify(exactly = 0) {
                 booksLocalDataSource.cacheBook(book = any())
             }
@@ -203,10 +216,12 @@ class UserBookCacheGateTest {
             val secondFetchGate = CompletableDeferred<List<Book>>()
             val firstWindows = mutableListOf<RefreshWindow>()
             val secondWindows = mutableListOf<RefreshWindow>()
+
             val first = openRefresh(
                 fetchGate = firstFetchGate,
                 windows = firstWindows,
             )
+
             val second = openRefresh(
                 fetchGate = secondFetchGate,
                 windows = secondWindows,
@@ -217,6 +232,7 @@ class UserBookCacheGateTest {
                 book = bookWithUserBook(userBookId = 7),
                 kind = PendingUserBookWriteKind.UPDATE_REVIEW,
             )
+
             firstFetchGate.complete(emptyList())
             secondFetchGate.complete(emptyList())
             first.await()
@@ -235,14 +251,17 @@ class UserBookCacheGateTest {
             val secondFetchGate = CompletableDeferred<List<Book>>()
             val firstWindows = mutableListOf<RefreshWindow>()
             val secondWindows = mutableListOf<RefreshWindow>()
+
             val first = openRefresh(
                 fetchGate = firstFetchGate,
                 windows = firstWindows,
             )
+
             val second = openRefresh(
                 fetchGate = secondFetchGate,
                 windows = secondWindows,
             )
+
             firstFetchGate.complete(emptyList())
             first.await()
 
@@ -251,6 +270,7 @@ class UserBookCacheGateTest {
                 book = bookWithUserBook(userBookId = 7),
                 kind = PendingUserBookWriteKind.UPDATE_RATING,
             )
+
             secondFetchGate.complete(emptyList())
             second.await()
 
@@ -267,6 +287,7 @@ class UserBookCacheGateTest {
             // ----- Arrange -----
             val fetchGate = CompletableDeferred<List<Book>>()
             val windows = mutableListOf<RefreshWindow>()
+
             val refresh = openRefresh(
                 fetchGate = fetchGate,
                 windows = windows,
@@ -279,6 +300,7 @@ class UserBookCacheGateTest {
 
             // ----- Assert -----
             windows.single().removedUserBookIds shouldBe setOf(3, 4)
+
             coVerify(exactly = 1) {
                 booksLocalDataSource.removeUserBooksById(ids = listOf(3, 4))
             }
@@ -289,10 +311,12 @@ class UserBookCacheGateTest {
             // ----- Arrange -----
             val fetchGate = CompletableDeferred<List<Book>>()
             val windows = mutableListOf<RefreshWindow>()
+
             val refresh = openRefresh(
                 fetchGate = fetchGate,
                 windows = windows,
             )
+
             gate.removeUserBooks(ids = listOf(3, 4))
 
             // ----- Act -----
@@ -316,6 +340,7 @@ class UserBookCacheGateTest {
                 fetchGate = fetchGate,
                 windows = windows,
             )
+
             fetchGate.complete(emptyList())
             refresh.await()
 
@@ -332,6 +357,7 @@ class UserBookCacheGateTest {
             val kept = bookWithUserBook(userBookId = 1)
             val dropped = bookWithUserBook(userBookId = 2)
             val fetchGate = CompletableDeferred<List<Book>>()
+
             val refresh = openRefresh(
                 fetchGate = fetchGate,
                 windows = mutableListOf(),
@@ -344,6 +370,7 @@ class UserBookCacheGateTest {
 
             // ----- Assert -----
             result shouldContainExactly listOf(kept, dropped)
+
             coVerify(exactly = 1) {
                 booksLocalDataSource.cacheBooks(books = listOf(kept))
             }
@@ -354,15 +381,16 @@ class UserBookCacheGateTest {
             // ----- Arrange -----
             val fetchGate = CompletableDeferred<List<Book>>()
             val windows = mutableListOf<RefreshWindow>()
+
             val failing: Deferred<Result<List<Book>>> = async {
                 runCatching {
                     gate.refresh(
                         fetch = {
-                    UserBooksSnapshot(
-                        books = fetchGate.await(),
-                        userTagsByBookId = emptyMap(),
-                    )
-                },
+                            UserBooksSnapshot(
+                                books = fetchGate.await(),
+                                userTagsByBookId = emptyMap(),
+                            )
+                        },
                         reconcile = { fetched, window ->
                             windows += window
                             fetched
@@ -371,6 +399,7 @@ class UserBookCacheGateTest {
                     )
                 }
             }
+
             runCurrent()
             fetchGate.completeExceptionally(IllegalStateException("offline"))
 
@@ -380,6 +409,7 @@ class UserBookCacheGateTest {
             // ----- Assert -----
             failure.shouldBeInstanceOf<IllegalStateException>().message shouldBe "offline"
             windows.size shouldBe 0
+
             coVerify(exactly = 0) {
                 booksLocalDataSource.cacheBooks(books = any())
             }
@@ -389,10 +419,12 @@ class UserBookCacheGateTest {
         fun `a cancelled fetch releases the gate`() = runTest {
             // ----- Arrange -----
             val cancelledFetchGate = CompletableDeferred<List<Book>>()
+
             val cancelled = openRefresh(
                 fetchGate = cancelledFetchGate,
                 windows = mutableListOf(),
             )
+
             val written = bookWithUserBook(userBookId = 7)
             val fetched = bookWithUserBook(userBookId = 8)
             val nextFetchGate = CompletableDeferred<List<Book>>()
@@ -401,21 +433,26 @@ class UserBookCacheGateTest {
             cancelled.cancel()
             runCurrent()
             gate.cacheBook(book = written)
+
             val next = openRefresh(
                 fetchGate = nextFetchGate,
                 windows = mutableListOf(),
             )
+
             nextFetchGate.complete(listOf(fetched))
             val result = next.await()
 
             // ----- Assert -----
             result shouldContainExactly listOf(fetched)
+
             coVerify(exactly = 1) {
                 booksLocalDataSource.cacheBook(book = written)
             }
+
             coVerify(exactly = 1) {
                 booksLocalDataSource.cacheBooks(books = listOf(fetched))
             }
+
             coVerify(exactly = 1) {
                 booksLocalDataSource.cacheBooks(books = any())
             }
@@ -452,10 +489,12 @@ class UserBookCacheGateTest {
             val first = baseBook.copy(id = 1)
             val second = baseBook.copy(id = 2)
             val fetchGate = CompletableDeferred<UserBooksSnapshot>()
+
             val refresh = openTagRefresh(
                 fetchGate = fetchGate,
                 books = listOf(first, second),
             )
+
             userTagsLocalDataSource.replaceForBook(
                 bookId = 2,
                 tags = listOf(tag("stale")),
@@ -468,6 +507,7 @@ class UserBookCacheGateTest {
                     userTagsByBookId = mapOf(1 to listOf(tag("fresh"))),
                 ),
             )
+
             refresh.await()
 
             // ----- Assert -----
@@ -483,6 +523,7 @@ class UserBookCacheGateTest {
             val tagged = baseBook.copy(id = 1)
             val other = baseBook.copy(id = 2)
             val fetchGate = CompletableDeferred<UserBooksSnapshot>()
+
             val refresh = openTagRefresh(
                 fetchGate = fetchGate,
                 books = listOf(tagged, other),
@@ -493,6 +534,7 @@ class UserBookCacheGateTest {
                 bookId = 1,
                 rows = listOf(tag("mine")),
             )
+
             fetchGate.complete(
                 UserBooksSnapshot(
                     books = listOf(tagged, other),
@@ -502,6 +544,7 @@ class UserBookCacheGateTest {
                     ),
                 ),
             )
+
             refresh.await()
 
             // ----- Assert -----
@@ -516,22 +559,28 @@ class UserBookCacheGateTest {
             // ----- Arrange -----
             val book = baseBook.copy(id = 1)
             val firstFetch = CompletableDeferred<UserBooksSnapshot>()
+
             val first = openTagRefresh(
                 fetchGate = firstFetch,
                 books = listOf(book),
             )
+
             firstFetch.complete(
                 UserBooksSnapshot(
                     books = listOf(book),
                     userTagsByBookId = emptyMap(),
                 ),
             )
+
             first.await()
+
             gate.writeUserTags(
                 bookId = 1,
                 rows = listOf(tag("mine")),
             )
+
             val secondFetch = CompletableDeferred<UserBooksSnapshot>()
+
             val second = openTagRefresh(
                 fetchGate = secondFetch,
                 books = listOf(book),
@@ -544,6 +593,7 @@ class UserBookCacheGateTest {
                     userTagsByBookId = mapOf(1 to listOf(tag("server"))),
                 ),
             )
+
             second.await()
 
             // ----- Assert -----
@@ -580,12 +630,14 @@ class UserBookCacheGateTest {
         fun `a save racing the fetch keeps the saved tags`() = runTest {
             // ----- Arrange -----
             val fetchGate = CompletableDeferred<List<UserTag>>()
+
             val refresh = async {
                 gate.refreshUserTags(
                     bookId = 1,
                     fetch = { fetchGate.await() },
                 )
             }
+
             runCurrent()
 
             // ----- Act -----
@@ -593,6 +645,7 @@ class UserBookCacheGateTest {
                 bookId = 1,
                 rows = listOf(tag("saved")),
             )
+
             fetchGate.complete(listOf(tag("stale")))
             refresh.await()
 
@@ -604,12 +657,14 @@ class UserBookCacheGateTest {
         fun `a save to a different book does not block the store`() = runTest {
             // ----- Arrange -----
             val fetchGate = CompletableDeferred<List<UserTag>>()
+
             val refresh = async {
                 gate.refreshUserTags(
                     bookId = 1,
                     fetch = { fetchGate.await() },
                 )
             }
+
             runCurrent()
 
             // ----- Act -----
@@ -617,6 +672,7 @@ class UserBookCacheGateTest {
                 bookId = 2,
                 rows = listOf(tag("other")),
             )
+
             fetchGate.complete(listOf(tag("fetched")))
             refresh.await()
 

@@ -16,16 +16,16 @@ internal class SidebarLiveScreenModel(
     themeStore: ShowcaseThemeStore,
     initializers: List<Collector<SidebarLiveUiState, SidebarLiveEvent, SidebarLiveDependencies, SidebarLiveLocalVariables>>,
 ) : ToadScreenModel<
-    SidebarLiveUiState,
-    SidebarLiveEvent,
-    SidebarLiveDependencies,
-    Collector<SidebarLiveUiState, SidebarLiveEvent, SidebarLiveDependencies, SidebarLiveLocalVariables>,
-    SidebarLiveLocalVariables,
+        SidebarLiveUiState,
+        SidebarLiveEvent,
+        SidebarLiveDependencies,
+        Collector<SidebarLiveUiState, SidebarLiveEvent, SidebarLiveDependencies, SidebarLiveLocalVariables>,
+        SidebarLiveLocalVariables,
     >(
-    initialState = sidebarLiveState(),
-    initialLocalVariables = SidebarLiveLocalVariables(),
-    initializers = initializers,
-) {
+        initialState = sidebarLiveState(),
+        initialLocalVariables = SidebarLiveLocalVariables(),
+        initializers = initializers,
+    ) {
     override val dependencies = SidebarLiveDependencies(
         themeStore = themeStore,
         coroutineScope = screenModelScope,

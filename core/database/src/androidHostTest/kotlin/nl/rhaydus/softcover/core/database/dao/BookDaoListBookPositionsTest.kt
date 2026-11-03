@@ -28,6 +28,7 @@ class BookDaoListBookPositionsTest {
             builder = Room.inMemoryDatabaseBuilder(context = context),
             queryContext = testDispatcher,
         )
+
         dao = database.bookDao()
     }
 
@@ -61,18 +62,22 @@ class BookDaoListBookPositionsTest {
                 listBookId = 1,
                 position = 0,
             )
+
             insertListBook(
                 listBookId = 2,
                 position = 5,
             )
+
             insertListBook(
                 listBookId = 3,
                 position = 2,
             )
+
             insertListBook(
                 listBookId = 4,
                 position = 9,
             )
+
             insertListBook(
                 listBookId = 5,
                 listId = 2,
@@ -109,6 +114,7 @@ class BookDaoListBookPositionsTest {
                 listBookId = 1,
                 position = 7,
             )
+
             insertListBook(
                 listBookId = 2,
                 position = 8,
@@ -145,6 +151,7 @@ class BookDaoListBookPositionsTest {
                     position = null,
                 ),
             )
+
             rows.size shouldBe 2
         }
     }

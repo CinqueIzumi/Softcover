@@ -26,6 +26,7 @@ class OnBarSelectedActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(topbarLiveState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(TopbarLiveLocalVariables()),

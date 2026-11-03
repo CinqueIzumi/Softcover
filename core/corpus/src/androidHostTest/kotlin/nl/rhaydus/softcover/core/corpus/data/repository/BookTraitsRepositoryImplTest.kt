@@ -44,6 +44,7 @@ class BookTraitsRepositoryImplTest {
     @BeforeEach
     fun setUp() {
         dataSource = FakeDataSource()
+
         repository = BookTraitsRepositoryImpl(
             localDataSource = dataSource,
             clock = FixedClock(millis = 123_456L),

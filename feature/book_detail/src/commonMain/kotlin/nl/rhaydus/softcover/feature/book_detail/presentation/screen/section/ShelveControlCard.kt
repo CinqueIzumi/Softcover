@@ -35,17 +35,17 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.icon.RhaydusIconResource
+import nl.rhaydus.designsystem.modifier.clippedSkeletonMask
+import nl.rhaydus.designsystem.modifier.shakeOnError
+import nl.rhaydus.designsystem.nav.rememberPulseScaleProvider
+import nl.rhaydus.designsystem.theme.Corners
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
 import nl.rhaydus.softcover.core.component.header.SectionHeader
-import nl.rhaydus.softcover.core.component.modifier.rememberPulseScaleProvider
-import nl.rhaydus.softcover.core.component.modifier.shakeOnError
-import nl.rhaydus.softcover.core.component.state.clippedSkeletonMask
 import nl.rhaydus.softcover.core.component.statistic.StatNumber
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.tabularFigures
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
@@ -190,6 +190,7 @@ private fun ShelveRow(
 
     var settledSelected by remember { mutableStateOf(selected) }
     var wasLoading by remember { mutableStateOf(isLoading) }
+
     val wipe = remember(selected) {
         Animatable(initialValue = if (isLoading || wasLoading || selected == settledSelected) 1f else 0f)
     }
@@ -210,6 +211,7 @@ private fun ShelveRow(
             targetValue = 1f,
             animationSpec = wipeSpec,
         )
+
         settledSelected = selected
     }
 
@@ -230,6 +232,7 @@ private fun ShelveRow(
         if (celebrationKey == initialCelebrationKey) return@LaunchedEffect
 
         celebration.snapTo(targetValue = 0f)
+
         celebration.animateTo(
             targetValue = 1f,
             animationSpec = celebrationSpec,
@@ -269,7 +272,10 @@ private fun ShelveRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = Spacing.sm, vertical = Spacing.sm),
+                .padding(
+                    horizontal = Spacing.sm,
+                    vertical = Spacing.sm,
+                ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(

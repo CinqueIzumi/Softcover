@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.toad.UiAction
 
 internal sealed interface LibraryAction : UiAction<
-        LibraryDependencies,
-        LibraryUiState,
-        LibraryEvent,
-        LibraryLocalVariables,
-        >
+    LibraryDependencies,
+    LibraryUiState,
+    LibraryEvent,
+    LibraryLocalVariables,
+>

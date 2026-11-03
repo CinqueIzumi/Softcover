@@ -125,6 +125,7 @@ class ReadingStatsMapperTest {
                     ),
                 ),
             )
+
             val previousYear = StatsRange.Bounded(
                 LocalDate(
                     2025,
@@ -204,6 +205,7 @@ class ReadingStatsMapperTest {
                 ),
                 editionId = 10,
             )
+
             val otherEdition = readBook(
                 id = 2,
                 finishedAt = "2026-02-01",
@@ -305,11 +307,13 @@ class ReadingStatsMapperTest {
                 finishedAt = "2026-01-10",
                 tags = listOf(genre("Science fiction")),
             )
+
             val lower2 = readBook(
                 id = 2,
                 finishedAt = "2026-01-11",
                 tags = listOf(genre("Science fiction")),
             )
+
             val upper = readBook(
                 id = 3,
                 finishedAt = "2026-01-12",
@@ -328,6 +332,7 @@ class ReadingStatsMapperTest {
                     fraction = 1.0,
                 ),
             )
+
             upperLast.slices shouldContainExactly expected
             upperFirst.slices shouldContainExactly expected
         }
@@ -340,6 +345,7 @@ class ReadingStatsMapperTest {
                 finishedAt = "2026-01-10",
                 tags = listOf(genre("Science fiction")),
             )
+
             val upper = readBook(
                 id = 2,
                 finishedAt = "2026-01-11",
@@ -358,6 +364,7 @@ class ReadingStatsMapperTest {
                     fraction = 1.0,
                 ),
             )
+
             lowerFirst.slices shouldContainExactly expected
             upperFirst.slices shouldContainExactly expected
         }
@@ -371,6 +378,7 @@ class ReadingStatsMapperTest {
                     count = 10,
                 )
             }
+
             val books = listOf(
                 readBook(
                     id = 1,
@@ -412,6 +420,7 @@ class ReadingStatsMapperTest {
                     tags = listOf(genre("Fantasy")),
                 ),
             )
+
             val userTags = mapOf(
                 1 to listOf(userTag("Mystery")),
             )
@@ -436,6 +445,7 @@ class ReadingStatsMapperTest {
                     tags = listOf(genre("Fantasy")),
                 ),
             )
+
             val userTags = mapOf(
                 1 to listOf(
                     userTag(
@@ -465,6 +475,7 @@ class ReadingStatsMapperTest {
                     tags = listOf(genre("Fantasy")),
                 ),
             )
+
             val userTags = mapOf(
                 1 to listOf(userTag("fantasy")),
             )
@@ -499,6 +510,7 @@ class ReadingStatsMapperTest {
                     tags = listOf(genre("Fantasy")),
                 ),
             )
+
             val userTags = mapOf(
                 1 to listOf(userTag("fantasy")),
             )
@@ -533,6 +545,7 @@ class ReadingStatsMapperTest {
                     finishedAt = "2026-01-11",
                 ),
             )
+
             val userTags = mapOf(
                 2 to listOf(userTag("Horror")),
             )
@@ -652,6 +665,7 @@ class ReadingStatsMapperTest {
                 name = "Sam",
                 gender = Gender.Female,
             )
+
             val books = listOf(
                 readBook(
                     id = 1,
@@ -785,6 +799,7 @@ class ReadingStatsMapperTest {
                 noCount = 1,
                 unknownCount = 1,
             )
+
             demographics.lgbtqBreakdown shouldBe DemographicBreakdown(
                 yesCount = 0,
                 noCount = 1,
@@ -833,6 +848,7 @@ class ReadingStatsMapperTest {
             // ----- Arrange -----
             val first = author(1)
             val second = author(2)
+
             val books = listOf(
                 readBook(
                     id = 1,
@@ -857,6 +873,7 @@ class ReadingStatsMapperTest {
             // ----- Arrange -----
             val writer = author(1)
             val translator = author(2)
+
             val book = readBook(
                 id = 1,
                 finishedAt = "2026-01-10",
@@ -877,6 +894,7 @@ class ReadingStatsMapperTest {
         fun `average rating is the mean of the rated books only`() {
             // ----- Arrange -----
             val writer = author(1)
+
             val books = listOf(
                 readBook(
                     id = 1,
@@ -927,6 +945,7 @@ class ReadingStatsMapperTest {
         fun `lead book is the latest finished book`() {
             // ----- Arrange -----
             val writer = author(1)
+
             val books = listOf(
                 readBook(
                     id = 1,
@@ -956,6 +975,7 @@ class ReadingStatsMapperTest {
         fun `an undated book loses the lead to a dated one`() {
             // ----- Arrange -----
             val writer = author(1)
+
             val books = listOf(
                 readBook(
                     id = 1,
@@ -981,6 +1001,7 @@ class ReadingStatsMapperTest {
             // ----- Arrange -----
             val prolific = author(1)
             val occasional = author(2)
+
             val books = listOf(
                 readBook(
                     id = 1,
@@ -1013,6 +1034,7 @@ class ReadingStatsMapperTest {
             val unrated = author(1)
             val low = author(2)
             val high = author(3)
+
             val books = listOf(
                 readBook(
                     id = 1,
@@ -1045,6 +1067,7 @@ class ReadingStatsMapperTest {
             // ----- Arrange -----
             val earlier = author(1)
             val later = author(2)
+
             val books = listOf(
                 readBook(
                     id = 1,
@@ -1072,10 +1095,12 @@ class ReadingStatsMapperTest {
                 id = 1,
                 name = "Zed",
             )
+
             val abe = author(
                 id = 2,
                 name = "Abe",
             )
+
             val books = listOf(
                 readBook(
                     id = 1,
@@ -1118,6 +1143,7 @@ class ReadingStatsMapperTest {
         fun `a bounded range leaves out books finished outside it and undated books`() {
             // ----- Arrange -----
             val writer = author(1)
+
             val books = listOf(
                 readBook(
                     id = 1,
@@ -1193,6 +1219,7 @@ class ReadingStatsMapperTest {
                 ReadingFormat.Ebook to 1,
                 ReadingFormat.Audio to 1,
             )
+
             split.unknownCount shouldBe 0
         }
 
@@ -1227,11 +1254,13 @@ class ReadingStatsMapperTest {
                 id = 1,
                 finishedAt = "2026-02-01",
             )
+
             val uncachedEdition = readBook(
                 id = 2,
                 finishedAt = "2026-02-01",
                 editionId = 99,
             )
+
             val nullFormat = formatBook(
                 id = 3,
                 format = null,

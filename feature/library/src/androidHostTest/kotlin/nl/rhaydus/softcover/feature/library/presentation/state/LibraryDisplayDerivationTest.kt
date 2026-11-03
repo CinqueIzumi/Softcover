@@ -171,6 +171,7 @@ class LibraryDisplayDerivationTest {
                 id = 1,
                 title = "Kotlin in Action",
             )
+
             val nonMatching = buildBook(
                 id = 2,
                 title = "Clean Code",
@@ -195,11 +196,13 @@ class LibraryDisplayDerivationTest {
                 id = 1,
                 name = "Robert C. Martin",
             )
+
             val matching = buildBook(
                 id = 1,
                 title = "Clean Code",
                 authors = listOf(author),
             )
+
             val nonMatching = buildBook(
                 id = 2,
                 title = "Other Book",
@@ -251,6 +254,7 @@ class LibraryDisplayDerivationTest {
                 id = 1,
                 userBook = buildUserBook(lastReadDate = "2023-06-15"),
             )
+
             val book2022 = buildBook(
                 id = 2,
                 userBook = buildUserBook(lastReadDate = "2022-06-15"),
@@ -275,10 +279,12 @@ class LibraryDisplayDerivationTest {
                 id = 1,
                 userBook = buildUserBook(lastReadDate = "2023-06-15"),
             )
+
             val book2022 = buildBook(
                 id = 2,
                 userBook = buildUserBook(lastReadDate = "2022-06-15"),
             )
+
             val bookNoDate = buildBook(
                 id = 3,
                 userBook = null,
@@ -303,14 +309,17 @@ class LibraryDisplayDerivationTest {
                 id = 10,
                 format = "ebook",
             )
+
             val paperbackEdition = buildEdition(
                 id = 11,
                 format = "paperback",
             )
+
             val ebookBook = buildBook(
                 id = 1,
                 editions = listOf(ebookEdition),
             )
+
             val paperbackBook = buildBook(
                 id = 2,
                 editions = listOf(paperbackEdition),
@@ -335,18 +344,21 @@ class LibraryDisplayDerivationTest {
                 id = 1,
                 name = "Fiction",
             )
+
             val matchingBook = buildBook(
                 id = 1,
                 title = "Kotlin Novel",
                 tags = listOf(tagFiction),
                 userBook = buildUserBook(lastReadDate = "2023-03-01"),
             )
+
             val wrongYearBook = buildBook(
                 id = 2,
                 title = "Kotlin Guide",
                 tags = listOf(tagFiction),
                 userBook = buildUserBook(lastReadDate = "2022-03-01"),
             )
+
             val wrongTagBook = buildBook(
                 id = 3,
                 title = "Kotlin Tips",
@@ -423,6 +435,7 @@ class LibraryDisplayDerivationTest {
                 id = 1,
                 title = "Banana",
             )
+
             val editionA = buildEdition(
                 id = 2,
                 title = "Apple",
@@ -451,6 +464,7 @@ class LibraryDisplayDerivationTest {
                 id = 1,
                 title = "Kotlin in Action",
             )
+
             val nonMatching = buildEdition(
                 id = 2,
                 title = "Clean Code",
@@ -479,11 +493,13 @@ class LibraryDisplayDerivationTest {
                 id = 1,
                 name = "Martin Fowler",
             )
+
             val matching = buildEdition(
                 id = 1,
                 title = "Refactoring",
                 authors = listOf(author),
             )
+
             val nonMatching = buildEdition(
                 id = 2,
                 title = "Other Book",
@@ -536,10 +552,12 @@ class LibraryDisplayDerivationTest {
                 id = 1,
                 title = "Cherry",
             )
+
             val editionA = buildEdition(
                 id = 2,
                 title = "Apple",
             )
+
             val editionB = buildEdition(
                 id = 3,
                 title = "Banana",
@@ -569,6 +587,7 @@ class LibraryDisplayDerivationTest {
                 title = "Owned",
                 owned = true,
             )
+
             val unownedEdition = buildEdition(
                 id = 2,
                 title = "Unowned",
@@ -598,10 +617,12 @@ class LibraryDisplayDerivationTest {
                 id = 1,
                 name = "Sci-Fi",
             )
+
             val scifiBook = buildBook(
                 id = 100,
                 tags = listOf(tagScifi),
             )
+
             val nonScifiBook = buildBook(
                 id = 200,
                 tags = emptyList(),
@@ -612,6 +633,7 @@ class LibraryDisplayDerivationTest {
                 bookId = 100,
                 title = "Sci-Fi Ed",
             )
+
             val nonScifiEdition = buildEdition(
                 id = 2,
                 bookId = 200,
@@ -637,10 +659,6 @@ class LibraryDisplayDerivationTest {
         @Test
         fun `editions with unknown bookId are treated as having no book for filter purposes`() {
             // ----- Arrange -----
-            val tagScifi = Tag(
-                id = 1,
-                name = "Sci-Fi",
-            )
             val orphanEdition = buildEdition(
                 id = 1,
                 bookId = 999,
@@ -671,6 +689,7 @@ class LibraryDisplayDerivationTest {
                 bookId = 100,
                 title = "Tagged Ed",
             )
+
             val untaggedEdition = buildEdition(
                 id = 2,
                 bookId = 200,
@@ -725,6 +744,7 @@ class LibraryDisplayDerivationTest {
         fun `book-tab path counts items matching the draft filters`() {
             // ----- Arrange -----
             val tabId = "status-read"
+
             val ebookBook = buildBook(
                 id = 1,
                 editions = listOf(
@@ -734,6 +754,7 @@ class LibraryDisplayDerivationTest {
                     ),
                 ),
             )
+
             val paperbackBook = buildBook(
                 id = 2,
                 editions = listOf(
@@ -763,6 +784,7 @@ class LibraryDisplayDerivationTest {
         fun `book-tab path combines the committed search query with the draft filters`() {
             // ----- Arrange -----
             val tabId = "status-read"
+
             val matching = buildBook(
                 id = 1,
                 title = "Kotlin Novel",
@@ -773,6 +795,7 @@ class LibraryDisplayDerivationTest {
                     ),
                 ),
             )
+
             val wrongFormat = buildBook(
                 id = 2,
                 title = "Kotlin Guide",
@@ -783,6 +806,7 @@ class LibraryDisplayDerivationTest {
                     ),
                 ),
             )
+
             val wrongTitle = buildBook(
                 id = 3,
                 title = "Other Book",
@@ -814,11 +838,13 @@ class LibraryDisplayDerivationTest {
         fun `custom-list edition-tab path counts editions matching the draft filters`() {
             // ----- Arrange -----
             val tabId = "list-5"
+
             val ownedEdition = buildEdition(
                 id = 1,
                 title = "Owned Ed",
                 owned = true,
             )
+
             val unownedEdition = buildEdition(
                 id = 2,
                 title = "Unowned Ed",
@@ -863,6 +889,7 @@ class LibraryDisplayDerivationTest {
         fun `book-tab with an empty collected list returns 0 without falling through to editions`() {
             // ----- Arrange -----
             val tabId = "status-read"
+
             val state = LibraryUiState(
                 booksByTab = persistentMapOf(tabId to persistentListOf()),
                 editionsByTab = persistentMapOf(tabId to persistentListOf(buildEdition(id = 1))),
@@ -883,6 +910,7 @@ class LibraryDisplayDerivationTest {
         fun `reads the draft filters rather than the tab's committed filtersByTab entry`() {
             // ----- Arrange -----
             val tabId = "status-read"
+
             val ebookBook = buildBook(
                 id = 1,
                 editions = listOf(
@@ -892,6 +920,7 @@ class LibraryDisplayDerivationTest {
                     ),
                 ),
             )
+
             val paperbackBook = buildBook(
                 id = 2,
                 editions = listOf(
@@ -901,6 +930,7 @@ class LibraryDisplayDerivationTest {
                     ),
                 ),
             )
+
             val audiobookBook = buildBook(
                 id = 3,
                 editions = listOf(
@@ -939,14 +969,17 @@ class LibraryDisplayDerivationTest {
             val tagged = buildBook(id = 1)
             val untagged = buildBook(id = 2)
             val unshelved = buildBook(id = 3)
+
             val userTags = persistentMapOf(
                 1 to listOf(userCozy),
                 2 to emptyList(),
             )
+
             val state = LibraryUiState(
                 booksByTab = persistentMapOf(tabId to persistentListOf(tagged, untagged, unshelved)),
                 userTagsByBookId = userTags,
             )
+
             val filters = LibraryFilters(yourTags = TagSelection(excluded = persistentSetOf(keyCozy)))
 
             // ----- Act -----
@@ -955,6 +988,7 @@ class LibraryDisplayDerivationTest {
                 tabId = tabId,
                 draftFilters = filters,
             )
+
             val applied = computeDisplayBooks(
                 raw = listOf(tagged, untagged, unshelved),
                 query = "",
@@ -971,14 +1005,17 @@ class LibraryDisplayDerivationTest {
         fun `Yours filters on an edition tab count editions through their parent book`() {
             // ----- Arrange -----
             val tabId = "list-1"
+
             val taggedEdition = buildEdition(
                 id = 1,
                 bookId = 100,
             )
+
             val untaggedEdition = buildEdition(
                 id = 2,
                 bookId = 200,
             )
+
             val state = LibraryUiState(
                 editionsByTab = persistentMapOf(tabId to persistentListOf(taggedEdition, untaggedEdition)),
                 userTagsByBookId = persistentMapOf(100 to listOf(userCozy)),

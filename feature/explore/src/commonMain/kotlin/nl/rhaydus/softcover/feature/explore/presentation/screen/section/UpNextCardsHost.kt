@@ -38,7 +38,7 @@ internal fun UpNextCardsHost(
             is BookCardEvent.PressStarted,
             is BookCardEvent.TrailingClicked,
             is BookCardEvent.ShakeEnded,
-                -> Unit
+            -> Unit
         }
     }
 

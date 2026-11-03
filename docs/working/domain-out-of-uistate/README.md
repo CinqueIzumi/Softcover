@@ -63,8 +63,8 @@ UI models is not mechanical, because the state also serves as data store and eve
 | 5 | 5d | Profile | [ ] |
 | 5 | 5e | Settings (states already stable; section models only) | [ ] |
 
-Each step runs as one session through the usual loop: design → approval → `softcover-implementer` →
-`softcover-test-writer` → `softcover-reviewer` → ask before committing → `/handoff`.
+Each step runs as one session through the usual loop: design → approval → `rhaydus-kotlin:implementer` →
+`rhaydus-kotlin:test-writer` → `rhaydus-kotlin:reviewer` → ask before committing → `/handoff`.
 
 ## Risks
 

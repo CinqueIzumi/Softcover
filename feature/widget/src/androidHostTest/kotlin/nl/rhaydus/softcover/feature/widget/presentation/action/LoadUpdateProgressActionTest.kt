@@ -8,9 +8,9 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.LocalDateTime
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.NO_USER_ID
-import kotlinx.datetime.LocalDateTime
 import nl.rhaydus.softcover.core.progresssheet.presentation.ProgressSheetState
 import nl.rhaydus.softcover.feature.widget.presentation.event.UpdateProgressEvent
 import nl.rhaydus.softcover.feature.widget.presentation.screenmodel.UpdateProgressDependencies
@@ -31,6 +31,7 @@ class LoadUpdateProgressActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(UpdateProgressUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(UpdateProgressLocalVariables()),
@@ -52,6 +53,7 @@ class LoadUpdateProgressActionTest {
             every {
                 dependencies.getUserIdAsFlow()
             } returns flowOf(NO_USER_ID)
+
             every {
                 dependencies.getCurrentlyReadingUserBooks()
             } returns flowOf(listOf(stubBook(id = 7)))
@@ -73,6 +75,7 @@ class LoadUpdateProgressActionTest {
             every {
                 dependencies.getUserIdAsFlow()
             } returns flowOf(1)
+
             every {
                 dependencies.getCurrentlyReadingUserBooks()
             } returns flowOf(listOf(stubBook(id = 8)))
@@ -92,9 +95,11 @@ class LoadUpdateProgressActionTest {
         fun `loads the matching shelf book into the sheet without finishing`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 7)
+
             every {
                 dependencies.getUserIdAsFlow()
             } returns flowOf(1)
+
             every {
                 dependencies.getCurrentlyReadingUserBooks()
             } returns flowOf(listOf(stubBook(id = 8), book))
@@ -115,17 +120,21 @@ class LoadUpdateProgressActionTest {
         fun `opening clears the previously chosen read time`() = runTest {
             // ----- Arrange -----
             stateFlow.value = UpdateProgressUiState(
-                progressSheet = ProgressSheetState(readAt = LocalDateTime(
-                    2020,
-                    1,
-                    2,
-                    9,
-                    15,
-                ),),
+                progressSheet = ProgressSheetState(
+                    readAt = LocalDateTime(
+                        2020,
+                        1,
+                        2,
+                        9,
+                        15,
+                    ),
+                ),
             )
+
             every {
                 dependencies.getUserIdAsFlow()
             } returns flowOf(1)
+
             every {
                 dependencies.getCurrentlyReadingUserBooks()
             } returns flowOf(listOf(stubBook(id = 7)))
@@ -145,6 +154,7 @@ class LoadUpdateProgressActionTest {
             // ----- Arrange -----
             val loaded = stubBook(id = 7)
             stateFlow.value = UpdateProgressUiState(bookToUpdate = loaded)
+
             every {
                 dependencies.getUserIdAsFlow()
             } returns flowOf(NO_USER_ID)

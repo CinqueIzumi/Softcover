@@ -17,10 +17,10 @@ class DismissPlanTodayUseCaseTest {
     @BeforeEach
     fun setUp() {
         settingsRepository = mockk(relaxed = true)
-        useCase =
-            DismissPlanTodayUseCase(
-                settingsRepository = settingsRepository,
-            )
+
+        useCase = DismissPlanTodayUseCase(
+            settingsRepository = settingsRepository,
+        )
     }
 
     @Nested
@@ -42,6 +42,7 @@ class DismissPlanTodayUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+
             coVerify {
                 settingsRepository.setPlanTodayDismissed(
                     bookId = 42,

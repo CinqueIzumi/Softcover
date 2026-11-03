@@ -15,16 +15,16 @@ internal class ProgressLiveScreenModel(
     themeStore: ShowcaseThemeStore,
     initializers: List<Collector<ProgressLiveUiState, ProgressLiveEvent, ProgressLiveDependencies, ProgressLiveLocalVariables>>,
 ) : ToadScreenModel<
-    ProgressLiveUiState,
-    ProgressLiveEvent,
-    ProgressLiveDependencies,
-    Collector<ProgressLiveUiState, ProgressLiveEvent, ProgressLiveDependencies, ProgressLiveLocalVariables>,
-    ProgressLiveLocalVariables,
+        ProgressLiveUiState,
+        ProgressLiveEvent,
+        ProgressLiveDependencies,
+        Collector<ProgressLiveUiState, ProgressLiveEvent, ProgressLiveDependencies, ProgressLiveLocalVariables>,
+        ProgressLiveLocalVariables,
     >(
-    initialState = ProgressLiveUiState(),
-    initialLocalVariables = ProgressLiveLocalVariables(),
-    initializers = initializers,
-) {
+        initialState = ProgressLiveUiState(),
+        initialLocalVariables = ProgressLiveLocalVariables(),
+        initializers = initializers,
+    ) {
     override val dependencies = ProgressLiveDependencies(
         themeStore = themeStore,
         coroutineScope = screenModelScope,

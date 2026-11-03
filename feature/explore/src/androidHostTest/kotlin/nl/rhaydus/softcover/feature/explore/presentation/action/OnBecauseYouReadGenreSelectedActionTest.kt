@@ -34,11 +34,13 @@ class OnBecauseYouReadGenreSelectedActionTest {
     fun setUp() {
         setBecauseYouReadGenreUseCase = mockk()
         stateFlow = MutableStateFlow(ExploreScreenUiState(loadingBecauseYouReadBooks = false))
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk<ExploreDependencies>(relaxed = true).also { mock ->
             every {
                 mock.setBecauseYouReadGenreUseCase
@@ -55,6 +57,7 @@ class OnBecauseYouReadGenreSelectedActionTest {
                 becauseYouReadGenre = "Romance",
                 becauseYouReadBooks = persistentListOf(mockk()),
             )
+
             val gate = CompletableDeferred<Unit>()
 
             coEvery {
@@ -90,6 +93,7 @@ class OnBecauseYouReadGenreSelectedActionTest {
                 becauseYouReadGenre = "Romance",
                 becauseYouReadGenreOptions = persistentListOf("Horror", "Fantasy"),
             )
+
             coEvery {
                 setBecauseYouReadGenreUseCase(genre = null)
             } returns Result.success(Unit)
@@ -113,6 +117,7 @@ class OnBecauseYouReadGenreSelectedActionTest {
                 becauseYouReadGenre = "Romance",
                 becauseYouReadGenreOptions = persistentListOf(),
             )
+
             coEvery {
                 setBecauseYouReadGenreUseCase(genre = null)
             } returns Result.success(Unit)
@@ -150,6 +155,7 @@ class OnBecauseYouReadGenreSelectedActionTest {
             // ----- Assert -----
             stateFlow.value.loadingBecauseYouReadBooks shouldBe false
             stateFlow.value.becauseYouReadBooks.size shouldBe 1
+
             coVerify(exactly = 0) {
                 setBecauseYouReadGenreUseCase(genre = any())
             }
@@ -176,6 +182,7 @@ class OnBecauseYouReadGenreSelectedActionTest {
             // ----- Assert -----
             stateFlow.value.loadingBecauseYouReadBooks shouldBe false
             stateFlow.value.becauseYouReadBooks.size shouldBe 1
+
             coVerify(exactly = 0) {
                 setBecauseYouReadGenreUseCase(genre = any())
             }

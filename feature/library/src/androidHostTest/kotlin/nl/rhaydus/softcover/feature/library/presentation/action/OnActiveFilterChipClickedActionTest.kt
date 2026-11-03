@@ -34,6 +34,7 @@ class OnActiveFilterChipClickedActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -74,6 +75,7 @@ class OnActiveFilterChipClickedActionTest {
         fun `a known chip key toggles the resolved filter value off`() = runTest {
             // ----- Arrange -----
             val value = LibraryFilterValue.Format(value = "ebook")
+
             val chip = ChipUiModel(
                 key = "format:ebook",
                 label = "ebook",

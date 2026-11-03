@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.showcase.live.sidebar.state.SidebarLiveUiState
 import nl.rhaydus.toad.UiAction
 
 internal sealed interface SidebarLiveAction : UiAction<
-        SidebarLiveDependencies,
-        SidebarLiveUiState,
-        SidebarLiveEvent,
-        SidebarLiveLocalVariables,
-        >
+    SidebarLiveDependencies,
+    SidebarLiveUiState,
+    SidebarLiveEvent,
+    SidebarLiveLocalVariables,
+>

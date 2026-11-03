@@ -29,6 +29,7 @@ class ListMapperTest {
             every {
                 this@mockk.count
             } returns count
+
             every {
                 this@mockk.max
             } returns max
@@ -54,24 +55,31 @@ class ListMapperTest {
         every {
             this@mockk.id
         } returns id
+
         every {
             this@mockk.name
         } returns name
+
         every {
             this@mockk.slug
         } returns slug
+
         every {
             this@mockk.ranked
         } returns ranked
+
         every {
             privacy_setting_id
         } returns privacySettingId
+
         every {
             list_books
         } returns listBooks
+
         every {
             updated_at
         } returns updatedAt
+
         every {
             list_books_aggregate
         } returns listBooksAggregate
@@ -94,18 +102,23 @@ class ListMapperTest {
             every {
                 this@mockk.id
             } returns id
+
             every {
                 list_id
             } returns listId
+
             every {
                 book_id
             } returns bookId
+
             every {
                 edition_id
             } returns editionId
+
             every {
                 this@mockk.position
             } returns position
+
             every {
                 created_at
             } returns createdAt
@@ -195,6 +208,7 @@ class ListMapperTest {
                     aggregate
                 } returns null
             }
+
             val fragment = stubListFragment(
                 updatedAt = "2024-06-01",
                 listBooksAggregate = noAggregate,

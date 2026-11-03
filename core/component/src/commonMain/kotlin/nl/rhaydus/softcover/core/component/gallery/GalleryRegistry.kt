@@ -13,5 +13,5 @@ object GalleryRegistry {
     val entries: ImmutableList<GalleryEntry> = (
         primitiveEntries + chromeEntries + statisticEntries + controlEntries + fieldEntries +
             bookEntries + sheetEntries + modalEntries + quoteEntries + traitsEntries + leafEntries
-        ).toImmutableList()
+    ).toImmutableList()
 }

@@ -38,8 +38,10 @@ class RatingsHistogramMapperTest {
 
             // ----- Assert -----
             result.isLoading shouldBe false
+
             result.columns.map { it.label } shouldBe
                 listOf("1★", null, "2★", null, "3★", null, "4★", null, "5★")
+
             result.columns.map { it.tone } shouldBe List(9) { index ->
                 if (index % 2 == 0) ChartTone.Lead else ChartTone.Fourth
             }

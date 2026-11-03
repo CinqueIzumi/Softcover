@@ -38,16 +38,16 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import kotlin.math.roundToInt
+import nl.rhaydus.designsystem.modifier.skeletonMask
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
-import nl.rhaydus.softcover.core.component.state.skeletonMask
+import nl.rhaydus.designsystem.theme.Corners
+import nl.rhaydus.designsystem.theme.Spacing
+import nl.rhaydus.designsystem.theme.motion
 import nl.rhaydus.softcover.core.component.text.FadeThroughText
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.motion
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.tabularFigures
+import kotlin.math.roundToInt
 
 @Composable
 fun RankedBars(
@@ -61,6 +61,7 @@ fun RankedBars(
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
     val windowHeight = LocalWindowInfo.current.containerSize.height.toFloat()
+
     // Sized for three digits whatever the row count, so expanding never shifts the columns sideways.
     val positionWidth = remember(
         positionStyle,
@@ -133,6 +134,7 @@ private fun RankedBarRow(
 ) {
     val shape = Corners.xxs
     val positionStyle = MaterialTheme.typography.labelMedium.tabularFigures()
+
     val fill = animateFloatAsState(
         targetValue = if (isLoading || row.fill <= 0f) 0f else row.fill.coerceIn(0.015f..1f),
         animationSpec = MaterialTheme.motion.valueChange,

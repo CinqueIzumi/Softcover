@@ -14,6 +14,7 @@ internal object Json {
             value,
             depth = 0,
         )
+
         append('\n')
     }
 
@@ -47,16 +48,20 @@ internal object Json {
         }
 
         append("{\n")
+
         map.entries.forEachIndexed { index, (key, value) ->
             append(INDENT.repeat(depth + 1))
             appendString(key as String)
             append(": ")
+
             append(
                 value,
                 depth + 1,
             )
+
             append(if (index < map.size - 1) ",\n" else "\n")
         }
+
         append(INDENT.repeat(depth))
         append('}')
     }
@@ -71,32 +76,40 @@ internal object Json {
         }
 
         append("[\n")
+
         list.forEachIndexed { index, value ->
             append(INDENT.repeat(depth + 1))
+
             append(
                 value,
                 depth + 1,
             )
+
             append(if (index < list.size - 1) ",\n" else "\n")
         }
+
         append(INDENT.repeat(depth))
         append(']')
     }
 
     private fun StringBuilder.appendString(text: String) {
         append('"')
+
         text.forEach { char ->
             when {
                 char == '"' -> append("\\\"")
                 char == '\\' -> append("\\\\")
                 char == '\n' -> append("\\n")
-                char < ' ' -> append("\\u").append(char.code.toString(HEX_RADIX).padStart(
-                    UNICODE_DIGITS,
-                    '0',
-                ),)
+                char < ' ' -> append("\\u").append(
+                    char.code.toString(HEX_RADIX).padStart(
+                        UNICODE_DIGITS,
+                        '0',
+                    ),
+                )
                 else -> append(char)
             }
         }
+
         append('"')
     }
 }

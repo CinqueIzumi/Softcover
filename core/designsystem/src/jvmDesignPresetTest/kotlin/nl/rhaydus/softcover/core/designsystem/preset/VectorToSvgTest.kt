@@ -18,6 +18,7 @@ class VectorToSvgTest {
         monochrome: Boolean = false,
     ): String {
         val source = dir.resolve("icon.xml")
+
         source.writeText(
             """
             <vector xmlns:android="http://schemas.android.com/apk/res/android"

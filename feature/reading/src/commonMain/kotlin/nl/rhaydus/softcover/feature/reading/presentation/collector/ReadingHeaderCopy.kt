@@ -6,8 +6,11 @@ import kotlin.math.roundToInt
 
 internal fun List<Book>.averageProgress(): Float? {
     if (isEmpty()) return null
+
     val values = mapNotNull { it.currentRead?.progress }
+
     if (values.isEmpty()) return null
+
     return values.average().toFloat()
 }
 
@@ -16,6 +19,7 @@ internal fun mastheadEyebrowFor(isRefreshing: Boolean): String =
 
 internal fun greetingForNow(): String {
     val hour = currentLocalDateTime().hour
+
     return when (hour) {
         in 5..11 -> "Good morning."
         in 12..17 -> "Good afternoon."

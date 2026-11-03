@@ -16,14 +16,14 @@ internal sealed class LibraryTabEntry(
     data class All(
         val totalCount: Int,
     ) : LibraryTabEntry(
-        id = ALL_ID,
-        label = "All",
-        count = totalCount,
-        isReorderable = false,
-        canHide = false,
-        isList = false,
-        visibilityToggle = null,
-    )
+            id = ALL_ID,
+            label = "All",
+            count = totalCount,
+            isReorderable = false,
+            canHide = false,
+            isList = false,
+            visibilityToggle = null,
+        )
 
     data class Status(
         val status: UserBookStatus,
@@ -31,14 +31,14 @@ internal sealed class LibraryTabEntry(
         val statusCount: Int,
         val statusVisibilityToggle: ToggleUiModel?,
     ) : LibraryTabEntry(
-        id = LibraryTab.Status.idFor(status = status),
-        label = statusLabel,
-        count = statusCount,
-        isReorderable = true,
-        canHide = status.isAlwaysVisibleInLibrary.not(),
-        isList = false,
-        visibilityToggle = statusVisibilityToggle,
-    )
+            id = LibraryTab.Status.idFor(status = status),
+            label = statusLabel,
+            count = statusCount,
+            isReorderable = true,
+            canHide = status.isAlwaysVisibleInLibrary.not(),
+            isList = false,
+            visibilityToggle = statusVisibilityToggle,
+        )
 
     data class CustomList(
         val listId: Int,
@@ -46,14 +46,14 @@ internal sealed class LibraryTabEntry(
         val listCount: Int,
         val listVisibilityToggle: ToggleUiModel,
     ) : LibraryTabEntry(
-        id = LibraryTab.CustomList.idFor(listId = listId),
-        label = listName,
-        count = listCount,
-        isReorderable = true,
-        canHide = true,
-        isList = true,
-        visibilityToggle = listVisibilityToggle,
-    )
+            id = LibraryTab.CustomList.idFor(listId = listId),
+            label = listName,
+            count = listCount,
+            isReorderable = true,
+            canHide = true,
+            isList = true,
+            visibilityToggle = listVisibilityToggle,
+        )
 
     companion object {
         val ALL_ID: String = LibraryTab.All.id

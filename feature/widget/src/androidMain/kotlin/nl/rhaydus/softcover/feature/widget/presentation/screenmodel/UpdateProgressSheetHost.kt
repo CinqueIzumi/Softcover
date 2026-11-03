@@ -17,7 +17,7 @@ internal object UpdateProgressSheetHost :
         UpdateProgressEvent,
         UpdateProgressDependencies,
         UpdateProgressLocalVariables,
-        > {
+    > {
     override fun bookOf(state: UpdateProgressUiState): Book? = state.bookToUpdate
 
     override fun sheetOf(state: UpdateProgressUiState): ProgressSheetState = state.progressSheet

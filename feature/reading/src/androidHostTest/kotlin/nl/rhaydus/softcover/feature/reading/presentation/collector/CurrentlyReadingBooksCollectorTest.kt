@@ -42,6 +42,7 @@ class CurrentlyReadingBooksCollectorTest {
         booksFlow = MutableSharedFlow()
         getCurrentlyReadingBooksUseCase = mockk()
         stateFlow = MutableStateFlow(ReadingScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ReadingLocalVariables()),
@@ -70,8 +71,10 @@ class CurrentlyReadingBooksCollectorTest {
                 isLoading = true,
                 progressSheet = openProgressSheet,
             )
+
             val books = listOf(stubBook(), stubBook())
             val collector = CurrentlyReadingBooksCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -93,6 +96,7 @@ class CurrentlyReadingBooksCollectorTest {
         fun `marks an empty emission as loaded`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = CurrentlyReadingBooksCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -131,6 +135,7 @@ class CurrentlyReadingBooksCollectorTest {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(isLoading = true)
             val collector = CurrentlyReadingBooksCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -152,6 +157,7 @@ class CurrentlyReadingBooksCollectorTest {
             val firstBooks = listOf(stubBook())
             val secondBooks = listOf(stubBook(), stubBook(), stubBook())
             val collector = CurrentlyReadingBooksCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -175,6 +181,7 @@ class CurrentlyReadingBooksCollectorTest {
         fun `eyebrow reads 0 more in motion when the flow emits an empty list`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = CurrentlyReadingBooksCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -194,6 +201,7 @@ class CurrentlyReadingBooksCollectorTest {
         fun `eyebrow reads 0 more in motion when the flow emits a single book`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = CurrentlyReadingBooksCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -210,29 +218,30 @@ class CurrentlyReadingBooksCollectorTest {
         }
 
         @Test
-        fun `eyebrow reads the singular One more in motion when the flow emits exactly two books`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val collector = CurrentlyReadingBooksCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+        fun `eyebrow reads the singular One more in motion when the flow emits exactly two books`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = CurrentlyReadingBooksCollector()
 
-                // ----- Act -----
-                booksFlow.emit(listOf(stubBook(), stubBook()))
-
-                // ----- Assert -----
-                stateFlow.value.alsoReadingHeader.shouldBeInstanceOf<SectionHeaderUiModel.Section>().eyebrow shouldBe "One more book"
-                job.cancel()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            // ----- Act -----
+            booksFlow.emit(listOf(stubBook(), stubBook()))
+
+            // ----- Assert -----
+            stateFlow.value.alsoReadingHeader.shouldBeInstanceOf<SectionHeaderUiModel.Section>().eyebrow shouldBe "One more book"
+            job.cancel()
+        }
 
         @Test
         fun `eyebrow reads the count when the flow emits more than two books`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = CurrentlyReadingBooksCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

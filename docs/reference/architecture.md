@@ -1,6 +1,6 @@
 # Architecture
 
-Clean Architecture layering, the core/feature/orchestration tiers, the TOAD pattern, DI, navigation, and dispatchers are governed by the foundation [`docs/rhaydus/0.3.1/architecture.md`](../rhaydus/0.3.1/architecture.md) and [`docs/rhaydus/0.3.1/toad-architecture.md`](../rhaydus/0.3.1/toad-architecture.md). Read those first — they are the source of truth for the two axes, the layer rules, placing a new type, the generic TOAD framework + per-feature boilerplate, Koin wiring, the `AppNavigator` contract, and the `AppDispatchers` abstraction.
+Clean Architecture layering, the core/feature/orchestration tiers, the TOAD pattern, DI, navigation, and dispatchers are governed by the foundation [`foundation/docs/architecture.md`](../../foundation/docs/architecture.md) and [`foundation/docs/toad-architecture.md`](../../foundation/docs/toad-architecture.md). Read those first — they are the source of truth for the two axes, the layer rules, placing a new type, the generic TOAD framework + per-feature boilerplate, Koin wiring, the `AppNavigator` contract, and the `AppDispatchers` abstraction.
 
 This file keeps only Softcover's concrete deltas.
 
@@ -30,7 +30,7 @@ the roster here. Modules are Kotlin Multiplatform: shared source lives under
 ## TOAD — Softcover-specific notes
 
 The generic TOAD framework, the five generic parameters, and the per-feature boilerplate are covered
-by [`toad-architecture.md`](../rhaydus/0.3.1/toad-architecture.md). Softcover deltas:
+by [`toad-architecture.md`](../../foundation/docs/toad-architecture.md). Softcover deltas:
 
 - **TOAD is per-Voyager-screen only.** `MainActivityViewModel` is a plain `ViewModel`, not a TOAD
   `ScreenModel`. It is the one app-level view model and lives in `:orchestration`
@@ -42,8 +42,8 @@ by [`toad-architecture.md`](../rhaydus/0.3.1/toad-architecture.md). Softcover de
   `includes(...)`; `orchestrationModule` is the composition root that includes the whole graph, so
   `softcoverModules = listOf(orchestrationModule)` (order-independent). A Koin `verify()` test
   (`SoftcoverModulesVerificationTest`) gates that every binding resolves across the aggregate.
-- The TOAD runtime is the foundation library `nl.rhaydus:toad` (`nl.rhaydus.toad.*`) — it is no longer
-  vendored in the app. Softcover's per-feature flow-collector interfaces are named `XxxCollector`
+- The TOAD runtime is the foundation library `nl.rhaydus:toad` (`nl.rhaydus.toad.*`).
+  Softcover's per-feature flow-collector interfaces are named `XxxCollector`
   (e.g. `BookDetailCollector`, in each feature's `presentation/collector/`) and implement the foundation
   `nl.rhaydus.toad.Collector` role.
 - **UI models are mapped off the composition.** A `UiState` exposes presentation-ready values; the
@@ -68,7 +68,7 @@ by [`toad-architecture.md`](../rhaydus/0.3.1/toad-architecture.md). Softcover de
   erase the exact state a component needs to render its own empty variant. Narrow a range only when the
   render genuinely cannot tell the narrowed states apart.
 - **Error-slot convention.** A screen that can fail a load/submit follows the foundation TOAD error-slot
-  convention ([`../rhaydus/0.3.1/toad-architecture.md`](../rhaydus/0.3.1/toad-architecture.md) §Conventions):
+  convention ([`../../foundation/docs/toad-architecture.md`](../../foundation/docs/toad-architecture.md) §Conventions):
   a nullable `String?` error slot on its `UiState` (e.g. `ExploreScreenUiState.searchError`,
   `OnboardingUiState.submissionError`), set by the action, cleared on any invalidating edit and on retry,
   and rendered with `InlineErrorState` whose retry re-dispatches the screen's own action. Do **not**

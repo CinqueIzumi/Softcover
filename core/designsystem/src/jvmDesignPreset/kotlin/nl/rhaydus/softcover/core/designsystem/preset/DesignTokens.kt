@@ -22,6 +22,7 @@ internal object DesignTokens {
             "spacing" to SpacingTokens.spacing(),
             "radius" to SpacingTokens.radius(),
         )
+
         checkNames(names(document))
 
         return document

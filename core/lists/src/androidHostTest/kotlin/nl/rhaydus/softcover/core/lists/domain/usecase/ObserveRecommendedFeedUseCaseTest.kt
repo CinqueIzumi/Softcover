@@ -95,8 +95,11 @@ class ObserveRecommendedFeedUseCaseTest {
     inner class Loading {
         @Test
         fun `is loading while nothing is cached and the refreshes are in flight`() = runTest {
+            // ----- Arrange -----
+            val feed = useCase(limit = 25)
+
             // ----- Act & Assert -----
-            useCase(limit = 25).test {
+            feed.test {
                 awaitItem().isLoading shouldBe true
                 cancelAndIgnoreRemainingEvents()
             }
@@ -104,8 +107,11 @@ class ObserveRecommendedFeedUseCaseTest {
 
         @Test
         fun `stops loading once both refreshes succeed with nothing cached`() = runTest {
+            // ----- Arrange -----
+            val feed = useCase(limit = 25)
+
             // ----- Act & Assert -----
-            useCase(limit = 25).test {
+            feed.test {
                 awaitItem().isLoading shouldBe true
 
                 recommendationRefresh.complete(Result.success(Unit))
@@ -132,6 +138,7 @@ class ObserveRecommendedFeedUseCaseTest {
                     isLoading = false,
                     source = SystemVibe.Recommendations,
                 )
+
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -156,6 +163,7 @@ class ObserveRecommendedFeedUseCaseTest {
                     isLoading = false,
                     source = SystemVibe.TopPicks,
                 )
+
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -188,6 +196,7 @@ class ObserveRecommendedFeedUseCaseTest {
                     isLoading = false,
                     source = SystemVibe.Recommendations,
                 )
+
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -212,6 +221,7 @@ class ObserveRecommendedFeedUseCaseTest {
                     isLoading = false,
                     source = SystemVibe.Recommendations,
                 )
+
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -231,6 +241,7 @@ class ObserveRecommendedFeedUseCaseTest {
                     isLoading = false,
                     source = SystemVibe.TopPicks,
                 )
+
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -249,6 +260,7 @@ class ObserveRecommendedFeedUseCaseTest {
                     isLoading = true,
                     source = SystemVibe.Recommendations,
                 )
+
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -271,6 +283,7 @@ class ObserveRecommendedFeedUseCaseTest {
                     isLoading = false,
                     source = SystemVibe.TopPicks,
                 )
+
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -295,6 +308,7 @@ class ObserveRecommendedFeedUseCaseTest {
                     isLoading = false,
                     source = SystemVibe.Recommendations,
                 )
+
                 cancelAndIgnoreRemainingEvents()
             }
         }

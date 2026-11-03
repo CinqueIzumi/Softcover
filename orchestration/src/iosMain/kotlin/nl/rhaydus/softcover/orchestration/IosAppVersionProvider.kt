@@ -12,6 +12,7 @@ import platform.Foundation.NSBundle
 internal class IosAppVersionProvider : AppVersionProvider {
     override val versionInfo: AppVersionInfo = run {
         val info = NSBundle.mainBundle.infoDictionary
+
         AppVersionInfo(
             name = info?.get("CFBundleShortVersionString") as? String ?: "0.0.0",
             code = (info?.get("CFBundleVersion") as? String)?.toIntOrNull() ?: 0,

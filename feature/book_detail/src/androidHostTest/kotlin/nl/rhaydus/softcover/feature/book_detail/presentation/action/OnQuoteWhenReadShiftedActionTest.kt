@@ -30,6 +30,7 @@ class OnQuoteWhenReadShiftedActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -55,6 +56,7 @@ class OnQuoteWhenReadShiftedActionTest {
                 9,
                 15,
             )
+
             stateFlow.value = buildBookDetailUiState().copy(quoteDraft = draft(readAt = readAt))
             val action = OnQuoteWhenReadShiftedAction(minutes = 30)
 
@@ -84,6 +86,7 @@ class OnQuoteWhenReadShiftedActionTest {
                 8,
                 0,
             )
+
             stateFlow.value = buildBookDetailUiState().copy(
                 progressSheet = ProgressSheetState(readAt = progressReadAt),
                 quoteDraft = draft(
@@ -96,6 +99,7 @@ class OnQuoteWhenReadShiftedActionTest {
                     ),
                 ),
             )
+
             val action = OnQuoteWhenReadShiftedAction(minutes = -30)
 
             // ----- Act -----

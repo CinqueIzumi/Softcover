@@ -25,7 +25,7 @@ import kotlinx.collections.immutable.ImmutableList
  * Emits [items] in a non-lazy container and keeps each removed item composed while its [exit] plays, then
  * drops it. An item that returns under the same key while exiting animates back in.
  *
- * [itemModifier] sits on each item's wrapper, so a placement modifier passed here sees the exit too.
+ * [modifier] sits on each item's wrapper, so a placement modifier passed here sees the exit too.
  * A removed item for which [animatesExit] is false is dropped without an exit, e.g. a loading stand-in.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -33,7 +33,7 @@ import kotlinx.collections.immutable.ImmutableList
 fun <T> ExitingItems(
     items: ImmutableList<T>,
     keyOf: (T) -> Any,
-    itemModifier: Modifier = Modifier,
+    modifier: Modifier = Modifier,
     animatesExit: (T) -> Boolean = { true },
     exit: ExitTransition = fadeOut(animationSpec = MaterialTheme.motionScheme.fastEffectsSpec()),
     content: @Composable (item: T, index: Int) -> Unit,
@@ -78,7 +78,7 @@ fun <T> ExitingItems(
 
             AnimatedVisibility(
                 visibleState = visibleState,
-                modifier = if (entry.exiting) itemModifier.inertWhileExiting() else itemModifier,
+                modifier = if (entry.exiting) modifier.inertWhileExiting() else modifier,
                 enter = EnterTransition.None,
                 exit = exit,
             ) {

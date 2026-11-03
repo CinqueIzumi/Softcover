@@ -23,6 +23,7 @@ class OnBecauseYouReadGenreSheetVisibleChangeActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(ExploreScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
@@ -60,6 +61,7 @@ class OnBecauseYouReadGenreSheetVisibleChangeActionTest {
                     sheetVisible = true,
                 ),
             )
+
             val stateBefore = stateFlow.value
             val action = OnBecauseYouReadGenreSheetVisibleChangeAction(visible = false)
 

@@ -53,6 +53,7 @@ class Migration61To62Test {
                     table.name,
                     table.columns.map { it.name },
                 )
+
                 after shouldBe rowsBefore.getValue(table.name)
             }
         }
@@ -77,6 +78,7 @@ class Migration61To62Test {
                     "genderId",
                 ),
             ) shouldBe listOf(listOf<String?>(null, null, null))
+
             db.snapshot(
                 "books",
                 listOf("pages"),
@@ -98,6 +100,7 @@ class Migration61To62Test {
             db.userTables() shouldBe exported.tableNames
             db.indexNames() shouldBe exported.indexNames
             db.viewNames() shouldBe exported.viewNames
+
             exported.tables.forEach { table ->
                 val actual = db.columnNames(table.name)
                 // ALTER TABLE ADD COLUMN appends, so books.pages sits last; Room matches columns by name.

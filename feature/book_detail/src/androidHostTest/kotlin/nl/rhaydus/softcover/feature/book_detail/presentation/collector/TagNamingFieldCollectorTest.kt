@@ -27,6 +27,7 @@ class TagNamingFieldCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -42,6 +43,7 @@ class TagNamingFieldCollectorTest {
         fun `placeholder and variant follow the draft once it changes`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = TagNamingFieldCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -58,6 +60,7 @@ class TagNamingFieldCollectorTest {
                 category = stateFlow.value.tagEditorCategory,
                 addPill = stateFlow.value.tagAddPill,
             )
+
             stateFlow.value.tagNamingField.variant shouldBe expected.variant
             stateFlow.value.tagNamingField.placeholder shouldBe expected.placeholder
             job.cancel()
@@ -67,6 +70,7 @@ class TagNamingFieldCollectorTest {
         fun `does not copy the stored draft over the field text when the category changes`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = TagNamingFieldCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

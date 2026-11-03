@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.showcase.live.field.state.FieldLiveUiState
 import nl.rhaydus.toad.UiAction
 
 internal sealed interface FieldLiveAction : UiAction<
-        FieldLiveDependencies,
-        FieldLiveUiState,
-        FieldLiveEvent,
-        FieldLiveLocalVariables,
-        >
+    FieldLiveDependencies,
+    FieldLiveUiState,
+    FieldLiveEvent,
+    FieldLiveLocalVariables,
+>

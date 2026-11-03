@@ -28,7 +28,9 @@ class OnBackClickedActionTest {
             coroutineScope = mockk(),
             mainDispatcher = mockk(),
         )
+
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = MutableStateFlow(
                 FamilyUiState(

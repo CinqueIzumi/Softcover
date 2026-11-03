@@ -26,11 +26,13 @@ class SortPillCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(ExploreScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk(relaxed = true)
     }
 
@@ -40,6 +42,7 @@ class SortPillCollectorTest {
         fun `sortPill follows sortMode changes`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = SortPillCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

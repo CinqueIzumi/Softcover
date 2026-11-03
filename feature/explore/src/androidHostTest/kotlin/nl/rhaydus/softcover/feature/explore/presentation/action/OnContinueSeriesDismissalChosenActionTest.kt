@@ -34,6 +34,7 @@ class OnContinueSeriesDismissalChosenActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(ExploreScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
@@ -50,6 +51,7 @@ class OnContinueSeriesDismissalChosenActionTest {
                 continueSeriesMenu = SheetSession.Open(model = menu),
                 continueSeriesMenuBookId = 7,
             )
+
             val action = OnContinueSeriesDismissalChosenAction(
                 bookId = 7,
                 kind = ContinueSeriesDismissalKind.WHOLE_SERIES,
@@ -63,10 +65,12 @@ class OnContinueSeriesDismissalChosenActionTest {
 
             // ----- Assert -----
             stateFlow.value.continueSeriesMenu.isClosing shouldBe true
+
             stateFlow.value.continueSeriesMenu.dismissed() shouldBe PendingContinueSeriesDismissal(
                 bookId = 7,
                 kind = ContinueSeriesDismissalKind.WHOLE_SERIES,
             )
+
             stateFlow.value.continueSeriesMenu.modelOrNull shouldBe menu.requestingClose()
             stateFlow.value.continueSeriesMenuBookId.shouldBeNull()
         }
@@ -83,6 +87,7 @@ class OnContinueSeriesDismissalChosenActionTest {
                     ),
                 ),
             )
+
             val action = OnContinueSeriesDismissalChosenAction(
                 bookId = 2,
                 kind = ContinueSeriesDismissalKind.THIS_BOOK,

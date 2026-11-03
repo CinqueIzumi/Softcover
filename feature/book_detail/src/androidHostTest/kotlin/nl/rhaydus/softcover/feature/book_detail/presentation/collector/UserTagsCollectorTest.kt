@@ -41,6 +41,7 @@ class UserTagsCollectorTest {
         observeUserTagsForBookUseCase = mockk()
         refreshUserTagsForBookUseCase = mockk()
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -51,6 +52,7 @@ class UserTagsCollectorTest {
             every {
                 mock.observeUserTagsForBookUseCase
             } returns observeUserTagsForBookUseCase
+
             every {
                 mock.refreshUserTagsForBookUseCase
             } returns refreshUserTagsForBookUseCase
@@ -61,6 +63,7 @@ class UserTagsCollectorTest {
         every {
             this@mockk.id
         } returns id
+
         every {
             this@mockk.userBook
         } returns mockk<UserBook>()
@@ -70,6 +73,7 @@ class UserTagsCollectorTest {
         every {
             this@mockk.id
         } returns id
+
         every {
             this@mockk.userBook
         } returns null
@@ -91,6 +95,7 @@ class UserTagsCollectorTest {
             every {
                 observeUserTagsForBookUseCase(bookId = 10)
             } returns flowOf(tags)
+
             coEvery {
                 refreshUserTagsForBookUseCase(bookId = 10)
             } coAnswers {
@@ -122,6 +127,7 @@ class UserTagsCollectorTest {
             every {
                 observeUserTagsForBookUseCase(bookId = 10)
             } returns flowOf(tags)
+
             coEvery {
                 refreshUserTagsForBookUseCase(bookId = 10)
             } returns Result.success(Unit)
@@ -143,33 +149,33 @@ class UserTagsCollectorTest {
         }
 
         @Test
-        fun `marks the tags failed but keeps showing the stored rows when the refresh fails`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val tags = listOf(stubTag("fantasy"))
+        fun `marks the tags failed but keeps showing the stored rows when the refresh fails`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val tags = listOf(stubTag("fantasy"))
 
-                every {
-                    observeUserTagsForBookUseCase(bookId = 3)
-                } returns flowOf(tags)
-                coEvery {
-                    refreshUserTagsForBookUseCase(bookId = 3)
-                } returns Result.failure(RuntimeException("network error"))
+            every {
+                observeUserTagsForBookUseCase(bookId = 3)
+            } returns flowOf(tags)
 
-                val job = launch {
-                    UserTagsCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+            coEvery {
+                refreshUserTagsForBookUseCase(bookId = 3)
+            } returns Result.failure(RuntimeException("network error"))
 
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(book = stubShelvedBook(id = 3))
-
-                // ----- Assert -----
-                stateFlow.value.userTags shouldBe tags
-                stateFlow.value.userTagsLoad shouldBe UserTagsLoad.Failed
-                job.cancel()
+            val job = launch {
+                UserTagsCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(book = stubShelvedBook(id = 3))
+
+            // ----- Assert -----
+            stateFlow.value.userTags shouldBe tags
+            stateFlow.value.userTagsLoad shouldBe UserTagsLoad.Failed
+            job.cancel()
+        }
 
         @Test
         fun `follows later changes to the stored tags`() = runTest(UnconfinedTestDispatcher()) {
@@ -179,6 +185,7 @@ class UserTagsCollectorTest {
             every {
                 observeUserTagsForBookUseCase(bookId = 10)
             } returns storedTags
+
             coEvery {
                 refreshUserTagsForBookUseCase(bookId = 10)
             } returns Result.success(Unit)
@@ -215,9 +222,11 @@ class UserTagsCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.userTagsLoad shouldBe UserTagsLoad.Loading
+
             coVerify(exactly = 0) {
                 refreshUserTagsForBookUseCase(bookId = any())
             }
+
             job.cancel()
         }
 
@@ -229,6 +238,7 @@ class UserTagsCollectorTest {
             every {
                 observeUserTagsForBookUseCase(bookId = 10)
             } returns flowOf(emptyList())
+
             coEvery {
                 refreshUserTagsForBookUseCase(bookId = 10)
             } returns Result.success(Unit)
@@ -250,48 +260,53 @@ class UserTagsCollectorTest {
             coVerify(exactly = 1) {
                 refreshUserTagsForBookUseCase(bookId = 10)
             }
+
             job.cancel()
         }
 
         @Test
-        fun `swaps to the other book's tags and refreshes it when the book changes`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val tagsA = listOf(stubTag("horror"))
-                val tagsB = listOf(stubTag("comedy"))
+        fun `swaps to the other book's tags and refreshes it when the book changes`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val tagsA = listOf(stubTag("horror"))
+            val tagsB = listOf(stubTag("comedy"))
 
-                every {
-                    observeUserTagsForBookUseCase(bookId = 1)
-                } returns flowOf(tagsA)
-                every {
-                    observeUserTagsForBookUseCase(bookId = 2)
-                } returns flowOf(tagsB)
-                coEvery {
-                    refreshUserTagsForBookUseCase(bookId = any())
-                } returns Result.success(Unit)
+            every {
+                observeUserTagsForBookUseCase(bookId = 1)
+            } returns flowOf(tagsA)
 
-                val job = launch {
-                    UserTagsCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+            every {
+                observeUserTagsForBookUseCase(bookId = 2)
+            } returns flowOf(tagsB)
 
-                stateFlow.value = stateFlow.value.copy(book = stubShelvedBook(id = 1))
+            coEvery {
+                refreshUserTagsForBookUseCase(bookId = any())
+            } returns Result.success(Unit)
 
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(book = stubShelvedBook(id = 2))
-
-                // ----- Assert -----
-                stateFlow.value.userTags shouldBe tagsB
-                coVerify(exactly = 1) {
-                    refreshUserTagsForBookUseCase(bookId = 1)
-                }
-                coVerify(exactly = 1) {
-                    refreshUserTagsForBookUseCase(bookId = 2)
-                }
-                job.cancel()
+            val job = launch {
+                UserTagsCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            stateFlow.value = stateFlow.value.copy(book = stubShelvedBook(id = 1))
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(book = stubShelvedBook(id = 2))
+
+            // ----- Assert -----
+            stateFlow.value.userTags shouldBe tagsB
+
+            coVerify(exactly = 1) {
+                refreshUserTagsForBookUseCase(bookId = 1)
+            }
+
+            coVerify(exactly = 1) {
+                refreshUserTagsForBookUseCase(bookId = 2)
+            }
+
+            job.cancel()
+        }
 
         @Test
         fun `resets to loading with no rows while the next book refreshes`() = runTest(UnconfinedTestDispatcher()) {
@@ -301,12 +316,15 @@ class UserTagsCollectorTest {
             every {
                 observeUserTagsForBookUseCase(bookId = 1)
             } returns flowOf(listOf(stubTag("horror")))
+
             every {
                 observeUserTagsForBookUseCase(bookId = 2)
             } returns flowOf(emptyList())
+
             coEvery {
                 refreshUserTagsForBookUseCase(bookId = 1)
             } returns Result.success(Unit)
+
             coEvery {
                 refreshUserTagsForBookUseCase(bookId = 2)
             } coAnswers {
@@ -341,6 +359,7 @@ class UserTagsCollectorTest {
             every {
                 observeUserTagsForBookUseCase(bookId = 1)
             } returns flowOf(tags)
+
             coEvery {
                 refreshUserTagsForBookUseCase(bookId = 1)
             } returns Result.success(Unit)

@@ -31,6 +31,7 @@ class OnAppearanceDismissedActionTest {
             coroutineScope = mockk(),
             mainDispatcher = mockk(),
         )
+
         stateFlow = MutableStateFlow(
             FamilyUiState(
                 topBar = mockk(),
@@ -38,6 +39,7 @@ class OnAppearanceDismissedActionTest {
                 appearance = AppearanceState(sheet = SheetSession.Open(model = appearanceSheet())),
             ),
         )
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(FamilyLocalVariables()),

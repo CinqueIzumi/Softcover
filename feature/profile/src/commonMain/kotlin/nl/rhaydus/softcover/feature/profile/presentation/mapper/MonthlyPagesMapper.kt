@@ -71,6 +71,7 @@ internal fun monthlyPagesHeader(
         scope = scope,
         today = today,
     )
+
     val busiest = columns.busiest()
 
     return SectionHeaderUiModel.Section(
@@ -96,6 +97,7 @@ internal fun monthlyPagesChartUiModel(
         scope = scope,
         today = today,
     )
+
     val peak = columns.maxOfOrNull { it.pages } ?: 0
     val tones = rankedColumnTones(columns.map { it.pages })
 

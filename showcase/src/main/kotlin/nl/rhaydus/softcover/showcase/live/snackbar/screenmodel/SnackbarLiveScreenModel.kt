@@ -19,23 +19,23 @@ internal class SnackbarLiveScreenModel(
     themeStore: ShowcaseThemeStore,
     initializers: List<
         Collector<SnackbarLiveUiState, SnackbarLiveEvent, SnackbarLiveDependencies, SnackbarLiveLocalVariables>,
-        >,
+    >,
 ) : ToadScreenModel<
-    SnackbarLiveUiState,
-    SnackbarLiveEvent,
-    SnackbarLiveDependencies,
-    Collector<SnackbarLiveUiState, SnackbarLiveEvent, SnackbarLiveDependencies, SnackbarLiveLocalVariables>,
-    SnackbarLiveLocalVariables,
+        SnackbarLiveUiState,
+        SnackbarLiveEvent,
+        SnackbarLiveDependencies,
+        Collector<SnackbarLiveUiState, SnackbarLiveEvent, SnackbarLiveDependencies, SnackbarLiveLocalVariables>,
+        SnackbarLiveLocalVariables,
     >(
-    initialState = SnackbarLiveUiState(
-        topBar = snackbarLiveTopBar(),
-        plainTrigger = plainSnackbarTrigger(),
-        actionTrigger = actionSnackbarTrigger(),
-        sheetTrigger = sheetSnackbarTrigger(),
-    ),
-    initialLocalVariables = SnackbarLiveLocalVariables(),
-    initializers = initializers,
-) {
+        initialState = SnackbarLiveUiState(
+            topBar = snackbarLiveTopBar(),
+            plainTrigger = plainSnackbarTrigger(),
+            actionTrigger = actionSnackbarTrigger(),
+            sheetTrigger = sheetSnackbarTrigger(),
+        ),
+        initialLocalVariables = SnackbarLiveLocalVariables(),
+        initializers = initializers,
+    ) {
     override val dependencies = SnackbarLiveDependencies(
         themeStore = themeStore,
         coroutineScope = screenModelScope,

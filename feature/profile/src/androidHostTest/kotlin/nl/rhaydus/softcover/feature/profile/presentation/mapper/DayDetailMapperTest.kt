@@ -83,6 +83,7 @@ class DayDetailMapperTest {
             date = date,
             books = listOf(book),
         )
+
         val model = dayDetailUiModel(
             day = day,
             books = libraryOf(book.bookId),
@@ -220,6 +221,7 @@ class DayDetailMapperTest {
                 startDay = 10,
                 endDay = 20,
             )
+
             val streaks = streaksOf(
                 longest,
                 longest = longest,
@@ -246,6 +248,7 @@ class DayDetailMapperTest {
                 startDay = 12,
                 endDay = 15,
             )
+
             val streaks = streaksOf(
                 current,
                 current = current,
@@ -272,6 +275,7 @@ class DayDetailMapperTest {
                 startDay = 14,
                 endDay = 18,
             )
+
             val streaks = streaksOf(
                 both,
                 longest = both,
@@ -299,6 +303,7 @@ class DayDetailMapperTest {
                 startDay = 13,
                 endDay = 16,
             )
+
             val streaks = streaksOf(other)
 
             // ----- Act -----
@@ -322,6 +327,7 @@ class DayDetailMapperTest {
                 startDay = 14,
                 endDay = 14,
             )
+
             val streaks = streaksOf(single)
 
             // ----- Act -----
@@ -345,6 +351,7 @@ class DayDetailMapperTest {
                 startDay = 14,
                 endDay = 14,
             )
+
             val streaks = streaksOf(
                 single,
                 longest = single,
@@ -367,6 +374,7 @@ class DayDetailMapperTest {
                 startDay = 14,
                 endDay = 14,
             )
+
             val streaks = streaksOf(
                 single,
                 current = single,

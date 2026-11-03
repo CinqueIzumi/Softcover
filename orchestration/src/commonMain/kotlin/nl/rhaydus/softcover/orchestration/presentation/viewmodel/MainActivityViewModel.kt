@@ -153,7 +153,7 @@ internal class MainActivityViewModel(
             }
 
             reAuthenticateUseCase(apiKey)
-                .onSuccess { reAuthSession.update { it.requestClose() } }
+                .onSuccess { reAuthSession.update { session -> session.requestClose() } }
                 .onFailure { error ->
                     AppLog.e("Re-authentication failed $error")
 
@@ -203,6 +203,7 @@ internal class MainActivityViewModel(
                     authenticated = false,
                 )
             }
+
             return
         }
 

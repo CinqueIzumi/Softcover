@@ -40,8 +40,10 @@ class TimeToFinishMapperTest {
 
             // ----- Assert -----
             result.isLoading shouldBe true
+
             result.tiles.map { it.eyebrow } shouldBe
                 listOf("All books", "Under 250 pages", "250 to 450 pages", "Over 450 pages")
+
             result.tiles.map { it.stat.shouldNotBeNull().isLoading } shouldBe List(4) { true }
         }
 
@@ -137,6 +139,7 @@ class TimeToFinishMapperTest {
             // ----- Assert -----
             result.tiles.map { it.eyebrow } shouldBe
                 listOf("All books", "Under 250 pages", "250 to 450 pages", "Over 450 pages")
+
             result.tiles.map { it.stat?.value } shouldBe listOf(9.0, 3.0, null, 20.0)
             result.tiles[2].stat.shouldBeNull()
         }

@@ -38,6 +38,7 @@ class OnSortModeChangeActionTest {
         searchForNameUseCase = mockk()
         stateFlow = MutableStateFlow(ExploreScreenUiState())
         localVariablesFlow = MutableStateFlow(ExploreLocalVariables())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
@@ -47,6 +48,7 @@ class OnSortModeChangeActionTest {
 
     private fun stubDependencies(testScope: TestScope): ExploreDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<ExploreDependencies>(relaxed = true).also { mock ->
             every {
                 mock.searchForNameUseCase
@@ -72,10 +74,12 @@ class OnSortModeChangeActionTest {
         fun `only closes the sort menu when the mode matches the current sortMode`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
+
             stateFlow.value = stateFlow.value.copy(
                 sortMode = ExploreSortMode.RELEVANCE,
                 isSortMenuExpanded = true,
             )
+
             val stateBefore = stateFlow.value
             val action = OnSortModeChangeAction(mode = ExploreSortMode.RELEVANCE)
 
@@ -87,6 +91,7 @@ class OnSortModeChangeActionTest {
 
             // ----- Assert -----
             stateFlow.value shouldBe stateBefore.copy(isSortMenuExpanded = false)
+
             coVerify(exactly = 0) {
                 searchForNameUseCase(
                     name = any(),
@@ -99,10 +104,12 @@ class OnSortModeChangeActionTest {
         fun `updates sortMode without triggering a search when searchText is empty`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
+
             stateFlow.value = stateFlow.value.copy(
                 sortMode = ExploreSortMode.RELEVANCE,
                 searchText = "",
             )
+
             val action = OnSortModeChangeAction(mode = ExploreSortMode.POPULARITY)
 
             // ----- Act -----
@@ -114,6 +121,7 @@ class OnSortModeChangeActionTest {
             // ----- Assert -----
             stateFlow.value.sortMode shouldBe ExploreSortMode.POPULARITY
             stateFlow.value.isLoading shouldBe false
+
             coVerify(exactly = 0) {
                 searchForNameUseCase(
                     name = any(),
@@ -127,11 +135,13 @@ class OnSortModeChangeActionTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
             val priorJob = Job()
+
             stateFlow.value = stateFlow.value.copy(
                 sortMode = ExploreSortMode.RELEVANCE,
                 searchText = "dune",
                 isSortMenuExpanded = true,
             )
+
             localVariablesFlow.value = localVariablesFlow.value.copy(
                 queryJob = priorJob,
                 searchResultsPage = 3,
@@ -156,12 +166,14 @@ class OnSortModeChangeActionTest {
             stateFlow.value.sortMode shouldBe ExploreSortMode.POPULARITY
             stateFlow.value.isSortMenuExpanded shouldBe false
             stateFlow.value.isLoading shouldBe false
+
             coVerify {
                 searchForNameUseCase(
                     name = "dune",
                     sortMode = ExploreSortMode.POPULARITY,
                 )
             }
+
             priorJob.isCancelled shouldBe true
             localVariablesFlow.value.queryJob.shouldNotBeNull()
             localVariablesFlow.value.queryJob shouldNotBe priorJob
@@ -172,11 +184,13 @@ class OnSortModeChangeActionTest {
         fun `sets isLoading true and clears searchError while the re-run search is in flight`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
+
             stateFlow.value = stateFlow.value.copy(
                 sortMode = ExploreSortMode.RELEVANCE,
                 searchText = "dune",
                 searchError = "previous error",
             )
+
             val gate = CompletableDeferred<Unit>()
 
             coEvery {
@@ -211,11 +225,13 @@ class OnSortModeChangeActionTest {
         fun `drops a pending load-more spinner while the re-run search is in flight`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
+
             stateFlow.value = stateFlow.value.copy(
                 sortMode = ExploreSortMode.RELEVANCE,
                 searchText = "dune",
                 loadingMoreQueriedBooks = true,
             )
+
             val gate = CompletableDeferred<Unit>()
 
             coEvery {
@@ -249,6 +265,7 @@ class OnSortModeChangeActionTest {
         fun `sets searchError and stops loading when the re-run search fails`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
+
             stateFlow.value = stateFlow.value.copy(
                 sortMode = ExploreSortMode.RELEVANCE,
                 searchText = "dune",

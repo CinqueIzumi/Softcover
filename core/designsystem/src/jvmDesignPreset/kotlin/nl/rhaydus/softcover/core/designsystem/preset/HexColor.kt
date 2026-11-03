@@ -10,6 +10,7 @@ private const val OPAQUE = 0xFF
 internal fun Color.toHex(): String {
     val argb = toArgb()
     val alpha = (argb ushr 24) and OPAQUE
+
     val rgb = String.format(
         Locale.ROOT,
         "#%06x",

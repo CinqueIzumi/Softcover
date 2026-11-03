@@ -77,7 +77,7 @@ class HowItReadSheetMapperTest {
             val chip = result.chip(CharacterTrait.BELIEVABLE.toKey())
             chip.tone shouldBe ChipTone.TonalDashed
             chip.selected shouldBe false
-            result.allChips().filter { it.tone == ChipTone.TonalDashed }.size shouldBe 1
+            result.allChips().count { it.tone == ChipTone.TonalDashed } shouldBe 1
         }
 
         @Test

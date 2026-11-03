@@ -28,11 +28,12 @@ class OnStatusToggleActionTest {
         LibraryVisibilitySettingsUiState,
         LibraryVisibilitySettingsEvent,
         LibraryVisibilitySettingsLocalVariables,
-        >
+    >
 
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(LibraryVisibilitySettingsUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryVisibilitySettingsLocalVariables()),
@@ -42,6 +43,7 @@ class OnStatusToggleActionTest {
 
     private fun stubDependencies(testScope: TestScope): LibraryVisibilitySettingsDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<LibraryVisibilitySettingsDependencies>(relaxed = true).also { mock ->
             every {
                 mock.coroutineScope
@@ -66,7 +68,9 @@ class OnStatusToggleActionTest {
                 draftEnabledStatusCodes = persistentSetOf(1),
                 initialized = true,
             )
+
             val dependencies = stubDependencies(this)
+
             val action = OnStatusToggleAction(
                 code = 3,
                 enabled = true,
@@ -89,7 +93,9 @@ class OnStatusToggleActionTest {
                 draftEnabledStatusCodes = persistentSetOf(),
                 initialized = true,
             ).withOrderedEntries()
+
             val dependencies = stubDependencies(this)
+
             val action = OnStatusToggleAction(
                 code = UserBookStatus.READ.code,
                 enabled = true,
@@ -105,6 +111,7 @@ class OnStatusToggleActionTest {
             val entry = stateFlow.value.orderedEntries
                 .filterIsInstance<LibraryTabEntry.Status>()
                 .single { it.status == UserBookStatus.READ }
+
             entry.statusVisibilityToggle.shouldNotBeNull().checked shouldBe true
         }
 
@@ -115,7 +122,9 @@ class OnStatusToggleActionTest {
                 draftEnabledStatusCodes = persistentSetOf(1, 3, 5),
                 initialized = true,
             )
+
             val dependencies = stubDependencies(this)
+
             val action = OnStatusToggleAction(
                 code = 3,
                 enabled = false,

@@ -1,10 +1,10 @@
 package nl.rhaydus.softcover.core.designsystem.preset
 
 import androidx.compose.ui.graphics.Color
-import java.lang.Long as JavaLong
 import java.util.Locale
 import kotlin.reflect.KVisibility
 import kotlin.reflect.jvm.kotlinProperty
+import java.lang.Long as JavaLong
 
 private val getter = Regex("^get([A-Z][A-Za-z0-9]*)(?:-[A-Za-z0-9_]+)?$")
 private val wordBoundary = Regex("(?<!^)([A-Z])")
@@ -74,6 +74,7 @@ internal fun <T> orderedByUsage(
 ): Map<String, T> {
     val undocumented = found.keys - documented
     val missing = documented - found.keys
+
     check(undocumented.isEmpty() && missing.isEmpty()) {
         "$source roles differ from the usage map. No usage note for: ${undocumented.sorted()}; " +
             "usage note for a role that no longer exists: ${missing.sorted()}"

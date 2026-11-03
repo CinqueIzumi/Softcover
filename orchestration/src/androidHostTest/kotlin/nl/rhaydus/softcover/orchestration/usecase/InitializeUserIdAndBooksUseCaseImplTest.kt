@@ -57,6 +57,7 @@ class InitializeUserIdAndBooksUseCaseImplTest {
             coEvery {
                 settingsRepository.getUserIdFromBackend()
             } returns 7
+
             coEvery {
                 refreshLibraryUseCase()
             } returns Result.success(Unit)
@@ -74,6 +75,7 @@ class InitializeUserIdAndBooksUseCaseImplTest {
             coEvery {
                 settingsRepository.getUserIdFromBackend()
             } returns 7
+
             coEvery {
                 refreshLibraryUseCase()
             } returns Result.failure(RuntimeException("refresh error"))

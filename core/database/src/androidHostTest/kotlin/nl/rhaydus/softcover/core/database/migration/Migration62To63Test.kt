@@ -71,6 +71,7 @@ class Migration62To63Test {
             db.userTables() shouldBe exported.tableNames
             db.indexNames() shouldBe exported.indexNames
             db.viewNames() shouldBe exported.viewNames
+
             exported.tables.forEach {
                 db.columnNames(it.name) shouldBe it.columns.map { column -> column.name }
             }
@@ -89,6 +90,7 @@ class Migration62To63Test {
 
             // ----- Assert -----
             emptyAfterMigration shouldBe 0
+
             connection.snapshot(
                 "book_user_tags",
                 listOf("bookId", "category", "name", "spoiler"),

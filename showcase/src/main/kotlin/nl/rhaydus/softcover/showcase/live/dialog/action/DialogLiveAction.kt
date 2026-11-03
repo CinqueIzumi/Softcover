@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.showcase.live.dialog.state.DialogLiveUiState
 import nl.rhaydus.toad.UiAction
 
 internal sealed interface DialogLiveAction : UiAction<
-        DialogLiveDependencies,
-        DialogLiveUiState,
-        DialogLiveEvent,
-        DialogLiveLocalVariables,
-        >
+    DialogLiveDependencies,
+    DialogLiveUiState,
+    DialogLiveEvent,
+    DialogLiveLocalVariables,
+>

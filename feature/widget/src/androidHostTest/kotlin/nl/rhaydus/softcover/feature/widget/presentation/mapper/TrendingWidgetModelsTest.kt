@@ -41,9 +41,11 @@ class TrendingWidgetModelsTest {
         every {
             this@mockk.id
         } returns id
+
         every {
             displayTitle
         } returns "Title $id"
+
         every {
             authorString
         } returns "Author $id"
@@ -109,21 +111,21 @@ class TrendingWidgetModelsTest {
         }
 
         @Test
-        fun `an empty list after a completed fetch shows the empty content with the feed's eyebrow and headline`() =
-            runTest {
-                // ----- Arrange -----
-                val flow = models(observeTrending = fixedBooks(emptyList()))
+        fun `an empty list after a completed fetch shows the empty content with the feed's eyebrow and headline`() = runTest {
+            // ----- Arrange -----
+            val flow = models(observeTrending = fixedBooks(emptyList()))
 
-                // ----- Act -----
-                flow.test {
-                    // ----- Assert -----
-                    awaitItem().content shouldBe TrendingWidgetUiModel.Content.Empty(
-                        eyebrow = "Eyebrow Week",
-                        headline = "Headline Week",
-                    )
-                    awaitComplete()
-                }
+            // ----- Act -----
+            flow.test {
+                // ----- Assert -----
+                awaitItem().content shouldBe TrendingWidgetUiModel.Content.Empty(
+                    eyebrow = "Eyebrow Week",
+                    headline = "Headline Week",
+                )
+
+                awaitComplete()
             }
+        }
 
         @Test
         fun `an empty list shows the loader while the feed is still loading`() = runTest {
@@ -175,6 +177,7 @@ class TrendingWidgetModelsTest {
         fun `the loader gives way to the empty content when the fetch settles with nothing`() = runTest {
             // ----- Arrange -----
             val status = MutableStateFlow(TrendingFeedFetchStatus.Loading)
+
             val flow = models(
                 fetchStatus = { status },
                 observeTrending = fixedBooks(emptyList()),
@@ -184,10 +187,12 @@ class TrendingWidgetModelsTest {
             flow.test {
                 awaitItem().content shouldBe TrendingWidgetUiModel.Content.Switching(eyebrow = "Eyebrow Week")
                 status.value = TrendingFeedFetchStatus.Settled
+
                 awaitItem().content shouldBe TrendingWidgetUiModel.Content.Empty(
                     eyebrow = "Eyebrow Week",
                     headline = "Headline Week",
                 )
+
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -248,6 +253,7 @@ class TrendingWidgetModelsTest {
                     eyebrow = "Eyebrow UpcomingYear",
                     headline = "Headline UpcomingYear",
                 )
+
                 awaitComplete()
             }
         }
@@ -272,6 +278,7 @@ class TrendingWidgetModelsTest {
                     eyebrow = "Eyebrow RecentMonth",
                     headline = "Headline RecentMonth",
                 )
+
                 awaitComplete()
             }
         }
@@ -362,10 +369,12 @@ class TrendingWidgetModelsTest {
             flow.test {
                 // ----- Assert -----
                 val content = awaitItem().content.shouldBeInstanceOf<TrendingWidgetUiModel.Content.Ranked>()
+
                 content.items.map { it.cover } shouldContainExactly listOf(
                     TrendingWidgetUiModel.Cover.Loaded(uri = uri),
                     TrendingWidgetUiModel.Cover.Missing,
                 )
+
                 awaitComplete()
             }
         }
@@ -386,10 +395,12 @@ class TrendingWidgetModelsTest {
                 pending.items.map { it.title } shouldContainExactly listOf("Title 1", "Title 2")
                 pending.items.map { it.cover } shouldContainExactly List(2) { TrendingWidgetUiModel.Cover.Pending }
                 val resolved = awaitItem().content.shouldBeInstanceOf<TrendingWidgetUiModel.Content.Ranked>()
+
                 resolved.items.map { it.cover } shouldContainExactly listOf(
                     TrendingWidgetUiModel.Cover.Loaded(uri = uri),
                     TrendingWidgetUiModel.Cover.Missing,
                 )
+
                 awaitComplete()
             }
         }
@@ -418,6 +429,7 @@ class TrendingWidgetModelsTest {
             val heights = MutableStateFlow(200)
             val uri = mockk<Uri>()
             coverUris[1] = uri
+
             val flow = models(
                 coverHeightDp = heights,
                 observeTrending = fixedBooks(listOf(book(1), book(2))),
@@ -434,6 +446,7 @@ class TrendingWidgetModelsTest {
                     TrendingWidgetUiModel.Cover.Loaded(uri = uri),
                     TrendingWidgetUiModel.Cover.Missing,
                 )
+
                 requestedHeights shouldContainExactly listOf(200, 200, 320, 320)
                 cancelAndIgnoreRemainingEvents()
             }
@@ -545,10 +558,12 @@ class TrendingWidgetModelsTest {
         fun `switching the period resubscribes to that period's list`() = runTest {
             // ----- Arrange -----
             val position = MutableStateFlow(positionAt(0))
+
             val booksByFeed = mapOf<TrendingFeed, List<Book>>(
                 TrendingFeed.Trending(period = TrendingPeriod.Week) to listOf(book(1), book(2)),
                 TrendingFeed.Trending(period = TrendingPeriod.Year) to listOf(book(100), book(200)),
             )
+
             val flow = models(
                 position = position,
                 observeTrending = { feed -> flowOf(booksByFeed.getValue(feed)) },
@@ -557,12 +572,15 @@ class TrendingWidgetModelsTest {
             // ----- Act -----
             lateinit var week: TrendingWidgetUiModel.Content
             lateinit var year: TrendingWidgetUiModel.Content
+
             flow.test {
                 week = awaitItem().content
+
                 position.value = positionAt(
                     page = 0,
                     period = TrendingPeriod.Year,
                 )
+
                 year = awaitItem().content
                 cancelAndIgnoreRemainingEvents()
             }
@@ -580,6 +598,7 @@ class TrendingWidgetModelsTest {
         fun `an upcoming feed lists its own books under its own eyebrow`() = runTest {
             // ----- Arrange -----
             val upcoming = TrendingFeed.Upcoming(window = UpcomingWindow.SixMonths)
+
             val flow = models(
                 position = flowOf(
                     TrendingPosition(
@@ -654,13 +673,16 @@ class TrendingWidgetModelsTest {
 
             // ----- Act -----
             val contents = mutableListOf<TrendingWidgetUiModel.Content>()
+
             flow.test {
                 contents += awaitItem().content
                 expectNoEvents()
+
                 position.value = positionAt(
                     page = 0,
                     period = TrendingPeriod.Year,
                 )
+
                 contents += awaitItem().content
                 expectNoEvents()
                 cancelAndIgnoreRemainingEvents()
@@ -689,13 +711,16 @@ class TrendingWidgetModelsTest {
 
             // ----- Act -----
             val contents = mutableListOf<TrendingWidgetUiModel.Content>()
+
             flow.test {
                 contents += awaitItem().content
                 contents += awaitItem().content
+
                 position.value = positionAt(
                     page = 1,
                     period = TrendingPeriod.Year,
                 )
+
                 contents += awaitItem().content
                 expectNoEvents()
                 cancelAndIgnoreRemainingEvents()
@@ -727,6 +752,7 @@ class TrendingWidgetModelsTest {
 
             // ----- Act -----
             val contents = mutableListOf<TrendingWidgetUiModel.Content>()
+
             flow.test {
                 contents += awaitItem().content
                 contents += awaitItem().content
@@ -761,34 +787,34 @@ class TrendingWidgetModelsTest {
         }
 
         @Test
-        fun `switching gives way to the ranking for the current period when the position never catches up`() =
-            runTest {
-                // ----- Arrange -----
-                val flow = models(
-                    position = flowOf(positionAt(page = 0)),
-                    settingsChanges = replayed(changeTo(TrendingPeriod.Year)),
-                    observeTrending = fixedBooks(listOf(book(1), book(2))),
-                )
+        fun `switching gives way to the ranking for the current period when the position never catches up`() = runTest {
+            // ----- Arrange -----
+            val flow = models(
+                position = flowOf(positionAt(page = 0)),
+                settingsChanges = replayed(changeTo(TrendingPeriod.Year)),
+                observeTrending = fixedBooks(listOf(book(1), book(2))),
+            )
 
-                // ----- Act -----
-                val contents = mutableListOf<TrendingWidgetUiModel.Content>()
-                var quietBeforeTimeout = false
-                flow.test {
-                    contents += awaitItem().content
-                    testScheduler.advanceTimeBy(4.seconds)
-                    testScheduler.runCurrent()
-                    expectNoEvents()
-                    quietBeforeTimeout = true
-                    testScheduler.advanceTimeBy(2.seconds)
-                    testScheduler.runCurrent()
-                    contents += awaitItem().content
-                    cancelAndIgnoreRemainingEvents()
-                }
+            // ----- Act -----
+            val contents = mutableListOf<TrendingWidgetUiModel.Content>()
+            var quietBeforeTimeout = false
 
-                // ----- Assert -----
-                quietBeforeTimeout shouldBe true
-                contents[0] shouldBe TrendingWidgetUiModel.Content.Switching(eyebrow = "Eyebrow Year")
-                contents[1].shouldBeInstanceOf<TrendingWidgetUiModel.Content.Ranked>().eyebrow shouldBe "Eyebrow Week"
+            flow.test {
+                contents += awaitItem().content
+                testScheduler.advanceTimeBy(4.seconds)
+                testScheduler.runCurrent()
+                expectNoEvents()
+                quietBeforeTimeout = true
+                testScheduler.advanceTimeBy(2.seconds)
+                testScheduler.runCurrent()
+                contents += awaitItem().content
+                cancelAndIgnoreRemainingEvents()
             }
+
+            // ----- Assert -----
+            quietBeforeTimeout shouldBe true
+            contents[0] shouldBe TrendingWidgetUiModel.Content.Switching(eyebrow = "Eyebrow Year")
+            contents[1].shouldBeInstanceOf<TrendingWidgetUiModel.Content.Ranked>().eyebrow shouldBe "Eyebrow Week"
+        }
     }
 }

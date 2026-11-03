@@ -29,18 +29,22 @@ class OnPageDraftChangedActionTest {
     @BeforeEach
     fun setUp() {
         activeSessionFlow = MutableStateFlow(null)
+
         val controller = mockk<ActiveSessionController>(relaxed = true) {
             every {
                 activeSession
             } returns activeSessionFlow
         }
+
         dependencies = mockk(relaxed = true) {
             every {
                 activeSessionController
             } returns controller
         }
+
         stateFlow = MutableStateFlow(FocusModeUiState())
         localVariablesFlow = MutableStateFlow(LocalFocusModeVariables(isFirstFocusEvent = false))
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
@@ -98,6 +102,7 @@ class OnPageDraftChangedActionTest {
         fun `leaves the draft text and selection as they were for a number above the page count`() = runTest {
             // ----- Arrange -----
             startSession(totalPages = 300)
+
             val original = draft(
                 text = "10",
                 selection = TextRange(
@@ -105,6 +110,7 @@ class OnPageDraftChangedActionTest {
                     end = 2,
                 ),
             )
+
             stateFlow.value = FocusModeUiState(pageDraft = original)
 
             // ----- Act -----
@@ -162,6 +168,7 @@ class OnPageDraftChangedActionTest {
         fun `keeps the draft flagged as rejected after a later in-range edit`() = runTest {
             // ----- Arrange -----
             startSession(totalPages = 300)
+
             stateFlow.value = FocusModeUiState(
                 pageDraft = draft("300"),
                 pageDraftRejected = true,
@@ -219,6 +226,7 @@ class OnPageDraftChangedActionTest {
             // ----- Arrange -----
             startSession(totalPages = 300)
             stateFlow.value = FocusModeUiState(pageDraft = draft("10"))
+
             val selection = TextRange(
                 start = 1,
                 end = 2,
@@ -241,16 +249,19 @@ class OnPageDraftChangedActionTest {
         fun `the first callback after focus keeps the existing selection and clears the flag`() = runTest {
             // ----- Arrange -----
             startSession(totalPages = 300)
+
             val selectAll = TextRange(
                 start = 0,
                 end = 2,
             )
+
             stateFlow.value = FocusModeUiState(
                 pageDraft = draft(
                     text = "10",
                     selection = selectAll,
                 ),
             )
+
             localVariablesFlow.value = LocalFocusModeVariables(isFirstFocusEvent = true)
 
             // ----- Act -----

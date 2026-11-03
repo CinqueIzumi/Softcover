@@ -86,6 +86,7 @@ class UpdateBookReviewUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+
             coVerify(exactly = 1) {
                 booksRepository.updateBookReview(
                     book = inputBook,

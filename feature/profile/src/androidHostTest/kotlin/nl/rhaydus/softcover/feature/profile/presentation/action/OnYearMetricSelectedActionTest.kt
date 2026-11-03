@@ -24,6 +24,7 @@ class OnYearMetricSelectedActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(StatsAtlasUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(StatsAtlasLocalVariables()),

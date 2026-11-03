@@ -51,12 +51,14 @@ class UpdateBookEditionUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+
             coVerify(exactly = 1) {
                 repository.updateBookEdition(
                     userBook = userBook,
                     newEditionId = newEditionId,
                 )
             }
+
             coVerify(exactly = 1) { repository.cacheBook(book = updatedBook) }
         }
 

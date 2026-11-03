@@ -30,6 +30,7 @@ class OnFilterSheetExpandedChangeActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -45,6 +46,7 @@ class OnFilterSheetExpandedChangeActionTest {
             val selectedTabId = "list-42"
             val committedFilters = LibraryFilters(formats = persistentSetOf("ebook"))
             val initial = LibraryUiState()
+
             stateFlow.value = initial.copy(
                 selectedTabId = selectedTabId,
                 filtersByTab = persistentMapOf(selectedTabId to committedFilters),
@@ -64,10 +66,12 @@ class OnFilterSheetExpandedChangeActionTest {
 
             // ----- Assert -----
             stateFlow.value.isFilterSheetExpanded shouldBe true
+
             stateFlow.value.filterDraft shouldBe LibraryFilterDraft(
                 tabId = selectedTabId,
                 filters = committedFilters,
             )
+
             stateFlow.value.filterSheet.scaffold shouldBe filterSheetScaffoldFor(
                 resultCount = 11,
                 filtersActive = true,
@@ -119,7 +123,9 @@ class OnFilterSheetExpandedChangeActionTest {
                 resultCount = 7,
                 filtersActive = true,
             )
+
             val initial = LibraryUiState()
+
             stateFlow.value = initial.copy(
                 isFilterSheetExpanded = true,
                 filterSheet = initial.filterSheet.copy(

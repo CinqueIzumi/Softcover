@@ -157,6 +157,7 @@ class MonthlyPagesMapperTest {
                     500,
                 ),
             )
+
             val scope = StatsScope.Rolling(StatsWindow.LAST_12_MONTHS)
 
             // ----- Act -----
@@ -287,6 +288,7 @@ class MonthlyPagesMapperTest {
                     1480,
                 ),
             )
+
             val scope = StatsScope.Rolling(StatsWindow.LAST_12_MONTHS)
 
             // ----- Act -----
@@ -473,6 +475,7 @@ class MonthlyPagesMapperTest {
                     0,
                 ),
             )
+
             val scope = StatsScope.Rolling(StatsWindow.LAST_30_DAYS)
 
             // ----- Act -----
@@ -551,6 +554,7 @@ class MonthlyPagesMapperTest {
                     0,
                 ),
             )
+
             val scope = StatsScope.Rolling(StatsWindow.LAST_30_DAYS)
 
             // ----- Act -----
@@ -620,6 +624,7 @@ class MonthlyPagesMapperTest {
                     0,
                 ),
             )
+
             val scope = StatsScope.Rolling(StatsWindow.LAST_12_MONTHS)
 
             // ----- Act -----
@@ -677,6 +682,7 @@ class MonthlyPagesMapperTest {
                 year = 2025,
                 counts = emptyMap(),
             )
+
             val second = year(
                 year = 2026,
                 counts = mapOf(3 to 10),
@@ -696,6 +702,7 @@ class MonthlyPagesMapperTest {
                 year = 2026,
                 counts = emptyMap(),
             )
+
             val allTime = allTime(emptyMap())
 
             // ----- Act -----
@@ -717,6 +724,7 @@ class MonthlyPagesMapperTest {
                     )
                 },
             )
+
             val calendarYear = year(
                 year = 2026,
                 counts = emptyMap(),

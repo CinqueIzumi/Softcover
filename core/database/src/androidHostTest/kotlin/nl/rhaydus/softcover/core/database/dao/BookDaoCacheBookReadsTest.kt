@@ -36,6 +36,7 @@ class BookDaoCacheBookReadsTest {
             builder = Room.inMemoryDatabaseBuilder(context = context),
             queryContext = testDispatcher,
         )
+
         dao = database.bookDao()
     }
 
@@ -145,6 +146,7 @@ class BookDaoCacheBookReadsTest {
                 .shouldNotBeNull()
                 .userBookWithJournals.shouldNotBeNull()
                 .userBookReads.single()
+
             stored.finishedAtPrecision shouldBe 2
             stored.editionPages shouldBe 320
         }
@@ -245,6 +247,7 @@ class BookDaoCacheBookReadsTest {
                     reads = listOf(read(id = 1), read(id = 2)),
                 ),
             )
+
             dao.cacheBook(
                 book = book(
                     id = 2,

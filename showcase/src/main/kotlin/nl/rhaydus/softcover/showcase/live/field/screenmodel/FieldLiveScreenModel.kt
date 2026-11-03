@@ -16,16 +16,16 @@ internal class FieldLiveScreenModel(
     themeStore: ShowcaseThemeStore,
     initializers: List<Collector<FieldLiveUiState, FieldLiveEvent, FieldLiveDependencies, FieldLiveLocalVariables>>,
 ) : ToadScreenModel<
-    FieldLiveUiState,
-    FieldLiveEvent,
-    FieldLiveDependencies,
-    Collector<FieldLiveUiState, FieldLiveEvent, FieldLiveDependencies, FieldLiveLocalVariables>,
-    FieldLiveLocalVariables,
+        FieldLiveUiState,
+        FieldLiveEvent,
+        FieldLiveDependencies,
+        Collector<FieldLiveUiState, FieldLiveEvent, FieldLiveDependencies, FieldLiveLocalVariables>,
+        FieldLiveLocalVariables,
     >(
-    initialState = fieldLiveState(),
-    initialLocalVariables = FieldLiveLocalVariables(),
-    initializers = initializers,
-) {
+        initialState = fieldLiveState(),
+        initialLocalVariables = FieldLiveLocalVariables(),
+        initializers = initializers,
+    ) {
     override val dependencies = FieldLiveDependencies(
         themeStore = themeStore,
         coroutineScope = screenModelScope,

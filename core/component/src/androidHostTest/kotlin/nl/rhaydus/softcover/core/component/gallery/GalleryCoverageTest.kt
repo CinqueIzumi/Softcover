@@ -14,7 +14,6 @@ class GalleryCoverageTest {
         "MastheadSubtitle" to "part of PageMasthead",
         "LazySheetScaffold" to "the lazy form of SheetScaffold",
         "AdaptiveModalSheet" to "the sheet host; entries draw sheet bodies inline",
-        "SkeletonRevealGroup" to "draws nothing itself",
         "RevealedWhenPresent" to "animates caller content in; draws nothing itself",
         "ExitingItems" to "animates caller items out; draws nothing itself",
     )
@@ -27,6 +26,7 @@ class GalleryCoverageTest {
                 '\\',
                 '/',
             )
+
             val inComponentSources = "core/component/src/commonMain/" in path
             val inGalleryPackage = "/component/gallery/" in path
             inComponentSources && inGalleryPackage.not()

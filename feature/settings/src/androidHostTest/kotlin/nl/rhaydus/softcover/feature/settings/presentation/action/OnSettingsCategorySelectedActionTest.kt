@@ -30,11 +30,13 @@ class OnSettingsCategorySelectedActionTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(SettingsScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(SettingsLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk(relaxed = true)
     }
 
@@ -47,6 +49,7 @@ class OnSettingsCategorySelectedActionTest {
                 selectedCategory = SettingsCategory.APPEARANCE,
                 settingsSidebar = settingsSidebarFor(selectedCategory = SettingsCategory.APPEARANCE),
             )
+
             val action = OnSettingsCategorySelectedAction(category = SettingsCategory.ROADMAP)
 
             // ----- Act -----
@@ -58,6 +61,7 @@ class OnSettingsCategorySelectedActionTest {
             // ----- Assert -----
             stateFlow.value.selectedCategory shouldBe SettingsCategory.ROADMAP
             val rows = stateFlow.value.settingsSidebar.sections.flatMap { it.rows }
+
             rows.single { it.selected }.key shouldBe
                 SettingsSidebarKey.Category(category = SettingsCategory.ROADMAP)
         }
@@ -69,6 +73,7 @@ class OnSettingsCategorySelectedActionTest {
                 selectedCategory = SettingsCategory.APPEARANCE,
                 settingsSidebar = settingsSidebarFor(selectedCategory = SettingsCategory.APPEARANCE),
             )
+
             val action = OnSettingsCategorySelectedAction(category = SettingsCategory.WHATS_NEW)
 
             // ----- Act -----
@@ -80,6 +85,7 @@ class OnSettingsCategorySelectedActionTest {
             // ----- Assert -----
             stateFlow.value.selectedCategory shouldBe SettingsCategory.WHATS_NEW
             val rows = stateFlow.value.settingsSidebar.sections.flatMap { it.rows }
+
             rows.single { it.selected }.key shouldBe
                 SettingsSidebarKey.Category(category = SettingsCategory.WHATS_NEW)
         }

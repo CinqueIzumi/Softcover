@@ -38,11 +38,13 @@ class TagEditorSheetCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk(relaxed = true)
     }
 
@@ -67,6 +69,7 @@ class TagEditorSheetCollectorTest {
         fun `builds tagEditorSheet from the book title and cover`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val cover = mockk<CoverUiModel>()
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = bookTitled("Dune"),
                 tagEditorCover = cover,
@@ -113,46 +116,50 @@ class TagEditorSheetCollectorTest {
         }
 
         @Test
-        fun `carries the add block and the tag groups from state into tagEditorSheet`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val moodChip = ChipUiModel(
-                    key = "MOOD",
-                    label = "Mood",
-                )
-                val categoryChips = persistentListOf(moodChip)
-                val suggestion = ChipUiModel(
-                    key = "suggestion",
-                    label = "cozy",
-                )
-                val cozyTag = UserTag(
-                    name = "cozy",
-                    category = TagCategory.MOOD,
-                )
-                val emptyState = EmptyStateUiModel(
-                    title = "Nothing",
-                    body = "Add one",
-                )
-                stateFlow.value = buildBookDetailUiState().copy(
-                    book = bookTitled("Dune"),
-                    tagEditorCategory = TagCategory.MOOD,
-                    tagEditorCategoryChips = categoryChips,
-                    tagSuggestionChips = listOf(suggestion to cozyTag).toChipSet(),
-                    tagEditorEmptyState = emptyState,
-                    newlyAddedTagKey = "MOOD:cozy",
-                )
+        fun `carries the add block and the tag groups from state into tagEditorSheet`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val moodChip = ChipUiModel(
+                key = "MOOD",
+                label = "Mood",
+            )
 
-                // ----- Act -----
-                launchCollector()
+            val categoryChips = persistentListOf(moodChip)
 
-                // ----- Assert -----
-                val sheet = stateFlow.value.tagEditorSheet.shouldNotBeNull()
-                sheet.categoryChips shouldBe categoryChips
-                sheet.selectedCategoryKey shouldBe "MOOD"
-                sheet.suggestionChips shouldBe listOf(suggestion)
-                sheet.emptyState shouldBe emptyState
-                sheet.newlyAddedTagKey shouldBe "MOOD:cozy"
-            }
+            val suggestion = ChipUiModel(
+                key = "suggestion",
+                label = "cozy",
+            )
+
+            val cozyTag = UserTag(
+                name = "cozy",
+                category = TagCategory.MOOD,
+            )
+
+            val emptyState = EmptyStateUiModel(
+                title = "Nothing",
+                body = "Add one",
+            )
+
+            stateFlow.value = buildBookDetailUiState().copy(
+                book = bookTitled("Dune"),
+                tagEditorCategory = TagCategory.MOOD,
+                tagEditorCategoryChips = categoryChips,
+                tagSuggestionChips = listOf(suggestion to cozyTag).toChipSet(),
+                tagEditorEmptyState = emptyState,
+                newlyAddedTagKey = "MOOD:cozy",
+            )
+
+            // ----- Act -----
+            launchCollector()
+
+            // ----- Assert -----
+            val sheet = stateFlow.value.tagEditorSheet.shouldNotBeNull()
+            sheet.categoryChips shouldBe categoryChips
+            sheet.selectedCategoryKey shouldBe "MOOD"
+            sheet.suggestionChips shouldBe listOf(suggestion)
+            sheet.emptyState shouldBe emptyState
+            sheet.newlyAddedTagKey shouldBe "MOOD:cozy"
+        }
 
         @Test
         fun `follows the selected category as it changes`() = runTest(UnconfinedTestDispatcher()) {

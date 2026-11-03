@@ -7,7 +7,7 @@ internal actual fun LibraryGridLayout.standInCount(): Int = when (this) {
     LibraryGridLayout.GRID_THREE_COLUMNS,
     LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY,
     LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY,
-        -> 12
+    -> 12
 
     LibraryGridLayout.LIST_LARGE -> 6
     LibraryGridLayout.LIST_COMPACT -> 10

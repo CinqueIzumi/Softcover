@@ -47,6 +47,7 @@ class ResumeIfPausedUseCaseTest {
 
             // ----- Assert -----
             result.getOrNull() shouldBe resumedBook
+
             coVerify(exactly = 1) {
                 booksRepository.markBookAsReading(
                     book = inputBook,
@@ -69,6 +70,7 @@ class ResumeIfPausedUseCaseTest {
 
             // ----- Assert -----
             result.getOrNull() shouldBe inputBook
+
             coVerify(exactly = 0) {
                 booksRepository.markBookAsReading(
                     book = any(),

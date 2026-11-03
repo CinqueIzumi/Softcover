@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.orchestration.presentation.state.BottomBarUiState
 import nl.rhaydus.toad.Collector
 
 internal sealed interface BottomBarCollector : Collector<
-        BottomBarUiState,
-        BottomBarEvent,
-        BottomBarDependencies,
-        BottomBarLocalVariables,
-        >
+    BottomBarUiState,
+    BottomBarEvent,
+    BottomBarDependencies,
+    BottomBarLocalVariables,
+>

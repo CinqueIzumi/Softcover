@@ -40,11 +40,13 @@ class FilterDraftChipsCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk<LibraryDependencies>(relaxed = true).also { mock ->
             every {
                 mock.defaultDispatcher
@@ -55,33 +57,34 @@ class FilterDraftChipsCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `filterSheet footer follows the selection's result count and clear-all state`() =
-            runTest(testDispatcher) {
-                // ----- Arrange -----
-                val collector = FilterDraftChipsCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+        fun `filterSheet footer follows the selection's result count and clear-all state`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val collector = FilterDraftChipsCollector()
 
-                // ----- Act -----
-                stateFlow.value = LibraryUiState(
-                    filterDraft = LibraryFilterDraft(
-                        tabId = "all",
-                        filters = LibraryFilters(formats = persistentSetOf("ebook")),
-                    ),
-                    booksByTab = persistentMapOf("all" to persistentListOf()),
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-
-                // ----- Assert -----
-                stateFlow.value.filterSheet.scaffold shouldBe filterSheetScaffoldFor(
-                    resultCount = 0,
-                    filtersActive = true,
-                )
-                job.cancel()
             }
+
+            // ----- Act -----
+            stateFlow.value = LibraryUiState(
+                filterDraft = LibraryFilterDraft(
+                    tabId = "all",
+                    filters = LibraryFilters(formats = persistentSetOf("ebook")),
+                ),
+                booksByTab = persistentMapOf("all" to persistentListOf()),
+            )
+
+            // ----- Assert -----
+            stateFlow.value.filterSheet.scaffold shouldBe filterSheetScaffoldFor(
+                resultCount = 0,
+                filtersActive = true,
+            )
+
+            job.cancel()
+        }
 
         @Test
         fun `filterSheet is left untouched while the sheet is closed`() = runTest(testDispatcher) {
@@ -90,10 +93,13 @@ class FilterDraftChipsCollectorTest {
                 resultCount = 8,
                 filtersActive = true,
             )
+
             stateFlow.value = LibraryUiState(
                 filterSheet = LibraryUiState().filterSheet.copy(scaffold = seeded),
             )
+
             val collector = FilterDraftChipsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -132,13 +138,16 @@ class FilterDraftChipsCollectorTest {
                     ),
                 ),
             )
+
             val collector = FilterDraftChipsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
                     dependencies = dependencies,
                 )
             }
+
             stateFlow.value = LibraryUiState(
                 filterDraft = LibraryFilterDraft(tabId = "all"),
                 filterOptionsByTab = persistentMapOf("all" to options),
@@ -158,77 +167,80 @@ class FilterDraftChipsCollectorTest {
         }
 
         @Test
-        fun `the built search field carries each source's own search text from the draft`() =
-            runTest(testDispatcher) {
-                // ----- Arrange -----
-                val options = LibraryFilterOptions(
-                    yourTags = persistentListOf(
-                        LibraryTagOption(
-                            key = UserTagKey(
-                                category = TagCategory.MOOD,
-                                name = "cozy",
-                            ),
+        fun `the built search field carries each source's own search text from the draft`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val options = LibraryFilterOptions(
+                yourTags = persistentListOf(
+                    LibraryTagOption(
+                        key = UserTagKey(
                             category = TagCategory.MOOD,
-                            count = 2,
+                            name = "cozy",
                         ),
+                        category = TagCategory.MOOD,
+                        count = 2,
                     ),
-                    hardcoverTags = persistentListOf(
-                        LibraryTagOption(
-                            key = HardcoverTagKey(
-                                id = 1,
-                                name = "magic",
-                            ),
-                            category = TagCategory.GENRE,
-                            count = 3,
+                ),
+                hardcoverTags = persistentListOf(
+                    LibraryTagOption(
+                        key = HardcoverTagKey(
+                            id = 1,
+                            name = "magic",
                         ),
+                        category = TagCategory.GENRE,
+                        count = 3,
                     ),
-                )
-                val collector = FilterDraftChipsCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+                ),
+            )
 
-                // ----- Act -----
-                stateFlow.value = LibraryUiState(
-                    filterDraft = LibraryFilterDraft(
-                        tabId = "all",
-                        yourTagsSection = TagSectionDraft(search = "coz"),
-                    ),
-                    filterOptionsByTab = persistentMapOf("all" to options),
-                )
+            val collector = FilterDraftChipsCollector()
 
-                // ----- Assert -----
-                val selection = stateFlow.value.filterSheet.selection
-                selection?.yourTags?.searchField?.text shouldBe "coz"
-                selection?.hardcoverTags?.searchField?.text shouldBe ""
-                job.cancel()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            // ----- Act -----
+            stateFlow.value = LibraryUiState(
+                filterDraft = LibraryFilterDraft(
+                    tabId = "all",
+                    yourTagsSection = TagSectionDraft(search = "coz"),
+                ),
+                filterOptionsByTab = persistentMapOf("all" to options),
+            )
+
+            // ----- Assert -----
+            val selection = stateFlow.value.filterSheet.selection
+            selection?.yourTags?.searchField?.text shouldBe "coz"
+            selection?.hardcoverTags?.searchField?.text shouldBe ""
+            job.cancel()
+        }
 
         @Test
-        fun `unrelated state change that leaves the snapshot equal does not retrigger recompute`() =
-            runTest(testDispatcher) {
-                // ----- Arrange -----
-                val collector = FilterDraftChipsCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-                stateFlow.value = LibraryUiState(
-                    filterDraft = LibraryFilterDraft(tabId = "all"),
+        fun `unrelated state change that leaves the snapshot equal does not retrigger recompute`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val collector = FilterDraftChipsCollector()
+
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-                val selectionAfterFirstEmit = stateFlow.value.filterSheet.selection
-
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(isArrangeSheetExpanded = true)
-
-                // ----- Assert -----
-                (stateFlow.value.filterSheet.selection === selectionAfterFirstEmit) shouldBe true
-                job.cancel()
             }
+
+            stateFlow.value = LibraryUiState(
+                filterDraft = LibraryFilterDraft(tabId = "all"),
+            )
+
+            val selectionAfterFirstEmit = stateFlow.value.filterSheet.selection
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(isArrangeSheetExpanded = true)
+
+            // ----- Assert -----
+            (stateFlow.value.filterSheet.selection === selectionAfterFirstEmit) shouldBe true
+            job.cancel()
+        }
     }
 }

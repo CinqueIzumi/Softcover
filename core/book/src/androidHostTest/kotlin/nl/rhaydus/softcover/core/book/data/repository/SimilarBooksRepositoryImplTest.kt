@@ -22,6 +22,7 @@ class SimilarBooksRepositoryImplTest {
     fun setUp() {
         remote = mockk()
         local = mockk()
+
         repository = SimilarBooksRepositoryImpl(
             booksRemoteDataSource = remote,
             booksLocalDataSource = local,
@@ -44,6 +45,7 @@ class SimilarBooksRepositoryImplTest {
             coEvery {
                 remote.fetchSimilarBookSeed(bookId = 1)
             } returns buildSeed(bookId = 1)
+
             coEvery {
                 remote.fetchSimilarBookSeed(bookId = 2)
             } returns buildSeed(bookId = 2)
@@ -64,6 +66,7 @@ class SimilarBooksRepositoryImplTest {
         fun `refetches after a failure instead of caching it`() = runTest {
             // ----- Arrange -----
             val seed = buildSeed(bookId = 1)
+
             coEvery {
                 remote.fetchSimilarBookSeed(bookId = 1)
             } throws IllegalStateException("boom") andThen seed

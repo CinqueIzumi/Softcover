@@ -18,10 +18,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopTooltip
+import nl.rhaydus.designsystem.modifier.pressScaleToggleable
+import nl.rhaydus.designsystem.theme.Corners
 import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
-import nl.rhaydus.softcover.core.component.modifier.tactileToggleable
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 
 /** A two-state glyph control reporting through one [ToggleEvent] lambda; the caller's [modifier] places it. */
 @Composable
@@ -35,28 +35,34 @@ fun Toggle(
     val size = if (filled) 44.dp else 38.dp
     val iconSize = if (filled) 24.dp else 20.dp
     val shape = if (filled) Corners.md else Corners.pill
+
     val targetContainer = when {
         filled.not() -> Color.Transparent
         model.checked -> scheme.primary
         else -> scheme.surfaceContainerHigh
     }
+
     val targetTint = when {
         filled && model.checked -> scheme.onPrimary
         filled -> scheme.primary
         model.checked -> scheme.primary
         else -> scheme.outline
     }
+
     val colorSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Color>()
+
     val container by animateColorAsState(
         targetValue = targetContainer,
         animationSpec = colorSpec,
         label = "IconToggleContainer",
     )
+
     val tint by animateColorAsState(
         targetValue = targetTint,
         animationSpec = colorSpec,
         label = "IconToggleTint",
     )
+
     val motionScheme = MaterialTheme.motionScheme
 
     DesktopTooltip(text = model.description) {
@@ -65,7 +71,7 @@ fun Toggle(
                 .minimumInteractiveComponentSize()
                 .alpha(if (model.enabled) 1f else DISABLED_ALPHA)
                 .size(size)
-                .tactileToggleable(
+                .pressScaleToggleable(
                     value = model.checked,
                     onValueChange = { checked ->
                         onEvent(ToggleEvent.Toggled(checked = checked))

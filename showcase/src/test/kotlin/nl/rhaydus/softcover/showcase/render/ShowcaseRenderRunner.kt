@@ -15,12 +15,11 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.test.core.app.ApplicationProvider
 import com.github.takahirom.roborazzi.captureRoboImage
-import java.io.File
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.gallery.GalleryFixture
 import nl.rhaydus.softcover.core.component.gallery.GalleryRegistry
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SchemeBrightness
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Before
@@ -30,6 +29,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
+import java.io.File
 
 /**
  * Generator, not a test: draws every [GalleryRegistry] fixture in the default Softcover palette to
@@ -55,6 +55,7 @@ class ShowcaseRenderRunner {
     @Before
     fun registerActivity() {
         val app = ApplicationProvider.getApplicationContext<Application>()
+
         shadowOf(app.packageManager).addActivityIfNotPresent(
             ComponentName(
                 app.packageName,
@@ -143,6 +144,7 @@ class ShowcaseRenderRunner {
             outputDir,
             brightness.name.lowercase(),
         )
+
         val skipped = mutableListOf<String>()
 
         val entrySlugs = uniqueSlugs(GalleryRegistry.entries.map { it.name })
@@ -152,6 +154,7 @@ class ShowcaseRenderRunner {
                 brightnessDir,
                 "${entry.family.name.lowercase()}/${entrySlugs[entryIndex]}",
             )
+
             val slugs = uniqueSlugs(entry.fixtures.map { it.label })
 
             entry.fixtures.forEachIndexed { index, fixture ->

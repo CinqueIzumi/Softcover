@@ -18,22 +18,22 @@ internal class CalloutLiveScreenModel(
     themeStore: ShowcaseThemeStore,
     initializers: List<
         Collector<CalloutLiveUiState, CalloutLiveEvent, CalloutLiveDependencies, CalloutLiveLocalVariables>,
-        >,
+    >,
 ) : ToadScreenModel<
-    CalloutLiveUiState,
-    CalloutLiveEvent,
-    CalloutLiveDependencies,
-    Collector<CalloutLiveUiState, CalloutLiveEvent, CalloutLiveDependencies, CalloutLiveLocalVariables>,
-    CalloutLiveLocalVariables,
+        CalloutLiveUiState,
+        CalloutLiveEvent,
+        CalloutLiveDependencies,
+        Collector<CalloutLiveUiState, CalloutLiveEvent, CalloutLiveDependencies, CalloutLiveLocalVariables>,
+        CalloutLiveLocalVariables,
     >(
-    initialState = CalloutLiveUiState(
-        topBar = calloutLiveTopBar(),
-        banners = liveBanners(),
-        callouts = liveCallouts(),
-    ),
-    initialLocalVariables = CalloutLiveLocalVariables(),
-    initializers = initializers,
-) {
+        initialState = CalloutLiveUiState(
+            topBar = calloutLiveTopBar(),
+            banners = liveBanners(),
+            callouts = liveCallouts(),
+        ),
+        initialLocalVariables = CalloutLiveLocalVariables(),
+        initializers = initializers,
+    ) {
     override val dependencies = CalloutLiveDependencies(
         themeStore = themeStore,
         coroutineScope = screenModelScope,

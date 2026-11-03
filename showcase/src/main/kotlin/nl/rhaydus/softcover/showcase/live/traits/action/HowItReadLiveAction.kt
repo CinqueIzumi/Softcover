@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.showcase.live.traits.state.HowItReadLiveUiState
 import nl.rhaydus.toad.UiAction
 
 internal sealed interface HowItReadLiveAction : UiAction<
-        HowItReadLiveDependencies,
-        HowItReadLiveUiState,
-        HowItReadLiveEvent,
-        HowItReadLiveLocalVariables,
-        >
+    HowItReadLiveDependencies,
+    HowItReadLiveUiState,
+    HowItReadLiveEvent,
+    HowItReadLiveLocalVariables,
+>

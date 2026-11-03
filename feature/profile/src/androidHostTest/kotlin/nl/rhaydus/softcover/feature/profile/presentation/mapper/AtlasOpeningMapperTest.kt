@@ -30,6 +30,7 @@ class AtlasOpeningMapperTest {
                 result.hero.stat.shouldNotBeNull(),
                 result.books.stat.shouldNotBeNull(),
             )
+
             tiles.map { it.value } shouldBe listOf(0.0, 0.0)
             tiles.map { it.isLoading } shouldBe listOf(true, true)
         }
@@ -57,10 +58,12 @@ class AtlasOpeningMapperTest {
             // ----- Assert -----
             result.hero.stat.shouldNotBeNull().value shouldBe 12000.0
             result.books.stat.shouldNotBeNull().value shouldBe 42.0
+
             val tiles = listOf(
                 result.hero.stat.shouldNotBeNull(),
                 result.books.stat.shouldNotBeNull(),
             )
+
             tiles.map { it.isLoading } shouldBe listOf(false, false)
         }
 

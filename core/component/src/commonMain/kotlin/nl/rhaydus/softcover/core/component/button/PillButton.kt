@@ -25,13 +25,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopTooltip
+import nl.rhaydus.designsystem.modifier.pressScaleClickable
+import nl.rhaydus.designsystem.theme.Corners
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
-import nl.rhaydus.softcover.core.component.modifier.tactileClickable
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 /**
  * A fixed-height, fully-rounded action button. A menu it opens belongs to the caller: the pill is only
@@ -45,12 +45,14 @@ fun PillButton(
     modifier: Modifier = Modifier,
 ) {
     val scheme = MaterialTheme.colorScheme
+
     val container = when (model.tone) {
         PillButtonTone.Tonal, PillButtonTone.Accent -> scheme.surfaceContainerHigh
         PillButtonTone.Filled -> scheme.primary
         PillButtonTone.Outlined -> Color.Transparent
         PillButtonTone.Quiet -> scheme.surfaceContainer
     }
+
     val ink = when (model.tone) {
         PillButtonTone.Tonal -> scheme.onSurface
         PillButtonTone.Accent -> scheme.primary
@@ -58,12 +60,16 @@ fun PillButton(
         PillButtonTone.Outlined -> scheme.onSurface
         PillButtonTone.Quiet -> scheme.onSurfaceVariant
     }
+
     val iconTint = if (model.tone == PillButtonTone.Outlined) scheme.primary else ink
+
     val height = when (model.size) {
         PillButtonSize.Regular -> 38.dp
         PillButtonSize.Large -> 44.dp
     }
+
     val isIconOnly = model.content is PillButtonContent.IconOnly
+
     val pillModifier = modifier
         .minimumInteractiveComponentSize()
         .pillButtonInteraction(
@@ -121,7 +127,7 @@ private fun Modifier.pillButtonInteraction(
     onClick: () -> Unit,
 ): Modifier = this
     .let { base -> if (enabled) base else base.alpha(DISABLED_ALPHA) }
-    .tactileClickable(
+    .pressScaleClickable(
         onClick = onClick,
         enabled = enabled,
         hoverShape = Corners.pill,

@@ -31,6 +31,7 @@ class OnSimilarBookClickActionTest {
         dependencies = mockk(relaxed = true)
         eventChannel = Channel(Channel.BUFFERED)
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
+
         scope = ActionScope(
             stateFlow = MutableStateFlow(buildBookDetailUiState()),
             localVariablesFlow = localVariablesFlow,
@@ -44,6 +45,7 @@ class OnSimilarBookClickActionTest {
         fun `opens the clicked book with its cover and the source-scoped surface`() = runTest {
             // ----- Arrange -----
             val book = buildSimilarBook(id = 11)
+
             localVariablesFlow.value = BookDetailLocalVariables(
                 similarBooksSourceId = 5,
                 similarBooks = listOf(buildSimilarBook(id = 10), book),
@@ -59,6 +61,7 @@ class OnSimilarBookClickActionTest {
             val event = eventChannel.tryReceive().getOrNull()
                 .shouldNotBeNull()
                 .shouldBeInstanceOf<BookDetailEvent.OpenSimilarBookEvent>()
+
             event.destination.id shouldBe 11
             event.destination.initialCover shouldBe BookInitialCover.fromBook(book)
             event.destination.transitionSurface shouldBe "similar:5"

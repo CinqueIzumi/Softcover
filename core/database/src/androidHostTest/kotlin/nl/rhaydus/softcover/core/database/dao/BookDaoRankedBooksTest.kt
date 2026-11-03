@@ -41,6 +41,7 @@ class BookDaoRankedBooksTest {
             builder = Room.inMemoryDatabaseBuilder(context = context),
             queryContext = testDispatcher,
         )
+
         dao = database.bookDao()
     }
 
@@ -136,10 +137,12 @@ class BookDaoRankedBooksTest {
             // ----- Arrange -----
             insertBook(id = 1)
             insertBook(id = 2)
+
             insertUserBook(
                 userBookId = 10,
                 bookId = 1,
             )
+
             dao.upsertRankedBooks(
                 rows = listOf(
                     RankedBookEntity(
@@ -162,10 +165,12 @@ class BookDaoRankedBooksTest {
             // ----- Arrange -----
             insertBook(id = 1)
             insertBook(id = 2)
+
             insertUserBook(
                 userBookId = 10,
                 bookId = 1,
             )
+
             insertListBook(bookId = 2)
 
             // ----- Act -----
@@ -179,27 +184,26 @@ class BookDaoRankedBooksTest {
     @Nested
     inner class ReplaceRankedBooks {
         @Test
-        fun `caches the books, ranks them in requested order and records the fetch together`() =
-            runTest(testDispatcher) {
-                // ----- Arrange -----
-                val books = listOf(
-                    domainBook(id = 1),
-                    domainBook(id = 2),
-                    domainBook(id = 3),
-                )
+        fun `caches the books, ranks them in requested order and records the fetch together`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val books = listOf(
+                domainBook(id = 1),
+                domainBook(id = 2),
+                domainBook(id = 3),
+            )
 
-                // ----- Act -----
-                dao.replaceRankedBooks(
-                    listKey = WEEK,
-                    requestedIds = listOf(3, 1, 2),
-                    books = books,
-                    fetchedAtEpochMillis = 200L,
-                )
+            // ----- Act -----
+            dao.replaceRankedBooks(
+                listKey = WEEK,
+                requestedIds = listOf(3, 1, 2),
+                books = books,
+                fetchedAtEpochMillis = 200L,
+            )
 
-                // ----- Assert -----
-                rankedIds() shouldContainExactly listOf(3, 1, 2)
-                dao.getRankedListFetchedAt(listKey = WEEK) shouldBe 200L
-            }
+            // ----- Assert -----
+            rankedIds() shouldContainExactly listOf(3, 1, 2)
+            dao.getRankedListFetchedAt(listKey = WEEK) shouldBe 200L
+        }
 
         @Test
         fun `returns the ids by rank rather than by book id`() = runTest(testDispatcher) {
@@ -209,6 +213,7 @@ class BookDaoRankedBooksTest {
                 domainBook(id = 20),
                 domainBook(id = 30),
             )
+
             dao.replaceRankedBooks(
                 listKey = WEEK,
                 requestedIds = listOf(30, 10, 20),
@@ -247,6 +252,7 @@ class BookDaoRankedBooksTest {
         fun `deletes a book that left a ranked list and is no longer referenced`() = runTest(testDispatcher) {
             // ----- Arrange -----
             insertBook(id = 1)
+
             dao.upsertRankedBooks(
                 rows = listOf(
                     RankedBookEntity(
@@ -276,11 +282,14 @@ class BookDaoRankedBooksTest {
             // ----- Arrange -----
             insertBook(id = 1)
             insertBook(id = 2)
+
             insertUserBook(
                 userBookId = 10,
                 bookId = 1,
             )
+
             insertListBook(bookId = 2)
+
             dao.upsertRankedBooks(
                 rows = listOf(
                     RankedBookEntity(
@@ -356,6 +365,7 @@ class BookDaoRankedBooksTest {
             // ----- Arrange -----
             insertBook(id = 1)
             insertBook(id = 5)
+
             dao.upsertRankedBooks(
                 rows = listOf(
                     RankedBookEntity(
@@ -370,6 +380,7 @@ class BookDaoRankedBooksTest {
                     ),
                 ),
             )
+
             insertBook(id = 7)
 
             // ----- Act -----
@@ -390,6 +401,7 @@ class BookDaoRankedBooksTest {
         fun `keeps a book that left one list but is still ranked in another`() = runTest(testDispatcher) {
             // ----- Arrange -----
             insertBook(id = 1)
+
             dao.upsertRankedBooks(
                 rows = listOf(
                     RankedBookEntity(
@@ -427,6 +439,7 @@ class BookDaoRankedBooksTest {
             // ----- Arrange -----
             insertBook(id = 1)
             insertBook(id = 2)
+
             dao.upsertRankedBooks(
                 rows = listOf(
                     RankedBookEntity(
@@ -456,6 +469,7 @@ class BookDaoRankedBooksTest {
             insertBook(id = 1)
             insertBook(id = 2)
             insertBook(id = 3)
+
             dao.upsertRankedBooks(
                 rows = listOf(
                     RankedBookEntity(
@@ -482,46 +496,48 @@ class BookDaoRankedBooksTest {
         }
 
         @Test
-        fun `drops the old ranked rows and keeps the user book when the new id has no book`() =
-            runTest(testDispatcher) {
-                // ----- Arrange -----
-                insertBook(id = 1)
-                insertUserBook(
-                    userBookId = 10,
-                    bookId = 1,
-                )
-                dao.upsertRankedBooks(
-                    rows = listOf(
-                        RankedBookEntity(
-                            listKey = WEEK,
-                            bookId = 1,
-                            rank = 0,
-                        ),
-                        RankedBookEntity(
-                            listKey = MONTH,
-                            bookId = 1,
-                            rank = 0,
-                        ),
+        fun `drops the old ranked rows and keeps the user book when the new id has no book`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            insertBook(id = 1)
+
+            insertUserBook(
+                userBookId = 10,
+                bookId = 1,
+            )
+
+            dao.upsertRankedBooks(
+                rows = listOf(
+                    RankedBookEntity(
+                        listKey = WEEK,
+                        bookId = 1,
+                        rank = 0,
                     ),
-                )
+                    RankedBookEntity(
+                        listKey = MONTH,
+                        bookId = 1,
+                        rank = 0,
+                    ),
+                ),
+            )
 
-                // ----- Act -----
-                dao.redirectBookId(
-                    oldId = 1,
-                    newId = 2,
-                )
+            // ----- Act -----
+            dao.redirectBookId(
+                oldId = 1,
+                newId = 2,
+            )
 
-                // ----- Assert -----
-                rankedIds(listKey = WEEK) shouldContainExactly emptyList()
-                rankedIds(listKey = MONTH) shouldContainExactly emptyList()
-                dao.getBookIdByUserBookId(userBookId = 10) shouldBe 1
-            }
+            // ----- Assert -----
+            rankedIds(listKey = WEEK) shouldContainExactly emptyList()
+            rankedIds(listKey = MONTH) shouldContainExactly emptyList()
+            dao.getBookIdByUserBookId(userBookId = 10) shouldBe 1
+        }
 
         @Test
         fun `moves the ranked rows of every list to an existing new book`() = runTest(testDispatcher) {
             // ----- Arrange -----
             insertBook(id = 1)
             insertBook(id = 2)
+
             dao.upsertRankedBooks(
                 rows = listOf(
                     RankedBookEntity(
@@ -555,10 +571,12 @@ class BookDaoRankedBooksTest {
         fun `keeps a book that is still ranked`() = runTest(testDispatcher) {
             // ----- Arrange -----
             insertBook(id = 1)
+
             insertUserBook(
                 userBookId = 10,
                 bookId = 1,
             )
+
             dao.upsertRankedBooks(
                 rows = listOf(
                     RankedBookEntity(
@@ -581,6 +599,7 @@ class BookDaoRankedBooksTest {
         fun `deletes a book that is not ranked`() = runTest(testDispatcher) {
             // ----- Arrange -----
             insertBook(id = 1)
+
             insertUserBook(
                 userBookId = 10,
                 bookId = 1,
@@ -600,6 +619,7 @@ class BookDaoRankedBooksTest {
         fun `empties both ranked tables`() = runTest(testDispatcher) {
             // ----- Arrange -----
             insertBook(id = 1)
+
             dao.upsertRankedBooks(
                 rows = listOf(
                     RankedBookEntity(

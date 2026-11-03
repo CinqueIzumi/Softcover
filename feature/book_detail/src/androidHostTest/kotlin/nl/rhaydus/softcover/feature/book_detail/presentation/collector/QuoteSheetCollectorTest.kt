@@ -34,11 +34,13 @@ class QuoteSheetCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk(relaxed = true)
     }
 
@@ -81,6 +83,7 @@ class QuoteSheetCollectorTest {
                 book = buildQuoteBook(currentPages = 437),
                 quoteDraft = draft(),
             )
+
             launchCollector()
 
             // ----- Act -----
@@ -97,6 +100,7 @@ class QuoteSheetCollectorTest {
                 book = buildQuoteBook(currentPages = 437),
                 quoteDraft = draft(),
             )
+
             launchCollector()
 
             // ----- Act -----

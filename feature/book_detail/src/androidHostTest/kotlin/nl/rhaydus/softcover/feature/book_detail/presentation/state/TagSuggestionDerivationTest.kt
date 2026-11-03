@@ -45,6 +45,7 @@ class TagSuggestionDerivationTest {
                 name = "Fantasy",
                 category = TagCategory.GENRE,
             )
+
             val moodTag = buildTag(
                 name = "Cozy",
                 category = TagCategory.MOOD,
@@ -69,10 +70,12 @@ class TagSuggestionDerivationTest {
                 name = "Fantasy",
                 category = TagCategory.GENRE,
             )
+
             val horror = buildTag(
                 name = "Horror",
                 category = TagCategory.GENRE,
             )
+
             val applied = buildTag(
                 name = "Fantasy",
                 category = TagCategory.GENRE,
@@ -97,6 +100,7 @@ class TagSuggestionDerivationTest {
                 name = "Fantasy",
                 category = TagCategory.GENRE,
             )
+
             val applied = buildTag(
                 name = "FANTASY",
                 category = TagCategory.GENRE,
@@ -121,6 +125,7 @@ class TagSuggestionDerivationTest {
                 name = "Cozy",
                 category = TagCategory.GENRE,
             )
+
             val appliedMoodCozy = buildTag(
                 name = "Cozy",
                 category = TagCategory.MOOD,
@@ -145,14 +150,17 @@ class TagSuggestionDerivationTest {
                 name = "Zebra",
                 count = 1,
             )
+
             val high = buildTag(
                 name = "Apple",
                 count = 9,
             )
+
             val tiedA = buildTag(
                 name = "Banana",
                 count = 5,
             )
+
             val tiedB = buildTag(
                 name = "Cherry",
                 count = 5,
@@ -177,6 +185,7 @@ class TagSuggestionDerivationTest {
                 name = "Apple",
                 count = 9,
             )
+
             val low = buildTag(
                 name = "Zebra",
                 count = 1,
@@ -253,6 +262,7 @@ class TagSuggestionDerivationTest {
                 name = "Urban Fantasy",
                 count = 100,
             )
+
             val prefix = buildTag(
                 name = "Fantasy Epic",
                 count = 1,
@@ -277,14 +287,17 @@ class TagSuggestionDerivationTest {
                 name = "Fantasy Zeta",
                 count = 1,
             )
+
             val highCount = buildTag(
                 name = "Fantasy Alpha",
                 count = 9,
             )
+
             val tiedA = buildTag(
                 name = "Fantasy Beta",
                 count = 5,
             )
+
             val tiedB = buildTag(
                 name = "Fantasy Gamma",
                 count = 5,

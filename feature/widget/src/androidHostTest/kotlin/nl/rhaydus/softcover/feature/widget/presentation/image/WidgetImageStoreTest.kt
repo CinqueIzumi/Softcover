@@ -14,6 +14,11 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
+import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import java.io.File
 import java.io.IOException
 import java.io.OutputStream
@@ -22,11 +27,6 @@ import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Instant
-import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class WidgetImageStoreTest {
     private val packageName = "nl.rhaydus.test"
@@ -43,22 +43,27 @@ class WidgetImageStoreTest {
     @BeforeEach
     fun setUp() {
         filesDir = Files.createTempDirectory("widget-store").toFile()
+
         context = mockk {
             every {
                 filesDir
             } returns this@WidgetImageStoreTest.filesDir
+
             every {
                 packageName
             } returns this@WidgetImageStoreTest.packageName
         }
+
         mockkStatic(Uri::class)
         parsedUris.clear()
+
         every {
             Uri.parse(any())
         } answers {
             parsedUris += firstArg<String>()
             mockk<Uri>(relaxed = true)
         }
+
         store = WidgetImageStore(
             context,
             clock = clock,
@@ -113,6 +118,7 @@ class WidgetImageStoreTest {
         fun `renders once and serves the second request for the same key from disk`() = runTest {
             // ----- Arrange -----
             var renders = 0
+
             val render: suspend () -> Bitmap? = {
                 renders++
                 bitmap()
@@ -123,6 +129,7 @@ class WidgetImageStoreTest {
                 "cover-1",
                 render = render,
             )
+
             val second = store.uriFor(
                 "cover-1",
                 render = render,
@@ -210,6 +217,7 @@ class WidgetImageStoreTest {
                     )
                 } throws IOException("disk full")
             }
+
             store.uriFor("cover-1") { failing }
             var renders = 0
 
@@ -350,10 +358,12 @@ class WidgetImageStoreTest {
                 name = "render1.tmp",
                 ageMillis = 1.minutes.inWholeMilliseconds,
             )
+
             val foreign = storedFile(
                 name = "notes.txt",
                 ageMillis = 1.minutes.inWholeMilliseconds,
             )
+
             store.uriFor("a") { bitmap() }
 
             // ----- Act -----

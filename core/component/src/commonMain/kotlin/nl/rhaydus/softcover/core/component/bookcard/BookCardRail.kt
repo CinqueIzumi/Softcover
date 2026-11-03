@@ -16,8 +16,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import nl.rhaydus.designsystem.component.rememberLazyItemMutationAnimator
-import nl.rhaydus.softcover.core.component.state.SkeletonRevealGroup
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
+import nl.rhaydus.designsystem.modifier.SkeletonRevealGroup
+import nl.rhaydus.designsystem.theme.Spacing
 
 /**
  * A horizontally scrolling rail of book cards. [listState] is the caller's, so a rail keeps its scroll

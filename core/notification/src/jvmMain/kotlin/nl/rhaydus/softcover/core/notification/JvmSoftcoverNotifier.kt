@@ -64,6 +64,7 @@ internal class JvmSoftcoverNotifier : SoftcoverNotifier, AutoCloseable {
                 TRAY_ICON_SIZE,
                 BufferedImage.TYPE_INT_ARGB,
             )
+
             val icon = TrayIcon(
                 image,
                 "Softcover",

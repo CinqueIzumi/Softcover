@@ -52,6 +52,7 @@ class ReadingActivityCollectorTest {
         observeReadingActivityUseCase = mockk()
         observeCurrentDateUseCase = mockk()
         stateFlow = MutableStateFlow(ReadingScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ReadingLocalVariables()),
@@ -61,9 +62,11 @@ class ReadingActivityCollectorTest {
         every {
             getReadingStreakEnabledAsFlowUseCase()
         } returns streakEnabledFlow
+
         every {
             observeReadingActivityUseCase()
         } returns activityFlow
+
         every {
             observeCurrentDateUseCase()
         } returns dateFlow
@@ -71,13 +74,16 @@ class ReadingActivityCollectorTest {
 
     private fun buildDependencies(testScope: TestScope): ReadingScreenDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<ReadingScreenDependencies>(relaxed = true).also { mock ->
             every {
                 mock.getReadingStreakEnabledAsFlowUseCase
             } returns getReadingStreakEnabledAsFlowUseCase
+
             every {
                 mock.observeReadingActivityUseCase
             } returns observeReadingActivityUseCase
+
             every {
                 mock.observeCurrentDateUseCase
             } returns observeCurrentDateUseCase
@@ -85,6 +91,7 @@ class ReadingActivityCollectorTest {
             every {
                 mock.coroutineScope
             } returns testScope
+
             every {
                 mock.mainDispatcher
             } returns dispatcher
@@ -126,6 +133,7 @@ class ReadingActivityCollectorTest {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(isLoading = true)
             val dependencies = buildDependencies(this)
+
             val job = launch {
                 ReadingActivityCollector().onLaunch(
                     scope = scope,
@@ -149,13 +157,16 @@ class ReadingActivityCollectorTest {
                 30,
                 31,
             )
+
             val dependencies = buildDependencies(this)
+
             val job = launch {
                 ReadingActivityCollector().onLaunch(
                     scope = scope,
                     dependencies = dependencies,
                 )
             }
+
             streakEnabledFlow.emit(true)
 
             // ----- Act -----
@@ -165,15 +176,18 @@ class ReadingActivityCollectorTest {
 
             // ----- Assert -----
             beforeDate shouldBe false
+
             stateFlow.value.streakStrip shouldBe streakStripFor(
                 activity = activity,
                 today = today,
                 isLoading = true,
             )
+
             stateFlow.value.streakSheet shouldBe streakSheetFor(
                 activity = activity,
                 today = today,
             )
+
             stateFlow.value.hasLoadedReadingActivity shouldBe true
             job.cancel()
         }
@@ -183,12 +197,14 @@ class ReadingActivityCollectorTest {
             // ----- Arrange -----
             val activity = activityReadingOn(31)
             val dependencies = buildDependencies(this)
+
             val job = launch {
                 ReadingActivityCollector().onLaunch(
                     scope = scope,
                     dependencies = dependencies,
                 )
             }
+
             streakEnabledFlow.emit(true)
             activityFlow.emit(activity)
             dateFlow.emit(today)
@@ -214,12 +230,14 @@ class ReadingActivityCollectorTest {
         fun `follows a later activity emission`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val dependencies = buildDependencies(this)
+
             val job = launch {
                 ReadingActivityCollector().onLaunch(
                     scope = scope,
                     dependencies = dependencies,
                 )
             }
+
             streakEnabledFlow.emit(true)
             dateFlow.emit(today)
             activityFlow.emit(activityReadingOn(30))
@@ -243,6 +261,7 @@ class ReadingActivityCollectorTest {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(isLoading = true)
             val dependencies = buildDependencies(this)
+
             val job = launch {
                 ReadingActivityCollector().onLaunch(
                     scope = scope,
@@ -255,11 +274,13 @@ class ReadingActivityCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.streakEnabled shouldBe false
+
             stateFlow.value.streakStrip shouldBe streakStripFor(
                 activity = null,
                 today = null,
                 isLoading = true,
             )
+
             stateFlow.value.streakSheet.rows shouldBe emptyList()
             stateFlow.value.hasLoadedReadingActivity shouldBe true
             job.cancel()
@@ -269,12 +290,14 @@ class ReadingActivityCollectorTest {
         fun `clears the strip and sheet when toggled from true to false`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val dependencies = buildDependencies(this)
+
             val job = launch {
                 ReadingActivityCollector().onLaunch(
                     scope = scope,
                     dependencies = dependencies,
                 )
             }
+
             streakEnabledFlow.emit(true)
             dateFlow.emit(today)
             activityFlow.emit(activityReadingOn(31))
@@ -284,15 +307,18 @@ class ReadingActivityCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.streakEnabled shouldBe false
+
             stateFlow.value.streakStrip shouldBe streakStripFor(
                 activity = null,
                 today = null,
                 isLoading = true,
             )
+
             stateFlow.value.streakSheet shouldBe streakSheetFor(
                 activity = null,
                 today = null,
             )
+
             job.cancel()
         }
 
@@ -300,12 +326,14 @@ class ReadingActivityCollectorTest {
         fun `stops following activity once disabled and picks it up again when re-enabled`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val dependencies = buildDependencies(this)
+
             val job = launch {
                 ReadingActivityCollector().onLaunch(
                     scope = scope,
                     dependencies = dependencies,
                 )
             }
+
             streakEnabledFlow.emit(true)
             streakEnabledFlow.emit(false)
 

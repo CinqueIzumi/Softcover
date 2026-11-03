@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
 import nl.rhaydus.platform.NetworkAvailability
+import nl.rhaydus.softcover.core.domain.exception.ApiException
 import nl.rhaydus.softcover.core.domain.exception.InvalidTokenException
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.exception.RetryableSyncException
@@ -103,10 +104,13 @@ private suspend fun <T> retryTransientFailures(block: suspend () -> T): T {
         } catch (exception: ServerUnavailableException) {
             if (attempt >= MAX_TRANSIENT_RETRIES) throw exception
 
-            delay(retryDelayFor(
-                exception,
-                attempt,
-            ),)
+            delay(
+                retryDelayFor(
+                    exception,
+                    attempt,
+                ),
+            )
+
             attempt++
         }
     }
@@ -120,28 +124,16 @@ private fun retryDelayFor(
 private fun ServerUnavailableException.retryAfterDurationOrNull(): Duration? =
     (cause as? ApolloHttpException)?.retryAfterOrNull()
 
-// Each throw is a distinct, deliberate failure path mapped to the sealed `ApiException` hierarchy
-// (retryable transport, auth-rejected, and unexpected/GraphQL), so the count is over the threshold by
-// design. Suppressed rather than gated.
-@Suppress("ThrowsCount")
-private fun <T : Operation.Data> requireData(response: ApolloResponse<T>): T {
-    response.exception?.let { exception ->
-        // A transient transport/server failure is retryable: the write is applied optimistically and
-        // will sync later. Everything else is a genuine failure.
-        retryableTransportFailureOrNull(exception)?.let { throw it }
-
-        // A rejected token drives the re-auth dialog rather than a generic error.
-        authFailureOrNull(exception)?.let {
-            SessionExpiredNotifier.notifySessionExpired()
-
-            throw it
-        }
-
-        throw UnexpectedApiException(
+private fun apiExceptionFor(exception: Throwable): ApiException =
+    retryableTransportFailureOrNull(exception)
+        ?: authFailureOrNull(exception)?.also { SessionExpiredNotifier.notifySessionExpired() }
+        ?: UnexpectedApiException(
             "Apollo error: ${exception.message}",
             exception,
         )
-    }
+
+private fun <T : Operation.Data> requireData(response: ApolloResponse<T>): T {
+    response.exception?.let { throw apiExceptionFor(it) }
 
     if (response.errors.isNullOrEmpty().not()) {
         val message = response.errors?.joinToString { error ->
@@ -154,7 +146,7 @@ private fun <T : Operation.Data> requireData(response: ApolloResponse<T>): T {
 
                 error.extensions?.let { append(" | extensions=$it") }
             }
-        } ?: ""
+        }.orEmpty()
 
         throw UnexpectedApiException("Apollo GraphQL error(s): \n$message")
     }
@@ -180,13 +172,12 @@ private suspend fun <T : Operation.Data> executeCall(
 
 // Writes are never retried here: an optimistic write that hits a transient failure is already
 // captured by the offline write queue, which owns replay. Retrying it here too would double-apply it.
-suspend fun <T : Mutation.Data> ApolloClient.safeMutation(mutation: Mutation<T>): T =
-    executeCall(
-        requireNetwork = true,
-        retryOnTransientFailure = false,
-    ) {
-        this.mutation(mutation).execute()
-    }
+suspend fun <T : Mutation.Data> ApolloClient.safeMutation(mutation: Mutation<T>): T = executeCall(
+    requireNetwork = true,
+    retryOnTransientFailure = false,
+) {
+    this.mutation(mutation).execute()
+}
 
 suspend fun <T : Query.Data> ApolloClient.safeQuery(
     query: Query<T>,

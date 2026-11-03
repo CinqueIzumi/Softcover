@@ -939,10 +939,12 @@ class BookEntityMapperTest {
                 id = 1,
                 name = "Alice",
             )
+
             val authorB = stubAuthor(
                 id = 2,
                 name = "Bob",
             )
+
             val book = stubBook(
                 id = 42,
                 authors = listOf(
@@ -1012,18 +1014,22 @@ class BookEntityMapperTest {
                 id = 1,
                 name = "Alice",
             )
+
             val authorB = stubAuthor(
                 id = 2,
                 name = "Bob",
             )
+
             val editionOne = stubBookEdition(
                 id = 10,
                 authors = listOf(authorA),
             )
+
             val editionTwo = stubBookEdition(
                 id = 11,
                 authors = listOf(authorB),
             )
+
             val book = stubBook(
                 editions = listOf(
                     editionOne,
@@ -1064,10 +1070,12 @@ class BookEntityMapperTest {
                 id = 1,
                 name = "Alice",
             )
+
             val authorB = stubAuthor(
                 id = 2,
                 name = "Bob",
             )
+
             val edition = stubBookEdition(
                 id = 10,
                 authors = listOf(
@@ -1113,6 +1121,7 @@ class BookEntityMapperTest {
                 id = 1,
                 name = "Jane Austen",
             )
+
             val entity = stubBookEditionEntity(
                 id = 10,
                 canonicalId = null,
@@ -1228,6 +1237,7 @@ class BookEntityMapperTest {
                 updatedAt = "2024-06-01T12:00:00",
                 event = "status:3",
             )
+
             val entity = stubUserBookEntity(
                 id = 3,
                 bookId = 1,
@@ -1291,9 +1301,9 @@ class BookEntityMapperTest {
 
                 // ----- Act -----
                 val result = entity.toModel(
-                journals = emptyList(),
-                reads = emptyList(),
-            )
+                    journals = emptyList(),
+                    reads = emptyList(),
+                )
 
                 // ----- Assert -----
                 result.status shouldBe expectedStatus
@@ -1367,6 +1377,7 @@ class BookEntityMapperTest {
                 ratingsCount = 55,
                 positionsInSeries = "2.0",
             )
+
             val entity = stubBookFullEntity(book = bookEntity)
 
             // ----- Act -----
@@ -1391,15 +1402,19 @@ class BookEntityMapperTest {
                 id = 10,
                 bookId = 1,
             )
+
             val editionView = stubBookEditionView(
                 entity = editionEntity,
                 isOwned = false,
             )
+
             val editionWithAuthors = stubBookEditionWithAuthors(editionView = editionView)
+
             val bookEntity = stubBookEntity(
                 id = 1,
                 defaultEditionId = 10,
             )
+
             val entity = stubBookFullEntity(
                 book = bookEntity,
                 editions = listOf(editionWithAuthors),
@@ -1432,15 +1447,19 @@ class BookEntityMapperTest {
                 id = 10,
                 bookId = 1,
             )
+
             val editionView = stubBookEditionView(
                 entity = editionEntity,
                 isOwned = false,
             )
+
             val editionWithAuthors = stubBookEditionWithAuthors(editionView = editionView)
+
             val bookEntity = stubBookEntity(
                 id = 1,
                 defaultEditionId = 999,
             )
+
             val entity = stubBookFullEntity(
                 book = bookEntity,
                 editions = listOf(editionWithAuthors),
@@ -1472,10 +1491,12 @@ class BookEntityMapperTest {
                 id = 3,
                 statusCode = BookStatus.Reading.code,
             )
+
             val withJournals = stubUserBookWithJournals(
                 userBook = userBookEntity,
                 journals = emptyList(),
             )
+
             val entity = stubBookFullEntity(userBookWithJournals = withJournals)
 
             // ----- Act -----
@@ -1506,10 +1527,12 @@ class BookEntityMapperTest {
                 id = 9,
                 currentPage = 10,
             )
+
             val olderRead = stubUserBookReadEntity(
                 id = 7,
                 currentPage = 42,
             )
+
             val withJournals = stubUserBookWithJournals(userBookReads = listOf(newerRead, olderRead))
             val entity = stubBookFullEntity(userBookWithJournals = withJournals)
 
@@ -1530,6 +1553,7 @@ class BookEntityMapperTest {
                 event = "status:3",
                 updatedAt = "2024-06-01T12:00:00",
             )
+
             val withJournals = stubUserBookWithJournals(journals = listOf(journalEntity))
             val entity = stubBookFullEntity(userBookWithJournals = withJournals)
 
@@ -1561,6 +1585,7 @@ class BookEntityMapperTest {
                 name = "Test Series",
                 amountOfBooks = 3,
             )
+
             val entity = stubBookFullEntity(series = seriesEntity)
 
             // ----- Act -----
@@ -1579,6 +1604,7 @@ class BookEntityMapperTest {
                 id = 1,
                 name = "Jane Austen",
             )
+
             val entity = stubBookFullEntity(
                 bookAuthors = listOf(stubBookAuthorFull(author = authorEntity)),
             )
@@ -1600,10 +1626,12 @@ class BookEntityMapperTest {
                 id = 1,
                 name = "Writer",
             )
+
             val translator = stubAuthorEntity(
                 id = 2,
                 name = "Translator",
             )
+
             val entity = stubBookFullEntity(
                 bookAuthors = listOf(
                     stubBookAuthorFull(author = writer),
@@ -1630,6 +1658,7 @@ class BookEntityMapperTest {
                 id = 1,
                 name = "Writer",
             )
+
             val entity = stubBookFullEntity(
                 bookAuthors = listOf(
                     stubBookAuthorFull(author = writer),
@@ -1654,10 +1683,12 @@ class BookEntityMapperTest {
                 id = 10,
                 bookId = 1,
             )
+
             val editionView = stubBookEditionView(
                 entity = editionEntity,
                 isOwned = true,
             )
+
             val editionWithAuthors = stubBookEditionWithAuthors(editionView = editionView)
             val entity = stubBookFullEntity(editions = listOf(editionWithAuthors))
 
@@ -1699,6 +1730,7 @@ class BookEntityMapperTest {
                     ),
                 ),
             )
+
             val entity = stubBookFullEntity(tags = tags)
 
             // ----- Act -----
@@ -1729,6 +1761,7 @@ class BookEntityMapperTest {
                     ),
                 ),
             )
+
             val entity = stubBookFullEntity(tags = tags)
 
             // ----- Act -----
@@ -1755,6 +1788,7 @@ class BookEntityMapperTest {
                     ),
                 ),
             )
+
             val entity = stubBookFullEntity(tags = tags)
 
             // ----- Act -----

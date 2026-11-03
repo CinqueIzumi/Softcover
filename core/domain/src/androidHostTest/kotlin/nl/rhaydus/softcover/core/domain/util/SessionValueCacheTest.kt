@@ -33,6 +33,7 @@ class SessionValueCacheTest {
         fun `returns the value cached for the key`() = runTest {
             // ----- Arrange -----
             val cache = SessionValueCache<String, String>()
+
             cache.getOrPut(
                 key = "key",
                 load = { "value" },
@@ -49,6 +50,7 @@ class SessionValueCacheTest {
         fun `returns null for a different key than the one cached`() = runTest {
             // ----- Arrange -----
             val cache = SessionValueCache<String, String>()
+
             cache.getOrPut(
                 key = "key",
                 load = { "value" },
@@ -69,6 +71,7 @@ class SessionValueCacheTest {
 
             // ----- Act -----
             cache.peek(key = "key")
+
             cache.getOrPut(
                 key = "key",
                 load = {
@@ -89,6 +92,7 @@ class SessionValueCacheTest {
             // ----- Arrange -----
             val cache = SessionValueCache<String, String>()
             val loadCount = AtomicInteger(0)
+
             val load: suspend () -> String = {
                 loadCount.incrementAndGet()
                 "value"
@@ -99,6 +103,7 @@ class SessionValueCacheTest {
                 key = "key",
                 load = load,
             )
+
             cache.getOrPut(
                 key = "key",
                 load = load,
@@ -113,11 +118,15 @@ class SessionValueCacheTest {
             // ----- Arrange -----
             val cache = SessionValueCache<String, String>()
             val loadCount = AtomicInteger(0)
+
             val load: suspend () -> String = {
                 val attempt = loadCount.incrementAndGet()
+
                 if (attempt == 1) throw RuntimeException("load failed")
+
                 "recovered"
             }
+
             runCatching {
                 cache.getOrPut(
                     key = "key",
@@ -141,6 +150,7 @@ class SessionValueCacheTest {
             // ----- Arrange -----
             val cache = SessionValueCache<String, String?>()
             val loadCount = AtomicInteger(0)
+
             val load: suspend () -> String? = {
                 loadCount.incrementAndGet()
                 null
@@ -151,6 +161,7 @@ class SessionValueCacheTest {
                 key = "key",
                 load = load,
             )
+
             val second = cache.getOrPut(
                 key = "key",
                 load = load,
@@ -168,10 +179,12 @@ class SessionValueCacheTest {
             val cache = SessionValueCache<String, String>()
             val aLoadCount = AtomicInteger(0)
             val bLoadCount = AtomicInteger(0)
+
             val loadA: suspend () -> String = {
                 aLoadCount.incrementAndGet()
                 "value-a"
             }
+
             val loadB: suspend () -> String = {
                 bLoadCount.incrementAndGet()
                 "value-b"
@@ -182,14 +195,17 @@ class SessionValueCacheTest {
                 key = "a",
                 load = loadA,
             )
+
             val b = cache.getOrPut(
                 key = "b",
                 load = loadB,
             )
+
             val aAgain = cache.getOrPut(
                 key = "a",
                 load = loadA,
             )
+
             val bAgain = cache.getOrPut(
                 key = "b",
                 load = loadB,
@@ -210,6 +226,7 @@ class SessionValueCacheTest {
             val cache = SessionValueCache<String, String>()
             val loadCount = AtomicInteger(0)
             val readyToProceed = CompletableDeferred<Unit>()
+
             val load: suspend () -> String = {
                 loadCount.incrementAndGet()
                 readyToProceed.await()
@@ -223,12 +240,14 @@ class SessionValueCacheTest {
                     load = load,
                 )
             }
+
             val second = launch {
                 cache.getOrPut(
                     key = "key",
                     load = load,
                 )
             }
+
             readyToProceed.complete(Unit)
             first.join()
             second.join()
@@ -244,10 +263,12 @@ class SessionValueCacheTest {
         fun `concurrent loads for different keys do not block each other`() = runTest {
             // ----- Arrange -----
             val cache = SessionValueCache<String, String>()
+
             val loadA: suspend () -> String = {
                 delay(10_000)
                 "value-a"
             }
+
             val loadB: suspend () -> String = { "value-b" }
 
             // ----- Act -----
@@ -257,7 +278,9 @@ class SessionValueCacheTest {
                     load = loadA,
                 )
             }
+
             runCurrent()
+
             val bResult = cache.getOrPut(
                 key = "b",
                 load = loadB,
@@ -283,12 +306,15 @@ class SessionValueCacheTest {
             val loadCount = AtomicInteger(0)
             val loadError = RuntimeException("load failed")
             val readyToFail = CompletableDeferred<Unit>()
+
             val load: suspend () -> String = {
                 val attempt = loadCount.incrementAndGet()
+
                 if (attempt == 1) {
                     readyToFail.await()
                     throw loadError
                 }
+
                 "recovered"
             }
 
@@ -301,15 +327,18 @@ class SessionValueCacheTest {
                     )
                 }
             }
+
             // Drive `first` up to the point where it holds the key's lock and is suspended inside
             // load(), so `second` deterministically queues behind it rather than racing for the lock.
             runCurrent()
+
             val second = async {
                 cache.getOrPut(
                     key = "key",
                     load = load,
                 )
             }
+
             readyToFail.complete(Unit)
             first.join()
             val secondResult = second.await()
@@ -336,6 +365,7 @@ class SessionValueCacheTest {
                 refreshLoadCount.incrementAndGet()
                 "new-value"
             }
+
             val afterRefresh = cache.getOrPut(key = "key") { error("must not load again") }
 
             // ----- Assert -----
@@ -368,11 +398,13 @@ class SessionValueCacheTest {
             val refreshLoadCount = AtomicInteger(0)
             val getOrPutLoadCount = AtomicInteger(0)
             val readyToProceed = CompletableDeferred<Unit>()
+
             val refreshLoad: suspend () -> String = {
                 refreshLoadCount.incrementAndGet()
                 readyToProceed.await()
                 "refreshed-value"
             }
+
             val getOrPutLoad: suspend () -> String = {
                 getOrPutLoadCount.incrementAndGet()
                 "should-not-be-used"
@@ -385,15 +417,18 @@ class SessionValueCacheTest {
                     load = refreshLoad,
                 )
             }
+
             // Drive `refreshJob` up to the point where it holds the key's lock and is suspended
             // inside load(), so the getOrPut below deterministically queues behind it.
             runCurrent()
+
             val getOrPutJob = async {
                 cache.getOrPut(
                     key = "key",
                     load = getOrPutLoad,
                 )
             }
+
             readyToProceed.complete(Unit)
             refreshJob.join()
             val getOrPutResult = getOrPutJob.await()
@@ -427,6 +462,7 @@ class SessionValueCacheTest {
             // ----- Arrange -----
             val cache = SessionValueCache<Unit, String>()
             val loadCount = AtomicInteger(0)
+
             val load: suspend () -> String = {
                 loadCount.incrementAndGet()
                 "value"

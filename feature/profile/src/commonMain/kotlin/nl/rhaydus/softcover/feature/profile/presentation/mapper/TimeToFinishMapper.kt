@@ -41,6 +41,7 @@ internal fun timeToFinishUiModel(
     if (timeToFinish == null) return loadingTimeToFinish()
 
     val median = timeToFinish.medianDays
+
     if (timeToFinish.readCount == 0 || median == null) {
         return TimeToFinishUiModel(
             title = TIME_TO_FINISH_TITLE,
@@ -79,6 +80,7 @@ private fun framing(
     bandMedianDays: Map<LengthBand, Int>,
 ): String {
     val typical = "Your typical book took ${days(medianDays)}."
+
     if (bandMedianDays.size < 2) return typical
 
     val longest = listOf(LengthBand.OVER_450, LengthBand.FROM_250_TO_450, LengthBand.UNDER_250)

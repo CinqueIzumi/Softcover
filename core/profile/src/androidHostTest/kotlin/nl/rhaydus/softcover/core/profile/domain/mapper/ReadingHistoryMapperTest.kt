@@ -263,6 +263,7 @@ class ReadingHistoryMapperTest {
 
             // ----- Assert -----
             history.recentlyLoved.map { it.bookId } shouldBe listOf(5, 4, 2)
+
             history.recentlyLoved.map { it.finishedOn } shouldBe listOf(
                 LocalDate(
                     2026,

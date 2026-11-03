@@ -14,7 +14,7 @@ internal class OnAppearanceDismissedAction<
     S : AppearanceUiState<S>,
     E : UiEvent,
     V : LocalVariables,
-    > : UiAction<D, S, E, V> where D : ActionDependencies, D : AppearanceDependencies {
+> : UiAction<D, S, E, V> where D : ActionDependencies, D : AppearanceDependencies {
     override suspend fun execute(
         dependencies: D,
         scope: ActionScope<S, E, V>,

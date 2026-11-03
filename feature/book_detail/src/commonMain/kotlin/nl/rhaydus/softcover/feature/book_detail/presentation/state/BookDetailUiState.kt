@@ -6,6 +6,7 @@ import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.persistentSetOf
+import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardRailUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
@@ -23,7 +24,6 @@ import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.control.SegmentedControlUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.deadline.DeadlineRowUiModel
-import nl.rhaydus.softcover.core.component.dialog.DatePickerUiModel
 import nl.rhaydus.softcover.core.component.field.TextFieldUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
@@ -175,8 +175,8 @@ internal data class BookDetailUiState(
     /** Null while the book has no read. */
     val shelveReadingStatus: ShelveReadingStatusUiModel? = null,
 
-    /** Non-null exactly while the deadline picker is open; built by `OnOpenDeadlinePickerAction`. */
-    val deadlinePicker: DatePickerUiModel? = null,
+    /** The day the deadline picker opens on; non-null exactly while it is open, set by `OnOpenDeadlinePickerAction`. */
+    val deadlinePickerDate: LocalDate? = null,
 
     val unreleasedBadge: BadgeUiModel? = null,
 
@@ -449,7 +449,7 @@ internal data class BookDetailUiState(
         get() = userLists.firstOrNull { it.isOwned }
             ?.books
             ?.mapTo(mutableSetOf()) { it.editionId }
-            ?: emptySet()
+            .orEmpty()
 
     fun isEditionOwned(edition: BookEdition?): Boolean = edition != null && edition.id in ownedEditionIds
 

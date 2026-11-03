@@ -70,6 +70,7 @@ class ObserveOwnedBookIdsUseCaseTest {
         fun `unions shelved ids with the ids of every list`() = runTest {
             // ----- Arrange -----
             booksFlow.value = listOf(shelved(1), shelved(2))
+
             listsFlow.value = listOf(
                 listOf(10, 2, 3),
                 listOf(11, 4),

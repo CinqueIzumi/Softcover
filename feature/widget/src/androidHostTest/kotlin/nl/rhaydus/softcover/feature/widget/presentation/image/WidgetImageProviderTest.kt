@@ -4,10 +4,10 @@ import android.net.Uri
 import io.kotest.assertions.throwables.shouldThrow
 import io.mockk.every
 import io.mockk.mockk
-import java.io.FileNotFoundException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import java.io.FileNotFoundException
 
 class WidgetImageProviderTest {
     private lateinit var provider: WidgetImageProvider
@@ -29,16 +29,20 @@ class WidgetImageProviderTest {
     inner class OpenFile {
         @Test
         fun `rejects write modes`() {
+            // ----- Arrange -----
+            val uri = uriOf(validName)
+
             // ----- Act & Assert -----
             shouldThrow<FileNotFoundException> {
                 provider.openFile(
-                    uriOf(validName),
+                    uri,
                     "w",
                 )
             }
+
             shouldThrow<FileNotFoundException> {
                 provider.openFile(
-                    uriOf(validName),
+                    uri,
                     "rw",
                 )
             }
@@ -46,16 +50,21 @@ class WidgetImageProviderTest {
 
         @Test
         fun `rejects a name that does not match the pattern`() {
+            // ----- Arrange -----
+            val lowercaseOnly = uriOf("cover.png")
+            val uppercase = uriOf("A".repeat(64) + ".png")
+
             // ----- Act & Assert -----
             shouldThrow<FileNotFoundException> {
                 provider.openFile(
-                    uriOf("cover.png"),
+                    lowercaseOnly,
                     "r",
                 )
             }
+
             shouldThrow<FileNotFoundException> {
                 provider.openFile(
-                    uriOf("A".repeat(64) + ".png"),
+                    uppercase,
                     "r",
                 )
             }
@@ -63,19 +72,25 @@ class WidgetImageProviderTest {
 
         @Test
         fun `rejects a traversal segment`() {
+            // ----- Arrange -----
+            val separateSegment = uriOf(
+                "..",
+                "x",
+            )
+
+            val embeddedSegment = uriOf("../x")
+
             // ----- Act & Assert -----
             shouldThrow<FileNotFoundException> {
                 provider.openFile(
-                    uriOf(
-                        "..",
-                        "x",
-                    ),
+                    separateSegment,
                     "r",
                 )
             }
+
             shouldThrow<FileNotFoundException> {
                 provider.openFile(
-                    uriOf("../x"),
+                    embeddedSegment,
                     "r",
                 )
             }
@@ -83,13 +98,16 @@ class WidgetImageProviderTest {
 
         @Test
         fun `rejects a path with more than one segment`() {
+            // ----- Arrange -----
+            val uri = uriOf(
+                "sub",
+                validName,
+            )
+
             // ----- Act & Assert -----
             shouldThrow<FileNotFoundException> {
                 provider.openFile(
-                    uriOf(
-                        "sub",
-                        validName,
-                    ),
+                    uri,
                     "r",
                 )
             }

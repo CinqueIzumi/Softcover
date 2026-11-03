@@ -2,10 +2,6 @@ package nl.rhaydus.softcover.core.component.gallery
 
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -15,8 +11,6 @@ import nl.rhaydus.softcover.core.component.badge.Badge
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.badge.CoverOverlay
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
-import nl.rhaydus.softcover.core.component.button.MorphingButton
-import nl.rhaydus.softcover.core.component.button.MorphingButtonTone
 import nl.rhaydus.softcover.core.component.button.PillButton
 import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.chip.Chip
@@ -96,49 +90,6 @@ internal val primitiveEntries: ImmutableList<GalleryEntry> = persistentListOf(
                 modifier = modifier,
             )
         },
-    ),
-    GalleryEntry(
-        name = "MorphingButton",
-        family = GalleryFamily.BUTTON,
-        blurb = "A text button that animates between the filled and tonal styles: colour, label " +
-            "crossfade and width. Tap the third fixture to see the morph.",
-        fixtures = persistentListOf(
-            GalleryFixture(
-                label = "Filled",
-                render = { modifier ->
-                    MorphingButton(
-                        label = "Want to read",
-                        tone = MorphingButtonTone.Filled,
-                        onClick = {},
-                        modifier = modifier,
-                    )
-                },
-            ),
-            GalleryFixture(
-                label = "Tonal",
-                render = { modifier ->
-                    MorphingButton(
-                        label = "Remove from library",
-                        tone = MorphingButtonTone.Tonal,
-                        onClick = {},
-                        modifier = modifier,
-                    )
-                },
-            ),
-            GalleryFixture(
-                label = "Tap to morph",
-                render = { modifier ->
-                    var inLibrary by remember { mutableStateOf(false) }
-
-                    MorphingButton(
-                        label = if (inLibrary) "Remove from library" else "Want to read",
-                        tone = if (inLibrary) MorphingButtonTone.Tonal else MorphingButtonTone.Filled,
-                        onClick = { inLibrary = inLibrary.not() },
-                        modifier = modifier,
-                    )
-                },
-            ),
-        ),
     ),
     galleryEntry(
         name = "Badge",

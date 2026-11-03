@@ -33,11 +33,13 @@ class CalloutsCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk(relaxed = true)
     }
 
@@ -74,31 +76,31 @@ class CalloutsCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `sets both callouts for a shelved book whose edition differs from the scanned one`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                stateFlow.value = buildBookDetailUiState().copy(
-                    book = stubBook(
-                        status = BookStatus.WantToRead,
-                        shelvedEditionId = 10,
-                    ),
-                    scannedEditionId = 42,
+        fun `sets both callouts for a shelved book whose edition differs from the scanned one`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = buildBookDetailUiState().copy(
+                book = stubBook(
+                    status = BookStatus.WantToRead,
+                    shelvedEditionId = 10,
+                ),
+                scannedEditionId = 42,
+            )
+
+            val collector = CalloutsCollector()
+
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-                val collector = CalloutsCollector()
-
-                // ----- Act -----
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Assert -----
-                stateFlow.value.statusCallout.shouldNotBeNull()
-                stateFlow.value.scanEditionCallout.shouldNotBeNull()
-                job.cancel()
             }
+
+            // ----- Assert -----
+            stateFlow.value.statusCallout.shouldNotBeNull()
+            stateFlow.value.scanEditionCallout.shouldNotBeNull()
+            job.cancel()
+        }
 
         @Test
         fun `both callouts are null when there is no book`() = runTest(UnconfinedTestDispatcher()) {
@@ -130,7 +132,9 @@ class CalloutsCollectorTest {
                 ),
                 scannedEditionId = 42,
             )
+
             val collector = CalloutsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -148,34 +152,37 @@ class CalloutsCollectorTest {
         }
 
         @Test
-        fun `scanEditionCallout switches to Busy while the scanned edition is updating`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                stateFlow.value = buildBookDetailUiState().copy(
-                    book = stubBook(
-                        status = BookStatus.Reading,
-                        shelvedEditionId = 10,
-                    ),
-                    scannedEditionId = 42,
+        fun `scanEditionCallout switches to Busy while the scanned edition is updating`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = buildBookDetailUiState().copy(
+                book = stubBook(
+                    status = BookStatus.Reading,
+                    shelvedEditionId = 10,
+                ),
+                scannedEditionId = 42,
+            )
+
+            val collector = CalloutsCollector()
+
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-                val collector = CalloutsCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-                stateFlow.value.scanEditionCallout.shouldNotBeNull().callToAction
-                    .shouldBeInstanceOf<CalloutActionUiModel.Button>()
-
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(isUpdatingScannedEdition = true)
-
-                // ----- Assert -----
-                stateFlow.value.scanEditionCallout.shouldNotBeNull().callToAction
-                    .shouldBeInstanceOf<CalloutActionUiModel.Busy>()
-                job.cancel()
             }
+
+            stateFlow.value.scanEditionCallout.shouldNotBeNull().callToAction
+                .shouldBeInstanceOf<CalloutActionUiModel.Button>()
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(isUpdatingScannedEdition = true)
+
+            // ----- Assert -----
+            stateFlow.value.scanEditionCallout.shouldNotBeNull().callToAction
+                .shouldBeInstanceOf<CalloutActionUiModel.Busy>()
+
+            job.cancel()
+        }
 
         @Test
         fun `sets shelveReadDate to the formatted read date of the user book`() = runTest(UnconfinedTestDispatcher()) {
@@ -187,6 +194,7 @@ class CalloutsCollectorTest {
                     readDate = "12/03/2026",
                 ),
             )
+
             val collector = CalloutsCollector()
 
             // ----- Act -----
@@ -212,6 +220,7 @@ class CalloutsCollectorTest {
                     readDate = null,
                 ),
             )
+
             val collector = CalloutsCollector()
 
             // ----- Act -----

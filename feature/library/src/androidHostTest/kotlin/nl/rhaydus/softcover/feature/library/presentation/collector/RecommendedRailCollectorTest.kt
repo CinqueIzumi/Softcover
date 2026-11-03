@@ -12,8 +12,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
@@ -86,6 +86,7 @@ class RecommendedRailCollectorTest {
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 val stateFlow = MutableStateFlow(state())
+
                 val job = launch {
                     RecommendedRailCollector().onLaunch(
                         scope = scopeFor(stateFlow),
@@ -98,10 +99,12 @@ class RecommendedRailCollectorTest {
 
                 // ----- Assert -----
                 rails.keys shouldBe setOf(wantToReadTab.id)
+
                 rails.getValue(wantToReadTab.id).rail.set.cards.map { it.key } shouldBe listOf(
                     BookCardKey.Book(bookId = 1),
                     BookCardKey.Book(bookId = 2),
                 )
+
                 job.cancel()
             }
 
@@ -109,6 +112,7 @@ class RecommendedRailCollectorTest {
         fun `publishes no rail once the shelf holds five books`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val stateFlow = MutableStateFlow(state(shelfBooks = shelf(count = 5)))
+
             val job = launch {
                 RecommendedRailCollector().onLaunch(
                     scope = scopeFor(stateFlow),
@@ -128,6 +132,7 @@ class RecommendedRailCollectorTest {
         fun `publishes no rail in selection mode`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val stateFlow = MutableStateFlow(state(selectionMode = true))
+
             val job = launch {
                 RecommendedRailCollector().onLaunch(
                     scope = scopeFor(stateFlow),
@@ -147,6 +152,7 @@ class RecommendedRailCollectorTest {
         fun `publishes no rail while rearranging`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val stateFlow = MutableStateFlow(state(isRearranging = true))
+
             val job = launch {
                 RecommendedRailCollector().onLaunch(
                     scope = scopeFor(stateFlow),
@@ -163,61 +169,62 @@ class RecommendedRailCollectorTest {
         }
 
         @Test
-        fun `publishes stand-in cards with no payloads while recommendations load`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val stateFlow = MutableStateFlow(
-                    state(
-                        recommended = emptyList(),
-                        loading = true,
-                    ),
+        fun `publishes stand-in cards with no payloads while recommendations load`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val stateFlow = MutableStateFlow(
+                state(
+                    recommended = emptyList(),
+                    loading = true,
+                ),
+            )
+
+            val job = launch {
+                RecommendedRailCollector().onLaunch(
+                    scope = scopeFor(stateFlow),
+                    dependencies = mockk<LibraryDependencies>(relaxed = true),
                 )
-                val job = launch {
-                    RecommendedRailCollector().onLaunch(
-                        scope = scopeFor(stateFlow),
-                        dependencies = mockk<LibraryDependencies>(relaxed = true),
-                    )
-                }
-
-                // ----- Act -----
-                val set = stateFlow.value.recommendedRailByTab[wantToReadTab.id].shouldNotBeNull().rail.set
-
-                // ----- Assert -----
-                set.cards.isNotEmpty() shouldBe true
-                set.cards.all { it.isLoading } shouldBe true
-                set.payloadByKey.isEmpty() shouldBe true
-                job.cancel()
             }
+
+            // ----- Act -----
+            val set = stateFlow.value.recommendedRailByTab[wantToReadTab.id].shouldNotBeNull().rail.set
+
+            // ----- Assert -----
+            set.cards.isNotEmpty() shouldBe true
+            set.cards.all { it.isLoading } shouldBe true
+            set.payloadByKey.isEmpty() shouldBe true
+            job.cancel()
+        }
 
         @Test
-        fun `publishes no rail without recommendations once loading has finished`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val stateFlow = MutableStateFlow(
-                    state(
-                        recommended = emptyList(),
-                        loading = false,
-                    ),
+        fun `publishes no rail without recommendations once loading has finished`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val stateFlow = MutableStateFlow(
+                state(
+                    recommended = emptyList(),
+                    loading = false,
+                ),
+            )
+
+            val job = launch {
+                RecommendedRailCollector().onLaunch(
+                    scope = scopeFor(stateFlow),
+                    dependencies = mockk<LibraryDependencies>(relaxed = true),
                 )
-                val job = launch {
-                    RecommendedRailCollector().onLaunch(
-                        scope = scopeFor(stateFlow),
-                        dependencies = mockk<LibraryDependencies>(relaxed = true),
-                    )
-                }
-
-                // ----- Act -----
-                val rails = stateFlow.value.recommendedRailByTab
-
-                // ----- Assert -----
-                rails.keys.shouldBeEmpty()
-                job.cancel()
             }
+
+            // ----- Act -----
+            val rails = stateFlow.value.recommendedRailByTab
+
+            // ----- Assert -----
+            rails.keys.shouldBeEmpty()
+            job.cancel()
+        }
 
         @Test
         fun `publishes no rail when want to read is not a visible tab`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val stateFlow = MutableStateFlow(state(tabs = listOf(LibraryTab.All)))
+
             val job = launch {
                 RecommendedRailCollector().onLaunch(
                     scope = scopeFor(stateFlow),
@@ -237,6 +244,7 @@ class RecommendedRailCollectorTest {
         fun `publishes no rail before the want to read books have loaded`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val stateFlow = MutableStateFlow(state(shelfBooks = null))
+
             val job = launch {
                 RecommendedRailCollector().onLaunch(
                     scope = scopeFor(stateFlow),
@@ -261,6 +269,7 @@ class RecommendedRailCollectorTest {
                     shelfLoading = true,
                 ),
             )
+
             val job = launch {
                 RecommendedRailCollector().onLaunch(
                     scope = scopeFor(stateFlow),
@@ -285,6 +294,7 @@ class RecommendedRailCollectorTest {
                     shelfLoading = false,
                 ),
             )
+
             val job = launch {
                 RecommendedRailCollector().onLaunch(
                     scope = scopeFor(stateFlow),
@@ -304,6 +314,7 @@ class RecommendedRailCollectorTest {
         fun `removes the rail when the shelf grows to five books`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val stateFlow = MutableStateFlow(state(shelfBooks = shelf(count = 4)))
+
             val job = launch {
                 RecommendedRailCollector().onLaunch(
                     scope = scopeFor(stateFlow),
@@ -325,6 +336,7 @@ class RecommendedRailCollectorTest {
         fun `places the rail under the empty state with a gutter inset`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val stateFlow = MutableStateFlow(state(shelfBooks = emptyList()))
+
             val job = launch {
                 RecommendedRailCollector().onLaunch(
                     scope = scopeFor(stateFlow),
@@ -345,6 +357,7 @@ class RecommendedRailCollectorTest {
         fun `places the rail under the grid with no inset`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val stateFlow = MutableStateFlow(state(shelfBooks = shelf(count = 2)))
+
             val job = launch {
                 RecommendedRailCollector().onLaunch(
                     scope = scopeFor(stateFlow),

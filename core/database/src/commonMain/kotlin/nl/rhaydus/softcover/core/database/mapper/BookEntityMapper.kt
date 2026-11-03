@@ -124,25 +124,23 @@ internal fun Author.toEntity(): AuthorEntity = AuthorEntity(
     genderId = gender.id,
 )
 
-internal fun Book.toBookAuthorRefs(): List<BookAuthorCrossRef> =
-    authors.map {
-        BookAuthorCrossRef(
-            bookId = id,
-            authorId = it.id,
-            isPrimaryAuthor = it.id !in nonPrimaryAuthorIds,
-        )
-    }
+internal fun Book.toBookAuthorRefs(): List<BookAuthorCrossRef> = authors.map {
+    BookAuthorCrossRef(
+        bookId = id,
+        authorId = it.id,
+        isPrimaryAuthor = it.id !in nonPrimaryAuthorIds,
+    )
+}
 
 internal fun Book.toEditionAuthorRefs(): List<EditionAuthorCrossRef> =
     editions.flatMap { it.toEditionAuthorRefs() }
 
-internal fun BookEdition.toEditionAuthorRefs(): List<EditionAuthorCrossRef> =
-    authors.map {
-        EditionAuthorCrossRef(
-            editionId = id,
-            authorId = it.id,
-        )
-    }
+internal fun BookEdition.toEditionAuthorRefs(): List<EditionAuthorCrossRef> = authors.map {
+    EditionAuthorCrossRef(
+        editionId = id,
+        authorId = it.id,
+    )
+}
 // endregion
 // region Entity -> UI mappers
 fun AuthorEntity.toModel(): Author = Author(
@@ -222,8 +220,10 @@ fun ReadingJournalEntity.toModel(): ReadingJournal = ReadingJournal(
 
 fun BookFullEntity.toModel(): Book {
     val bookAuthorEntities = bookAuthors.mapNotNull { it.author }
+
     val uiEditions = editions.map { editionWithAuthors ->
         val editionAuthors = editionWithAuthors.authors.ifEmpty { bookAuthorEntities }
+
         editionWithAuthors.edition.edition.toModel(
             authors = editionAuthors,
             owned = editionWithAuthors.edition.isOwned,
@@ -234,11 +234,12 @@ fun BookFullEntity.toModel(): Book {
         uiEditions.firstOrNull { it.id == id }
     }
 
-    val journals = userBookWithJournals?.journals?.map { it.toModel() } ?: emptyList()
+    val journals = userBookWithJournals?.journals?.map { it.toModel() }.orEmpty()
+
     val reads = userBookWithJournals?.userBookReads
         ?.sortedBy { it.id }
         ?.map { it.toModel() }
-        ?: emptyList()
+        .orEmpty()
 
     return Book(
         id = book.id,

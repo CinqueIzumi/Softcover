@@ -26,6 +26,7 @@ class OnFieldShakeEndedActionTest {
     fun setUp() {
         val initial = fieldLiveState()
         dependencies = mockk(relaxed = true)
+
         stateFlow = MutableStateFlow(
             initial.copy(
                 fields = initial.fields
@@ -33,6 +34,7 @@ class OnFieldShakeEndedActionTest {
                     .toImmutableList(),
             ),
         )
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(FieldLiveLocalVariables()),
@@ -56,14 +58,17 @@ class OnFieldShakeEndedActionTest {
 
             // ----- Assert -----
             val errors = stateFlow.value.fields.map { it.field.error }
+
             errors.first() shouldBe TextFieldError(
                 message = "Nope",
                 shaking = false,
             )
+
             val untouched = TextFieldError(
                 message = "Nope",
                 shaking = true,
             )
+
             errors.drop(1).all { it == untouched } shouldBe true
         }
 

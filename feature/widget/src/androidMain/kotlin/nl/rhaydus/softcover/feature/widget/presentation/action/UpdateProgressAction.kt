@@ -11,4 +11,4 @@ internal sealed interface UpdateProgressAction : UiAction<
     UpdateProgressUiState,
     UpdateProgressEvent,
     UpdateProgressLocalVariables,
-    >
+>

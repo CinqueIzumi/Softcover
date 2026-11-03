@@ -6,9 +6,9 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
+import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -17,12 +17,6 @@ import io.mockk.slot
 import io.mockk.unmockkAll
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.CreateListBookMutation
 import nl.rhaydus.softcover.CreateListMutation
@@ -44,6 +38,12 @@ import nl.rhaydus.softcover.core.network.helper.safeMutation
 import nl.rhaydus.softcover.core.network.helper.safeQuery
 import nl.rhaydus.softcover.fragment.ListFragment
 import nl.rhaydus.softcover.type.ListInput
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class ListsRemoteDataSourceImplTest {
     private lateinit var apolloClient: ApolloClient
@@ -55,6 +55,7 @@ class ListsRemoteDataSourceImplTest {
         apolloClient = mockk()
 
         val dispatcher = UnconfinedTestDispatcher()
+
         appDispatchers = AppDispatchers(
             main = dispatcher,
             io = dispatcher,
@@ -114,7 +115,6 @@ class ListsRemoteDataSourceImplTest {
         @Test
         fun `maps each list to a ListSignature with correct signature string`() = runTest {
             // ----- Arrange -----
-            val userId = 1
             val updatedAt = "2024-01-10"
             val maxBookUpdatedAt = "2024-01-09"
             val count = 3
@@ -132,27 +132,35 @@ class ListsRemoteDataSourceImplTest {
             every {
                 queryData.me
             } returns listOf(meEntry)
+
             every {
                 meEntry.lists
             } returns listOf(listEntry)
+
             every {
                 listEntry.id
             } returns 42
+
             every {
                 listEntry.updated_at
             } returns updatedAt
+
             every {
                 listEntry.list_books_aggregate
             } returns aggregate
+
             every {
                 aggregate.aggregate
             } returns aggregateInner
+
             every {
                 aggregateInner.count
             } returns count
+
             every {
                 aggregateInner.max
             } returns max
+
             every {
                 max.updated_at
             } returns maxBookUpdatedAt
@@ -163,6 +171,7 @@ class ListsRemoteDataSourceImplTest {
             // ----- Assert -----
             result.size shouldBe 1
             result[0].listId shouldBe 42
+
             result[0].signature shouldBe buildListSignature(
                 updatedAt = updatedAt,
                 count = count,
@@ -173,7 +182,6 @@ class ListsRemoteDataSourceImplTest {
         @Test
         fun `signature uses empty strings for null updatedAt and null maxListBookUpdatedAt`() = runTest {
             // ----- Arrange -----
-            val userId = 2
             val queryData = mockk<GetUserListSignaturesQuery.Data>()
             val meEntry = mockk<GetUserListSignaturesQuery.Data.Me>()
             val listEntry = mockk<GetUserListSignaturesQuery.Data.Me.List>()
@@ -187,24 +195,31 @@ class ListsRemoteDataSourceImplTest {
             every {
                 queryData.me
             } returns listOf(meEntry)
+
             every {
                 meEntry.lists
             } returns listOf(listEntry)
+
             every {
                 listEntry.id
             } returns 7
+
             every {
                 listEntry.updated_at
             } returns null
+
             every {
                 listEntry.list_books_aggregate
             } returns aggregate
+
             every {
                 aggregate.aggregate
             } returns aggregateInner
+
             every {
                 aggregateInner.count
             } returns 5
+
             every {
                 aggregateInner.max
             } returns null
@@ -219,7 +234,6 @@ class ListsRemoteDataSourceImplTest {
         @Test
         fun `uses count 0 when aggregate is null`() = runTest {
             // ----- Arrange -----
-            val userId = 3
             val queryData = mockk<GetUserListSignaturesQuery.Data>()
             val meEntry = mockk<GetUserListSignaturesQuery.Data.Me>()
             val listEntry = mockk<GetUserListSignaturesQuery.Data.Me.List>()
@@ -232,18 +246,23 @@ class ListsRemoteDataSourceImplTest {
             every {
                 queryData.me
             } returns listOf(meEntry)
+
             every {
                 meEntry.lists
             } returns listOf(listEntry)
+
             every {
                 listEntry.id
             } returns 9
+
             every {
                 listEntry.updated_at
             } returns "2024-02-01"
+
             every {
                 listEntry.list_books_aggregate
             } returns aggregate
+
             every {
                 aggregate.aggregate
             } returns null

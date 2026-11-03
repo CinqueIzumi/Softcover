@@ -54,6 +54,7 @@ class MainActivityViewModelTest {
         coEvery {
             getUserIdUseCase()
         } returns Result.success(-1)
+
         every {
             getThemeConfigurationUseCase()
         } returns emptyFlow()
@@ -182,6 +183,7 @@ class MainActivityViewModelTest {
             coEvery {
                 reAuthenticateUseCase("abc")
             } returns Result.success(Unit)
+
             showReAuthSheet()
             viewModel.onReAuthApiKeyChanged("abc")
 
@@ -200,6 +202,7 @@ class MainActivityViewModelTest {
             coEvery {
                 reAuthenticateUseCase("abc")
             } returns Result.failure(IllegalStateException("rejected"))
+
             showReAuthSheet()
             viewModel.onReAuthApiKeyChanged("abc")
 
@@ -239,6 +242,7 @@ class MainActivityViewModelTest {
             coEvery {
                 reAuthenticateUseCase("abc")
             } returns Result.success(Unit)
+
             showReAuthSheet()
             viewModel.onReAuthApiKeyChanged("abc")
             viewModel.reAuthenticate()
@@ -268,6 +272,7 @@ class MainActivityViewModelTest {
             coEvery {
                 resetUserDataUseCase()
             } returns Result.success(Unit)
+
             showReAuthSheet()
             viewModel.logOutFromReAuth()
 
@@ -286,6 +291,7 @@ class MainActivityViewModelTest {
             coEvery {
                 reAuthenticateUseCase("abc")
             } returns Result.success(Unit)
+
             showReAuthSheet()
             viewModel.onReAuthApiKeyChanged("abc")
             viewModel.reAuthenticate()
@@ -302,12 +308,15 @@ class MainActivityViewModelTest {
         fun `log out tapped while re-auth validates, then success, still logs out after dismissal`() {
             // ----- Arrange -----
             val validation = CompletableDeferred<Result<Unit>>()
+
             coEvery {
                 reAuthenticateUseCase("abc")
             } coAnswers { validation.await() }
+
             coEvery {
                 resetUserDataUseCase()
             } returns Result.success(Unit)
+
             showReAuthSheet()
             viewModel.onReAuthApiKeyChanged("abc")
             viewModel.reAuthenticate()
@@ -328,6 +337,7 @@ class MainActivityViewModelTest {
             coEvery {
                 resetUserDataUseCase()
             } returns Result.success(Unit)
+
             showReAuthSheet()
             viewModel.logOutFromReAuth()
             viewModel.onReAuthDismissed()
@@ -463,9 +473,11 @@ class MainActivityViewModelTest {
         fun `survives a still loading sign-in state and is pending once signed in`() {
             // ----- Arrange -----
             val userId = CompletableDeferred<Result<Int>>()
+
             coEvery {
                 getUserIdUseCase()
             } coAnswers { userId.await() }
+
             val model = createViewModel()
 
             // ----- Act -----
@@ -481,9 +493,11 @@ class MainActivityViewModelTest {
         fun `is cleared when the sign-in state resolves to signed out`() {
             // ----- Arrange -----
             val userId = CompletableDeferred<Result<Int>>()
+
             coEvery {
                 getUserIdUseCase()
             } coAnswers { userId.await() }
+
             val model = createViewModel()
             model.onExternalNavigationRequest(request = request)
 

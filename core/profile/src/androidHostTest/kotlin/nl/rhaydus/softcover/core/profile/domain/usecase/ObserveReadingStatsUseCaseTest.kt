@@ -30,10 +30,13 @@ class ObserveReadingStatsUseCaseTest {
     fun setUp() {
         getReadUserBooksUseCase = mockk()
         observeUserTagsByBookUseCase = mockk()
+
         every {
             observeUserTagsByBookUseCase()
         } returns flowOf(emptyMap())
+
         dispatcher = StandardTestDispatcher()
+
         useCase = ObserveReadingStatsUseCase(
             getReadUserBooksUseCase = getReadUserBooksUseCase,
             observeUserTagsByBookUseCase = observeUserTagsByBookUseCase,
@@ -57,11 +60,13 @@ class ObserveReadingStatsUseCaseTest {
                     pages = 100,
                 ),
             )
+
             val two = one + readBook(
                 id = 2,
                 finishedAt = "2026-02-01",
                 pages = 50,
             )
+
             every {
                 getReadUserBooksUseCase()
             } returns flowOf(
@@ -87,11 +92,14 @@ class ObserveReadingStatsUseCaseTest {
                     finishedAt = "2026-01-01",
                 ),
             )
+
             val tagsFlow = MutableSharedFlow<Map<Int, List<UserTag>>>(replay = 1)
             tagsFlow.tryEmit(emptyMap())
+
             every {
                 getReadUserBooksUseCase()
             } returns flowOf(books)
+
             every {
                 observeUserTagsByBookUseCase()
             } returns tagsFlow

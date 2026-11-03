@@ -31,9 +31,11 @@ class RefreshLibraryOnStartUseCaseTest {
     fun setUp() {
         settingsRepository = mockk(relaxed = true)
         refreshLibraryUseCase = mockk()
+
         every {
             settingsRepository.authorRolesBackfilled
         } returns flowOf(true)
+
         every {
             settingsRepository.readDatesBackfilled
         } returns flowOf(true)
@@ -52,9 +54,11 @@ class RefreshLibraryOnStartUseCaseTest {
             every {
                 settingsRepository.readThroughsBackfilled
             } returns flowOf(false)
+
             every {
                 settingsRepository.authorDemographicsBackfilled
             } returns flowOf(true)
+
             coEvery {
                 refreshLibraryUseCase(scope = any())
             } returns Result.success(Unit)
@@ -64,11 +68,13 @@ class RefreshLibraryOnStartUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+
             coVerify(exactly = 1) {
                 refreshLibraryUseCase(
                     scope = RefreshScope.ByStatuses(statuses = UserBookStatus.entries.toSet()),
                 )
             }
+
             coVerify(exactly = 1) { settingsRepository.markReadThroughsBackfilled() }
         }
 
@@ -76,12 +82,15 @@ class RefreshLibraryOnStartUseCaseTest {
         fun `does not mark the flag and returns the failure when the backfill refresh fails`() = runTest {
             // ----- Arrange -----
             val expectedError = RuntimeException("refresh error")
+
             every {
                 settingsRepository.readThroughsBackfilled
             } returns flowOf(false)
+
             every {
                 settingsRepository.authorDemographicsBackfilled
             } returns flowOf(true)
+
             coEvery {
                 refreshLibraryUseCase(scope = any())
             } returns Result.failure(expectedError)
@@ -101,9 +110,11 @@ class RefreshLibraryOnStartUseCaseTest {
             every {
                 settingsRepository.readThroughsBackfilled
             } returns flowOf(true)
+
             every {
                 settingsRepository.authorDemographicsBackfilled
             } returns flowOf(true)
+
             coEvery {
                 refreshLibraryUseCase(scope = any())
             } returns Result.success(Unit)
@@ -121,12 +132,15 @@ class RefreshLibraryOnStartUseCaseTest {
         fun `returns the failure when the active-scope refresh fails`() = runTest {
             // ----- Arrange -----
             val expectedError = RuntimeException("refresh error")
+
             every {
                 settingsRepository.readThroughsBackfilled
             } returns flowOf(true)
+
             every {
                 settingsRepository.authorDemographicsBackfilled
             } returns flowOf(true)
+
             coEvery {
                 refreshLibraryUseCase(scope = any())
             } returns Result.failure(expectedError)
@@ -145,9 +159,11 @@ class RefreshLibraryOnStartUseCaseTest {
             every {
                 settingsRepository.readThroughsBackfilled
             } returns emptyFlow()
+
             every {
                 settingsRepository.authorDemographicsBackfilled
             } returns emptyFlow()
+
             coEvery {
                 refreshLibraryUseCase(scope = any())
             } returns Result.success(Unit)
@@ -167,9 +183,11 @@ class RefreshLibraryOnStartUseCaseTest {
             every {
                 settingsRepository.readThroughsBackfilled
             } returns flowOf(true)
+
             every {
                 settingsRepository.authorDemographicsBackfilled
             } returns flowOf(false)
+
             coEvery {
                 refreshLibraryUseCase(scope = any())
             } returns Result.success(Unit)
@@ -190,12 +208,15 @@ class RefreshLibraryOnStartUseCaseTest {
             every {
                 settingsRepository.readThroughsBackfilled
             } returns flowOf(true)
+
             every {
                 settingsRepository.authorDemographicsBackfilled
             } returns flowOf(true)
+
             every {
                 settingsRepository.authorRolesBackfilled
             } returns flowOf(false)
+
             coEvery {
                 refreshLibraryUseCase(scope = any())
             } returns Result.success(Unit)
@@ -215,12 +236,15 @@ class RefreshLibraryOnStartUseCaseTest {
             every {
                 settingsRepository.readThroughsBackfilled
             } returns flowOf(true)
+
             every {
                 settingsRepository.authorDemographicsBackfilled
             } returns flowOf(true)
+
             every {
                 settingsRepository.readDatesBackfilled
             } returns flowOf(false)
+
             coEvery {
                 refreshLibraryUseCase(scope = any())
             } returns Result.success(Unit)
@@ -230,11 +254,13 @@ class RefreshLibraryOnStartUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+
             coVerify(exactly = 1) {
                 refreshLibraryUseCase(
                     scope = RefreshScope.ByStatuses(statuses = UserBookStatus.entries.toSet()),
                 )
             }
+
             coVerify(exactly = 0) { refreshLibraryUseCase(scope = activeScope) }
         }
 
@@ -242,15 +268,19 @@ class RefreshLibraryOnStartUseCaseTest {
         fun `returns the failure when the read-dates refresh fails`() = runTest {
             // ----- Arrange -----
             val expectedError = RuntimeException("refresh error")
+
             every {
                 settingsRepository.readThroughsBackfilled
             } returns flowOf(true)
+
             every {
                 settingsRepository.authorDemographicsBackfilled
             } returns flowOf(true)
+
             every {
                 settingsRepository.readDatesBackfilled
             } returns flowOf(false)
+
             coEvery {
                 refreshLibraryUseCase(scope = any())
             } returns Result.failure(expectedError)
@@ -266,12 +296,15 @@ class RefreshLibraryOnStartUseCaseTest {
         fun `returns the failure when the read refresh fails`() = runTest {
             // ----- Arrange -----
             val expectedError = RuntimeException("refresh error")
+
             every {
                 settingsRepository.readThroughsBackfilled
             } returns flowOf(true)
+
             every {
                 settingsRepository.authorDemographicsBackfilled
             } returns flowOf(false)
+
             coEvery {
                 refreshLibraryUseCase(scope = any())
             } returns Result.failure(expectedError)
@@ -289,9 +322,11 @@ class RefreshLibraryOnStartUseCaseTest {
             every {
                 settingsRepository.readThroughsBackfilled
             } returns flowOf(false)
+
             every {
                 settingsRepository.authorDemographicsBackfilled
             } returns flowOf(false)
+
             coEvery {
                 refreshLibraryUseCase(scope = any())
             } returns Result.success(Unit)
@@ -302,11 +337,13 @@ class RefreshLibraryOnStartUseCaseTest {
             // ----- Assert -----
             result.isSuccess shouldBe true
             coVerify(exactly = 1) { refreshLibraryUseCase(scope = any()) }
+
             coVerify(exactly = 1) {
                 refreshLibraryUseCase(
                     scope = RefreshScope.ByStatuses(statuses = UserBookStatus.entries.toSet()),
                 )
             }
+
             coVerify(exactly = 1) { settingsRepository.markReadThroughsBackfilled() }
         }
     }

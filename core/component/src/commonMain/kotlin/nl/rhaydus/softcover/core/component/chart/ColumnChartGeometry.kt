@@ -53,10 +53,12 @@ internal fun Modifier.keepInsideRow(
             maxWidth = Constraints.Infinity,
         ),
     )
+
     val columnWidth = constraints.maxWidth
     val columnLeft = index * (columnWidth + gap)
     val rowWidth = count * columnWidth + (count - 1) * gap
     val centredLeft = columnLeft + (columnWidth - placeable.width) / 2f
+
     val left = centredLeft.coerceIn(
         0f,
         (rowWidth - placeable.width).coerceAtLeast(0f),

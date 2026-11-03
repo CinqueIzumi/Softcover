@@ -40,15 +40,20 @@ class SimilarBooksRailCollectorTest {
     fun setUp() {
         shelvedIdsFlow = MutableStateFlow(emptySet())
         observeShelvedBookIdsUseCase = mockk()
+
         every {
             observeShelvedBookIdsUseCase(ids = any())
         } returns shelvedIdsFlow
+
         dependencies = mockk(relaxed = true)
+
         every {
             dependencies.observeShelvedBookIdsUseCase
         } returns observeShelvedBookIdsUseCase
+
         stateFlow = MutableStateFlow(buildBookDetailUiState())
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
@@ -61,6 +66,7 @@ class SimilarBooksRailCollectorTest {
         isLoading: Boolean = false,
     ) {
         localVariablesFlow.value = BookDetailLocalVariables(similarBooks = ids.map { buildSimilarBook(id = it) })
+
         stateFlow.value = stateFlow.value.copy(
             book = buildSimilarBook(id = 5),
             similarBookIds = ids.toImmutableList(),
@@ -75,32 +81,32 @@ class SimilarBooksRailCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `maps the loaded books to cards in rank order with click payloads`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                loadBooks(ids = listOf(30, 10, 20))
-                val collector = SimilarBooksRailCollector()
+        fun `maps the loaded books to cards in rank order with click payloads`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            loadBooks(ids = listOf(30, 10, 20))
+            val collector = SimilarBooksRailCollector()
 
-                // ----- Act -----
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Assert -----
-                stateFlow.value.railBookIds() shouldBe listOf(30, 10, 20)
-                val payload = stateFlow.value.similarBooks.set[BookCardKey.Book(bookId = 10)]
-                payload.shouldNotBeNull().shouldBeInstanceOf<OnSimilarBookClickAction>().bookId shouldBe 10
-                job.cancel()
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            // ----- Assert -----
+            stateFlow.value.railBookIds() shouldBe listOf(30, 10, 20)
+            val payload = stateFlow.value.similarBooks.set[BookCardKey.Book(bookId = 10)]
+            payload.shouldNotBeNull().shouldBeInstanceOf<OnSimilarBookClickAction>().bookId shouldBe 10
+            job.cancel()
+        }
 
         @Test
         fun `drops a book from the rail as soon as it is shelved`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             loadBooks(ids = listOf(10, 20, 30))
             val collector = SimilarBooksRailCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -124,6 +130,7 @@ class SimilarBooksRailCollectorTest {
                 similarBookIds = null,
                 isLoadingSimilarBooks = true,
             )
+
             val collector = SimilarBooksRailCollector()
 
             // ----- Act -----
@@ -147,6 +154,7 @@ class SimilarBooksRailCollectorTest {
                 similarBookIds = persistentListOf(),
                 isLoadingSimilarBooks = false,
             )
+
             val collector = SimilarBooksRailCollector()
 
             // ----- Act -----
@@ -163,27 +171,27 @@ class SimilarBooksRailCollectorTest {
         }
 
         @Test
-        fun `flags the rail as appending while a further page loads over existing cards`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                loadBooks(
-                    ids = listOf(10, 20),
-                    isLoading = true,
+        fun `flags the rail as appending while a further page loads over existing cards`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            loadBooks(
+                ids = listOf(10, 20),
+                isLoading = true,
+            )
+
+            val collector = SimilarBooksRailCollector()
+
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-                val collector = SimilarBooksRailCollector()
-
-                // ----- Act -----
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Assert -----
-                stateFlow.value.similarBooks.isAppending shouldBe true
-                job.cancel()
             }
+
+            // ----- Assert -----
+            stateFlow.value.similarBooks.isAppending shouldBe true
+            job.cancel()
+        }
 
         @Test
         fun `lets the rail load more only while the ranking has more pages`() = runTest(UnconfinedTestDispatcher()) {
@@ -191,12 +199,14 @@ class SimilarBooksRailCollectorTest {
             loadBooks(ids = listOf(10, 20))
             stateFlow.value = stateFlow.value.copy(similarBooksHasMore = true)
             val collector = SimilarBooksRailCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
                     dependencies = dependencies,
                 )
             }
+
             val whileMore = stateFlow.value.similarBooks.canLoadMore
 
             // ----- Act -----
@@ -215,7 +225,9 @@ class SimilarBooksRailCollectorTest {
                 ids = listOf(10, 20),
                 isLoading = true,
             )
+
             val collector = SimilarBooksRailCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

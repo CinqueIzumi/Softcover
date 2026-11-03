@@ -7,8 +7,8 @@ import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.Constraints
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.chip.Chip
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 @Composable
 internal fun BookCardTagStripRow(
@@ -34,6 +34,7 @@ internal fun BookCardTagStripRow(
             gap = gap,
             available = constraints.maxWidth,
         )
+
         val overflow = overflows.getOrNull(chips.size - shown - 1)?.takeIf { shown < chips.size }
         val line = chips.take(shown) + listOfNotNull(overflow)
         val height = line.maxOfOrNull(Placeable::height) ?: 0
@@ -47,6 +48,7 @@ internal fun BookCardTagStripRow(
                     x = x,
                     y = (height - placeable.height) / 2,
                 )
+
                 x += placeable.width + gap
             }
         }

@@ -73,16 +73,21 @@ class ProgressSheetSliceTest {
     @BeforeEach
     fun setUp() {
         getLastUsedUnit = mockk()
+
         every {
             getLastUsedUnit()
         } returns emptyFlow()
+
         setLastUsedUnit = mockk(relaxed = true)
+
         slice = ProgressSheetSlice(
             getLastUsedProgressUnitAsFlowUseCase = getLastUsedUnit,
             setLastUsedProgressUnitUseCase = setLastUsedUnit,
         )
+
         host = RecordingHost()
         stateFlow = MutableStateFlow(TestState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(TestLocalVariables),
@@ -97,9 +102,11 @@ class ProgressSheetSliceTest {
             every {
                 mock.coroutineScope
             } returns testScope
+
             every {
                 mock.mainDispatcher
             } returns dispatcher
+
             every {
                 mock.launch(any())
             } answers { callOriginal() }
@@ -117,6 +124,7 @@ class ProgressSheetSliceTest {
             every {
                 getLastUsedUnit()
             } returns flowOf(ProgressUnit.PERCENTAGE)
+
             stateFlow.value = TestState(progressSheet = ProgressSheetState(tab = ProgressSheetTab.PAGE))
 
             // ----- Act -----
@@ -153,29 +161,29 @@ class ProgressSheetSliceTest {
         }
 
         @Test
-        fun `opens the sheet on the mapped model when a book arrives for a requested sheet`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val book = PreviewData.baseBook
-                val job = launch {
-                    slice.collect(
-                        host,
-                        scope,
-                    )
-                }
+        fun `opens the sheet on the mapped model when a book arrives for a requested sheet`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val book = PreviewData.baseBook
 
-                // ----- Act -----
-                stateFlow.value = TestState(
-                    book = book,
-                    progressSheet = ProgressSheetState().opened(),
+            val job = launch {
+                slice.collect(
+                    host,
+                    scope,
                 )
-
-                // ----- Assert -----
-                val expected = book.toProgressSheetUiModel(selectedTab = ProgressSheetTab.PAGE)
-                val sheet = stateFlow.value.progressSheet.session.modelOrNull.shouldNotBeNull()
-                sheet.copy(whenRead = expected.whenRead) shouldBe expected
-                job.cancel()
             }
+
+            // ----- Act -----
+            stateFlow.value = TestState(
+                book = book,
+                progressSheet = ProgressSheetState().opened(),
+            )
+
+            // ----- Assert -----
+            val expected = book.toProgressSheetUiModel(selectedTab = ProgressSheetTab.PAGE)
+            val sheet = stateFlow.value.progressSheet.session.modelOrNull.shouldNotBeNull()
+            sheet.copy(whenRead = expected.whenRead) shouldBe expected
+            job.cancel()
+        }
 
         @Test
         fun `a book alone does not open the sheet`() = runTest(UnconfinedTestDispatcher()) {
@@ -222,6 +230,7 @@ class ProgressSheetSliceTest {
                     scope,
                 )
             }
+
             stateFlow.value = TestState(
                 book = PreviewData.baseBook,
                 progressSheet = ProgressSheetState().opened(),
@@ -245,6 +254,7 @@ class ProgressSheetSliceTest {
                     scope,
                 )
             }
+
             stateFlow.value = TestState(
                 book = PreviewData.baseBook,
                 progressSheet = ProgressSheetState().opened(),
@@ -259,34 +269,35 @@ class ProgressSheetSliceTest {
         }
 
         @Test
-        fun `reopens with a fresh model when a request arrives while a close is in flight`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val book = PreviewData.baseBook
-                val closingModel = ProgressSheetUiModel.previews.values.first().requestingClose()
-                stateFlow.value = TestState(
-                    progressSheet = ProgressSheetState(session = SheetSession.Open(model = closingModel)),
-                )
-                val job = launch {
-                    slice.collect(
-                        host,
-                        scope,
-                    )
-                }
+        fun `reopens with a fresh model when a request arrives while a close is in flight`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val book = PreviewData.baseBook
+            val closingModel = ProgressSheetUiModel.previews.values.first().requestingClose()
 
-                // ----- Act -----
-                stateFlow.value = TestState(
-                    book = book,
-                    progressSheet = stateFlow.value.progressSheet.opened(),
-                )
+            stateFlow.value = TestState(
+                progressSheet = ProgressSheetState(session = SheetSession.Open(model = closingModel)),
+            )
 
-                // ----- Assert -----
-                stateFlow.value.progressSheet.session.isClosing shouldBe false
-                val expected = book.toProgressSheetUiModel(selectedTab = ProgressSheetTab.PAGE)
-                val sheet = stateFlow.value.progressSheet.session.modelOrNull.shouldNotBeNull()
-                sheet.copy(whenRead = expected.whenRead) shouldBe expected
-                job.cancel()
+            val job = launch {
+                slice.collect(
+                    host,
+                    scope,
+                )
             }
+
+            // ----- Act -----
+            stateFlow.value = TestState(
+                book = book,
+                progressSheet = stateFlow.value.progressSheet.opened(),
+            )
+
+            // ----- Assert -----
+            stateFlow.value.progressSheet.session.isClosing shouldBe false
+            val expected = book.toProgressSheetUiModel(selectedTab = ProgressSheetTab.PAGE)
+            val sheet = stateFlow.value.progressSheet.session.modelOrNull.shouldNotBeNull()
+            sheet.copy(whenRead = expected.whenRead) shouldBe expected
+            job.cancel()
+        }
 
         @Test
         fun `a tab change alone re-emits the model on the stored tab`() = runTest(UnconfinedTestDispatcher()) {
@@ -297,6 +308,7 @@ class ProgressSheetSliceTest {
                     scope,
                 )
             }
+
             stateFlow.value = TestState(
                 book = PreviewData.baseBook,
                 progressSheet = ProgressSheetState(tab = ProgressSheetTab.PAGE).opened(),
@@ -321,6 +333,7 @@ class ProgressSheetSliceTest {
                     scope,
                 )
             }
+
             stateFlow.value = TestState(
                 book = audioBook,
                 progressSheet = ProgressSheetState().opened(),
@@ -341,6 +354,7 @@ class ProgressSheetSliceTest {
             // ----- Assert -----
             val medium = stateFlow.value.progressSheet.session.modelOrNull?.medium
                 .shouldBeInstanceOf<ProgressSheetMedium.Timed>()
+
             medium.hours.text shouldBe "4"
             medium.minutes.text shouldBe "30"
             medium.seconds.text shouldBe "15"
@@ -356,6 +370,7 @@ class ProgressSheetSliceTest {
                     scope,
                 )
             }
+
             stateFlow.value = TestState(
                 book = audioBook,
                 progressSheet = ProgressSheetState(
@@ -374,6 +389,7 @@ class ProgressSheetSliceTest {
             // ----- Assert -----
             val medium = stateFlow.value.progressSheet.session.modelOrNull?.medium
                 .shouldBeInstanceOf<ProgressSheetMedium.Timed>()
+
             medium.hours.text shouldBe "0"
             medium.minutes.text shouldBe "0"
             medium.seconds.text shouldBe "0"
@@ -381,30 +397,30 @@ class ProgressSheetSliceTest {
         }
 
         @Test
-        fun `a backdate shows the picked time on the whenRead row and selects its chip`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val job = launch {
-                    slice.collect(
-                        host,
-                        scope,
-                    )
-                }
-                stateFlow.value = TestState(
-                    book = PreviewData.baseBook,
-                    progressSheet = ProgressSheetState().opened(),
+        fun `a backdate shows the picked time on the whenRead row and selects its chip`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val job = launch {
+                slice.collect(
+                    host,
+                    scope,
                 )
-
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.withSheet { it.copy(readAt = pastReadAt) }
-
-                // ----- Assert -----
-                val whenRead = stateFlow.value.progressSheet.session.modelOrNull.shouldNotBeNull().whenRead
-                whenRead.timeLabel shouldBe "09:15"
-                whenRead.chip.selected shouldBe true
-                whenRead.chip.label shouldEndWith ", 09:15"
-                job.cancel()
             }
+
+            stateFlow.value = TestState(
+                book = PreviewData.baseBook,
+                progressSheet = ProgressSheetState().opened(),
+            )
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.withSheet { it.copy(readAt = pastReadAt) }
+
+            // ----- Assert -----
+            val whenRead = stateFlow.value.progressSheet.session.modelOrNull.shouldNotBeNull().whenRead
+            whenRead.timeLabel shouldBe "09:15"
+            whenRead.chip.selected shouldBe true
+            whenRead.chip.label shouldEndWith ", 09:15"
+            job.cancel()
+        }
 
         @Test
         fun `resetting the backdate returns the whenRead row to just now`() = runTest(UnconfinedTestDispatcher()) {
@@ -415,6 +431,7 @@ class ProgressSheetSliceTest {
                     scope,
                 )
             }
+
             stateFlow.value = TestState(
                 book = PreviewData.baseBook,
                 progressSheet = ProgressSheetState(readAt = pastReadAt).copy(requested = true),
@@ -438,6 +455,7 @@ class ProgressSheetSliceTest {
                     scope,
                 )
             }
+
             stateFlow.value = TestState(
                 book = audioBook,
                 progressSheet = ProgressSheetState(
@@ -456,6 +474,7 @@ class ProgressSheetSliceTest {
             // ----- Assert -----
             val medium = stateFlow.value.progressSheet.session.modelOrNull?.medium
                 .shouldBeInstanceOf<ProgressSheetMedium.Timed>()
+
             medium.hours.text shouldBe "2"
             medium.minutes.text shouldBe "20"
             medium.seconds.text shouldBe "5"
@@ -673,6 +692,7 @@ class ProgressSheetSliceTest {
         fun `submitting pages records a page entry with the backdated actionAt`() = runTest {
             // ----- Arrange -----
             val book = PreviewData.baseBook
+
             stateFlow.value = TestState(
                 book = book,
                 progressSheet = ProgressSheetState(readAt = pastReadAt),
@@ -724,11 +744,13 @@ class ProgressSheetSliceTest {
                 pages = 400,
                 owned = true,
             )
+
             val book = PreviewData.baseBook.copy(
                 editions = listOf(edition),
                 defaultEdition = edition,
                 userBook = PreviewData.baseBook.userBook?.copy(editionId = null),
             )
+
             stateFlow.value = TestState(book = book)
 
             // ----- Act -----
@@ -751,6 +773,7 @@ class ProgressSheetSliceTest {
                 defaultEdition = null,
                 userBook = PreviewData.baseBook.userBook?.copy(editionId = null),
             )
+
             stateFlow.value = TestState(book = book)
 
             // ----- Act -----
@@ -794,6 +817,7 @@ class ProgressSheetSliceTest {
         fun `mark as read hands the book and the backdated actionAt to the host`() = runTest {
             // ----- Arrange -----
             val book = PreviewData.baseBook
+
             stateFlow.value = TestState(
                 book = book,
                 progressSheet = ProgressSheetState(readAt = pastReadAt),
@@ -869,6 +893,7 @@ class ProgressSheetSliceTest {
         fun `dismissing closes a session that is already closing`() = runTest {
             // ----- Arrange -----
             val closingModel = ProgressSheetUiModel.previews.values.first().requestingClose()
+
             stateFlow.value = TestState(
                 progressSheet = ProgressSheetState(session = SheetSession.Open(model = closingModel)),
             )

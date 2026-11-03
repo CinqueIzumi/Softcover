@@ -29,52 +29,57 @@ internal fun stubDependencies(testScope: TestScope): UpdateProgressDependencies 
 internal fun stubPagedBook(
     pages: Int?,
     id: Int = 99,
-): Book =
-    mockk<Book>().also { book ->
-        val edition = mockk<BookEdition>().also { e ->
-            every {
-                e.pages
-            } returns pages
-            every {
-                e.isAudiobook
-            } returns false
-            every {
-                e.audioSeconds
-            } returns null
-        }
+): Book = mockk<Book>().also { book ->
+    val edition = mockk<BookEdition>().also { e ->
+        every {
+            e.pages
+        } returns pages
 
         every {
-            book.id
-        } returns id
+            e.isAudiobook
+        } returns false
+
         every {
-            book.currentEdition
-        } returns edition
-        every {
-            book.defaultEdition
+            e.audioSeconds
         } returns null
     }
+
+    every {
+        book.id
+    } returns id
+
+    every {
+        book.currentEdition
+    } returns edition
+
+    every {
+        book.defaultEdition
+    } returns null
+}
 
 internal fun stubAudiobook(
     audioSeconds: Int?,
     id: Int = 99,
-): Book =
-    mockk<Book>().also { book ->
-        val edition = mockk<BookEdition>().also { e ->
-            every {
-                e.isAudiobook
-            } returns true
-            every {
-                e.audioSeconds
-            } returns audioSeconds
-        }
+): Book = mockk<Book>().also { book ->
+    val edition = mockk<BookEdition>().also { e ->
+        every {
+            e.isAudiobook
+        } returns true
 
         every {
-            book.id
-        } returns id
-        every {
-            book.currentEdition
-        } returns edition
-        every {
-            book.defaultEdition
-        } returns null
+            e.audioSeconds
+        } returns audioSeconds
     }
+
+    every {
+        book.id
+    } returns id
+
+    every {
+        book.currentEdition
+    } returns edition
+
+    every {
+        book.defaultEdition
+    } returns null
+}

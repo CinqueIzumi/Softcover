@@ -100,10 +100,12 @@ class ListsRepositoryImplAddRemoveListBookTest {
             val listId = 5
             val bookId = 3
             val editionId = 10
+
             val edition = stubEdition(
                 id = editionId,
                 bookId = bookId,
             )
+
             val realListBook = stubListBook(
                 listBookId = 99,
                 listId = listId,
@@ -164,6 +166,7 @@ class ListsRepositoryImplAddRemoveListBookTest {
             val listId = 5
             val bookId = 3
             val editionId = 10
+
             val edition = stubEdition(
                 id = editionId,
                 bookId = bookId,
@@ -216,10 +219,12 @@ class ListsRepositoryImplAddRemoveListBookTest {
             val listId = 5
             val bookId = 3
             val editionId = 10
+
             val edition = stubEdition(
                 id = editionId,
                 bookId = bookId,
             )
+
             val remoteError = RuntimeException("rejected")
 
             coEvery {
@@ -260,10 +265,12 @@ class ListsRepositoryImplAddRemoveListBookTest {
             val listId = 5
             val bookId = 3
             val editionId = 10
+
             val edition = stubEdition(
                 id = editionId,
                 bookId = bookId,
             )
+
             val queueError = IllegalStateException("queue full")
 
             coEvery {
@@ -304,6 +311,7 @@ class ListsRepositoryImplAddRemoveListBookTest {
             val listId = 5
             val bookId = 3
             val editionId = 10
+
             val edition = stubEdition(
                 id = editionId,
                 bookId = bookId,
@@ -371,11 +379,13 @@ class ListsRepositoryImplAddRemoveListBookTest {
             // ----- Arrange -----
             val listId = 5
             val bookId = 3
+
             val snapshot = stubListBook(
                 listBookId = 42,
                 listId = listId,
                 bookId = bookId,
             )
+
             val updatedBookList = stubBookList()
 
             coEvery {
@@ -412,6 +422,7 @@ class ListsRepositoryImplAddRemoveListBookTest {
             val bookId = 3
             val editionId = 10
             val listBookId = 42
+
             val snapshot = stubListBook(
                 listBookId = listBookId,
                 listId = listId,
@@ -465,11 +476,13 @@ class ListsRepositoryImplAddRemoveListBookTest {
             // ----- Arrange -----
             val listId = 5
             val bookId = 3
+
             val snapshot = stubListBook(
                 listBookId = 42,
                 listId = listId,
                 bookId = bookId,
             )
+
             val remoteError = RuntimeException("rejected")
 
             coEvery {
@@ -508,11 +521,13 @@ class ListsRepositoryImplAddRemoveListBookTest {
             // ----- Arrange -----
             val listId = 5
             val bookId = 3
+
             val snapshot = stubListBook(
                 listBookId = 42,
                 listId = listId,
                 bookId = bookId,
             )
+
             val queueError = IllegalStateException("queue full")
 
             coEvery {
@@ -551,6 +566,7 @@ class ListsRepositoryImplAddRemoveListBookTest {
             // ----- Arrange -----
             val listId = 5
             val bookId = 3
+
             val snapshot = stubListBook(
                 listBookId = 42,
                 listId = listId,

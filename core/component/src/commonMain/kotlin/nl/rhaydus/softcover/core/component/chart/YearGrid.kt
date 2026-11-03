@@ -41,13 +41,13 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.designsystem.modifier.skeletonMask
+import nl.rhaydus.designsystem.theme.Corners
+import nl.rhaydus.designsystem.theme.Spacing
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import kotlin.math.floor
 import kotlin.math.roundToInt
-import nl.rhaydus.designsystem.modifier.pointerHandCursor
-import nl.rhaydus.softcover.core.component.state.skeletonMask
-import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 private const val DAY_COLUMNS = 31
 
@@ -88,6 +88,7 @@ fun YearGrid(
                 minimumValue = 0.dp,
                 maximumValue = 14.dp,
             )
+
         val rows = model.months.size.coerceAtLeast(1)
         val cellPx = with(density) { cell.toPx() }
         val gapPx = with(density) { gap.toPx() }
@@ -228,6 +229,7 @@ fun YearGrid(
                                             .semantics {
                                                 role = Role.Button
                                                 contentDescription = day.contentDescription
+
                                                 onClick {
                                                     currentOnEvent(YearGridEvent.DayTapped(day.date))
                                                     true

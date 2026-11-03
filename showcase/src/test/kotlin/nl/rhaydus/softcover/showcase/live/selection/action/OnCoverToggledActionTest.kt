@@ -24,6 +24,7 @@ class OnCoverToggledActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(selectionLiveState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(SelectionLiveLocalVariables()),
@@ -63,6 +64,7 @@ class OnCoverToggledActionTest {
                 dependencies = dependencies,
                 scope = scope,
             )
+
             action.execute(
                 dependencies = dependencies,
                 scope = scope,

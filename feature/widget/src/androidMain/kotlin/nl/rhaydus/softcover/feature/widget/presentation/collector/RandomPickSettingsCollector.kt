@@ -11,4 +11,4 @@ internal sealed interface RandomPickSettingsCollector : Collector<
     RandomPickSettingsEvent,
     RandomPickSettingsDependencies,
     RandomPickSettingsLocalVariables,
-    >
+>

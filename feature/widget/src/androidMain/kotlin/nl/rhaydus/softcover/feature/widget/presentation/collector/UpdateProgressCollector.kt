@@ -11,4 +11,4 @@ internal sealed interface UpdateProgressCollector : Collector<
     UpdateProgressEvent,
     UpdateProgressDependencies,
     UpdateProgressLocalVariables,
-    >
+>

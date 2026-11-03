@@ -173,6 +173,7 @@ private fun List<Book>.toAuthorDemographics(): AuthorDemographics {
                 fraction = count.toDouble() / totalAuthors,
             )
         }
+
     val genderSlices = if (unknownGenderCount > 0) {
         knownGenderSlices +
             GenderSlice(

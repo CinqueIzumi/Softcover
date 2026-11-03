@@ -32,6 +32,7 @@ class OnEndSessionPauseClickActionTest {
                 endSessionPauseSheet = SheetSession.Open(model = endSessionPauseSheetScaffold(bookTitle = "Dune")),
             ),
         )
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),

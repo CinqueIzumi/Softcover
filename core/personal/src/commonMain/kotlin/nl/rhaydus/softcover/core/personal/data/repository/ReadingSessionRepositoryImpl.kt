@@ -32,16 +32,16 @@ internal class ReadingSessionRepositoryImpl(
         startPage: Int?,
         startSeconds: Int?,
     ): Long = localDataSource.insert(
-            entity = ReadingSessionEntity(
-                bookId = bookId,
-                startedAt = Clock.System.now().toString(),
-                endedAt = null,
-                startPage = startPage,
-                endPage = null,
-                startSeconds = startSeconds,
-                endSeconds = null,
-            ),
-        )
+        entity = ReadingSessionEntity(
+            bookId = bookId,
+            startedAt = Clock.System.now().toString(),
+            endedAt = null,
+            startPage = startPage,
+            endPage = null,
+            startSeconds = startSeconds,
+            endSeconds = null,
+        ),
+    )
 
     override suspend fun stop(
         id: Long,

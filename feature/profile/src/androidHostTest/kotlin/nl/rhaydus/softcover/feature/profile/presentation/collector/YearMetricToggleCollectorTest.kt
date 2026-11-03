@@ -28,6 +28,7 @@ class YearMetricToggleCollectorTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(StatsAtlasUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(StatsAtlasLocalVariables()),
@@ -44,6 +45,7 @@ class YearMetricToggleCollectorTest {
                 isLoading = true,
                 readingHistory = mockk<ReadingHistory>(),
             )
+
             val collector = YearMetricToggleCollector()
 
             // ----- Act -----
@@ -59,6 +61,7 @@ class YearMetricToggleCollectorTest {
                 selected = YearMetric.BOOKS,
                 enabled = false,
             )
+
             job.cancel()
         }
 
@@ -69,6 +72,7 @@ class YearMetricToggleCollectorTest {
                 isLoading = false,
                 readingHistory = null,
             )
+
             val collector = YearMetricToggleCollector()
 
             // ----- Act -----
@@ -84,6 +88,7 @@ class YearMetricToggleCollectorTest {
                 selected = YearMetric.BOOKS,
                 enabled = false,
             )
+
             job.cancel()
         }
 
@@ -94,6 +99,7 @@ class YearMetricToggleCollectorTest {
                 isLoading = false,
                 readingHistory = mockk<ReadingHistory>(),
             )
+
             val collector = YearMetricToggleCollector()
 
             // ----- Act -----
@@ -109,6 +115,7 @@ class YearMetricToggleCollectorTest {
                 selected = YearMetric.BOOKS,
                 enabled = true,
             )
+
             job.cancel()
         }
 
@@ -119,7 +126,9 @@ class YearMetricToggleCollectorTest {
                 isLoading = false,
                 readingHistory = mockk<ReadingHistory>(),
             )
+
             val collector = YearMetricToggleCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -135,6 +144,7 @@ class YearMetricToggleCollectorTest {
                 selected = YearMetric.PAGES,
                 enabled = true,
             )
+
             job.cancel()
         }
     }

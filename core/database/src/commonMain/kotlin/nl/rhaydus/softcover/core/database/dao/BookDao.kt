@@ -321,11 +321,13 @@ interface BookDao {
             editions = book.editions,
             existingRefs = getEditionImageRefsByEditionIds(editionIds = book.editions.map { it.id }),
         )
+
         insertEditions(editionPlan.entities)
 
         // Insert authors (deduplicated by Hardcover id; book-level authors win over edition-level ones)
         val allAuthors = (book.authors + book.editions.flatMap { it.authors })
             .distinctBy { it.id }
+
         insertAuthors(allAuthors.map { it.toEntity() })
 
         // Cross references
@@ -433,6 +435,7 @@ interface BookDao {
             editions = editions,
             existingRefs = getEditionImageRefsByEditionIds(editionIds = editions.map { it.id }),
         )
+
         insertEditions(plan.entities)
 
         val allAuthors = editions.flatMap { it.authors }.distinctBy { it.id }
@@ -687,6 +690,7 @@ interface BookDao {
         val rankedIdSet = rankedIds.toSet()
 
         deleteRankedBooks(listKey = listKey)
+
         upsertRankedBooks(
             rows = rankedIds.mapIndexed { rank, bookId ->
                 RankedBookEntity(
@@ -696,6 +700,7 @@ interface BookDao {
                 )
             },
         )
+
         upsertRankedListMeta(
             meta = RankedListMetaEntity(
                 listKey = listKey,
@@ -800,10 +805,12 @@ interface BookDao {
                 oldId = oldId,
                 newId = newId,
             )
+
             copyBookUserTags(
                 oldId = oldId,
                 newId = newId,
             )
+
             deleteBookUserTagsForBook(bookId = oldId)
         }
 
@@ -860,6 +867,7 @@ interface BookDao {
         deleteUserBookByUserBookId(userBookId)
 
         if (countListBooksForBook(bookId = bookId) > 0) return
+
         if (countRankedForBook(bookId = bookId) > 0) return
 
         clearBookAuthors(bookId)

@@ -24,6 +24,7 @@ fun LocalDateTime?.toWhenReadUiModel(now: LocalDateTime): WhenReadUiModel {
         2,
         '0',
     )
+
     val mm = shown.minute.toString().padStart(
         2,
         '0',

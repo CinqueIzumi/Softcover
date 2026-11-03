@@ -41,6 +41,16 @@ private fun nl.rhaydus.softcover.feature.reading.presentation.component.StreakSt
     - row: STABLE (class with no mutable properties)
 
 @Composable
+private fun nl.rhaydus.softcover.feature.reading.presentation.screen.PreviewReadingScreenLayout(state: nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction, kotlin.Unit>, onBookClick: kotlin.Function1<nl.rhaydus.softcover.core.domain.model.Book, kotlin.Unit>, onNavigateToSearch: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+  skippable: false
+  restartable: true
+  params:
+    - state: UNSTABLE (has mutable properties or unstable members)
+    - runAction: STABLE (function type)
+    - onBookClick: STABLE (function type)
+    - onNavigateToSearch: STABLE (function type)
+
+@Composable
 public fun nl.rhaydus.softcover.feature.reading.presentation.screen.ReadingScreen.Content(): kotlin.Unit
   skippable: true
   restartable: true

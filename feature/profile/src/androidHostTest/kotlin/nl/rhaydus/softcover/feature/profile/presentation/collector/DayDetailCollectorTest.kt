@@ -68,6 +68,7 @@ class DayDetailCollectorTest {
         observeReadingDayUseCase = mockk()
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(StatsAtlasUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(StatsAtlasLocalVariables()),
@@ -132,6 +133,7 @@ class DayDetailCollectorTest {
                 currentYear = 2026,
                 streaks = AtlasStreaks(),
             )
+
             stateFlow.value.dayDetailSheet.modelOrNull shouldBe expected
             job.cancel()
         }
@@ -146,6 +148,7 @@ class DayDetailCollectorTest {
             } returns emissions
 
             stateFlow.value = StatsAtlasUiState(selectedReadingDay = day)
+
             val job = launch {
                 DayDetailCollector().onLaunch(
                     scope = scope,
@@ -163,6 +166,7 @@ class DayDetailCollectorTest {
                 currentYear = 2026,
                 streaks = AtlasStreaks(),
             )
+
             stateFlow.value.dayDetailSheet.modelOrNull shouldBe expected
             job.cancel()
         }
@@ -188,6 +192,7 @@ class DayDetailCollectorTest {
             } returns flowOf(readingDay(pages = 30))
 
             stateFlow.value = StatsAtlasUiState(selectedReadingDay = day)
+
             val job = launch {
                 DayDetailCollector().onLaunch(
                     scope = scope,
@@ -210,6 +215,7 @@ class DayDetailCollectorTest {
                 .shouldNotBeNull()
                 .scaffold.header.shouldNotBeNull().section.description
                 ?.joinToString(separator = "") { it.text }
+
             description shouldBe "Day 2 of a 3-day streak."
             job.cancel()
         }
@@ -222,6 +228,7 @@ class DayDetailCollectorTest {
             } returns flowOf(readingDay(pages = 30))
 
             stateFlow.value = StatsAtlasUiState(selectedReadingDay = day)
+
             val job = launch {
                 DayDetailCollector().onLaunch(
                     scope = scope,
@@ -238,28 +245,27 @@ class DayDetailCollectorTest {
         }
 
         @Test
-        fun `clears the selection and opens nothing when the day's pages fall to zero`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                every {
-                    observeReadingDayUseCase(day)
-                } returns flowOf(readingDay(pages = 0))
+        fun `clears the selection and opens nothing when the day's pages fall to zero`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            every {
+                observeReadingDayUseCase(day)
+            } returns flowOf(readingDay(pages = 0))
 
-                val job = launch {
-                    DayDetailCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                stateFlow.value = StatsAtlasUiState(selectedReadingDay = day)
-
-                // ----- Assert -----
-                stateFlow.value.selectedReadingDay.shouldBeNull()
-                stateFlow.value.dayDetailSheet.shouldNotBeNull() shouldBe SheetSession.Closed
-                job.cancel()
+            val job = launch {
+                DayDetailCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            // ----- Act -----
+            stateFlow.value = StatsAtlasUiState(selectedReadingDay = day)
+
+            // ----- Assert -----
+            stateFlow.value.selectedReadingDay.shouldBeNull()
+            stateFlow.value.dayDetailSheet.shouldNotBeNull() shouldBe SheetSession.Closed
+            job.cancel()
+        }
 
         @Test
         fun `does not reopen a sheet that is already closing`() = runTest(UnconfinedTestDispatcher()) {
@@ -271,12 +277,14 @@ class DayDetailCollectorTest {
             } returns emissions
 
             stateFlow.value = StatsAtlasUiState(selectedReadingDay = day)
+
             val job = launch {
                 DayDetailCollector().onLaunch(
                     scope = scope,
                     dependencies = dependencies,
                 )
             }
+
             stateFlow.value = stateFlow.value.copy(
                 dayDetailSheet = SheetSession.Open(
                     model = stateFlow.value.dayDetailSheet.modelOrNull.shouldNotBeNull().requestingClose(),

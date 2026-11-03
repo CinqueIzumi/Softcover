@@ -203,12 +203,14 @@ class HowItReadDraftMapperTest {
             // ----- Arrange -----
             val paces = Pace.entries.map { BookTraits(bookId = 1).copy(pace = it) }
             val styles = WritingStyle.entries.map { BookTraits(bookId = 1).copy(writingStyle = it) }
+
             val complicated = CharacterTrait.entries.map {
                 BookTraits(
                     bookId = 1,
                     characters = mapOf(it to TraitAnswer.COMPLICATED),
                 )
             }
+
             val all = paces + styles + complicated
 
             // ----- Act -----

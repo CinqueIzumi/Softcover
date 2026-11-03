@@ -3,10 +3,10 @@ package nl.rhaydus.softcover.core.book.data.datasource
 import androidx.room.RoomRawQuery
 import app.cash.turbine.test
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.types.shouldBeSameInstanceAs
-import io.kotest.matchers.types.shouldNotBeSameInstanceAs
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
+import io.kotest.matchers.types.shouldBeSameInstanceAs
+import io.kotest.matchers.types.shouldNotBeSameInstanceAs
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.coVerifyOrder
@@ -46,6 +46,7 @@ class BooksLocalDataSourceImplTest {
         dao = mockk(relaxed = true)
         editionImageStorage = mockk(relaxed = true)
         val dispatcher = UnconfinedTestDispatcher()
+
         dataSource = BooksLocalDataSourceImpl(
             dao = dao,
             editionImageStorage = editionImageStorage,
@@ -391,6 +392,7 @@ class BooksLocalDataSourceImplTest {
 
             // ----- Assert -----
             result shouldBe emptyList()
+
             coVerify(exactly = 0) {
                 dao.getExistingBookIds(any())
             }
@@ -409,6 +411,7 @@ class BooksLocalDataSourceImplTest {
 
             // ----- Assert -----
             result shouldBe emptyList()
+
             coVerify(exactly = 0) {
                 dao.getExistingEditionIds(any())
             }

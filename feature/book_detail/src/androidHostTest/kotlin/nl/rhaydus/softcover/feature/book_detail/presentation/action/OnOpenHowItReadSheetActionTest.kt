@@ -4,11 +4,11 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
-import io.mockk.coVerify
 import io.mockk.verify
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,6 +40,7 @@ class OnOpenHowItReadSheetActionTest {
     fun setUp() {
         getBookTraitsUseCase = mockk()
         stateFlow = MutableStateFlow(buildBookDetailUiState(bookId = 42))
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -47,6 +48,7 @@ class OnOpenHowItReadSheetActionTest {
         )
 
         mockkObject(SnackBarManager)
+
         every {
             SnackBarManager.showSnackbar(title = any())
         } returns Unit
@@ -64,12 +66,15 @@ class OnOpenHowItReadSheetActionTest {
             every {
                 mock.getBookTraitsUseCase
             } returns getBookTraitsUseCase
+
             every {
                 mock.coroutineScope
             } returns testScope
+
             every {
                 mock.mainDispatcher
             } returns dispatcher
+
             every {
                 mock.launch(any())
             } answers { callOriginal() }
@@ -82,6 +87,7 @@ class OnOpenHowItReadSheetActionTest {
         fun `seeds the draft from the stored traits of this book`() = runTest {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState(bookId = 42).copy(book = buildQuoteBook())
+
             coEvery {
                 getBookTraitsUseCase(bookId = 42)
             } returns Result.success(
@@ -108,6 +114,7 @@ class OnOpenHowItReadSheetActionTest {
         fun `leaves the draft empty and shows a message when the traits cannot be read`() = runTest {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState(bookId = 42).copy(book = buildQuoteBook())
+
             coEvery {
                 getBookTraitsUseCase(bookId = 42)
             } returns Result.failure(RuntimeException("read failed"))
@@ -120,6 +127,7 @@ class OnOpenHowItReadSheetActionTest {
 
             // ----- Assert -----
             stateFlow.value.howItReadDraft.shouldBeNull()
+
             verify(exactly = 1) {
                 SnackBarManager.showSnackbar(title = "Couldn't load your answers. Try again.")
             }
@@ -138,6 +146,7 @@ class OnOpenHowItReadSheetActionTest {
 
             // ----- Assert -----
             stateFlow.value.howItReadDraft.shouldBeNull()
+
             coVerify(exactly = 0) {
                 getBookTraitsUseCase(bookId = any())
             }

@@ -3,6 +3,8 @@ package nl.rhaydus.softcover.orchestration.presentation
 import cafe.adriel.voyager.navigator.tab.Tab
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.presentation.util.LibraryNavPulseKey
 import nl.rhaydus.softcover.feature.explore.presentation.screen.ExploreTab
 import nl.rhaydus.softcover.feature.library.presentation.screen.LibraryTab
@@ -35,6 +37,10 @@ class NavItemClickResolverTest {
         selected: Boolean,
     ) = NavItemUi(
         tab = tab,
+        icon = drawableIconResource(
+            contentDescription = "icon",
+            icon = SoftcoverIcon.Explore,
+        ),
         selected = selected,
         showBadge = false,
         iconScale = 1f,
@@ -46,6 +52,7 @@ class NavItemClickResolverTest {
         fun `unselected item selects its tab without reselect or pulse`() = runTest {
             // ----- Arrange -----
             val resolver = resolver(reselectResult = true)
+
             val item = item(
                 ExploreTab,
                 selected = false,
@@ -56,6 +63,7 @@ class NavItemClickResolverTest {
                 item = item,
                 launchReselect = ::recordLaunch,
             )
+
             launchedBlocks.forEach { it() }
 
             // ----- Assert -----
@@ -68,6 +76,7 @@ class NavItemClickResolverTest {
         fun `selected item whose reselect is consumed neither pulses nor selects`() = runTest {
             // ----- Arrange -----
             val resolver = resolver(reselectResult = true)
+
             val item = item(
                 ReadingTab,
                 selected = true,
@@ -78,6 +87,7 @@ class NavItemClickResolverTest {
                 item = item,
                 launchReselect = ::recordLaunch,
             )
+
             launchedBlocks.forEach { it() }
 
             // ----- Assert -----
@@ -90,6 +100,7 @@ class NavItemClickResolverTest {
         fun `selected item whose reselect is not consumed pulses its key`() = runTest {
             // ----- Arrange -----
             val resolver = resolver(reselectResult = false)
+
             val item = item(
                 ExploreTab,
                 selected = true,
@@ -100,10 +111,11 @@ class NavItemClickResolverTest {
                 item = item,
                 launchReselect = ::recordLaunch,
             )
+
             launchedBlocks.forEach { it() }
 
             // ----- Assert -----
-            pulsedKeys shouldBe listOf(ExploreTab)
+            pulsedKeys shouldBe listOf(TabNavPulseKey(ExploreTab))
             selectedTabs shouldBe emptyList()
         }
 
@@ -111,6 +123,7 @@ class NavItemClickResolverTest {
         fun `selected library item pulses the shared library key`() = runTest {
             // ----- Arrange -----
             val resolver = resolver(reselectResult = false)
+
             val item = item(
                 LibraryTab,
                 selected = true,
@@ -121,6 +134,7 @@ class NavItemClickResolverTest {
                 item = item,
                 launchReselect = ::recordLaunch,
             )
+
             launchedBlocks.forEach { it() }
 
             // ----- Assert -----
@@ -134,6 +148,7 @@ class NavItemClickResolverTest {
         fun `unselected never calls launch`() {
             // ----- Arrange -----
             val resolver = resolver(reselectResult = false)
+
             val item = item(
                 ExploreTab,
                 selected = false,
@@ -153,6 +168,7 @@ class NavItemClickResolverTest {
         fun `selected defers reselect until the launched block runs`() = runTest {
             // ----- Arrange -----
             val resolver = resolver(reselectResult = false)
+
             val item = item(
                 ReadingTab,
                 selected = true,
@@ -163,6 +179,7 @@ class NavItemClickResolverTest {
                 item = item,
                 launchReselect = ::recordLaunch,
             )
+
             val reselectedBeforeRun = reselectedKeys.toList()
             launchedBlocks.single().invoke()
 
@@ -188,7 +205,7 @@ class NavItemClickResolverTest {
         }
 
         @Test
-        fun `any other tab maps to itself`() {
+        fun `any other tab maps to a pulse key wrapping that tab`() {
             // ----- Arrange -----
             val tab: Tab = ReadingTab
 
@@ -196,7 +213,7 @@ class NavItemClickResolverTest {
             val result = navPulseKeyFor(tab)
 
             // ----- Assert -----
-            result shouldBe ReadingTab
+            result shouldBe TabNavPulseKey(ReadingTab)
         }
     }
 }

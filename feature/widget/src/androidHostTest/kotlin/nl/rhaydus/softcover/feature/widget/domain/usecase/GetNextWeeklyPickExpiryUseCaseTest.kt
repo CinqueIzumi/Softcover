@@ -34,6 +34,7 @@ class GetNextWeeklyPickExpiryUseCaseTest {
         coEvery {
             repository.getSettings(appWidgetId = appWidgetId)
         } returns RandomPickSettings(cadence = cadence)
+
         coEvery {
             repository.getState(appWidgetId = appWidgetId)
         } returns RandomPickState(
@@ -52,11 +53,13 @@ class GetNextWeeklyPickExpiryUseCaseTest {
                 cadence = RandomPickCadence.Weekly,
                 pickedAt = now - 1.days,
             )
+
             stubInstance(
                 appWidgetId = 2,
                 cadence = RandomPickCadence.Weekly,
                 pickedAt = now - 5.days,
             )
+
             stubInstance(
                 appWidgetId = 3,
                 cadence = RandomPickCadence.Weekly,
@@ -78,6 +81,7 @@ class GetNextWeeklyPickExpiryUseCaseTest {
                 cadence = RandomPickCadence.Weekly,
                 pickedAt = now - 8.days,
             )
+
             stubInstance(
                 appWidgetId = 2,
                 cadence = RandomPickCadence.Weekly,
@@ -99,11 +103,13 @@ class GetNextWeeklyPickExpiryUseCaseTest {
                 cadence = RandomPickCadence.Weekly,
                 pickedAt = now - 7.days,
             )
+
             stubInstance(
                 appWidgetId = 2,
                 cadence = RandomPickCadence.Daily,
                 pickedAt = now - 1.days,
             )
+
             stubInstance(
                 appWidgetId = 3,
                 cadence = RandomPickCadence.OnShuffleOnly,
@@ -122,6 +128,7 @@ class GetNextWeeklyPickExpiryUseCaseTest {
         fun `surfaces a repository failure as a failed result`() = runTest {
             // ----- Arrange -----
             val failure = IllegalStateException("store unavailable")
+
             coEvery {
                 repository.getSettings(appWidgetId = 1)
             } throws failure

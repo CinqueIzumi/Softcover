@@ -9,11 +9,10 @@ import nl.rhaydus.softcover.core.component.share.withShareCapture
 internal fun profileShareSheetFor(
     card: ReadingLifeShareCardUiModel,
     progress: ShareCaptureProgress,
-): ShareCardSheetUiModel =
-    ShareCardSheetUiModel(
-        card = card,
-        scaffold = profileShareSheetScaffold().withShareCapture(progress = progress),
-        displayName = "${card.readerName}-reading-life",
-        previewMaxWidth = 240.dp,
-        previewMaxHeight = 420.dp,
-    )
+): ShareCardSheetUiModel = ShareCardSheetUiModel(
+    card = card,
+    scaffold = profileShareSheetScaffold().withShareCapture(progress = progress),
+    displayName = "${card.readerName}-reading-life",
+    previewMaxWidth = 240.dp,
+    previewMaxHeight = 420.dp,
+)

@@ -30,6 +30,7 @@ class OnDemoSelectedActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(SheetLiveUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(SheetLiveLocalVariables()),
@@ -96,6 +97,7 @@ class OnDemoSelectedActionTest {
                     scope = scope,
                 )
             }
+
             runCurrent()
 
             // ----- Assert -----
@@ -115,6 +117,7 @@ class OnDemoSelectedActionTest {
                     scope = scope,
                 )
             }
+
             advanceTimeBy(1_500)
             runCurrent()
 
@@ -135,6 +138,7 @@ class OnDemoSelectedActionTest {
                     scope = scope,
                 )
             }
+
             advanceTimeBy(3_000)
             runCurrent()
 

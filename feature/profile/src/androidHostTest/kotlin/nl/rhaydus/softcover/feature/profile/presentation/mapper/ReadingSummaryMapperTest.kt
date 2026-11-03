@@ -101,6 +101,7 @@ class ReadingSummaryMapperTest {
                     ),
                 ),
             )
+
             val activity = activityOf(
                 today to 10,
                 daysAgo(3) to 20,
@@ -199,6 +200,7 @@ class ReadingSummaryMapperTest {
         fun `tints by the quartiles of the window and ignores older days`() {
             // ----- Arrange -----
             val inWindow = (0 until 4).map { daysAgo(it) to (it + 1) * 10 }
+
             val activity = activityOf(
                 *inWindow.toTypedArray(),
                 daysAgo(200) to 5_000,

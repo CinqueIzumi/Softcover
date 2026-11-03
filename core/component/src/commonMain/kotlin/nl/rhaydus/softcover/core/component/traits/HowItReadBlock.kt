@@ -27,13 +27,13 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
-import nl.rhaydus.softcover.core.component.modifier.tactileClickable
+import nl.rhaydus.designsystem.theme.Corners
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
@@ -78,7 +78,7 @@ private fun HowItReadInvitation(
             .fillMaxWidth()
             .heightIn(min = 48.dp)
             .pointerHandCursor()
-            .tactileClickable(onClick = onClick)
+            .pressScaleClickable(onClick = onClick)
             .padding(horizontal = Spacing.md),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -124,11 +124,13 @@ private fun HowItReadSummaryRow(
 ) {
     val playMotion = playDecorativeMotion()
     val spatialSpec = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
+
     val rotation by animateFloatAsState(
         targetValue = if (model.expanded) 180f else 0f,
         animationSpec = if (playMotion) spatialSpec else snap(),
         label = "HowItReadChevronRotation",
     )
+
     val chevron = drawableIconResource(
         icon = SoftcoverIcon.ArrowDropDown,
         contentDescription = model.toggleLabel,
@@ -139,7 +141,7 @@ private fun HowItReadSummaryRow(
             .fillMaxWidth()
             .heightIn(min = 48.dp)
             .pointerHandCursor()
-            .tactileClickable(onClick = onClick)
+            .pressScaleClickable(onClick = onClick)
             .padding(horizontal = Spacing.md),
         horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
         verticalAlignment = Alignment.CenterVertically,
@@ -186,7 +188,7 @@ private fun HowItReadRows(
                 .align(Alignment.End)
                 .heightIn(min = 48.dp)
                 .pointerHandCursor()
-                .tactileClickable(
+                .pressScaleClickable(
                     onClick = onEditClick,
                     role = Role.Button,
                 )

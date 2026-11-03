@@ -37,6 +37,7 @@ class OnQuoteDeleteSheetDismissedActionTest {
         } returns deleteQuoteUseCase
 
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -53,6 +54,7 @@ class OnQuoteDeleteSheetDismissedActionTest {
                 quoteDeleteSheet = SheetSession.Open(model = deleteQuoteSheetScaffold()),
                 quoteDeleteRequestId = 5L,
             )
+
             val action = OnQuoteDeleteSheetDismissedAction()
 
             // ----- Act -----
@@ -65,6 +67,7 @@ class OnQuoteDeleteSheetDismissedActionTest {
             coVerify(exactly = 0) {
                 deleteQuoteUseCase(localId = any())
             }
+
             stateFlow.value.quoteDeleteSheet shouldBe SheetSession.Closed
             stateFlow.value.quoteDeleteRequestId.shouldBeNull()
         }

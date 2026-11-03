@@ -28,6 +28,7 @@ class BookTraitsDaoTest {
             builder = Room.inMemoryDatabaseBuilder(context = context),
             queryContext = testDispatcher,
         )
+
         dao = database.bookTraitsDao()
     }
 
@@ -68,10 +69,12 @@ class BookTraitsDaoTest {
                 bookId = 1,
                 updatedAt = 10L,
             )
+
             val kept = BookTraitsEntity(
                 bookId = 2,
                 updatedAt = 10L,
             )
+
             dao.upsert(entity = deleted)
             dao.upsert(entity = kept)
 
@@ -93,10 +96,12 @@ class BookTraitsDaoTest {
                 bookId = 1,
                 updatedAt = 10L,
             )
+
             val second = BookTraitsEntity(
                 bookId = 2,
                 updatedAt = 10L,
             )
+
             dao.upsert(entity = first)
             dao.upsert(entity = second)
 

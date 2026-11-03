@@ -32,9 +32,11 @@ class RefreshDocumentPageActionTest {
     @BeforeEach
     fun setUp() {
         source = mockk()
+
         stateFlow = MutableStateFlow(
             DocumentPage.WHATS_NEW.toInitialUiState().copy(refreshFailureMessage = FALLBACK_MESSAGE),
         )
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(DocumentPageLocalVariables()),

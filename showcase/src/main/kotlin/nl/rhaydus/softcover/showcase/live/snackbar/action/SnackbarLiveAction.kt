@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.showcase.live.snackbar.state.SnackbarLiveUiState
 import nl.rhaydus.toad.UiAction
 
 internal sealed interface SnackbarLiveAction : UiAction<
-        SnackbarLiveDependencies,
-        SnackbarLiveUiState,
-        SnackbarLiveEvent,
-        SnackbarLiveLocalVariables,
-        >
+    SnackbarLiveDependencies,
+    SnackbarLiveUiState,
+    SnackbarLiveEvent,
+    SnackbarLiveLocalVariables,
+>

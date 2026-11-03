@@ -53,6 +53,7 @@ class OnSaveQuoteActionTest {
         recordBookProgressUseCase = mockk()
         stateFlow = MutableStateFlow(buildBookDetailUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -60,6 +61,7 @@ class OnSaveQuoteActionTest {
         )
 
         mockkObject(SnackBarManager)
+
         every {
             SnackBarManager.showSnackbar(title = any())
         } returns Unit
@@ -77,6 +79,7 @@ class OnSaveQuoteActionTest {
                 editionCoverUrl = any(),
             )
         } returns Result.success(1L)
+
         coEvery {
             recordBookProgressUseCase(
                 book = any(),
@@ -99,15 +102,19 @@ class OnSaveQuoteActionTest {
             every {
                 mock.addQuoteUseCase
             } returns addQuoteUseCase
+
             every {
                 mock.recordBookProgressUseCase
             } returns recordBookProgressUseCase
+
             every {
                 mock.coroutineScope
             } returns testScope
+
             every {
                 mock.mainDispatcher
             } returns dispatcher
+
             every {
                 mock.launch(any())
             } answers { callOriginal() }
@@ -146,6 +153,7 @@ class OnSaveQuoteActionTest {
         fun `records progress and adds the quote when the toggle is on and the position is ahead`() = runTest {
             // ----- Arrange -----
             val book = pagedBook()
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
                 quoteDraft = draft(),
@@ -163,6 +171,7 @@ class OnSaveQuoteActionTest {
                     actionAt = null,
                 )
             }
+
             coVerify {
                 addQuoteUseCase(
                     bookId = 7,
@@ -191,7 +200,9 @@ class OnSaveQuoteActionTest {
                 7,
                 8,
             )
+
             val book = pagedBook()
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
                 quoteDraft = draft(readAt = readAt),
@@ -209,6 +220,7 @@ class OnSaveQuoteActionTest {
                     actionAt = readAt.toActionAt(),
                 )
             }
+
             coVerify {
                 addQuoteUseCase(
                     bookId = 7,
@@ -247,6 +259,7 @@ class OnSaveQuoteActionTest {
                     actionAt = any(),
                 )
             }
+
             coVerify(exactly = 1) {
                 addQuoteUseCase(
                     bookId = any(),
@@ -356,6 +369,7 @@ class OnSaveQuoteActionTest {
         fun `saves nothing and keeps the draft when the text is blank`() = runTest {
             // ----- Arrange -----
             val blankDraft = draft(text = "   ")
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = pagedBook(),
                 quoteDraft = blankDraft,
@@ -378,6 +392,7 @@ class OnSaveQuoteActionTest {
                     editionCoverUrl = any(),
                 )
             }
+
             coVerify(exactly = 0) {
                 recordBookProgressUseCase(
                     book = any(),
@@ -386,6 +401,7 @@ class OnSaveQuoteActionTest {
                     actionAt = any(),
                 )
             }
+
             stateFlow.value.quoteDraft shouldBe blankDraft
         }
 
@@ -415,6 +431,7 @@ class OnSaveQuoteActionTest {
                     actionAt = any(),
                 )
             } returns Result.failure(RuntimeException("progress failed"))
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = pagedBook(),
                 quoteDraft = draft(),
@@ -437,6 +454,7 @@ class OnSaveQuoteActionTest {
                     editionCoverUrl = any(),
                 )
             }
+
             stateFlow.value.failedMutationBookIds shouldBe setOf(7)
         }
 
@@ -451,6 +469,7 @@ class OnSaveQuoteActionTest {
                     actionAt = any(),
                 )
             } returns Result.success(ShelfMutationOutcome.Applied)
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = pagedBook(),
                 quoteDraft = draft(positionText = "437"),
@@ -494,6 +513,7 @@ class OnSaveQuoteActionTest {
                     editionCoverUrl = any(),
                 )
             } returns Result.failure(RuntimeException("add failed"))
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = pagedBook(),
                 quoteDraft = draft(progressAdvanceEnabled = false),
@@ -506,6 +526,7 @@ class OnSaveQuoteActionTest {
             verify(exactly = 1) {
                 SnackBarManager.showSnackbar(title = "Couldn't save your quote. Try again.")
             }
+
             eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.MutationFailedEvent>()
         }
 
@@ -517,6 +538,7 @@ class OnSaveQuoteActionTest {
                 audioSeconds = 36_000,
                 readSeconds = 2700,
             )
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
                 quoteDraft = QuoteDraft(

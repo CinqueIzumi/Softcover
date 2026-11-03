@@ -27,7 +27,7 @@ internal fun rememberReadingCardEventHandler(
         is BookCardEvent.LongClicked,
         is BookCardEvent.PressStarted,
         is BookCardEvent.MenuClicked,
-            -> Unit
+        -> Unit
     }
 }
 
@@ -48,6 +48,6 @@ internal fun rememberOnHoldCardEventHandler(
         is BookCardEvent.LongClicked,
         is BookCardEvent.PressStarted,
         is BookCardEvent.MenuClicked,
-            -> Unit
+        -> Unit
     }
 }

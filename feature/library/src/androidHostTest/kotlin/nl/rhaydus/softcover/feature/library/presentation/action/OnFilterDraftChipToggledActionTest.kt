@@ -57,6 +57,7 @@ class OnFilterDraftChipToggledActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -73,6 +74,7 @@ class OnFilterDraftChipToggledActionTest {
                 tabId = tabId,
                 filters = LibraryFilters(),
             )
+
             stateFlow.value = LibraryUiState(
                 filterDraft = draft,
                 filterChipsByTab = persistentMapOf(
@@ -117,6 +119,7 @@ class OnFilterDraftChipToggledActionTest {
                 tabId = tabId,
                 filters = LibraryFilters(),
             )
+
             stateFlow.value = LibraryUiState(
                 filterDraft = draft,
                 filterChipsByTab = persistentMapOf(
@@ -141,6 +144,7 @@ class OnFilterDraftChipToggledActionTest {
                 tabId = tabId,
                 filters = LibraryFilters(formats = persistentSetOf("Hardcover")),
             )
+
             stateFlow.value = LibraryUiState(
                 filterDraft = draft,
                 filterChipsByTab = persistentMapOf(
@@ -234,6 +238,7 @@ class OnFilterDraftChipToggledActionTest {
             stateFlow.value = stateWithTagOptions(
                 filters = LibraryFilters(yourTags = TagSelection(included = persistentSetOf(cozy))),
             )
+
             val chip = chosenChipKey()
 
             // ----- Act -----
@@ -254,6 +259,7 @@ class OnFilterDraftChipToggledActionTest {
             stateFlow.value = stateWithTagOptions(
                 filters = LibraryFilters(yourTags = TagSelection(excluded = persistentSetOf(cozy))),
             )
+
             val chip = chosenChipKey()
 
             // ----- Act -----
@@ -291,6 +297,7 @@ class OnFilterDraftChipToggledActionTest {
                 category = TagCategory.MOOD,
                 name = "gone",
             )
+
             stateFlow.value = stateWithTagOptions(
                 filters = LibraryFilters(yourTags = TagSelection(excluded = persistentSetOf(gone))),
             )
@@ -312,6 +319,7 @@ class OnFilterDraftChipToggledActionTest {
                 id = 77,
                 name = "Gone",
             )
+
             stateFlow.value = stateWithTagOptions(
                 filters = LibraryFilters(hardcoverTags = TagSelection(included = persistentSetOf(gone))),
             )
@@ -331,6 +339,7 @@ class OnFilterDraftChipToggledActionTest {
         val state = stateFlow.value
         val draft = state.filterDraft ?: error("draft expected")
         val options = state.availableFilterOptionsFor(draft.tabId)
+
         val summary = buildTagSourceSummary(
             source = TagSource.YOURS,
             options = options,

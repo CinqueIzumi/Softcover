@@ -29,6 +29,7 @@ class OnScopeSelectedActionTest {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(StatsAtlasUiState())
         localVariablesFlow = MutableStateFlow(StatsAtlasLocalVariables())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
@@ -42,6 +43,7 @@ class OnScopeSelectedActionTest {
         fun `selects the tapped scope`() = runTest {
             // ----- Arrange -----
             val key = statsScopeKey(StatsScope.CalendarYear(2025))
+
             stateFlow.value = StatsAtlasUiState(
                 selectedScopeKey = ALL_TIME_SCOPE_KEY,
                 scopeChips = atlasScopeChips(
@@ -49,6 +51,7 @@ class OnScopeSelectedActionTest {
                     selectedKey = ALL_TIME_SCOPE_KEY,
                 ),
             )
+
             val action = OnScopeSelectedAction(statsScope = StatsScope.CalendarYear(2025))
 
             // ----- Act -----

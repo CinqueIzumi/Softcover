@@ -38,6 +38,7 @@ class OnQuoteDeleteConfirmedActionTest {
         deleteQuoteUseCase = mockk()
         stateFlow = MutableStateFlow(buildBookDetailUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -45,9 +46,11 @@ class OnQuoteDeleteConfirmedActionTest {
         )
 
         mockkObject(SnackBarManager)
+
         every {
             SnackBarManager.showSnackbar(title = any())
         } returns Unit
+
         coEvery {
             deleteQuoteUseCase(localId = any())
         } returns Result.success(Unit)
@@ -65,12 +68,15 @@ class OnQuoteDeleteConfirmedActionTest {
             every {
                 mock.deleteQuoteUseCase
             } returns deleteQuoteUseCase
+
             every {
                 mock.coroutineScope
             } returns testScope
+
             every {
                 mock.mainDispatcher
             } returns dispatcher
+
             every {
                 mock.launch(any())
             } answers { callOriginal() }
@@ -95,6 +101,7 @@ class OnQuoteDeleteConfirmedActionTest {
             coVerify(exactly = 1) {
                 deleteQuoteUseCase(localId = 5L)
             }
+
             stateFlow.value.quoteDeleteRequestId.shouldBeNull()
         }
 
@@ -121,6 +128,7 @@ class OnQuoteDeleteConfirmedActionTest {
             coEvery {
                 deleteQuoteUseCase(localId = any())
             } returns Result.failure(RuntimeException("delete failed"))
+
             stateFlow.value = buildBookDetailUiState().copy(quoteDeleteRequestId = 5L)
             val action = OnQuoteDeleteConfirmedAction()
 
@@ -134,6 +142,7 @@ class OnQuoteDeleteConfirmedActionTest {
             verify(exactly = 1) {
                 SnackBarManager.showSnackbar(title = "Couldn't delete your quote. Try again.")
             }
+
             eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.MutationFailedEvent>()
         }
     }

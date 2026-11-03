@@ -26,6 +26,7 @@ class OnLogOutSheetOpenActionTest {
     fun setUp() {
         dependencies = mockk<ProfileDependencies>(relaxed = true)
         stateFlow = MutableStateFlow(ProfileUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalProfileVariables()),
@@ -59,6 +60,7 @@ class OnLogOutSheetOpenActionTest {
                     pending = LogOut,
                 ),
             )
+
             val action = OnLogOutSheetOpenAction()
 
             // ----- Act -----

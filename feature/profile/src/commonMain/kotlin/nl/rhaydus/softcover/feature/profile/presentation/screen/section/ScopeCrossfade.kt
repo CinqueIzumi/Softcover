@@ -79,6 +79,7 @@ internal fun ScopeEmptySwitch(
 private fun <S> scopeTransition(): AnimatedContentTransitionScope<S>.() -> ContentTransform {
     val effects = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
     val spatial = MaterialTheme.motionScheme.defaultSpatialSpec<IntSize>()
+
     return {
         (fadeIn(effects) togetherWith fadeOut(effects)).using(
             SizeTransform(clip = false) { _, _ -> spatial },

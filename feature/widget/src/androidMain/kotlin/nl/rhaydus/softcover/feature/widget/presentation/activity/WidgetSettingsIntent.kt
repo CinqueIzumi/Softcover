@@ -20,6 +20,7 @@ internal fun widgetSettingsIntent(
     action = AppWidgetManager.ACTION_APPWIDGET_CONFIGURE
     data = "softcover://widget/settings/${activityClass.simpleName}/$appWidgetId".toUri()
     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+
     putExtra(
         AppWidgetManager.EXTRA_APPWIDGET_ID,
         appWidgetId,

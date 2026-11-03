@@ -33,12 +33,14 @@ class UserBookWriteLockTest {
                     events += "first end"
                 }
             }
+
             val second = async {
                 lock.withLock(bookId = 1) {
                     events += "second start"
                     events += "second end"
                 }
             }
+
             advanceUntilIdle()
             first.await()
             second.await()
@@ -60,12 +62,14 @@ class UserBookWriteLockTest {
                     events += "first end"
                 }
             }
+
             val second = async {
                 lock.withLock(bookId = 2) {
                     events += "second start"
                     events += "second end"
                 }
             }
+
             advanceUntilIdle()
             first.await()
             second.await()

@@ -35,6 +35,7 @@ class OnFilterTagSearchChangedActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -154,8 +155,10 @@ class OnFilterTagSearchChangedActionTest {
                     ),
                 ),
             )
+
             val draft = LibraryFilterDraft(tabId = "all")
             val initial = LibraryUiState()
+
             stateFlow.value = initial.copy(
                 filterDraft = draft,
                 filterSheet = initial.filterSheet.copy(

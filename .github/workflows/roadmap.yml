@@ -51,12 +51,21 @@ jobs:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      pull-requests: write
-      actions: write
+      contents: read
     steps:
+      # Pushes made with GITHUB_TOKEN never start the full gate, and the required checks on main
+      # come from its push runs. The app's pushes start it like any other branch push.
+      - name: Create the roadmap app token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.ROADMAP_APP_CLIENT_ID }}
+          private-key: ${{ secrets.ROADMAP_APP_PRIVATE_KEY }}
+
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Regenerate from milestones
         env:
@@ -65,7 +74,7 @@ jobs:
 
       - name: Open or update the roadmap pull request
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
           BASE: ${{ github.event.repository.default_branch }}
         run: |
           set -euo pipefail
@@ -108,11 +117,6 @@ jobs:
                 '' \
                 'This branch is rebuilt from scratch on every milestone change, so further edits update this PR in place rather than opening another.')"
           fi
-
-          # The required checks on main come from push runs of the full gate, and a push made
-          # with GITHUB_TOKEN never starts one. A dispatch does, and its checks land on the same
-          # commit the PR reports.
-          gh workflow run ci-full.yml --ref "$SYNC_BRANCH"
 
   check:
     name: Verify ROADMAP.md is generated

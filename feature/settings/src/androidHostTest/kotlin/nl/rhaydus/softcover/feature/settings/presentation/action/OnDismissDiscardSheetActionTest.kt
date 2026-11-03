@@ -25,13 +25,14 @@ class OnDismissDiscardSheetActionTest {
         LibraryVisibilitySettingsUiState,
         LibraryVisibilitySettingsEvent,
         LibraryVisibilitySettingsLocalVariables,
-        >
+    >
 
     @BeforeEach
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(LibraryVisibilitySettingsUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryVisibilitySettingsLocalVariables()),
@@ -50,6 +51,7 @@ class OnDismissDiscardSheetActionTest {
                     pending = LeaveScreen,
                 ),
             )
+
             val action = OnDismissDiscardSheetAction()
 
             // ----- Act -----
@@ -71,6 +73,7 @@ class OnDismissDiscardSheetActionTest {
                     pending = LeaveScreen,
                 ),
             )
+
             val action = OnDismissDiscardSheetAction()
 
             // ----- Act -----
@@ -91,6 +94,7 @@ class OnDismissDiscardSheetActionTest {
                     model = discardSheetScaffold().requestingClose(),
                 ),
             )
+
             val action = OnDismissDiscardSheetAction()
 
             // ----- Act -----

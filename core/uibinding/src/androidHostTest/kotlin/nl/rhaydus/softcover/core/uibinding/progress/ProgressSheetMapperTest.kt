@@ -75,6 +75,7 @@ class ProgressSheetMapperTest {
 
             // ----- Assert -----
             book.currentEdition shouldBe PreviewData.baseEdition
+
             result.medium shouldBe ProgressSheetMedium.Paged(
                 totalPages = 100,
                 currentPage = 0,
@@ -98,11 +99,13 @@ class ProgressSheetMapperTest {
                 pages = null,
                 readingFormat = ReadingFormat.Physical,
             )
+
             val defaultEd = PreviewData.baseEdition.copy(
                 id = 11,
                 pages = 250,
                 readingFormat = ReadingFormat.Physical,
             )
+
             val book = PreviewData.baseBook.copy(
                 editions = listOf(currentEd),
                 defaultEdition = defaultEd,
@@ -114,6 +117,7 @@ class ProgressSheetMapperTest {
 
             // ----- Assert -----
             book.currentEdition shouldBe currentEd
+
             result.medium shouldBe ProgressSheetMedium.Paged(
                 totalPages = 250,
                 currentPage = 0,
@@ -130,11 +134,13 @@ class ProgressSheetMapperTest {
                 audioSeconds = null,
                 readingFormat = ReadingFormat.Audio,
             )
+
             val defaultEd = PreviewData.baseEdition.copy(
                 id = 21,
                 audioSeconds = 9_000,
                 readingFormat = ReadingFormat.Audio,
             )
+
             val book = PreviewData.baseBook.copy(
                 editions = listOf(currentEd),
                 defaultEdition = defaultEd,
@@ -146,10 +152,12 @@ class ProgressSheetMapperTest {
 
             // ----- Assert -----
             book.currentEdition shouldBe currentEd
+
             result.medium shouldBe expectedTimed(
                 totalSeconds = 0,
                 suffix = null,
             )
+
             (result.medium as ProgressSheetMedium.Timed).hasKnownTotal shouldBe false
         }
     }
@@ -164,6 +172,7 @@ class ProgressSheetMapperTest {
                 pages = null,
                 readingFormat = ReadingFormat.Physical,
             )
+
             val book = PreviewData.baseBook.copy(
                 editions = listOf(currentEd),
                 defaultEdition = null,
@@ -175,11 +184,13 @@ class ProgressSheetMapperTest {
 
             // ----- Assert -----
             book.currentEdition shouldBe currentEd
+
             result.medium shouldBe ProgressSheetMedium.Paged(
                 totalPages = 0,
                 currentPage = 0,
                 suffix = null,
             )
+
             (result.medium as ProgressSheetMedium.Paged).hasKnownTotal shouldBe false
         }
     }
@@ -207,6 +218,7 @@ class ProgressSheetMapperTest {
                 audioSeconds = 3_600,
                 readingFormat = ReadingFormat.Audio,
             )
+
             val book = PreviewData.baseBook.copy(
                 editions = listOf(audioEdition),
                 userBook = PreviewData.baseBook.userBook?.copy(
@@ -271,6 +283,7 @@ class ProgressSheetMapperTest {
                 id = 77,
                 title = "The Starless Sea (Illustrated)",
             )
+
             val book = PreviewData.baseBook.copy(
                 title = "The Starless Sea",
                 editions = listOf(edition),
@@ -291,6 +304,7 @@ class ProgressSheetMapperTest {
                 id = 77,
                 title = "Some Other Edition",
             )
+
             val book = PreviewData.baseBook.copy(
                 title = "The Starless Sea",
                 editions = listOf(edition),
@@ -378,6 +392,7 @@ class ProgressSheetMapperTest {
         fun `uses a draft that was seeded from the current position`() {
             // ----- Arrange -----
             val book = audioBook(currentSeconds = 600)
+
             val draft = ProgressTimeDraft(
                 forSeconds = 600,
                 hours = "7",
@@ -406,6 +421,7 @@ class ProgressSheetMapperTest {
         fun `keeps cleared draft text so the field can be emptied`() {
             // ----- Arrange -----
             val book = audioBook(currentSeconds = 600)
+
             val draft = ProgressTimeDraft(
                 forSeconds = 600,
                 hours = "",
@@ -434,6 +450,7 @@ class ProgressSheetMapperTest {
         fun `discards a draft seeded from a position the book has moved past`() {
             // ----- Arrange -----
             val book = audioBook(currentSeconds = 3_600)
+
             val draft = ProgressTimeDraft(
                 forSeconds = 600,
                 hours = "7",
@@ -487,6 +504,7 @@ class ProgressSheetMapperTest {
         fun `minutes at zero can only increase`() {
             // ----- Arrange -----
             val book = audioBook(currentSeconds = 600)
+
             val draft = ProgressTimeDraft(
                 forSeconds = 600,
                 hours = "0",
@@ -510,6 +528,7 @@ class ProgressSheetMapperTest {
         fun `minutes at the maximum can only decrease`() {
             // ----- Arrange -----
             val book = audioBook(currentSeconds = 600)
+
             val draft = ProgressTimeDraft(
                 forSeconds = 600,
                 hours = "0",
@@ -533,6 +552,7 @@ class ProgressSheetMapperTest {
         fun `minutes between the bounds can step both ways`() {
             // ----- Arrange -----
             val book = audioBook(currentSeconds = 600)
+
             val draft = ProgressTimeDraft(
                 forSeconds = 600,
                 hours = "0",
@@ -556,6 +576,7 @@ class ProgressSheetMapperTest {
         fun `a blank minutes draft is treated as zero`() {
             // ----- Arrange -----
             val book = audioBook(currentSeconds = 600)
+
             val draft = ProgressTimeDraft(
                 forSeconds = 600,
                 hours = "0",

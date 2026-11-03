@@ -29,6 +29,7 @@ class OnSnackbarSheetDismissedActionTest {
     @BeforeEach
     fun setUp() {
         dependencies = mockk(relaxed = true)
+
         stateFlow = MutableStateFlow(
             SnackbarLiveUiState(
                 topBar = snackbarLiveTopBar(),
@@ -37,7 +38,9 @@ class OnSnackbarSheetDismissedActionTest {
                 sheetTrigger = sheetSnackbarTrigger(),
             ),
         )
+
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(SnackbarLiveLocalVariables()),

@@ -27,6 +27,7 @@ internal class ObserveCurrentDateUseCaseImpl : ObserveCurrentDateUseCase {
                 1,
                 DateTimeUnit.DAY,
             ).atStartOfDayIn(timeZone)
+
             val untilTomorrow = startOfTomorrow - Clock.System.now()
             delay(untilTomorrow.inWholeMilliseconds.coerceAtLeast(0))
         }

@@ -1,9 +1,9 @@
 package nl.rhaydus.softcover.feature.profile.presentation.collector
 
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.every
@@ -93,6 +93,7 @@ class AtlasScopedSectionsCollectorTest {
         observeReadingStatsBackfilledUseCase = mockk()
         getHideUntaggedAuthorsAsFlowUseCase = mockk()
         stateFlow = MutableStateFlow(stateFor(StatsScope.AllTime))
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(StatsAtlasLocalVariables()),
@@ -238,6 +239,7 @@ class AtlasScopedSectionsCollectorTest {
                     ),
                 ),
             )
+
             job.cancel()
         }
 
@@ -264,6 +266,7 @@ class AtlasScopedSectionsCollectorTest {
                     ),
                 ),
             )
+
             job.cancel()
         }
 
@@ -277,6 +280,7 @@ class AtlasScopedSectionsCollectorTest {
                     day = 23,
                 ),
             )
+
             stateFlow.value = stateFor(StatsScope.Rolling(StatsWindow.LAST_30_DAYS))
             val job = launchCollector(dateFlow = dateFlow)
 
@@ -300,6 +304,7 @@ class AtlasScopedSectionsCollectorTest {
                     day = 24,
                 ),
             )
+
             job.cancel()
         }
 
@@ -356,6 +361,7 @@ class AtlasScopedSectionsCollectorTest {
                 selected = StatsScope.AllTime,
                 readingHistory = null,
             )
+
             val job = launchCollector()
 
             // ----- Act -----
@@ -400,6 +406,7 @@ class AtlasScopedSectionsCollectorTest {
         fun `writes the stats of the scope into the opening tiles and the genre flag`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = stateFor(StatsScope.CalendarYear(2025))
+
             statsFor = {
                 ReadingStats(
                     booksRead = 5,
@@ -446,6 +453,7 @@ class AtlasScopedSectionsCollectorTest {
         fun `a narrow scope with few ratings states the count`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = stateFor(StatsScope.Rolling(StatsWindow.LAST_30_DAYS))
+
             statsFor = {
                 ReadingStats(
                     booksRead = 3,
@@ -490,37 +498,38 @@ class AtlasScopedSectionsCollectorTest {
         }
 
         @Test
-        fun `hide untagged authors drops the unknown authors from the scoped demographics`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                hideFlow.value = true
-                statsFor = {
-                    ReadingStats(
-                        booksRead = 4,
-                        authorDemographics = AuthorDemographics(
-                            bipocBreakdown = DemographicBreakdown(
-                                yesCount = 2,
-                                noCount = 1,
-                                unknownCount = 5,
-                            ),
+        fun `hide untagged authors drops the unknown authors from the scoped demographics`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            hideFlow.value = true
+
+            statsFor = {
+                ReadingStats(
+                    booksRead = 4,
+                    authorDemographics = AuthorDemographics(
+                        bipocBreakdown = DemographicBreakdown(
+                            yesCount = 2,
+                            noCount = 1,
+                            unknownCount = 5,
                         ),
-                    )
-                }
-
-                // ----- Act -----
-                val job = launchCollector()
-
-                // ----- Assert -----
-                stateFlow.value.bipocBreakdown shouldBe demographicBreakdownUiModel(
-                    breakdown = DemographicBreakdown(
-                        yesCount = 2,
-                        noCount = 1,
-                        unknownCount = 0,
                     ),
-                    hideUntaggedAuthors = true,
                 )
-                job.cancel()
             }
+
+            // ----- Act -----
+            val job = launchCollector()
+
+            // ----- Assert -----
+            stateFlow.value.bipocBreakdown shouldBe demographicBreakdownUiModel(
+                breakdown = DemographicBreakdown(
+                    yesCount = 2,
+                    noCount = 1,
+                    unknownCount = 0,
+                ),
+                hideUntaggedAuthors = true,
+            )
+
+            job.cancel()
+        }
 
         @Test
         fun `keeps the unknown authors while hide untagged authors is off`() = runTest(UnconfinedTestDispatcher()) {
@@ -530,6 +539,7 @@ class AtlasScopedSectionsCollectorTest {
                 noCount = 1,
                 unknownCount = 5,
             )
+
             statsFor = {
                 ReadingStats(
                     booksRead = 4,
@@ -545,6 +555,7 @@ class AtlasScopedSectionsCollectorTest {
                 breakdown = breakdown,
                 hideUntaggedAuthors = false,
             )
+
             job.cancel()
         }
 
@@ -552,12 +563,14 @@ class AtlasScopedSectionsCollectorTest {
         fun `charts the hourly pages queried for the selected scope`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val ranges = mutableListOf<StatsRange>()
+
             every {
                 observeHourlyPagesReadUseCase(any())
             } answers {
                 ranges += firstArg<StatsRange>()
-                flowOf(HourlyPages(List(24) { if (it == 22) 10 else 0 }))
+                flowOf(HourlyPages(List(24) { hour -> if (hour == 22) 10 else 0 }))
             }
+
             stateFlow.value = stateFor(StatsScope.CalendarYear(2025))
 
             // ----- Act -----
@@ -578,6 +591,7 @@ class AtlasScopedSectionsCollectorTest {
                     ),
                 ),
             )
+
             stateFlow.value.hasTimeOfDayPages shouldBe true
             stateFlow.value.timeOfDayChart.isLoading shouldBe false
             stateFlow.value.timeOfDayChart.columns[5].value shouldBe "100%"
@@ -585,68 +599,70 @@ class AtlasScopedSectionsCollectorTest {
         }
 
         @Test
-        fun `maps the scoped top authors into rows, the has flag and the caption`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val leadBook = mockk<Book>(relaxed = true)
-                every {
-                    leadBook.id
-                } returns 31
-                statsFor = {
-                    ReadingStats(
-                        booksRead = 4,
-                        topAuthors = listOf(
-                            AuthorRanking(
-                                author = Author(
-                                    id = 1,
-                                    name = "Ursula K. Le Guin",
-                                ),
-                                booksRead = 4,
-                                averageRating = 4.5,
-                                leadBook = leadBook,
+        fun `maps the scoped top authors into rows, the has flag and the caption`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val leadBook = mockk<Book>(relaxed = true)
+
+            every {
+                leadBook.id
+            } returns 31
+
+            statsFor = {
+                ReadingStats(
+                    booksRead = 4,
+                    topAuthors = listOf(
+                        AuthorRanking(
+                            author = Author(
+                                id = 1,
+                                name = "Ursula K. Le Guin",
                             ),
+                            booksRead = 4,
+                            averageRating = 4.5,
+                            leadBook = leadBook,
                         ),
-                    )
-                }
-
-                // ----- Act -----
-                val job = launchCollector()
-
-                // ----- Assert -----
-                stateFlow.value.hasTopAuthors shouldBe true
-                stateFlow.value.topAuthorRows.map { it.key } shouldBe listOf(BookCardKey.Book(bookId = 31))
-                stateFlow.value.topAuthorRows.none { it.isLoading } shouldBe true
-                stateFlow.value.topAuthorsCaption shouldBe
-                    "Your five most-read authors, with your average rating of their books."
-                job.cancel()
+                    ),
+                )
             }
+
+            // ----- Act -----
+            val job = launchCollector()
+
+            // ----- Assert -----
+            stateFlow.value.hasTopAuthors shouldBe true
+            stateFlow.value.topAuthorRows.map { it.key } shouldBe listOf(BookCardKey.Book(bookId = 31))
+            stateFlow.value.topAuthorRows.none { it.isLoading } shouldBe true
+
+            stateFlow.value.topAuthorsCaption shouldBe
+                "Your five most-read authors, with your average rating of their books."
+
+            job.cancel()
+        }
 
         @Test
-        fun `maps the scoped format split into the caption, chart and has flag`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                statsFor = {
-                    ReadingStats(
-                        booksRead = 4,
-                        formatSplit = FormatSplit(
-                            counts = mapOf(
-                                ReadingFormat.Physical to 3,
-                                ReadingFormat.Ebook to 1,
-                            ),
+        fun `maps the scoped format split into the caption, chart and has flag`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            statsFor = {
+                ReadingStats(
+                    booksRead = 4,
+                    formatSplit = FormatSplit(
+                        counts = mapOf(
+                            ReadingFormat.Physical to 3,
+                            ReadingFormat.Ebook to 1,
                         ),
-                    )
-                }
-
-                // ----- Act -----
-                val job = launchCollector()
-
-                // ----- Assert -----
-                stateFlow.value.hasFormatSplit shouldBe true
-                stateFlow.value.formatSplitChart.isLoading shouldBe false
-                stateFlow.value.formatSplitChart.segments.map { it.label } shouldBe listOf("Print", "Ebook")
-                stateFlow.value.formatSplitCaption shouldBe "Mostly paper, with a quarter on a screen."
-                job.cancel()
+                    ),
+                )
             }
+
+            // ----- Act -----
+            val job = launchCollector()
+
+            // ----- Assert -----
+            stateFlow.value.hasFormatSplit shouldBe true
+            stateFlow.value.formatSplitChart.isLoading shouldBe false
+            stateFlow.value.formatSplitChart.segments.map { it.label } shouldBe listOf("Print", "Ebook")
+            stateFlow.value.formatSplitCaption shouldBe "Mostly paper, with a quarter on a screen."
+            job.cancel()
+        }
 
         @Test
         fun `writes the time to finish of the scope into the section`() = runTest(UnconfinedTestDispatcher()) {
@@ -670,29 +686,30 @@ class AtlasScopedSectionsCollectorTest {
         }
 
         @Test
-        fun `keeps the time to finish loading until the read dates are backfilled`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                readDatesBackfilledFlow.value = false
-                timeToFinishFor = {
-                    TimeToFinish(
-                        readCount = 4,
-                        medianDays = 9,
-                        bandMedianDays = emptyMap(),
-                        excludedReadCount = 0,
-                    )
-                }
-                val job = launchCollector()
-                val whileLoading = stateFlow.value.timeToFinish.isLoading
+        fun `keeps the time to finish loading until the read dates are backfilled`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            readDatesBackfilledFlow.value = false
 
-                // ----- Act -----
-                readDatesBackfilledFlow.value = true
-
-                // ----- Assert -----
-                whileLoading shouldBe true
-                stateFlow.value.timeToFinish.isLoading shouldBe false
-                stateFlow.value.timeToFinish.framing shouldBe "Your typical book took 9 days."
-                job.cancel()
+            timeToFinishFor = {
+                TimeToFinish(
+                    readCount = 4,
+                    medianDays = 9,
+                    bandMedianDays = emptyMap(),
+                    excludedReadCount = 0,
+                )
             }
+
+            val job = launchCollector()
+            val whileLoading = stateFlow.value.timeToFinish.isLoading
+
+            // ----- Act -----
+            readDatesBackfilledFlow.value = true
+
+            // ----- Assert -----
+            whileLoading shouldBe true
+            stateFlow.value.timeToFinish.isLoading shouldBe false
+            stateFlow.value.timeToFinish.framing shouldBe "Your typical book took 9 days."
+            job.cancel()
+        }
     }
 }

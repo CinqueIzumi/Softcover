@@ -42,8 +42,8 @@ import nl.rhaydus.designsystem.layout.BottomBarScaffold
 import nl.rhaydus.designsystem.layout.TwoPaneScaffold
 import nl.rhaydus.designsystem.layout.WindowWidthClass
 import nl.rhaydus.designsystem.layout.rememberWindowSizeClass
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.state.EmptyState
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
 import nl.rhaydus.softcover.core.presentation.navigation.BookDetailPresenter

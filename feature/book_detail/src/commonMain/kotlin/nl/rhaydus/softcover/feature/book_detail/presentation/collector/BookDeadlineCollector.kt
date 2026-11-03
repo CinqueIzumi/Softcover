@@ -30,6 +30,7 @@ internal class BookDeadlineCollector : BookDetailCollector {
         val bookProgressFlow = scope.state
             .map {
                 val edition = it.book?.currentEdition
+
                 ProgressSnapshot(
                     bookId = it.book?.id,
                     totalPages = edition?.pages,
@@ -59,6 +60,7 @@ internal class BookDeadlineCollector : BookDetailCollector {
                 DeadlineUnit.SECONDS -> snapshot.totalSeconds
                 null -> null
             }
+
             val current = when (deadline?.unit) {
                 DeadlineUnit.PAGES -> snapshot.currentPage
                 DeadlineUnit.SECONDS -> snapshot.currentSeconds

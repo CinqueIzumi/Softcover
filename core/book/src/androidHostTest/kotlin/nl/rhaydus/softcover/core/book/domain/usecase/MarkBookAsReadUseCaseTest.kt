@@ -21,6 +21,7 @@ class MarkBookAsReadUseCaseTest {
     @BeforeEach
     fun setUp() {
         repository = mockk()
+
         useCase = MarkBookAsReadUseCase(
             repository = repository,
         )
@@ -59,6 +60,7 @@ class MarkBookAsReadUseCaseTest {
             // ----- Assert -----
             result.isSuccess shouldBe true
             result.getOrNull() shouldBe ShelfMutationOutcome.Applied
+
             coVerify(exactly = 1) {
                 repository.markBookAsRead(
                     book = inputBook,
@@ -236,6 +238,7 @@ class MarkBookAsReadUseCaseTest {
 
             // ----- Assert -----
             result.getOrNull() shouldBe ShelfMutationOutcome.NoChange
+
             coVerify(exactly = 0) {
                 repository.markBookAsRead(
                     any(),

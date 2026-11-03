@@ -22,6 +22,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -49,11 +50,13 @@ import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.statistic.StatNumber
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 /** A list body belongs in [LazySheetScaffold]; a `LazyColumn` inside this scaffold's scrolling body crashes. */
 @Composable
@@ -233,8 +236,8 @@ private fun SheetTop(
             RhaydusButton(
                 label = model.dismissLabel,
                 style = ButtonStyle.TEXT,
-                onClick = chrome::dismiss,
-                enabled = chrome.canDismiss && chrome.unlocked,
+                onClick = chrome::dismissFromButton,
+                enabled = chrome.busy.not() && chrome.unlocked,
             )
         }
     }
@@ -298,7 +301,7 @@ private fun RowScope.SheetHeaderTrailingContent(
                     onEvent(SheetScaffoldEvent.HeaderActionClicked)
 
                     if (trailing.dismissesSheet) {
-                        chrome.dismiss()
+                        chrome.dismissFromButton()
                     }
                 }
             },
@@ -419,7 +422,6 @@ private fun FooterButton(
         contentAlignment = if (fillWidth) Alignment.CenterEnd else Alignment.Center,
     ) {
         RhaydusButton(
-            label = button.label,
             style = when {
                 button.emphasis == SheetFooterEmphasis.Outlined -> ButtonStyle.OUTLINED
                 primary -> ButtonStyle.FILLED
@@ -436,14 +438,24 @@ private fun FooterButton(
                     onEvent(if (primary) SheetScaffoldEvent.PrimaryClicked else SheetScaffoldEvent.SecondaryClicked)
 
                     if (button.dismissesSheet) {
-                        chrome.dismiss()
+                        chrome.dismissFromButton()
                     }
                 }
             },
             modifier = if (fillWidth) Modifier.fillMaxWidth() else Modifier.alpha(labelAlpha),
             enabled = button.enabled && chrome.busy.not() && chrome.unlocked,
             size = ButtonSize.M,
-        )
+        ) {
+            SoftcoverText(text = button.label)
+
+            button.count?.let { count ->
+                StatNumber(
+                    model = count,
+                    style = LocalTextStyle.current,
+                    autoSize = null,
+                )
+            }
+        }
 
         AnimatedVisibility(
             visible = button.running,

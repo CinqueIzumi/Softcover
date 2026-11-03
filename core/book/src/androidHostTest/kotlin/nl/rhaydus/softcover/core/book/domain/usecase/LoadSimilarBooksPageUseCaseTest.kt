@@ -81,11 +81,13 @@ class LoadSimilarBooksPageUseCaseTest {
         coEvery {
             similarBooksRepository.getSeed(bookId = SOURCE_ID)
         } returns seed
+
         coEvery {
             similarBooksRepository.getShelvedBookIds(ids = any())
         } answers {
-            firstArg<List<Int>>().filter { it in shelved }.toSet()
+            firstArg<List<Int>>().filter { id -> id in shelved }.toSet()
         }
+
         coEvery {
             similarBooksRepository.fetchCandidates(ids = any())
         } returns candidates
@@ -100,6 +102,7 @@ class LoadSimilarBooksPageUseCaseTest {
                 rankedIds = listOf(SOURCE_ID, 2, 3, 4, 5),
                 excludedSeriesBookIds = setOf(3),
             )
+
             stubRepository(
                 seed = seed,
                 shelved = setOf(4),
@@ -354,6 +357,7 @@ class LoadSimilarBooksPageUseCaseTest {
         fun `returns failure when the seed cannot be fetched`() = runTest {
             // ----- Arrange -----
             val error = IllegalStateException("boom")
+
             coEvery {
                 similarBooksRepository.getSeed(bookId = SOURCE_ID)
             } throws error
@@ -373,6 +377,7 @@ class LoadSimilarBooksPageUseCaseTest {
             // ----- Arrange -----
             val error = IllegalStateException("boom")
             stubRepository(seed = buildSeed(rankedIds = listOf(2)))
+
             coEvery {
                 similarBooksRepository.fetchCandidates(ids = any())
             } throws error

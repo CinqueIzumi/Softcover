@@ -10,10 +10,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.core.component.sidebar.Sidebar
 import nl.rhaydus.softcover.core.component.sidebar.SidebarEvent
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnSettingsCategorySelectedAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.model.SettingsSidebarKey
@@ -55,7 +55,10 @@ internal fun SettingsCategorySidebar(
         ) {
             PageMasthead(
                 model = state.settingsSidebarMasthead,
-                modifier = Modifier.padding(start = Spacing.gutter, end = Spacing.md),
+                modifier = Modifier.padding(
+                    start = Spacing.gutter,
+                    end = Spacing.md,
+                ),
             )
 
             Spacer(modifier = Modifier.height(Spacing.lg))

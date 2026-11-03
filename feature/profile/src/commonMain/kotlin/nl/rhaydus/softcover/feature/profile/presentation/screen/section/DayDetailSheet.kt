@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.profile.presentation.screen.section
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
@@ -12,7 +13,6 @@ import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.component.sheet.modelOrNull
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SchemeBrightness
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberPrefetchingBookCardEventHandler
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnDayDetailBookTappedAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnDayDetailSheetDismissedAction

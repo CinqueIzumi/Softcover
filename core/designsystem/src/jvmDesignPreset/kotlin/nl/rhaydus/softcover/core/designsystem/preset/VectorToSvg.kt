@@ -37,7 +37,9 @@ internal class VectorToSvg(
     fun convert(source: File): String {
         val root = DocumentBuilderFactory.newInstance().apply { isNamespaceAware = true }
             .newDocumentBuilder().parse(source).documentElement
+
         check(root.tagName == "vector") { "${source.name}: expected <vector>, found <${root.tagName}>" }
+
         checkAttributes(
             root,
             vectorAttributes,
@@ -61,6 +63,7 @@ internal class VectorToSvg(
 
     private fun convertChildren(parent: Element) {
         var openClips = 0
+
         parent.elements().forEach { child ->
             when (child.tagName) {
                 "path" -> convertPath(child)
@@ -72,6 +75,7 @@ internal class VectorToSvg(
                 else -> error("Unsupported vector element <${child.tagName}>")
             }
         }
+
         repeat(openClips) { body.append("</g>\n") }
     }
 
@@ -80,6 +84,7 @@ internal class VectorToSvg(
             group,
             groupAttributes,
         )
+
         val transform = groupTransform(group)
         body.append(if (transform == null) "<g>\n" else "<g transform=\"$transform\">\n")
         convertChildren(group)
@@ -106,6 +111,7 @@ internal class VectorToSvg(
             clip,
             setOf("name", "pathData"),
         )
+
         val id = "clip-${nextId++}"
         defs.append("<clipPath id=\"$id\"><path d=\"${pathData(clip)}\"/></clipPath>\n")
 
@@ -117,21 +123,25 @@ internal class VectorToSvg(
             path,
             pathAttributes,
         )
+
         val fill = paint(
             path,
             "fillColor",
             "fillAlpha",
         )
+
         val stroke = paint(
             path,
             "strokeColor",
             "strokeAlpha",
         )
+
         val attributes = buildList {
             add("d=\"${pathData(path)}\"")
             add("fill=\"${fill?.paint ?: "none"}\"")
             if (fill != null && fill.opacity != 1f) add("fill-opacity=\"${fill.opacity.toPlain()}\"")
             if (path.attr("fillType") == "evenOdd") add("fill-rule=\"evenodd\"")
+
             if (stroke != null) {
                 add("stroke=\"${stroke.paint}\"")
                 path.attr("strokeWidth")?.let { add("stroke-width=\"$it\"") }
@@ -141,6 +151,7 @@ internal class VectorToSvg(
                 path.attr("strokeMiterLimit")?.let { add("stroke-miterlimit=\"$it\"") }
             }
         }
+
         body.append("<path ${attributes.joinToString(" ")}/>\n")
     }
 
@@ -174,43 +185,51 @@ internal class VectorToSvg(
     private fun linearGradient(attr: Element): String {
         val gradient = attr.elements().singleOrNull { it.tagName == "gradient" } ?: error("Expected one <gradient>")
         check(gradient.attr("type") == "linear") { "Only linear gradients convert, found ${gradient.attr("type")}" }
+
         checkAttributes(
             gradient,
             setOf("type", "startX", "startY", "endX", "endY"),
         )
+
         val id = "gradient-${nextId++}"
         defs.append("<linearGradient id=\"$id\" gradientUnits=\"userSpaceOnUse\" ")
         defs.append("x1=\"${gradient.attr("startX")}\" y1=\"${gradient.attr("startY")}\" ")
         defs.append("x2=\"${gradient.attr("endX")}\" y2=\"${gradient.attr("endY")}\">\n")
+
         gradient.elements().forEach { item ->
             check(item.tagName == "item") { "Unsupported gradient element <${item.tagName}>" }
+
             val color = resolveSvgColor(
                 item.attr("color") ?: error("Gradient item without a colour"),
                 monochrome,
                 colorDir,
             )
+
             defs.append("<stop offset=\"${item.attr("offset")}\" stop-color=\"${color?.paint ?: "#000000"}\"")
             defs.append(" stop-opacity=\"${(color?.opacity ?: 0f).toPlain()}\"/>\n")
         }
+
         defs.append("</linearGradient>\n")
 
         return id
     }
 
-    private fun pathData(element: Element): String =
-        (element.attr("pathData") ?: error("A path without android:pathData")).trim().replace(
-            Regex("\\s+"),
-            " ",
-        )
+    private fun pathData(element: Element): String = (element.attr("pathData") ?: error("A path without android:pathData")).trim().replace(
+        Regex("\\s+"),
+        " ",
+    )
 
     private fun checkAttributes(
         element: Element,
         allowed: Set<String>,
     ) {
         val attributes = element.attributes
+
         for (index in 0 until attributes.length) {
             val node = attributes.item(index)
+
             if (node.namespaceURI == XMLNS_NS || node.namespaceURI == TOOLS_NS) continue
+
             check(node.namespaceURI == ANDROID_NS && node.localName in allowed) {
                 "Unsupported attribute ${node.nodeName} on <${element.tagName}>"
             }

@@ -5,10 +5,6 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
-import kotlin.random.Random
-import kotlin.time.Duration.Companion.days
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
@@ -24,6 +20,10 @@ import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickSource
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickState
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import kotlin.random.Random
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Instant
 
 class RandomPickSelectionTest {
     private val firstCandidate = object : Random() {
@@ -38,6 +38,7 @@ class RandomPickSelectionTest {
         every {
             this@mockk.id
         } returns id
+
         every {
             this@mockk.status
         } returns status
@@ -107,6 +108,7 @@ class RandomPickSelectionTest {
                     slug = "owned",
                 ),
             )
+
             val withoutOwned = listOf(list(id = 2))
 
             // ----- Act -----
@@ -114,6 +116,7 @@ class RandomPickSelectionTest {
                 source = RandomPickSource.Owned,
                 lists = withOwned,
             )
+
             val absent = isSourceAvailable(
                 source = RandomPickSource.Owned,
                 lists = withoutOwned,
@@ -134,6 +137,7 @@ class RandomPickSelectionTest {
                 source = RandomPickSource.UserList(listId = 1),
                 lists = lists,
             )
+
             val missing = isSourceAvailable(
                 source = RandomPickSource.UserList(listId = 99),
                 lists = lists,
@@ -243,6 +247,7 @@ class RandomPickSelectionTest {
                     status = BookStatus.Reading,
                 ),
             )
+
             val lists = listOf(
                 list(
                     id = 1,
@@ -261,6 +266,7 @@ class RandomPickSelectionTest {
                 wantToRead = emptyList(),
                 lists = lists,
             )
+
             val userList = buildPool(
                 source = RandomPickSource.UserList(listId = 2),
                 wantToRead = emptyList(),
@@ -297,6 +303,7 @@ class RandomPickSelectionTest {
         fun `a user list pool carries each entry's shown edition as its list edition`() {
             // ----- Arrange -----
             val firstEdition = mockk<BookEdition>()
+
             val lists = listOf(
                 list(
                     id = 1,
@@ -320,6 +327,7 @@ class RandomPickSelectionTest {
         fun `an owned pool carries each entry's shown edition as its list edition`() {
             // ----- Arrange -----
             val ownedEdition = mockk<BookEdition>()
+
             val lists = listOf(
                 list(
                     id = 1,
@@ -449,6 +457,7 @@ class RandomPickSelectionTest {
                     minute = 59,
                 ).toEpochMilliseconds(),
             )
+
             val now = at(
                 day = 11,
                 hour = 0,
@@ -475,6 +484,7 @@ class RandomPickSelectionTest {
                 day = 1,
                 hour = 9,
             )
+
             val state = RandomPickState(
                 pickedBookId = 2,
                 pickedAtMillis = pickedAt.toEpochMilliseconds(),
@@ -498,7 +508,9 @@ class RandomPickSelectionTest {
                 day = 1,
                 hour = 9,
             )
+
             val now = pickedAt + 7.days
+
             val state = RandomPickState(
                 pickedBookId = 2,
                 pickedAtMillis = pickedAt.toEpochMilliseconds(),
@@ -525,6 +537,7 @@ class RandomPickSelectionTest {
                 day = 1,
                 hour = 9,
             )
+
             val state = RandomPickState(
                 pickedBookId = 2,
                 pickedAtMillis = pickedAt.toEpochMilliseconds(),
@@ -548,6 +561,7 @@ class RandomPickSelectionTest {
                 day = 10,
                 hour = 10,
             )
+
             val state = RandomPickState(
                 pickedBookId = 99,
                 pickedAtMillis = at(
@@ -653,6 +667,7 @@ class RandomPickSelectionTest {
                 day = 10,
                 hour = 10,
             )
+
             val state = RandomPickState(
                 pickedBookId = 1,
                 pickedAtMillis = 0L,
@@ -680,6 +695,7 @@ class RandomPickSelectionTest {
                 day = 10,
                 hour = 10,
             )
+
             val state = RandomPickState(
                 pickedBookId = 1,
                 pickedAtMillis = 0L,
@@ -764,6 +780,7 @@ class RandomPickSelectionTest {
                 settings = RandomPickSettings(cadence = RandomPickCadence.Daily),
                 state = state,
             )
+
             val onShuffleOnly = weeklyPickExpiry(
                 settings = RandomPickSettings(cadence = RandomPickCadence.OnShuffleOnly),
                 state = state,

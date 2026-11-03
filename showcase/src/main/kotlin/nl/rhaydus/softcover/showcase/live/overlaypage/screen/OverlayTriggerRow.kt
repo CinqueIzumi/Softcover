@@ -7,9 +7,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.showcase.live.overlaypage.model.OverlayTriggerUiModel
 
@@ -23,7 +23,10 @@ internal fun OverlayTriggerRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onClick)
-                .padding(horizontal = Spacing.xl, vertical = Spacing.md),
+                .padding(
+                    horizontal = Spacing.xl,
+                    vertical = Spacing.md,
+                ),
         ) {
             SoftcoverText(
                 text = model.label,

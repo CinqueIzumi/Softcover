@@ -13,19 +13,21 @@ private fun nl.rhaydus.softcover.feature.library.presentation.component.EmptyFac
     - body: STABLE (String is immutable)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.library.presentation.component.FacetChipLine(chips: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit
-  skippable: true
+internal fun nl.rhaydus.softcover.feature.library.presentation.component.FacetChipLine(chips: kotlin.collections.List<nl.rhaydus.softcover.core.component.chip.ChipUiModel>, onChipEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.chip.ChipEvent, kotlin.Unit>): kotlin.Unit
+  skippable: false
   restartable: true
   params:
-    - chips: STABLE (composable function type)
+    - chips: RUNTIME (requires runtime check)
+    - onChipEvent: STABLE (function type)
 
 @Composable
-private fun nl.rhaydus.softcover.feature.library.presentation.component.FacetSection(label: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, chips: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit
-  skippable: true
+private fun nl.rhaydus.softcover.feature.library.presentation.component.FacetSection(label: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, chips: kotlin.collections.List<nl.rhaydus.softcover.core.component.chip.ChipUiModel>, onChipEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.chip.ChipEvent, kotlin.Unit>): kotlin.Unit
+  skippable: false
   restartable: true
   params:
     - label: STABLE (marked @Stable or @Immutable)
-    - chips: STABLE (composable function type)
+    - chips: RUNTIME (requires runtime check)
+    - onChipEvent: STABLE (function type)
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.library.presentation.component.LibraryArrangeSheet(state: nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction, kotlin.Unit>, onDismissRequest: kotlin.Function0<kotlin.Unit>): kotlin.Unit

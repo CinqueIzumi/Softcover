@@ -18,6 +18,7 @@ internal class OnFilterDraftChipToggledAction(
     ) {
         scope.setState { state ->
             val draft = state.filterDraft ?: return@setState state
+
             val value = state.filterChipsFor(draft.tabId)[key]
                 ?: state.availableFilterOptionsFor(draft.tabId).tagValueFor(
                     key = key,

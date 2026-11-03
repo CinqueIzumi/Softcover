@@ -43,6 +43,7 @@ class OnLogOutSheetDismissedActionTest {
         resetUserDataUseCase = mockk()
         stateFlow = MutableStateFlow(ProfileUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalProfileVariables()),
@@ -55,14 +56,14 @@ class OnLogOutSheetDismissedActionTest {
         Dispatchers.resetMain()
     }
 
-    private fun closingWithLogOut(): SheetSession<SheetScaffoldUiModel, LogOut> =
-        SheetSession.Open(
-            model = logOutSheetScaffold().requestingClose(),
-            pending = LogOut,
-        )
+    private fun closingWithLogOut(): SheetSession<SheetScaffoldUiModel, LogOut> = SheetSession.Open(
+        model = logOutSheetScaffold().requestingClose(),
+        pending = LogOut,
+    )
 
     private fun stubDependencies(testScope: TestScope): ProfileDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<ProfileDependencies>(relaxed = true).also { mock ->
             every {
                 mock.resetUserDataUseCase

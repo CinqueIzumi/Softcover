@@ -14,6 +14,9 @@ interface PendingUserBookWriteDao {
     @Query("SELECT * FROM pending_user_book_writes WHERE attempts < :maxAttempts ORDER BY enqueuedAt ASC")
     suspend fun getPending(maxAttempts: Int): List<PendingUserBookWriteEntity>
 
+    @Query("SELECT * FROM pending_user_book_writes ORDER BY enqueuedAt ASC")
+    suspend fun getPending(): List<PendingUserBookWriteEntity>
+
     @Query("SELECT * FROM pending_user_book_writes WHERE userBookId = :userBookId AND kind = :kind LIMIT 1")
     suspend fun getByUserBookIdAndKind(
         userBookId: Int,

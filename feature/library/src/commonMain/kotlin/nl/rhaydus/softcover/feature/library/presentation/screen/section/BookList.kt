@@ -26,6 +26,7 @@ import nl.rhaydus.designsystem.component.rememberLazyItemMutationAnimator
 import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.modifier.platformModifierClick
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
@@ -35,10 +36,8 @@ import nl.rhaydus.softcover.core.component.bookcard.rememberBookCardEntryCoordin
 import nl.rhaydus.softcover.core.component.haptics.rememberReorderHaptics
 import nl.rhaydus.softcover.core.component.reorder.reorderLift
 import nl.rhaydus.softcover.core.component.state.EmptyState
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
-import nl.rhaydus.softcover.core.presentation.model.LibraryTab as LibraryContentTab
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberPrefetchingBookCardEventHandler
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkAddToListSheetShownAction
@@ -53,6 +52,7 @@ import nl.rhaydus.softcover.feature.library.presentation.state.RecommendedRailPl
 import nl.rhaydus.softcover.feature.library.presentation.state.bookReorderStatusFor
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyGridState
+import nl.rhaydus.softcover.core.presentation.model.LibraryTab as LibraryContentTab
 
 @Composable
 internal fun BookList(
@@ -67,6 +67,7 @@ internal fun BookList(
 
     if (rawBooks != null && rawBooks.isEmpty() && state.isLoading.not()) {
         val emptyState = state.emptyStatesByTab[tab.id]
+
         val recommendedRail = state.recommendedRailByTab[tab.id]?.takeIf {
             it.placement == RecommendedRailPlacement.UnderEmptyState
         }
@@ -197,7 +198,7 @@ internal fun BookList(
             is BookCardEvent.TrailingClicked,
             is BookCardEvent.MenuClicked,
             is BookCardEvent.ShakeEnded,
-                -> Unit
+            -> Unit
         }
     }
 
@@ -510,6 +511,7 @@ private fun libraryBookContextMenu(
             onClick = onAddToList,
         ),
     )
+
     add(
         DesktopContextMenuItem(
             label = "Remove from library",

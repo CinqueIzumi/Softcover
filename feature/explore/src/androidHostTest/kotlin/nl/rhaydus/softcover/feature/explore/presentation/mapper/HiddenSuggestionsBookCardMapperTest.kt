@@ -216,6 +216,7 @@ class HiddenSuggestionsBookCardMapperTest {
                 authorText = " ",
                 bookCount = 2,
             )
+
             val withoutCountInput = hiddenSeries(
                 authorText = " ",
                 bookCount = null,

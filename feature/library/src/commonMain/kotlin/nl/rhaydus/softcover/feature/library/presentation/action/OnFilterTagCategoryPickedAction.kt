@@ -18,6 +18,7 @@ internal class OnFilterTagCategoryPickedAction(
     ) {
         scope.setState { state ->
             val draft = state.filterDraft ?: return@setState state
+
             val category = TagCategory.entries.firstOrNull { it.name == key }
 
             state.copy(

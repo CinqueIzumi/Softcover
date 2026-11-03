@@ -38,6 +38,7 @@ class ColorReaderTest {
                     source = "Test",
                 )
             }
+
             error.message.shouldContain("surface-new")
         }
 
@@ -54,6 +55,7 @@ class ColorReaderTest {
                     source = "Test",
                 )
             }
+
             error.message.shouldContain("gone-role")
         }
     }

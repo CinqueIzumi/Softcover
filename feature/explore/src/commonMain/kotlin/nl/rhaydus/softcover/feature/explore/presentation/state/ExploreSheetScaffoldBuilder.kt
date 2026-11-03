@@ -7,49 +7,46 @@ import nl.rhaydus.softcover.core.component.sheet.SheetHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 
-internal fun becauseYouReadGenreSheetScaffold(): SheetScaffoldUiModel =
-    SheetScaffoldUiModel(
-        header = SheetHeaderUiModel(
-            section = SectionHeaderUiModel.Section(
-                eyebrow = "Genre",
-                headline = "Pick a genre",
-            ),
+internal fun becauseYouReadGenreSheetScaffold(): SheetScaffoldUiModel = SheetScaffoldUiModel(
+    header = SheetHeaderUiModel(
+        section = SectionHeaderUiModel.Section(
+            eyebrow = "Genre",
+            headline = "Pick a genre",
         ),
-    )
+    ),
+)
 
 internal fun recommendedMenuSheetScaffoldFor(
     book: Book,
     eyebrow: String,
-): SheetScaffoldUiModel =
-    SheetScaffoldUiModel(
-        header = SheetHeaderUiModel(
-            section = SectionHeaderUiModel.Section(
-                eyebrow = eyebrow,
-                headline = book.title,
-            ),
+): SheetScaffoldUiModel = SheetScaffoldUiModel(
+    header = SheetHeaderUiModel(
+        section = SectionHeaderUiModel.Section(
+            eyebrow = eyebrow,
+            headline = book.title,
         ),
-        footer = SheetFooterUiModel.Stacked(
-            primary = null,
-            secondary = SheetFooterButton(
-                label = "Cancel",
-                dismissesSheet = true,
-            ),
+    ),
+    footer = SheetFooterUiModel.Stacked(
+        primary = null,
+        secondary = SheetFooterButton(
+            label = "Cancel",
+            dismissesSheet = true,
         ),
-    )
+    ),
+)
 
-internal fun continueSeriesMenuSheetScaffoldFor(book: Book): SheetScaffoldUiModel =
-    SheetScaffoldUiModel(
-        header = SheetHeaderUiModel(
-            section = SectionHeaderUiModel.Section(
-                eyebrow = book.bookSeries?.name ?: "Up next",
-                headline = book.title,
-            ),
+internal fun continueSeriesMenuSheetScaffoldFor(book: Book): SheetScaffoldUiModel = SheetScaffoldUiModel(
+    header = SheetHeaderUiModel(
+        section = SectionHeaderUiModel.Section(
+            eyebrow = book.bookSeries?.name ?: "Up next",
+            headline = book.title,
         ),
-        footer = SheetFooterUiModel.Stacked(
-            primary = null,
-            secondary = SheetFooterButton(
-                label = "Cancel",
-                dismissesSheet = true,
-            ),
+    ),
+    footer = SheetFooterUiModel.Stacked(
+        primary = null,
+        secondary = SheetFooterButton(
+            label = "Cancel",
+            dismissesSheet = true,
         ),
-    )
+    ),
+)

@@ -37,6 +37,7 @@ class OnExternalLinkClickActionTest {
         stateFlow = MutableStateFlow(buildBookDetailUiState())
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
@@ -52,6 +53,7 @@ class OnExternalLinkClickActionTest {
             stateFlow.value = buildBookDetailUiState().copy(
                 previewEdition = buildEdition(id = 1).copy(isbn13 = "9780306406157"),
             )
+
             val action = OnExternalLinkClickAction(key = AMAZON_KEY)
 
             // ----- Act -----
@@ -73,6 +75,7 @@ class OnExternalLinkClickActionTest {
             stateFlow.value = buildBookDetailUiState().copy(
                 previewEdition = buildEdition(id = 1).copy(isbn13 = "9780306406157"),
             )
+
             val action = OnExternalLinkClickAction(key = "missing")
 
             // ----- Act -----
@@ -95,6 +98,7 @@ class OnExternalLinkClickActionTest {
                     isbn13 = null,
                 ),
             )
+
             val action = OnExternalLinkClickAction(key = BOOKSHOP_KEY)
 
             // ----- Act -----
@@ -114,6 +118,7 @@ class OnExternalLinkClickActionTest {
             stateFlow.value = buildBookDetailUiState().copy(
                 previewEdition = buildEdition(id = 1).copy(isbn13 = "9780306406157"),
             )
+
             val action = OnExternalLinkClickAction(key = BOOKSHOP_KEY)
 
             // ----- Act -----
@@ -125,6 +130,7 @@ class OnExternalLinkClickActionTest {
             // ----- Assert -----
             val event = eventChannel.tryReceive().getOrNull()
                 .shouldBeInstanceOf<BookDetailEvent.OpenExternalLinkEvent>()
+
             event.url shouldBe "https://bookshop.org/search?keywords=9780306406157"
         }
 
@@ -134,6 +140,7 @@ class OnExternalLinkClickActionTest {
             stateFlow.value = buildBookDetailUiState().copy(
                 previewEdition = buildEdition(id = 1).copy(isbn13 = "9780306406157"),
             )
+
             val action = OnExternalLinkClickAction(key = OPEN_LIBRARY_KEY)
 
             // ----- Act -----
@@ -145,6 +152,7 @@ class OnExternalLinkClickActionTest {
             // ----- Assert -----
             val event = eventChannel.tryReceive().getOrNull()
                 .shouldBeInstanceOf<BookDetailEvent.OpenExternalLinkEvent>()
+
             event.url shouldBe "https://openlibrary.org/search?isbn=9780306406157"
         }
 
@@ -157,6 +165,7 @@ class OnExternalLinkClickActionTest {
                     isbn13 = null,
                 ),
             )
+
             val action = OnExternalLinkClickAction(key = AMAZON_KEY)
 
             // ----- Act -----
@@ -168,6 +177,7 @@ class OnExternalLinkClickActionTest {
             // ----- Assert -----
             val event = eventChannel.tryReceive().getOrNull()
                 .shouldBeInstanceOf<BookDetailEvent.OpenExternalLinkEvent>()
+
             event.url shouldBe "https://www.amazon.com/s?k=0306406152"
         }
 
@@ -200,6 +210,7 @@ class OnExternalLinkClickActionTest {
                     ),
                 ).copy(title = "Dune"),
             )
+
             val action = OnExternalLinkClickAction(key = KOBO_KEY)
 
             // ----- Act -----
@@ -211,6 +222,7 @@ class OnExternalLinkClickActionTest {
             // ----- Assert -----
             val event = eventChannel.tryReceive().getOrNull()
                 .shouldBeInstanceOf<BookDetailEvent.OpenExternalLinkEvent>()
+
             event.url shouldBe "https://www.kobo.com/search?query=Dune%20Frank%20Herbert"
         }
 
@@ -220,6 +232,7 @@ class OnExternalLinkClickActionTest {
             stateFlow.value = buildBookDetailUiState().copy(
                 previewEdition = buildEdition(id = 1).copy(isbn13 = "9780306406157"),
             )
+
             val action = OnExternalLinkClickAction(key = KOBO_KEY)
 
             // ----- Act -----
@@ -238,6 +251,7 @@ class OnExternalLinkClickActionTest {
             stateFlow.value = buildBookDetailUiState().copy(
                 previewEdition = buildEdition(id = 1).copy(title = "Dune"),
             )
+
             val action = OnExternalLinkClickAction(key = AMAZON_KEY)
 
             // ----- Act -----

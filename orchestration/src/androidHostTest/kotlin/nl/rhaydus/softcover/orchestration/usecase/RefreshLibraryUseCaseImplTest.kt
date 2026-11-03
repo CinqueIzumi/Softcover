@@ -159,11 +159,13 @@ class RefreshLibraryUseCaseImplTest {
                     userId = 55,
                     statusFilter = null,
                 )
+
                 booksRepository.hydrateReferencedBooks(
                     bookIds = listOf(10),
                     editionIds = listOf(100),
                     forceNetwork = true,
                 )
+
                 listsRepository.syncBookListMetadata(serverListIds = setOf(7, 8, 9))
                 listsRepository.cacheUserBookLists(lists = listOf(changedList))
                 booksRepository.deleteOrphanBooks()
@@ -322,6 +324,7 @@ class RefreshLibraryUseCaseImplTest {
         fun `fetches the single list by id, hydrates and caches it, and leaves books and list metadata alone`() = runTest {
             // ----- Arrange -----
             val listId = 7
+
             val fetchedList = stubBookList(
                 id = listId,
                 books = listOf(
@@ -355,6 +358,7 @@ class RefreshLibraryUseCaseImplTest {
                     editionIds = listOf(100),
                     forceNetwork = true,
                 )
+
                 listsRepository.cacheUserBookLists(lists = listOf(fetchedList))
             }
 
@@ -363,6 +367,7 @@ class RefreshLibraryUseCaseImplTest {
                     userId = any(),
                     statusFilter = any(),
                 )
+
                 listsRepository.syncBookListMetadata(serverListIds = any())
                 booksRepository.deleteOrphanBooks()
             }
@@ -442,6 +447,7 @@ class RefreshLibraryUseCaseImplTest {
             coEvery {
                 getUserIdUseCase()
             } returns Result.success(55)
+
             coEvery {
                 listsRepository.refreshUserLists(userId = 55)
             } returns ListsRefreshResult(
@@ -574,6 +580,7 @@ class RefreshLibraryUseCaseImplTest {
         fun `a failed read refresh does not mark the backfill`() = runTest {
             // ----- Arrange -----
             val scope = RefreshScope.ByStatuses(statuses = setOf(UserBookStatus.READ))
+
             coEvery {
                 booksRepository.refreshUserBooks(
                     userId = 55,

@@ -41,7 +41,6 @@ import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.domain.model.UpcomingWindow
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
-import nl.rhaydus.softcover.core.domain.model.isBlank
 import kotlin.concurrent.Volatile
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Clock
@@ -206,6 +205,7 @@ internal class BooksRepositoryImpl(
             }
         }.getOrElse { error ->
             if (error is CancellationException) throw error
+
             AppLog.w("Skipping the prune of ${missingUserBookIds.size} user book(s): ${error.message}")
             return
         }
@@ -725,6 +725,7 @@ internal class BooksRepositoryImpl(
 
                 else -> {
                     queued?.let { offlineSync.settle(it) }
+
                     rollBack(
                         snapshot = snapshot,
                         onRolledBack = onRolledBack,
@@ -737,10 +738,12 @@ internal class BooksRepositoryImpl(
 
         runCatchingLogged(context = "Confirming user book write ($kind) failed locally") {
             queued?.let { offlineSync.settle(it) }
+
             userBookCacheGate.recordWrite(
                 book = confirmed,
                 kind = kind,
             )
+
             onConfirmed()
 
             if (confirmed !== optimistic) cacheBook(book = confirmed)
@@ -890,7 +893,7 @@ internal class BooksRepositoryImpl(
                 runCatching {
                     booksRemoteDataSource.removeBookFromLibrary(book = book)
                 }.onSuccess {
-                    book.userBook?.id?.let { userBookCacheGate.removeUserBooks(ids = listOf(it)) }
+                    book.userBook?.id?.let { userBookId -> userBookCacheGate.removeUserBooks(ids = listOf(userBookId)) }
                 }.onFailure { error ->
                     if (error is CancellationException) throw error
 

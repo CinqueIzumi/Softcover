@@ -30,6 +30,7 @@ class OnArrangeSheetExpandedChangeActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -43,6 +44,7 @@ class OnArrangeSheetExpandedChangeActionTest {
         fun `opening seeds arrangeDraft from the selected tab's committed sort and layout`() = runTest {
             // ----- Arrange -----
             val selectedTabId = LibraryTab.CustomList.idFor(listId = 42)
+
             stateFlow.value = LibraryUiState(
                 selectedTabId = selectedTabId,
                 sortModeByTab = persistentMapOf(selectedTabId to LibrarySortMode.TITLE),
@@ -50,6 +52,7 @@ class OnArrangeSheetExpandedChangeActionTest {
                 gridLayout = LibraryGridLayout.GRID_THREE_COLUMNS,
                 arrangeDraft = null,
             )
+
             val action = OnArrangeSheetExpandedChangeAction(expanded = true)
 
             // ----- Act -----
@@ -60,6 +63,7 @@ class OnArrangeSheetExpandedChangeActionTest {
 
             // ----- Assert -----
             stateFlow.value.isArrangeSheetExpanded shouldBe true
+
             stateFlow.value.arrangeDraft shouldBe LibraryArrangeDraft(
                 tabId = selectedTabId,
                 sortMode = LibrarySortMode.TITLE,
@@ -80,6 +84,7 @@ class OnArrangeSheetExpandedChangeActionTest {
                     gridLayout = LibraryGridLayout.LIST_LARGE,
                 ),
             )
+
             val action = OnArrangeSheetExpandedChangeAction(expanded = false)
 
             // ----- Act -----

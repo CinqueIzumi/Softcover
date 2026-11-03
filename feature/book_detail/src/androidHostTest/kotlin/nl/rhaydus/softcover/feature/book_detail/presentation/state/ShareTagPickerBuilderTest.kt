@@ -138,6 +138,7 @@ class ShareTagPickerBuilderTest {
 
             // ----- Assert -----
             result.groups.map { (it.header as SectionHeaderUiModel.Label).eyebrow } shouldBe listOf("Genre", "Mood")
+
             result.groups.first().tags.chips.map { it.label to it.selected } shouldBe listOf(
                 "Fantasy" to false,
                 "Mystery" to true,

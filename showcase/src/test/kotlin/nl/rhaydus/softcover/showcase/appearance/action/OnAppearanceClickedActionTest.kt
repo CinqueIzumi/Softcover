@@ -30,12 +30,14 @@ class OnAppearanceClickedActionTest {
             coroutineScope = mockk(),
             mainDispatcher = mockk(),
         )
+
         stateFlow = MutableStateFlow(
             FamilyUiState(
                 topBar = mockk(),
                 entries = persistentListOf(),
             ),
         )
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(FamilyLocalVariables()),

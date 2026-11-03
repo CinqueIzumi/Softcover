@@ -50,6 +50,7 @@ class ReadingJournalHistoryRepositoryImplTest {
     fun setUp() {
         remote = mockk()
         local = FakeLocal()
+
         repository = ReadingJournalHistoryRepositoryImpl(
             readingJournalHistoryRemoteDataSource = remote,
             readingJournalHistoryLocalDataSource = local,
@@ -121,6 +122,7 @@ class ReadingJournalHistoryRepositoryImplTest {
                     pages = 1,
                 ),
             )
+
             local.add(
                 entity = entity(
                     actionAtEpochMillis = 2_000L,
@@ -157,6 +159,7 @@ class ReadingJournalHistoryRepositoryImplTest {
                     pages = 1,
                 ),
             )
+
             local.add(
                 entity = entity(
                     actionAtEpochMillis = 2_000L,

@@ -20,17 +20,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
+import nl.rhaydus.designsystem.modifier.pressScaleToggleable
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.chrome.ChromeIconButton
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.header.SectionHeader
-import nl.rhaydus.softcover.core.component.modifier.tactileToggleable
 import nl.rhaydus.softcover.core.component.selection.SelectionCheck
 import nl.rhaydus.softcover.core.component.selection.SelectionMark
 import nl.rhaydus.softcover.core.component.selection.SelectionMarkBackdrop
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.showcase.appearance.action.OnAppearanceClickedAction
 import nl.rhaydus.softcover.showcase.appearance.action.OnBackClickedAction
 import nl.rhaydus.softcover.showcase.appearance.screen.AppearanceSheetHost
@@ -86,7 +86,7 @@ internal fun SelectionLiveLayout(
 
             items(items = state.covers, key = { it.key }) { item ->
                 Box(
-                    modifier = Modifier.tactileToggleable(
+                    modifier = Modifier.pressScaleToggleable(
                         value = item.selected,
                         onValueChange = { runAction(OnCoverToggledAction(key = item.key)) },
                         role = Role.Checkbox,

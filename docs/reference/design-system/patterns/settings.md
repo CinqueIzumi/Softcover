@@ -20,7 +20,7 @@
   horizontal padding of its own; `SettingsSelectableRow` reuses it with a check slot reserved when unselected.
 - `SettingsMenuRowTarget` sets the trailing glyph and the interaction: `SubPage` (chevron), `ExternalLink`
   (`OpenInNew`), `Edit` (pencil), `Add` (plus), `Copyable` (selectable text, not clickable) and `Static`
-  (nothing to do). Interactive rows press through `tactileClickable` / `tactileSelectable`.
+  (nothing to do). Interactive rows press through `pressScaleClickable` / `pressScaleSelectable`.
 - `SettingsRowGroup` draws a hairline `Divider` above every row (first included) and none after the last, never a
   card; a single-choice run uses `selectableGroup()`. Switches are the shared `ToggleRow`.
 

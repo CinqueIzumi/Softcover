@@ -30,6 +30,7 @@ class OnTrendingKindSelectedActionTest {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(TrendingSettingsUiState())
         localVariablesFlow = MutableStateFlow(TrendingSettingsLocalVariables())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
@@ -64,10 +65,12 @@ class OnTrendingKindSelectedActionTest {
         fun `switching back to trending restores the period chosen there`() = runTest {
             // ----- Arrange -----
             val chosen = TrendingFeed.Trending(period = TrendingPeriod.Year)
+
             OnTrendingFeedSelectedAction(feed = chosen).execute(
                 dependencies = dependencies,
                 scope = scope,
             )
+
             OnTrendingKindSelectedAction(kind = TrendingFeedKind.Upcoming).execute(
                 dependencies = dependencies,
                 scope = scope,
@@ -88,14 +91,17 @@ class OnTrendingKindSelectedActionTest {
         fun `switching back to upcoming restores the window chosen there`() = runTest {
             // ----- Arrange -----
             val chosen = TrendingFeed.Upcoming(window = UpcomingWindow.SixMonths)
+
             OnTrendingKindSelectedAction(kind = TrendingFeedKind.Upcoming).execute(
                 dependencies = dependencies,
                 scope = scope,
             )
+
             OnTrendingFeedSelectedAction(feed = chosen).execute(
                 dependencies = dependencies,
                 scope = scope,
             )
+
             OnTrendingKindSelectedAction(kind = TrendingFeedKind.Trending).execute(
                 dependencies = dependencies,
                 scope = scope,

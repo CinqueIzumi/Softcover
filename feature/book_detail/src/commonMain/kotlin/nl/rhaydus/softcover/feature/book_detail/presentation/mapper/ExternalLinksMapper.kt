@@ -19,6 +19,7 @@ internal val BookEdition.searchIsbn: String?
 internal val BookEdition.koboQuery: String?
     get() {
         val searchTitle: String = title?.takeIf { it.isNotBlank() } ?: return null
+
         val firstAuthor: String? = authors.firstOrNull()?.name?.takeIf { it.isNotBlank() }
 
         return listOfNotNull(searchTitle, firstAuthor).joinToString(separator = " ")
@@ -39,6 +40,7 @@ internal fun toExternalLinkPills(
                     icon = SoftcoverIcon.Storefront,
                 ),
             )
+
             add(
                 externalLinkPill(
                     key = AMAZON_KEY,
@@ -47,6 +49,7 @@ internal fun toExternalLinkPills(
                 ),
             )
         }
+
         if (hasKoboQuery) {
             add(
                 externalLinkPill(
@@ -56,6 +59,7 @@ internal fun toExternalLinkPills(
                 ),
             )
         }
+
         if (hasIsbn) {
             add(
                 externalLinkPill(
@@ -92,6 +96,7 @@ private fun String.percentEncoded(): String = buildString {
     for (byte in encodeToByteArray()) {
         val value: Int = byte.toInt() and 0xFF
         val char: Char = value.toChar()
+
         if (char in 'A'..'Z' || char in 'a'..'z' || char in '0'..'9' || char in "-._~") {
             append(char)
         } else {

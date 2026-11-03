@@ -33,6 +33,7 @@ internal class BookDeadlineRepositoryImpl(
             0,
             total - current,
         )
+
         val daysUntilDeadline = today.daysUntil(deadlineDate)
 
         val initialPerDay = when {

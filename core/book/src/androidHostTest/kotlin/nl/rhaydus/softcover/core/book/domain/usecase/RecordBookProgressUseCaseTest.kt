@@ -45,6 +45,7 @@ class RecordBookProgressUseCaseTest {
             every {
                 this@mockk.pages
             } returns pages
+
             every {
                 this@mockk.audioSeconds
             } returns audioSeconds
@@ -378,6 +379,7 @@ class RecordBookProgressUseCaseTest {
                     actionAt = null,
                 )
             }
+
             coVerify(exactly = 0) {
                 updateBookProgressUseCase(
                     book = book,

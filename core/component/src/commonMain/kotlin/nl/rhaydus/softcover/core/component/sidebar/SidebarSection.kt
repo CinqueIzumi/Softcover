@@ -27,13 +27,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.designsystem.modifier.pressScaleCombinedClickable
+import nl.rhaydus.designsystem.theme.Corners
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.header.SectionHeader
-import nl.rhaydus.softcover.core.component.modifier.tactileClickable
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 /** Renders every section in [model] under one shared `selectableGroup()`, with a gap between sections. */
 @Composable
@@ -94,6 +94,7 @@ private fun <K> SidebarRow(
     val variant = model.variant
     val isSelected = (variant as? SidebarRowVariant.Destination)?.selected ?: false
     val rowRole = if (variant is SidebarRowVariant.Destination) Role.Tab else Role.Button
+
     val onLongClick: (() -> Unit)? = if (variant is SidebarRowVariant.Destination && variant.longPressable) {
         {
             haptics.threshold()
@@ -104,11 +105,13 @@ private fun <K> SidebarRow(
     }
 
     val motionScheme = MaterialTheme.motionScheme
+
     val container by animateColorAsState(
         targetValue = if (isSelected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent,
         animationSpec = motionScheme.defaultEffectsSpec(),
         label = "SidebarRowContainer",
     )
+
     val content by animateColorAsState(
         targetValue = if (isSelected) {
             MaterialTheme.colorScheme.onSecondaryContainer
@@ -126,7 +129,7 @@ private fun <K> SidebarRow(
                 horizontal = Spacing.sm,
                 vertical = Spacing.xxxs,
             )
-            .tactileClickable(
+            .pressScaleCombinedClickable(
                 onClick = { onEvent(SidebarEvent.Clicked(key = model.key)) },
                 role = rowRole,
                 onLongClick = onLongClick,

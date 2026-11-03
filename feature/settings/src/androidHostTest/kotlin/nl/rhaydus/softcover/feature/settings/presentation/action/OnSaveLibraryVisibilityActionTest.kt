@@ -47,7 +47,7 @@ class OnSaveLibraryVisibilityActionTest {
         LibraryVisibilitySettingsUiState,
         LibraryVisibilitySettingsEvent,
         LibraryVisibilitySettingsLocalVariables,
-        >
+    >
 
     @BeforeEach
     fun setUp() {
@@ -59,6 +59,7 @@ class OnSaveLibraryVisibilityActionTest {
         refreshLibraryUseCase = mockk()
         stateFlow = MutableStateFlow(LibraryVisibilitySettingsUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryVisibilitySettingsLocalVariables()),
@@ -84,6 +85,7 @@ class OnSaveLibraryVisibilityActionTest {
         ),
     ): LibraryVisibilitySettingsDependencies {
         val dispatcher = UnconfinedTestDispatcher(callerTestScope.testScheduler)
+
         return mockk<LibraryVisibilitySettingsDependencies>(relaxed = true).also { mock ->
             every {
                 mock.setEnabledStatusCodesUseCase
@@ -127,6 +129,7 @@ class OnSaveLibraryVisibilityActionTest {
                 draftEnabledListIds = persistentSetOf(10),
                 initialized = true,
             )
+
             val dependencies = stubDependencies(this)
             val action = OnSaveLibraryVisibilityAction()
 
@@ -153,6 +156,7 @@ class OnSaveLibraryVisibilityActionTest {
                 initialized = true,
                 isSaving = true,
             )
+
             val dependencies = stubDependencies(this)
             val action = OnSaveLibraryVisibilityAction()
 
@@ -179,6 +183,7 @@ class OnSaveLibraryVisibilityActionTest {
                 draftTabOrder = persistentListOf("status:3", "list:10"),
                 initialized = true,
             )
+
             val dependencies = stubDependencies(this)
 
             coEvery {
@@ -225,6 +230,7 @@ class OnSaveLibraryVisibilityActionTest {
                 draftEnabledListIds = persistentSetOf(),
                 initialized = true,
             )
+
             val dependencies = stubDependencies(this)
             val savingSnapshots = mutableListOf<Boolean>()
 
@@ -269,6 +275,7 @@ class OnSaveLibraryVisibilityActionTest {
                 draftEnabledStatusCodes = persistentSetOf(1),
                 initialized = true,
             )
+
             val dependencies = stubDependencies(this)
 
             coEvery {
@@ -310,6 +317,7 @@ class OnSaveLibraryVisibilityActionTest {
                 draftEnabledStatusCodes = persistentSetOf(1),
                 initialized = true,
             )
+
             val dependencies = stubDependencies(this)
 
             coEvery {
@@ -351,6 +359,7 @@ class OnSaveLibraryVisibilityActionTest {
                 draftEnabledStatusCodes = persistentSetOf(1),
                 initialized = true,
             )
+
             val dependencies = stubDependencies(this)
 
             coEvery {
@@ -392,6 +401,7 @@ class OnSaveLibraryVisibilityActionTest {
                 draftEnabledStatusCodes = persistentSetOf(1),
                 initialized = true,
             )
+
             val dependencies = stubDependencies(this)
 
             coEvery {
@@ -434,6 +444,7 @@ class OnSaveLibraryVisibilityActionTest {
                 initialized = true,
                 discardSheet = SheetSession.Open(model = discardSheetScaffold()),
             )
+
             val dependencies = stubDependencies(this)
 
             coEvery {
@@ -462,10 +473,12 @@ class OnSaveLibraryVisibilityActionTest {
 
             // ----- Assert -----
             eventChannel.tryReceive().getOrNull() shouldBe null
+
             stateFlow.value.discardSheet shouldBe SheetSession.Open(
                 model = discardSheetScaffold(saving = false).requestingClose(),
                 pending = LeaveScreen,
             )
+
             coVerify(exactly = 1) { setEnabledStatusCodesUseCase(codes = setOf(1)) }
         }
 
@@ -478,6 +491,7 @@ class OnSaveLibraryVisibilityActionTest {
                 initialized = true,
                 discardSheet = SheetSession.Open(model = discardSheetScaffold()),
             )
+
             val dependencies = stubDependencies(this)
 
             coEvery {
@@ -518,6 +532,7 @@ class OnSaveLibraryVisibilityActionTest {
                 initialized = true,
                 discardSheet = SheetSession.Open(model = discardSheetScaffold()),
             )
+
             val dependencies = stubDependencies(this)
             var sheetDuringSave: SheetSession<*, *>? = null
 
@@ -561,6 +576,7 @@ class OnSaveLibraryVisibilityActionTest {
                 initialized = true,
                 discardSheet = SheetSession.Open(model = discardSheetScaffold()),
             )
+
             val dependencies = stubDependencies(this)
 
             coEvery {
@@ -591,6 +607,7 @@ class OnSaveLibraryVisibilityActionTest {
             eventChannel.tryReceive().getOrNull() shouldBe LibraryVisibilitySettingsEvent.SaveFailed
             eventChannel.tryReceive().getOrNull() shouldBe null
             stateFlow.value.isSaving shouldBe false
+
             stateFlow.value.discardSheet shouldBe SheetSession.Open(
                 model = discardSheetScaffold(saving = false).requestingClose(),
             )
@@ -605,6 +622,7 @@ class OnSaveLibraryVisibilityActionTest {
                 initialized = true,
                 discardSheet = SheetSession.Open(model = discardSheetScaffold()),
             )
+
             val dependencies = stubDependencies(this)
 
             coEvery {
@@ -646,6 +664,7 @@ class OnSaveLibraryVisibilityActionTest {
                 initialized = true,
                 discardSheet = SheetSession.Open(model = discardSheetScaffold()),
             )
+
             val dependencies = stubDependencies(this)
             val action = OnSaveLibraryVisibilityAction(leaveAfterSave = true)
 
@@ -657,10 +676,12 @@ class OnSaveLibraryVisibilityActionTest {
 
             // ----- Assert -----
             eventChannel.tryReceive().getOrNull() shouldBe null
+
             stateFlow.value.discardSheet shouldBe SheetSession.Open(
                 model = discardSheetScaffold().requestingClose(),
                 pending = LeaveScreen,
             )
+
             coVerify(exactly = 0) { setEnabledStatusCodesUseCase(codes = any()) }
             coVerify(exactly = 0) { setEnabledListIdsUseCase(ids = any()) }
             coVerify(exactly = 0) { setLibraryTabOrderUseCase(order = any()) }
@@ -676,6 +697,7 @@ class OnSaveLibraryVisibilityActionTest {
                 isSaving = true,
                 discardSheet = SheetSession.Open(model = discardSheetScaffold()),
             )
+
             val dependencies = stubDependencies(this)
             val action = OnSaveLibraryVisibilityAction(leaveAfterSave = true)
 
@@ -687,10 +709,12 @@ class OnSaveLibraryVisibilityActionTest {
 
             // ----- Assert -----
             eventChannel.tryReceive().getOrNull() shouldBe null
+
             stateFlow.value.discardSheet shouldBe SheetSession.Open(
                 model = discardSheetScaffold().requestingClose(),
                 pending = LeaveScreen,
             )
+
             coVerify(exactly = 0) { setEnabledStatusCodesUseCase(codes = any()) }
             coVerify(exactly = 0) { setEnabledListIdsUseCase(ids = any()) }
             coVerify(exactly = 0) { setLibraryTabOrderUseCase(order = any()) }
@@ -704,6 +728,7 @@ class OnSaveLibraryVisibilityActionTest {
                 draftEnabledStatusCodes = persistentSetOf(1),
                 initialized = true,
             )
+
             val dependencies = stubDependencies(this)
 
             coEvery {

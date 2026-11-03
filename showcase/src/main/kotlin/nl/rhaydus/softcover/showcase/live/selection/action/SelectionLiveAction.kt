@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.showcase.live.selection.state.SelectionLiveUiState
 import nl.rhaydus.toad.UiAction
 
 internal sealed interface SelectionLiveAction : UiAction<
-        SelectionLiveDependencies,
-        SelectionLiveUiState,
-        SelectionLiveEvent,
-        SelectionLiveLocalVariables,
-        >
+    SelectionLiveDependencies,
+    SelectionLiveUiState,
+    SelectionLiveEvent,
+    SelectionLiveLocalVariables,
+>

@@ -42,6 +42,7 @@ class Migration58To59Test {
             "INSERT INTO trending_books (period, bookId, rank) VALUES " +
                 "('week', 1, 0), ('upcoming_week', 1, 3), ('recent_month', 1, 7), ('recommendations', 1, 12)",
         )
+
         connection.execSQL(
             "INSERT INTO trending_meta (period, fetchedAtEpochMillis) VALUES " +
                 "('week', 1111), ('recommendations', 2222)",
@@ -93,6 +94,7 @@ class Migration58To59Test {
             // ----- Arrange -----
             seedRankedLists()
             val kept = schema58.tables.filter { it.name != "trending_books" && it.name != "trending_meta" }
+
             val rowsBefore = kept.associate { table ->
                 table.name to connection.snapshot(
                     table.name,
@@ -137,6 +139,7 @@ class Migration58To59Test {
             // ----- Assert -----
             db.indexNames() shouldBe exported.indexNames
             db.viewNames() shouldBe exported.viewNames
+
             listOf("ranked_books", "ranked_list_meta").forEach {
                 db.columnNames(it) shouldBe exported.table(it).columns.map { column -> column.name }
             }

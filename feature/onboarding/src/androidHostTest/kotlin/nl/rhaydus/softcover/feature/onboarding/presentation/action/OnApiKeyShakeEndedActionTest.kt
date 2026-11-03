@@ -24,6 +24,7 @@ class OnApiKeyShakeEndedActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(OnboardingUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalOnboardingVariables()),
@@ -37,6 +38,7 @@ class OnApiKeyShakeEndedActionTest {
         fun `stops the shake and keeps the error message`() = runTest {
             // ----- Arrange -----
             val base = stateFlow.value
+
             stateFlow.value = base.copy(
                 apiKeyField = base.apiKeyField.copy(
                     error = TextFieldError(
@@ -45,6 +47,7 @@ class OnApiKeyShakeEndedActionTest {
                     ),
                 ),
             )
+
             val action = OnApiKeyShakeEndedAction
 
             // ----- Act -----

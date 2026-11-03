@@ -1,11 +1,11 @@
 package nl.rhaydus.softcover.orchestration.presentation
 
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.Surface
@@ -32,15 +32,16 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.layout.WindowWidthClass
 import nl.rhaydus.designsystem.layout.rememberWindowSizeClass
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.core.component.haptics.Feedback
 import nl.rhaydus.softcover.core.component.haptics.play
 import nl.rhaydus.softcover.core.component.snackbar.SoftcoverSnackbarHost
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.appupdate.ObserveAppUpdateStateUseCase
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.core.presentation.cover.ProvideCoverImagePersister
+import nl.rhaydus.softcover.core.presentation.share.ProvideShareCardIoDispatcher
 import nl.rhaydus.softcover.core.presentation.theme.LocalThemeConfiguration
 import nl.rhaydus.softcover.core.presentation.util.LocalAppUpdateState
 import nl.rhaydus.softcover.core.presentation.util.LocalStartAppUpdate
@@ -139,93 +140,95 @@ internal fun App() {
         }
 
         ClearFocusOnTapScreen {
-            ProvideCoverImagePersister {
-                CompositionLocalProvider(
-                    LocalThemeConfiguration provides themeConfig,
-                    LocalAppUpdateState provides appUpdateState,
-                    LocalStartAppUpdate provides onStartAppUpdate,
-                ) {
-                    val bottomChromeAnchor = remember { BottomChromeAnchor() }
-                    var hostBottomInRoot by remember { mutableFloatStateOf(0f) }
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .onGloballyPositioned { coordinates ->
-                                hostBottomInRoot = coordinates.boundsInRoot().bottom
-                            },
+            ProvideShareCardIoDispatcher {
+                ProvideCoverImagePersister {
+                    CompositionLocalProvider(
+                        LocalThemeConfiguration provides themeConfig,
+                        LocalAppUpdateState provides appUpdateState,
+                        LocalStartAppUpdate provides onStartAppUpdate,
                     ) {
-                        // Gate the first navigation on resolved auth state. Until the splash check
-                        // finishes `authenticated` defaults to false, so building the navigator eagerly
-                        // would mount OnboardingScreen and only swap to RootScreen once auth resolves.
-                        // Android hides that frame behind the system splash; desktop has no such splash,
-                        // so it flashed the login screen.
-                        if (state.isLoading) {
-                            Surface(modifier = Modifier.fillMaxSize()) {}
-                        } else {
-                            key(state.authenticated) {
-                                CompositionLocalProvider(LocalBottomChromeAnchor provides bottomChromeAnchor) {
-                                    Navigator(
-                                        screen = if (state.authenticated) RootScreen else OnboardingScreen,
-                                        onBackPressed = null,
-                                    )
-                                }
-                            }
-                        }
+                        val bottomChromeAnchor = remember { BottomChromeAnchor() }
+                        var hostBottomInRoot by remember { mutableFloatStateOf(0f) }
 
-                        // On an expanded (desktop / large) window a bottom-centre toast floats far from
-                        // the action; anchor it bottom-end with a constrained width — the desktop
-                        // convention — and keep the phone bottom-centre otherwise. While the compact
-                        // bottom chrome is on screen the phone host rides above its reported top edge
-                        // (that edge already clears the navigation-bar inset); without it, it only
-                        // clears the navigation bar.
-                        val onWideWindow =
-                            rememberWindowSizeClass().widthClass == WindowWidthClass.EXPANDED
-
-                        val snackbarModifier = if (onWideWindow) {
-                            Modifier
-                                .align(Alignment.BottomEnd)
-                                .navigationBarsPadding()
-                                .padding(Spacing.md)
-                                .widthIn(max = 420.dp)
-                        } else {
-                            val chromeTop = bottomChromeAnchor.topInRoot
-
-                            if (chromeTop == null) {
-                                Modifier
-                                    .align(Alignment.BottomCenter)
-                                    .navigationBarsPadding()
-                            } else {
-                                val chromeHeightDp = with(LocalDensity.current) {
-                                    (hostBottomInRoot - chromeTop).coerceAtLeast(0f).toDp()
-                                }
-
-                                Modifier
-                                    .align(Alignment.BottomCenter)
-                                    .padding(bottom = chromeHeightDp + Spacing.xs)
-                            }
-                        }
-
-                        SoftcoverSnackbarHost(modifier = snackbarModifier)
-
-                        // Show the re-auth overlay only during an authenticated session — if the user
-                        // is already on onboarding they can enter a token through the normal flow.
-                        reAuthSheet?.takeIf { state.authenticated }?.let { sheet ->
-                            ReAuthSheet(
-                                model = sheet,
-                                onEvent = { event ->
-                                    when (event) {
-                                        is ReAuthSheetEvent.ApiKeyChanged ->
-                                            viewModel.onReAuthApiKeyChanged(event.value)
-
-                                        ReAuthSheetEvent.Submitted -> viewModel.reAuthenticate()
-
-                                        ReAuthSheetEvent.LoggedOut -> viewModel.logOutFromReAuth()
-
-                                        ReAuthSheetEvent.Dismissed -> viewModel.onReAuthDismissed()
-                                    }
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .onGloballyPositioned { coordinates ->
+                                    hostBottomInRoot = coordinates.boundsInRoot().bottom
                                 },
-                            )
+                        ) {
+                            // Gate the first navigation on resolved auth state. Until the splash check
+                            // finishes `authenticated` defaults to false, so building the navigator eagerly
+                            // would mount OnboardingScreen and only swap to RootScreen once auth resolves.
+                            // Android hides that frame behind the system splash; desktop has no such splash,
+                            // so it flashed the login screen.
+                            if (state.isLoading) {
+                                Surface(modifier = Modifier.fillMaxSize()) {}
+                            } else {
+                                key(state.authenticated) {
+                                    CompositionLocalProvider(LocalBottomChromeAnchor provides bottomChromeAnchor) {
+                                        Navigator(
+                                            screen = if (state.authenticated) RootScreen else OnboardingScreen,
+                                            onBackPressed = null,
+                                        )
+                                    }
+                                }
+                            }
+
+                            // On an expanded (desktop / large) window a bottom-centre toast floats far from
+                            // the action; anchor it bottom-end with a constrained width — the desktop
+                            // convention — and keep the phone bottom-centre otherwise. While the compact
+                            // bottom chrome is on screen the phone host rides above its reported top edge
+                            // (that edge already clears the navigation-bar inset); without it, it only
+                            // clears the navigation bar.
+                            val onWideWindow =
+                                rememberWindowSizeClass().widthClass == WindowWidthClass.EXPANDED
+
+                            val snackbarModifier = if (onWideWindow) {
+                                Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .navigationBarsPadding()
+                                    .padding(Spacing.md)
+                                    .widthIn(max = 420.dp)
+                            } else {
+                                val chromeTop = bottomChromeAnchor.topInRoot
+
+                                if (chromeTop == null) {
+                                    Modifier
+                                        .align(Alignment.BottomCenter)
+                                        .navigationBarsPadding()
+                                } else {
+                                    val chromeHeightDp = with(LocalDensity.current) {
+                                        (hostBottomInRoot - chromeTop).coerceAtLeast(0f).toDp()
+                                    }
+
+                                    Modifier
+                                        .align(Alignment.BottomCenter)
+                                        .padding(bottom = chromeHeightDp + Spacing.xs)
+                                }
+                            }
+
+                            SoftcoverSnackbarHost(modifier = snackbarModifier)
+
+                            // Show the re-auth overlay only during an authenticated session — if the user
+                            // is already on onboarding they can enter a token through the normal flow.
+                            reAuthSheet?.takeIf { state.authenticated }?.let { sheet ->
+                                ReAuthSheet(
+                                    model = sheet,
+                                    onEvent = { event ->
+                                        when (event) {
+                                            is ReAuthSheetEvent.ApiKeyChanged ->
+                                                viewModel.onReAuthApiKeyChanged(event.value)
+
+                                            ReAuthSheetEvent.Submitted -> viewModel.reAuthenticate()
+
+                                            ReAuthSheetEvent.LoggedOut -> viewModel.logOutFromReAuth()
+
+                                            ReAuthSheetEvent.Dismissed -> viewModel.onReAuthDismissed()
+                                        }
+                                    },
+                                )
+                            }
                         }
                     }
                 }

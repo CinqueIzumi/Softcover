@@ -37,6 +37,7 @@ class HeaderAnnotatedStringTest {
                 HeaderTextSegment.Plain(text = "Shelve "),
                 HeaderTextSegment.Plain(text = "it"),
             )
+
             val colorScheme = colorScheme
 
             // ----- Act -----
@@ -58,6 +59,7 @@ class HeaderAnnotatedStringTest {
                 HeaderTextSegment.Emphasised(text = "Piranesi"),
                 HeaderTextSegment.Plain(text = " now"),
             )
+
             val colorScheme = colorScheme
 
             // ----- Act -----
@@ -82,6 +84,7 @@ class HeaderAnnotatedStringTest {
                 HeaderTextSegment.Plain(text = "-"),
                 HeaderTextSegment.Emphasised(text = "B"),
             )
+
             val colorScheme = colorScheme
 
             // ----- Act -----

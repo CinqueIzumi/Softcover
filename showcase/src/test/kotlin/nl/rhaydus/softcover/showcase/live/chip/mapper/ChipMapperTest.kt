@@ -20,12 +20,12 @@ class ChipMapperTest {
         mode = mode,
         set = listOf("a", "b", "c")
             .map {
-            ChipUiModel(
-                key = it,
-                label = it,
-                selected = it in selectedKeys,
-            ) to it.uppercase()
-        }
+                ChipUiModel(
+                    key = it,
+                    label = it,
+                    selected = it in selectedKeys,
+                ) to it.uppercase()
+            }
             .toChipSet(),
     )
 

@@ -35,6 +35,7 @@ class BecauseYouReadCollectorTest {
         recommendationFlow = MutableSharedFlow()
         getBecauseYouReadBooksUseCase = mockk()
         stateFlow = MutableStateFlow(ExploreScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
@@ -64,11 +65,14 @@ class BecauseYouReadCollectorTest {
         fun `sets genre and books from a non-null recommendation and clears loading`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = stubBook(id = 1)
+
             val recommendation = BecauseYouReadRecommendation(
                 genre = "Romance",
                 books = listOf(book),
             )
+
             val collector = BecauseYouReadCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -83,10 +87,12 @@ class BecauseYouReadCollectorTest {
             stateFlow.value.becauseYouReadGenre shouldBe "Romance"
             stateFlow.value.becauseYouReadBooks shouldBe listOf(book)
             stateFlow.value.loadingBecauseYouReadBooks shouldBe false
+
             stateFlow.value.becauseYouReadHeader shouldBe SectionHeaderUiModel.Section(
                 eyebrow = "Because you read",
                 headline = "Romance",
             )
+
             job.cancel()
         }
 
@@ -94,6 +100,7 @@ class BecauseYouReadCollectorTest {
         fun `falls back to the header stand-in when the recommendation is null`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = BecauseYouReadCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -118,6 +125,7 @@ class BecauseYouReadCollectorTest {
             val firstBook = stubBook(id = 1)
             val secondBook = stubBook(id = 2)
             val collector = BecauseYouReadCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -143,10 +151,12 @@ class BecauseYouReadCollectorTest {
             // ----- Assert -----
             stateFlow.value.becauseYouReadGenre shouldBe "Horror"
             stateFlow.value.becauseYouReadBooks shouldBe listOf(secondBook)
+
             stateFlow.value.becauseYouReadHeader shouldBe SectionHeaderUiModel.Section(
                 eyebrow = "Because you read",
                 headline = "Horror",
             )
+
             job.cancel()
         }
     }

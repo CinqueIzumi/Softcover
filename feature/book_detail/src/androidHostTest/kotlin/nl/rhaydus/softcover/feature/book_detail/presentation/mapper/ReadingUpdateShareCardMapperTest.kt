@@ -299,6 +299,7 @@ class ReadingUpdateShareCardMapperTest {
         fun `progressLabel includes page and percentage when currentPage and edition pages are present`() {
             // ----- Arrange -----
             val edition = buildEdition(pages = 400)
+
             val book = buildBook(
                 userBook = buildUserBook(status = BookStatus.Reading),
                 userBookRead = buildUserBookRead(
@@ -322,6 +323,7 @@ class ReadingUpdateShareCardMapperTest {
         fun `progressLabel falls back to percentage-only when currentPage is null`() {
             // ----- Arrange -----
             val edition = buildEdition(pages = 400)
+
             val book = buildBook(
                 userBook = buildUserBook(status = BookStatus.Reading),
                 userBookRead = buildUserBookRead(
@@ -345,6 +347,7 @@ class ReadingUpdateShareCardMapperTest {
         fun `progressLabel falls back to percentage-only when edition pages is null`() {
             // ----- Arrange -----
             val edition = buildEdition(pages = null)
+
             val book = buildBook(
                 userBook = buildUserBook(status = BookStatus.Reading),
                 userBookRead = buildUserBookRead(
@@ -390,6 +393,7 @@ class ReadingUpdateShareCardMapperTest {
         fun `progressLabel shows time and percentage for audiobook when currentSeconds and audioSeconds are present`() {
             // ----- Arrange -----
             val edition = buildAudiobookEdition(audioSeconds = 7200)
+
             val book = buildBook(
                 userBook = buildUserBook(status = BookStatus.Reading),
                 userBookRead = buildUserBookRead(currentSeconds = 3600),
@@ -410,6 +414,7 @@ class ReadingUpdateShareCardMapperTest {
         fun `progressLabel falls back to percentage-only for audiobook when currentSeconds is null`() {
             // ----- Arrange -----
             val edition = buildAudiobookEdition(audioSeconds = 7200)
+
             val book = buildBook(
                 userBook = buildUserBook(status = BookStatus.Reading),
                 userBookRead = buildUserBookRead(
@@ -470,6 +475,7 @@ class ReadingUpdateShareCardMapperTest {
                     ),
                 ),
             )
+
             val book = buildBook(
                 userBook = buildUserBook(
                     reviewDocument = reviewDoc,
@@ -506,6 +512,7 @@ class ReadingUpdateShareCardMapperTest {
         fun `review is non-null when reviewHasSpoilers is true — whole-review spoiler flag does not null the rich text`() {
             // ----- Arrange -----
             val reviewDoc = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("A great read")))))
+
             val book = buildBook(
                 userBook = buildUserBook(
                     reviewDocument = reviewDoc,
@@ -614,11 +621,14 @@ class ReadingUpdateShareCardMapperTest {
                 tempDir,
                 "cover.jpg",
             )
+
             localFile.writeText("img")
+
             val edition = buildEdition(
                 localImagePath = localFile.path,
                 url = "https://remote.cover/img.jpg",
             )
+
             val book = buildBook(coverUrl = "https://book.cover/img.jpg")
 
             // ----- Act -----
@@ -679,6 +689,7 @@ class ReadingUpdateShareCardMapperTest {
         fun `cover uses the default edition's image when the chosen edition has none`() {
             // ----- Arrange -----
             val defaultEdition = buildEdition(url = "https://default.cover/img.jpg")
+
             val book = buildBook(
                 coverUrl = "https://book.cover/img.jpg",
                 defaultEdition = defaultEdition,
@@ -743,6 +754,7 @@ class ReadingUpdateShareCardMapperTest {
         fun `tags are over-media chips and spoiler tags are excluded`() {
             // ----- Arrange -----
             val book = buildBook()
+
             val tags = listOf(
                 UserTag(
                     name = "Cozy",

@@ -93,6 +93,7 @@ class HourlyPagesReadMapperTest {
                 range = StatsRange.Unbounded,
                 timeZone = TimeZone.UTC,
             )
+
             val local = toHourlyPages(
                 updates = updates,
                 range = StatsRange.Unbounded,
@@ -206,6 +207,7 @@ class HourlyPagesReadMapperTest {
                 range = range,
                 timeZone = TimeZone.UTC,
             )
+
             val local = toHourlyPages(
                 updates = updates,
                 range = range,
@@ -233,6 +235,7 @@ class HourlyPagesReadMapperTest {
                 range = range,
                 timeZone = TimeZone.UTC,
             )
+
             val local = toHourlyPages(
                 updates = updates,
                 range = range,

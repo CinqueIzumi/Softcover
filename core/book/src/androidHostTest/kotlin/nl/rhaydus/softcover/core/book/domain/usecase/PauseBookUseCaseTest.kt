@@ -57,6 +57,7 @@ class PauseBookUseCaseTest {
 
             // ----- Assert -----
             result.getOrNull() shouldBe ShelfMutationOutcome.Applied
+
             coVerify(exactly = 1) {
                 booksRepository.markBookAsPaused(
                     book = inputBook,
@@ -231,6 +232,7 @@ class PauseBookUseCaseTest {
 
             // ----- Assert -----
             result.getOrNull() shouldBe ShelfMutationOutcome.NoChange
+
             coVerify(exactly = 0) {
                 booksRepository.markBookAsPaused(
                     book = any(),

@@ -28,6 +28,7 @@ class OnReorderShelfBooksActionTest {
     fun setUp() {
         reorderShelfBooksUseCase = mockk(relaxed = true)
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -35,12 +36,11 @@ class OnReorderShelfBooksActionTest {
         )
     }
 
-    private fun stubDependencies(): LibraryDependencies =
-        mockk<LibraryDependencies>(relaxed = true).also { mock ->
-            every {
-                mock.reorderShelfBooksUseCase
-            } returns reorderShelfBooksUseCase
-        }
+    private fun stubDependencies(): LibraryDependencies = mockk<LibraryDependencies>(relaxed = true).also { mock ->
+        every {
+            mock.reorderShelfBooksUseCase
+        } returns reorderShelfBooksUseCase
+    }
 
     @Nested
     inner class Execute {
@@ -49,6 +49,7 @@ class OnReorderShelfBooksActionTest {
             // ----- Arrange -----
             val status = UserBookStatus.READ
             val bookIds = listOf(3, 1, 2)
+
             val action = OnReorderShelfBooksAction(
                 status = status,
                 prefixOrderedBookIds = bookIds,
@@ -74,10 +75,12 @@ class OnReorderShelfBooksActionTest {
             // ----- Arrange -----
             val status = UserBookStatus.WANT_TO_READ
             val bookIds = listOf(10, 20)
+
             val action = OnReorderShelfBooksAction(
                 status = status,
                 prefixOrderedBookIds = bookIds,
             )
+
             val stateBefore = stateFlow.value
 
             coEvery {

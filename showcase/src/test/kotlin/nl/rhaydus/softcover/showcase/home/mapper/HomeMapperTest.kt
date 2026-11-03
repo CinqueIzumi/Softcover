@@ -43,6 +43,7 @@ class HomeMapperTest {
             val multiFamily = GalleryFamily.entries
                 .firstOrNull { family -> GalleryRegistry.entries.count { it.family == family } > 1 }
                 .shouldNotBeNull()
+
             val count = GalleryRegistry.entries.count { it.family == multiFamily }
 
             // ----- Act -----

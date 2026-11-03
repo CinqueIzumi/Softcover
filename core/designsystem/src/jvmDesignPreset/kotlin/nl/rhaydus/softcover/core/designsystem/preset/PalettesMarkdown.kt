@@ -10,6 +10,7 @@ internal object PalettesMarkdown {
 
     fun render(): String = buildString {
         append("# Palettes\n\n")
+
         append(
             "Softcover ships ${SpinePalette.entries.size} palettes. ${SpinePalette.DEFAULT.label} is the default " +
                 "and is the one in the token file. The other ${alternates.size} are listed here. Each retints " +
@@ -21,6 +22,7 @@ internal object PalettesMarkdown {
                 SchemeBrightness.LIGHT,
                 palette,
             )
+
             val dark = rolesFor(
                 SchemeBrightness.DARK,
                 palette,
@@ -28,6 +30,7 @@ internal object PalettesMarkdown {
 
             append("\n## ${palette.label}\n\n${palette.gloss}\n\n")
             append("| Role | Light | Dark |\n| --- | --- | --- |\n")
+
             light.forEach { (role, color) ->
                 append("| `$role` | `${color.toHex()}` | `${dark.getValue(role).toHex()}` |\n")
             }
@@ -37,8 +40,10 @@ internal object PalettesMarkdown {
     private fun rolesFor(
         brightness: SchemeBrightness,
         palette: SpinePalette,
-    ) = ColorTokens.schemeRoles(softcoverColorScheme(
-        brightness,
-        palette,
-    ),)
+    ) = ColorTokens.schemeRoles(
+        softcoverColorScheme(
+            brightness,
+            palette,
+        ),
+    )
 }

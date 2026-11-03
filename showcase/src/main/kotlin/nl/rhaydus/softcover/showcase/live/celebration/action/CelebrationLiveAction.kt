@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.showcase.live.celebration.state.CelebrationLiveUiSta
 import nl.rhaydus.toad.UiAction
 
 internal sealed interface CelebrationLiveAction : UiAction<
-        CelebrationLiveDependencies,
-        CelebrationLiveUiState,
-        CelebrationLiveEvent,
-        CelebrationLiveLocalVariables,
-        >
+    CelebrationLiveDependencies,
+    CelebrationLiveUiState,
+    CelebrationLiveEvent,
+    CelebrationLiveLocalVariables,
+>

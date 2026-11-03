@@ -37,6 +37,7 @@ class QueriedBooksCollectorTest {
         getAllUserBooksUseCase = mockk()
         getQueriedBooksUseCase = mockk()
         stateFlow = MutableStateFlow(ExploreScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
@@ -77,6 +78,7 @@ class QueriedBooksCollectorTest {
             val fetchedBook2 = stubBook(id = 2)
             val userBook1 = stubBook(id = 1)
             val collector = QueriedBooksCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -101,6 +103,7 @@ class QueriedBooksCollectorTest {
             val fetchedBook = stubBook(id = 3)
             val updatedUserBook = stubBook(id = 3)
             val collector = QueriedBooksCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

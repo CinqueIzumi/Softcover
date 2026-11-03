@@ -74,10 +74,13 @@ fun DesktopApp() {
     // Compose Desktop inheriting a 1.0 density on Linux, where the app otherwise renders tiny.
     val baseDensity = LocalDensity.current
 
+    @Suppress("RestrictedApi") // Lint resolves Density.fontScale to the restricted FontScalingLinear override.
+    val baseFontScale = baseDensity.fontScale
+
     CompositionLocalProvider(
         LocalDensity provides Density(
             density = baseDensity.density * uiScale.factor,
-            fontScale = baseDensity.fontScale,
+            fontScale = baseFontScale,
         ),
     ) {
         App()

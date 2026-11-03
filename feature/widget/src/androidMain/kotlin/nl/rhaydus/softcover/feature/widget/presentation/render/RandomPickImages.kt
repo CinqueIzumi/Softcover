@@ -27,6 +27,7 @@ internal class RandomPickImages(
         coverHeightDp: Int,
     ): Uri? {
         val source = pick.coverSource() ?: return null
+
         val coverPx = (coverHeightDp * density).roundToInt()
 
         return store.uriFor(

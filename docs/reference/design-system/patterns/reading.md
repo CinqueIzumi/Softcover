@@ -37,7 +37,7 @@
 - A "Most recent first" caption beside an italic "N days running" streak, shown while the current streak runs: one ending yesterday still counts until midnight.
 - The dot is binary: a day with pages read in the on-device progress history, never reading sessions.
 - The strip shows only while Settings' "Reading streak" is on.
-- The row is one `tactileClickable` target (`select`) opening a per-day breakdown sheet. With no activity
+- The row is one `pressScaleClickable` target (`select`) opening a per-day breakdown sheet. With no activity
   in the window the strip is omitted.
 
 ### Reading featured-hero card

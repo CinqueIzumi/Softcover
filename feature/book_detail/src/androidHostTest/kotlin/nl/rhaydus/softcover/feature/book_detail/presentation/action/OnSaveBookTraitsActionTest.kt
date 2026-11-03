@@ -42,14 +42,17 @@ class OnSaveBookTraitsActionTest {
     fun setUp() {
         savedTraits.clear()
         saveBookTraitsUseCase = mockk()
+
         coEvery {
             saveBookTraitsUseCase(traits = any())
         } answers {
             savedTraits += firstArg<BookTraits>()
             Result.success(Unit)
         }
+
         stateFlow = MutableStateFlow(buildBookDetailUiState(bookId = 42))
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -57,6 +60,7 @@ class OnSaveBookTraitsActionTest {
         )
 
         mockkObject(SnackBarManager)
+
         every {
             SnackBarManager.showSnackbar(title = any())
         } returns Unit
@@ -74,12 +78,15 @@ class OnSaveBookTraitsActionTest {
             every {
                 mock.saveBookTraitsUseCase
             } returns saveBookTraitsUseCase
+
             every {
                 mock.coroutineScope
             } returns testScope
+
             every {
                 mock.mainDispatcher
             } returns dispatcher
+
             every {
                 mock.launch(any())
             } answers { callOriginal() }
@@ -112,6 +119,7 @@ class OnSaveBookTraitsActionTest {
                     plotCharacterBalance = 50,
                 ),
             )
+
             stateFlow.value.howItReadDraft.shouldBeNull()
         }
 
@@ -152,6 +160,7 @@ class OnSaveBookTraitsActionTest {
             coEvery {
                 saveBookTraitsUseCase(traits = any())
             } returns Result.failure(RuntimeException("save failed"))
+
             stateFlow.value = buildBookDetailUiState(bookId = 42).copy(howItReadDraft = HowItReadDraft())
 
             // ----- Act -----
@@ -164,6 +173,7 @@ class OnSaveBookTraitsActionTest {
             verify(exactly = 1) {
                 SnackBarManager.showSnackbar(title = "Couldn't save your answers. Try again.")
             }
+
             eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.MutationFailedEvent>()
         }
     }

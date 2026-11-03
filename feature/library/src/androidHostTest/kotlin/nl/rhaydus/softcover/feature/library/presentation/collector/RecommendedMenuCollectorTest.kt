@@ -37,38 +37,38 @@ class RecommendedMenuCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `opens the sheet under the rail eyebrow with the requested book's title`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val stateFlow = MutableStateFlow(
-                    LibraryUiState(
-                        recommendedBooks = persistentListOf(
-                            recommendedBook(id = 1),
-                            recommendedBook(
-                                id = 2,
-                                title = "Dune",
-                            ),
+        fun `opens the sheet under the rail eyebrow with the requested book's title`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val stateFlow = MutableStateFlow(
+                LibraryUiState(
+                    recommendedBooks = persistentListOf(
+                        recommendedBook(id = 1),
+                        recommendedBook(
+                            id = 2,
+                            title = "Dune",
                         ),
-                        recommendedHeader = header,
-                        recommendedMenuBookId = 2,
                     ),
+                    recommendedHeader = header,
+                    recommendedMenuBookId = 2,
+                ),
+            )
+
+            val job = launch {
+                RecommendedMenuCollector().onLaunch(
+                    scope = scopeFor(stateFlow),
+                    dependencies = mockk<LibraryDependencies>(relaxed = true),
                 )
-                val job = launch {
-                    RecommendedMenuCollector().onLaunch(
-                        scope = scopeFor(stateFlow),
-                        dependencies = mockk<LibraryDependencies>(relaxed = true),
-                    )
-                }
-
-                // ----- Act -----
-                val section = stateFlow.value.recommendedMenu.modelOrNull.shouldNotBeNull().scaffold.header
-                    .shouldNotBeNull().section
-
-                // ----- Assert -----
-                section.eyebrow shouldBe "Not on your shelf yet"
-                section.headlineText shouldBe "Dune"
-                job.cancel()
             }
+
+            // ----- Act -----
+            val section = stateFlow.value.recommendedMenu.modelOrNull.shouldNotBeNull().scaffold.header
+                .shouldNotBeNull().section
+
+            // ----- Assert -----
+            section.eyebrow shouldBe "Not on your shelf yet"
+            section.headlineText shouldBe "Dune"
+            job.cancel()
+        }
 
         @Test
         fun `stays closed while no book is requested`() = runTest(UnconfinedTestDispatcher()) {
@@ -79,6 +79,7 @@ class RecommendedMenuCollectorTest {
                     recommendedHeader = header,
                 ),
             )
+
             val job = launch {
                 RecommendedMenuCollector().onLaunch(
                     scope = scopeFor(stateFlow),
@@ -95,31 +96,31 @@ class RecommendedMenuCollectorTest {
         }
 
         @Test
-        fun `opens the sheet with the label's eyebrow when the header is a label`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val stateFlow = MutableStateFlow(
-                    LibraryUiState(
-                        recommendedBooks = persistentListOf(recommendedBook(id = 1)),
-                        recommendedHeader = SectionHeaderUiModel.Label(eyebrow = "Not on your shelf yet"),
-                        recommendedMenuBookId = 1,
-                    ),
+        fun `opens the sheet with the label's eyebrow when the header is a label`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val stateFlow = MutableStateFlow(
+                LibraryUiState(
+                    recommendedBooks = persistentListOf(recommendedBook(id = 1)),
+                    recommendedHeader = SectionHeaderUiModel.Label(eyebrow = "Not on your shelf yet"),
+                    recommendedMenuBookId = 1,
+                ),
+            )
+
+            val job = launch {
+                RecommendedMenuCollector().onLaunch(
+                    scope = scopeFor(stateFlow),
+                    dependencies = mockk<LibraryDependencies>(relaxed = true),
                 )
-                val job = launch {
-                    RecommendedMenuCollector().onLaunch(
-                        scope = scopeFor(stateFlow),
-                        dependencies = mockk<LibraryDependencies>(relaxed = true),
-                    )
-                }
-
-                // ----- Act -----
-                val section = stateFlow.value.recommendedMenu.modelOrNull.shouldNotBeNull().scaffold.header
-                    .shouldNotBeNull().section
-
-                // ----- Assert -----
-                section.eyebrow shouldBe "Not on your shelf yet"
-                job.cancel()
             }
+
+            // ----- Act -----
+            val section = stateFlow.value.recommendedMenu.modelOrNull.shouldNotBeNull().scaffold.header
+                .shouldNotBeNull().section
+
+            // ----- Assert -----
+            section.eyebrow shouldBe "Not on your shelf yet"
+            job.cancel()
+        }
 
         @Test
         fun `updates the open sheet when the book's title changes`() = runTest(UnconfinedTestDispatcher()) {
@@ -128,6 +129,7 @@ class RecommendedMenuCollectorTest {
                 id = 1,
                 title = "Dune",
             )
+
             val stateFlow = MutableStateFlow(
                 LibraryUiState(
                     recommendedBooks = persistentListOf(dune),
@@ -135,6 +137,7 @@ class RecommendedMenuCollectorTest {
                     recommendedMenuBookId = 1,
                 ),
             )
+
             val job = launch {
                 RecommendedMenuCollector().onLaunch(
                     scope = scopeFor(stateFlow),
@@ -147,14 +150,17 @@ class RecommendedMenuCollectorTest {
                 id = 1,
                 title = "Dune Messiah",
             )
+
             stateFlow.value = stateFlow.value.copy(recommendedBooks = persistentListOf(messiah))
 
             // ----- Assert -----
             val menu = stateFlow.value.recommendedMenu
             menu.isOpen shouldBe true
             menu.isClosing shouldBe false
+
             menu.modelOrNull.shouldNotBeNull().scaffold.header.shouldNotBeNull().section.headlineText shouldBe
                 "Dune Messiah"
+
             job.cancel()
         }
 
@@ -168,6 +174,7 @@ class RecommendedMenuCollectorTest {
                     recommendedMenuBookId = 1,
                 ),
             )
+
             val job = launch {
                 RecommendedMenuCollector().onLaunch(
                     scope = scopeFor(stateFlow),
@@ -193,6 +200,7 @@ class RecommendedMenuCollectorTest {
                     recommendedMenuBookId = 1,
                 ),
             )
+
             val job = launch {
                 RecommendedMenuCollector().onLaunch(
                     scope = scopeFor(stateFlow),

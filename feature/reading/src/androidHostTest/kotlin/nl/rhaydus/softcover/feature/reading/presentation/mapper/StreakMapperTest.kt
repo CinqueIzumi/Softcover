@@ -58,11 +58,13 @@ class StreakMapperTest {
 
             // ----- Assert -----
             result.days shouldHaveSize 21
+
             result.days.take(3).map { it.didRead } shouldBe listOf(
                 true,
                 false,
                 true,
             )
+
             result.days.map { it.isToday } shouldBe List(21) { it == 0 }
             result.days.drop(3).none { it.didRead } shouldBe true
         }
@@ -153,6 +155,7 @@ class StreakMapperTest {
                 activity = null,
                 today = today,
             )
+
             val withoutToday = streakStripFor(
                 activity = activity,
                 today = null,
@@ -186,6 +189,7 @@ class StreakMapperTest {
 
             // ----- Assert -----
             result.rows shouldHaveSize 21
+
             result.rows.take(3) shouldBe listOf(
                 StreakDayRowUiModel(
                     label = "Today",
@@ -214,6 +218,7 @@ class StreakMapperTest {
                 activity = null,
                 today = today,
             )
+
             val withoutToday = streakSheetFor(
                 activity = activity,
                 today = null,

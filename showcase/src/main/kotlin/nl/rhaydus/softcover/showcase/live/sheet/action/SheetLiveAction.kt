@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.showcase.live.sheet.state.SheetLiveUiState
 import nl.rhaydus.toad.UiAction
 
 internal sealed interface SheetLiveAction : UiAction<
-        SheetLiveDependencies,
-        SheetLiveUiState,
-        SheetLiveEvent,
-        SheetLiveLocalVariables,
-        >
+    SheetLiveDependencies,
+    SheetLiveUiState,
+    SheetLiveEvent,
+    SheetLiveLocalVariables,
+>

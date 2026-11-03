@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import kotlinx.collections.immutable.ImmutableList
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.chart.ColumnChart
@@ -14,7 +15,6 @@ import nl.rhaydus.softcover.core.component.chart.ColumnChartUiModel
 import nl.rhaydus.softcover.core.component.chart.ProportionChart
 import nl.rhaydus.softcover.core.component.chart.ProportionChartUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.profile.presentation.state.TimeToFinishUiModel
 
 /**
@@ -54,12 +54,10 @@ internal fun SeasonsAndRecordsChapter(
                 Column {
                     Spacer(modifier = Modifier.height(Spacing.xl))
 
-                    ScopeCrossfade(
-                        target = monthSetKey to chart,
-                        contentKey = { it.first },
-                    ) { (_, scopedChart) ->
-                        ColumnChart(model = scopedChart)
-                    }
+                    ScopedColumnChart(
+                        monthSetKey = monthSetKey,
+                        chart = chart,
+                    )
                 }
             },
         )
@@ -79,16 +77,7 @@ internal fun SeasonsAndRecordsChapter(
                 Column {
                     Spacer(modifier = Modifier.height(Spacing.md))
 
-                    ScopeCrossfade(target = topAuthorRows) { rows ->
-                        Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-                            rows.forEach { row ->
-                                BookCard(
-                                    model = row,
-                                    onEvent = {},
-                                )
-                            }
-                        }
-                    }
+                    ScopedTopAuthorRows(rows = topAuthorRows)
                 }
             },
         )
@@ -116,5 +105,52 @@ internal fun SeasonsAndRecordsChapter(
         Spacer(modifier = Modifier.height(Spacing.xl))
 
         TimeToFinishSection(model = timeToFinish)
+    }
+}
+
+/**
+ * [ColumnChart] crossfaded between month sets. The lambda reads [modifier] so the compiler emits it as a
+ * capturing instance; a capture-free one would be hoisted into a public `ComposableSingletons` class
+ * whose signature leaks [ColumnChartUiModel] into this module's ABI.
+ */
+@Composable
+private fun ScopedColumnChart(
+    monthSetKey: String?,
+    chart: ColumnChartUiModel,
+    modifier: Modifier = Modifier,
+) {
+    ScopeCrossfade(
+        target = monthSetKey to chart,
+        contentKey = { it.first },
+    ) { (_, scopedChart) ->
+        ColumnChart(
+            model = scopedChart,
+            modifier = modifier,
+        )
+    }
+}
+
+/**
+ * The top-author [BookCard] rows crossfaded between scopes. The lambda reads [modifier] so it is not
+ * hoisted into a public `ComposableSingletons` class that would leak [BookCardUiModel] into this
+ * module's ABI.
+ */
+@Composable
+private fun ScopedTopAuthorRows(
+    rows: ImmutableList<BookCardUiModel>,
+    modifier: Modifier = Modifier,
+) {
+    ScopeCrossfade(target = rows) { scopedRows ->
+        Column(
+            modifier = modifier,
+            verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+        ) {
+            scopedRows.forEach { row ->
+                BookCard(
+                    model = row,
+                    onEvent = {},
+                )
+            }
+        }
     }
 }

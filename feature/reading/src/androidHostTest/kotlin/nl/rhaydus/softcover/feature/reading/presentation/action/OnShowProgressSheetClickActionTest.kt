@@ -27,6 +27,7 @@ class OnShowProgressSheetClickActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(ReadingScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ReadingLocalVariables()),
@@ -67,6 +68,7 @@ class OnShowProgressSheetClickActionTest {
                     ),
                 ),
             )
+
             val action = OnShowProgressSheetClickAction(book = PreviewData.baseBook)
 
             // ----- Act -----
@@ -85,6 +87,7 @@ class OnShowProgressSheetClickActionTest {
             stateFlow.value = ReadingScreenUiState(
                 progressSheet = ProgressSheetState(tab = ProgressSheetTab.PERCENTAGE),
             )
+
             val action = OnShowProgressSheetClickAction(book = PreviewData.baseBook)
 
             // ----- Act -----

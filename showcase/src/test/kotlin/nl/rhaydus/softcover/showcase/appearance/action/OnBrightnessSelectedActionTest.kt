@@ -27,11 +27,13 @@ class OnBrightnessSelectedActionTest {
     @BeforeEach
     fun setUp() {
         themeStore = ShowcaseThemeStore()
+
         dependencies = FamilyDependencies(
             themeStore = themeStore,
             coroutineScope = mockk(),
             mainDispatcher = mockk(),
         )
+
         scope = ActionScope(
             stateFlow = MutableStateFlow(
                 FamilyUiState(
@@ -50,6 +52,7 @@ class OnBrightnessSelectedActionTest {
         fun `writes the brightness to the theme store and keeps the palette`() = runTest {
             // ----- Arrange -----
             themeStore.selectPalette(SpinePalette.SEA)
+
             val action = OnBrightnessSelectedAction<FamilyDependencies, FamilyUiState, FamilyEvent, FamilyLocalVariables>(
                 brightness = SchemeBrightness.DARK,
             )

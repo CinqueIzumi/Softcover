@@ -110,12 +110,15 @@ class AuthorDemographicsTest {
                 noCount = 5,
                 unknownCount = 0,
             )
+
             result.bipocBreakdown.total shouldBe 9
+
             result.lgbtqBreakdown shouldBe DemographicBreakdown(
                 yesCount = 1,
                 noCount = 2,
                 unknownCount = 0,
             )
+
             result.lgbtqBreakdown.total shouldBe 3
         }
 

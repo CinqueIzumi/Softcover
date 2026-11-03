@@ -29,13 +29,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.haptics.LocalHaptics
-import nl.rhaydus.softcover.core.component.state.skeletonMask
+import nl.rhaydus.designsystem.modifier.skeletonMask
+import nl.rhaydus.designsystem.theme.Corners
+import nl.rhaydus.designsystem.theme.Spacing
+import nl.rhaydus.designsystem.theme.motion
 import nl.rhaydus.softcover.core.component.text.FadeThroughText
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.motion
 
 @Composable
 fun ColumnChart(
@@ -115,6 +115,7 @@ private fun ColumnChartRow(
             )
 
             val dimmed = activeIndex >= 0 && index != activeIndex
+
             val barAlpha = animateFloatAsState(
                 targetValue = if (dimmed) 0.35f else 1f,
                 animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),

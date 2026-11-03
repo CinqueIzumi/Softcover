@@ -39,6 +39,7 @@ class OnRefreshActionTest {
         refreshLibraryUseCase = mockk()
         refreshRecommendedFeedUseCase = mockk()
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -48,6 +49,7 @@ class OnRefreshActionTest {
 
     private fun stubDependencies(testScope: TestScope): LibraryDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<LibraryDependencies>(relaxed = true).also { mock ->
             every {
                 mock.refreshLibraryUseCase
@@ -136,6 +138,7 @@ class OnRefreshActionTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
             val wantToRead = LibraryTab.Status.of(UserBookStatus.WANT_TO_READ)
+
             stateFlow.value = LibraryUiState(
                 selectedTabId = wantToRead.id,
                 visibleTabs = persistentListOf(LibraryTab.All, wantToRead),
@@ -169,6 +172,7 @@ class OnRefreshActionTest {
             val dependencies = stubDependencies(this)
             val pending = CompletableDeferred<Result<Unit>>()
             val wantToRead = LibraryTab.Status.of(UserBookStatus.WANT_TO_READ)
+
             stateFlow.value = LibraryUiState(
                 selectedTabId = wantToRead.id,
                 visibleTabs = persistentListOf(LibraryTab.All, wantToRead),
@@ -183,12 +187,14 @@ class OnRefreshActionTest {
             } coAnswers { pending.await() }
 
             val action = OnRefreshAction()
+
             val job = launch {
                 action.execute(
                     dependencies = dependencies,
                     scope = scope,
                 )
             }
+
             testScheduler.runCurrent()
             val loadingWhilePending = stateFlow.value.isLoading
 

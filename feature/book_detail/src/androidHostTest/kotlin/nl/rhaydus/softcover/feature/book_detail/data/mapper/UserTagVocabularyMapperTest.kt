@@ -13,25 +13,24 @@ class UserTagVocabularyMapperTest {
         tag: String = "emotional",
         tagCategoryValue: String? = "Mood",
         aggregateCount: Int? = 111,
-    ): FindUserTagVocabularyQuery.Data.Tag =
-        FindUserTagVocabularyQuery.Data.Tag(
-            __typename = "tags",
-            id = 1L,
-            tag = tag,
-            tag_category = FindUserTagVocabularyQuery.Data.Tag.Tag_category(
-                __typename = "tag_categories",
-                category = tagCategoryValue,
-            ),
-            taggings_aggregate = FindUserTagVocabularyQuery.Data.Tag.Taggings_aggregate(
-                __typename = "taggings_aggregate",
-                aggregate = aggregateCount?.let {
-                    FindUserTagVocabularyQuery.Data.Tag.Taggings_aggregate.Aggregate(
-                        __typename = "taggings_aggregate_fields",
-                        count = it,
-                    )
-                },
-            ),
-        )
+    ): FindUserTagVocabularyQuery.Data.Tag = FindUserTagVocabularyQuery.Data.Tag(
+        __typename = "tags",
+        id = 1L,
+        tag = tag,
+        tag_category = FindUserTagVocabularyQuery.Data.Tag.Tag_category(
+            __typename = "tag_categories",
+            category = tagCategoryValue,
+        ),
+        taggings_aggregate = FindUserTagVocabularyQuery.Data.Tag.Taggings_aggregate(
+            __typename = "taggings_aggregate",
+            aggregate = aggregateCount?.let {
+                FindUserTagVocabularyQuery.Data.Tag.Taggings_aggregate.Aggregate(
+                    __typename = "taggings_aggregate_fields",
+                    count = it,
+                )
+            },
+        ),
+    )
 
     @Nested
     inner class EntityToUserTag {

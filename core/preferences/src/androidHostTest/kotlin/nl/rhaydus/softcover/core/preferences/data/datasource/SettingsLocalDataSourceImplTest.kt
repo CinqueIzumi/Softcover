@@ -47,11 +47,10 @@ class SettingsLocalDataSourceImplTest {
             updated
         }
 
-        dataSource =
-            SettingsLocalDataSourceImpl(
-                appSettingsDataStore = AppSettingsDataStore(store = dataStore),
-                apiKeyLocalDataSource = mockk(relaxed = true),
-            )
+        dataSource = SettingsLocalDataSourceImpl(
+            appSettingsDataStore = AppSettingsDataStore(store = dataStore),
+            apiKeyLocalDataSource = mockk(relaxed = true),
+        )
     }
 
     @Nested
@@ -72,6 +71,7 @@ class SettingsLocalDataSourceImplTest {
                         direction = SortDirection.DESCENDING,
                     ),
                 )
+
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -91,6 +91,7 @@ class SettingsLocalDataSourceImplTest {
                         direction = LibrarySortMode.TITLE.defaultDirection,
                     ),
                 )
+
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -110,6 +111,7 @@ class SettingsLocalDataSourceImplTest {
                         direction = SortDirection.ASCENDING,
                     ),
                 )
+
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -159,6 +161,7 @@ class SettingsLocalDataSourceImplTest {
                         direction = SortDirection.ASCENDING,
                     ),
                 )
+
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -186,6 +189,7 @@ class SettingsLocalDataSourceImplTest {
                     colorPalette = ColorPalette.INK,
                     useDynamicColor = true,
                 )
+
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -266,6 +270,7 @@ class SettingsLocalDataSourceImplTest {
         fun `restores the library visibility and tab order defaults and keeps every other setting`() = runTest {
             // ----- Arrange -----
             val defaults = AppSettingsEntity()
+
             val customised = AppSettingsEntity(
                 userId = 42,
                 enabledStatusCodes = setOf(2),
@@ -276,6 +281,7 @@ class SettingsLocalDataSourceImplTest {
                     "reading",
                 ),
             )
+
             persisted.value = customised
 
             // ----- Act -----

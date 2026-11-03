@@ -18,6 +18,7 @@ class UpdateBookProgressUseCaseTest {
     @BeforeEach
     fun setUp() {
         repository = mockk()
+
         useCase = UpdateBookProgressUseCase(
             repository = repository,
         )
@@ -47,6 +48,7 @@ class UpdateBookProgressUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+
             coVerify(exactly = 1) {
                 repository.updateBookProgress(
                     book = inputBook,
@@ -80,6 +82,7 @@ class UpdateBookProgressUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+
             coVerify(exactly = 1) {
                 repository.updateBookProgress(
                     book = inputBook,

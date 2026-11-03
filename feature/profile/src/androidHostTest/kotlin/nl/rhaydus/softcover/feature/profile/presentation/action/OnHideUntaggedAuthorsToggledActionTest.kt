@@ -32,6 +32,7 @@ class OnHideUntaggedAuthorsToggledActionTest {
         setHideUntaggedAuthorsUseCase = mockk()
         stateFlow = MutableStateFlow(StatsAtlasUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(StatsAtlasLocalVariables()),
@@ -41,6 +42,7 @@ class OnHideUntaggedAuthorsToggledActionTest {
 
     private fun stubDependencies(testScope: TestScope): StatsAtlasDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<StatsAtlasDependencies>(relaxed = true).also { mock ->
             every {
                 mock.setHideUntaggedAuthorsUseCase

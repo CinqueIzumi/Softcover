@@ -39,6 +39,7 @@ class OnProgressSheetEventActionTest {
     fun setUp() {
         recordBookProgressUseCase = mockk()
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -46,6 +47,7 @@ class OnProgressSheetEventActionTest {
         )
 
         val getLastUsedUnit = mockk<GetLastUsedProgressUnitAsFlowUseCase>()
+
         every {
             getLastUsedUnit()
         } returns emptyFlow()
@@ -63,19 +65,24 @@ class OnProgressSheetEventActionTest {
 
     private fun stubDependencies(testScope: TestScope): BookDetailDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<BookDetailDependencies>(relaxed = true).also { mock ->
             every {
                 mock.progressSheetSlice
             } returns slice
+
             every {
                 mock.recordBookProgressUseCase
             } returns recordBookProgressUseCase
+
             every {
                 mock.coroutineScope
             } returns testScope
+
             every {
                 mock.mainDispatcher
             } returns dispatcher
+
             every {
                 mock.launch(any())
             } answers { callOriginal() }
@@ -87,10 +94,14 @@ class OnProgressSheetEventActionTest {
         @Test
         fun `forwards a submitted page to the book detail host's record`() = runTest {
             // ----- Arrange -----
-            val book = mockk<Book>().also { every {
-                it.id
-            } returns 42 }
+            val book = mockk<Book>().also {
+                every {
+                    it.id
+                } returns 42
+            }
+
             stateFlow.value = buildBookDetailUiState().copy(book = book)
+
             coEvery {
                 recordBookProgressUseCase(
                     book = any(),

@@ -42,6 +42,7 @@ class RandomPickBookTest {
             every {
                 editionId
             } returns 7
+
             every {
                 status
             } returns BookStatus.WantToRead

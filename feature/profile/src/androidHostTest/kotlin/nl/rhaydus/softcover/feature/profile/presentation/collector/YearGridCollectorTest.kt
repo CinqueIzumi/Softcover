@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.profile.presentation.collector
 
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -67,6 +67,7 @@ class YearGridCollectorTest {
         dependencies = mockk(relaxed = true)
         dateFlow = MutableStateFlow(today)
         stateFlow = MutableStateFlow(StatsAtlasUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(StatsAtlasLocalVariables()),
@@ -110,6 +111,7 @@ class YearGridCollectorTest {
         fun `writes the grid and header of the selected calendar year`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = stateFor(StatsScope.CalendarYear(2025))
+
             val activity = ReadingActivity(
                 pagesByDay = mapOf(
                     date(
@@ -138,6 +140,7 @@ class YearGridCollectorTest {
                 activity = activity,
                 year = 2025,
             )
+
             stateFlow.value.yearAtAGlanceHeader shouldBe yearAtAGlanceHeader(year = 2025)
             job.cancel()
         }
@@ -162,31 +165,33 @@ class YearGridCollectorTest {
         }
 
         @Test
-        fun `does not observe the activity again when the scope changes within the same year`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                stateFlow.value = stateFor(StatsScope.AllTime)
-                val job = launch {
-                    YearGridCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+        fun `does not observe the activity again when the scope changes within the same year`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = stateFor(StatsScope.AllTime)
 
-                // ----- Act -----
-                stateFlow.value = stateFor(StatsScope.CalendarYear(2026))
-
-                // ----- Assert -----
-                verify(exactly = 1) {
-                    observeReadingActivityUseCase()
-                }
-                job.cancel()
+            val job = launch {
+                YearGridCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            // ----- Act -----
+            stateFlow.value = stateFor(StatsScope.CalendarYear(2026))
+
+            // ----- Assert -----
+            verify(exactly = 1) {
+                observeReadingActivityUseCase()
+            }
+
+            job.cancel()
+        }
 
         @Test
         fun `re-keys the grid when the scope moves to another year`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = stateFor(StatsScope.CalendarYear(2025))
+
             val job = launch {
                 YearGridCollector().onLaunch(
                     scope = scope,
@@ -238,33 +243,34 @@ class YearGridCollectorTest {
         )
 
         @Test
-        fun `keys the tiles and the day sheet streaks to the atlas year and today`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                stateFlow.value = stateFor(StatsScope.CalendarYear(2025))
+        fun `keys the tiles and the day sheet streaks to the atlas year and today`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = stateFor(StatsScope.CalendarYear(2025))
 
-                every {
-                    observeReadingActivityUseCase()
-                } returns flowOf(activity)
+            every {
+                observeReadingActivityUseCase()
+            } returns flowOf(activity)
 
-                // ----- Act -----
-                val job = launch {
-                    YearGridCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Assert -----
-                stateFlow.value.longestStreakTile.stat.shouldNotBeNull().value shouldBe 5.0
-                stateFlow.value.currentStreakTile.stat.shouldNotBeNull().value shouldBe 3.0
-                stateFlow.value.atlasStreaks shouldBe AtlasStreaks(
-                    activity = activity,
-                    longestInAtlasYear = longestOf2025,
-                    current = runningNow,
+            // ----- Act -----
+            val job = launch {
+                YearGridCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-                job.cancel()
             }
+
+            // ----- Assert -----
+            stateFlow.value.longestStreakTile.stat.shouldNotBeNull().value shouldBe 5.0
+            stateFlow.value.currentStreakTile.stat.shouldNotBeNull().value shouldBe 3.0
+
+            stateFlow.value.atlasStreaks shouldBe AtlasStreaks(
+                activity = activity,
+                longestInAtlasYear = longestOf2025,
+                current = runningNow,
+            )
+
+            job.cancel()
+        }
 
         @Test
         fun `lets the current streak lapse when the date moves on`() = runTest(UnconfinedTestDispatcher()) {
@@ -296,39 +302,39 @@ class YearGridCollectorTest {
         }
 
         @Test
-        fun `moves the grid and the longest tile to the new year when the date rolls over`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                dateFlow.value = date(
-                    year = 2026,
-                    month = 12,
-                    day = 31,
+        fun `moves the grid and the longest tile to the new year when the date rolls over`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            dateFlow.value = date(
+                year = 2026,
+                month = 12,
+                day = 31,
+            )
+
+            stateFlow.value = stateFor(StatsScope.AllTime)
+
+            every {
+                observeReadingActivityUseCase()
+            } returns flowOf(activity)
+
+            val job = launch {
+                YearGridCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-                stateFlow.value = stateFor(StatsScope.AllTime)
-
-                every {
-                    observeReadingActivityUseCase()
-                } returns flowOf(activity)
-
-                val job = launch {
-                    YearGridCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                dateFlow.value = date(
-                    year = 2027,
-                    month = 1,
-                    day = 1,
-                )
-
-                // ----- Assert -----
-                stateFlow.value.yearGrid.year shouldBe 2027
-                stateFlow.value.longestStreakTile.stat.shouldNotBeNull().value shouldBe 0.0
-                job.cancel()
             }
+
+            // ----- Act -----
+            dateFlow.value = date(
+                year = 2027,
+                month = 1,
+                day = 1,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.yearGrid.year shouldBe 2027
+            stateFlow.value.longestStreakTile.stat.shouldNotBeNull().value shouldBe 0.0
+            job.cancel()
+        }
 
         @Test
         fun `follows new activity without re-keying the year`() = runTest(UnconfinedTestDispatcher()) {
@@ -340,6 +346,7 @@ class YearGridCollectorTest {
             } returns emissions
 
             stateFlow.value = stateFor(StatsScope.CalendarYear(2025))
+
             val job = launch {
                 YearGridCollector().onLaunch(
                     scope = scope,

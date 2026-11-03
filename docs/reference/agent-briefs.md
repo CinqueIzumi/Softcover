@@ -1,13 +1,13 @@
 # Agent briefs
 
-Every spawn of a `softcover-*` agent carries a brief with the sections below.
-`.claude/hooks/agent-brief-check.sh` refuses a spawn whose brief is missing a required section, and the
+Every spawn of a `rhaydus-kotlin` agent carries a brief with the sections below.
+The `rhaydus-kotlin` plugin's brief-check hook (configured in `.claude/rhaydus.json`) refuses a spawn whose brief is missing a required section, and the
 agents themselves stop with `BRIEF INCOMPLETE` if one slips through.
 
 A brief is the agent's whole context. Hand it what you already know — exact paths, line numbers, the
 contract — so it does not rediscover it. A loose brief on a large file costs 10× a tight one.
 
-## `softcover-implementer`
+## `rhaydus-kotlin:implementer`
 
 One agent per vertical slice (state + mapper + render + call sites), so no two agents read the same files.
 
@@ -26,7 +26,7 @@ The UiState / UiAction / UiEvent shape or the public signature, when it is alrea
 What must not change; decisions already taken; the design-system section that governs the surface.
 
 ## Verify
-scripts/gradle-quiet.sh :module:compileKotlinJvm
+./gradlew :module:compileKotlinJvm
 
 ## Report
 ≤150 words: Done / Files changed / Verify result / Left over / Needs tests.
@@ -34,7 +34,7 @@ scripts/gradle-quiet.sh :module:compileKotlinJvm
 
 Required: `## Goal`, `## Files`, `## Verify`, `## Report`.
 
-## `softcover-test-writer`
+## `rhaydus-kotlin:test-writer`
 
 ```markdown
 ## Files
@@ -42,7 +42,7 @@ Required: `## Goal`, `## Files`, `## Verify`, `## Report`.
 - `path/to/UseCaseTest.kt:40-95` — the construction sites to fix / where to add
 
 ## Verify
-scripts/gradle-quiet.sh :module:testAndroidHostTest --tests "nl.rhaydus.softcover.feature.x.YTest"
+./gradlew :module:testAndroidHostTest --tests "nl.rhaydus.softcover.feature.x.YTest"
 
 ## Report
 ≤150 words: tests added / pass or fail with names and diagnosis.
@@ -59,7 +59,7 @@ When the target is a whole package or directory, add under `## Files`: "audit ex
 target for coverage gaps and close them in the same pass." Do not run a separate audit round. For independent files, spawn test-writers in
 parallel on disjoint file sets.
 
-## `softcover-reviewer`
+## `rhaydus-kotlin:reviewer`
 
 ```markdown
 ## Scope

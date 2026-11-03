@@ -56,6 +56,7 @@ class ProfileRefreshGateTest {
                     throw RuntimeException("fetch failed")
                 }
             }
+
             gate.runOnce { executionCount++ }
 
             // ----- Assert -----
@@ -74,12 +75,14 @@ class ProfileRefreshGateTest {
                     executionCount++
                 }
             }
+
             val job2 = launch {
                 gate.runOnce {
                     delay(10)
                     executionCount++
                 }
             }
+
             job1.join()
             job2.join()
 

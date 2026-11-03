@@ -5,7 +5,7 @@
 -keepnames class * implements cafe.adriel.voyager.core.screen.Screen
 
 # Android saves the Voyager back stack via java.io.Serializable for process-death restore; R8 would remove
-# serialized fields it sees as never read (see TransientNavArg).
+# serialized fields it sees as never read (see the foundation's TransientNavArg).
 -keepclassmembers class * implements cafe.adriel.voyager.core.screen.Screen {
     !static !transient <fields>;
 }

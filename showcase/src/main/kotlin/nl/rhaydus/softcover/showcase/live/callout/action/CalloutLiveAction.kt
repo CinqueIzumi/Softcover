@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.showcase.live.callout.state.CalloutLiveUiState
 import nl.rhaydus.toad.UiAction
 
 internal sealed interface CalloutLiveAction : UiAction<
-        CalloutLiveDependencies,
-        CalloutLiveUiState,
-        CalloutLiveEvent,
-        CalloutLiveLocalVariables,
-        >
+    CalloutLiveDependencies,
+    CalloutLiveUiState,
+    CalloutLiveEvent,
+    CalloutLiveLocalVariables,
+>

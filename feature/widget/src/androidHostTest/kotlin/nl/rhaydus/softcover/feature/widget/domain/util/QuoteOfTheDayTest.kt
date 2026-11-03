@@ -27,6 +27,7 @@ class QuoteOfTheDayTest {
                 localId = 1L,
                 remoteId = null,
             )
+
             val synced = testQuote(
                 bookId = 7,
                 text = "Same words",
@@ -51,8 +52,10 @@ class QuoteOfTheDayTest {
                 text = "Same words",
                 actionAtMillis = 1_000L,
             )
+
             val otherText = base.copy(text = "Other words")
             val otherBook = base.copy(bookId = 8)
+
             val otherTime = testQuote(
                 bookId = 7,
                 text = "Same words",
@@ -79,6 +82,7 @@ class QuoteOfTheDayTest {
                 localId = 1L,
                 remoteId = null,
             )
+
             val synced = testQuote(
                 bookId = 7,
                 text = "Same words",
@@ -134,6 +138,7 @@ class QuoteOfTheDayTest {
                 quotes = quotes,
                 epochDay = today,
             )
+
             val second = rankForDay(
                 quotes = quotes,
                 epochDay = today,
@@ -153,10 +158,12 @@ class QuoteOfTheDayTest {
                 quotes = quotes,
                 epochDay = today,
             )
+
             val reversed = rankForDay(
                 quotes = quotes.reversed(),
                 epochDay = today,
             )
+
             val rotated = rankForDay(
                 quotes = quotes.drop(7) + quotes.take(7),
                 epochDay = today,
@@ -177,6 +184,7 @@ class QuoteOfTheDayTest {
                 quotes = quotes,
                 epochDay = today,
             )
+
             val dayTwo = rankForDay(
                 quotes = quotes,
                 epochDay = today + 1,
@@ -206,10 +214,12 @@ class QuoteOfTheDayTest {
         fun `adding a quote leaves the relative order of the others unchanged`() {
             // ----- Arrange -----
             val quotes = testQuotes(count = 15)
+
             val added = testQuote(
                 bookId = 999,
                 text = "Brand new",
             )
+
             val before = rankForDay(
                 quotes = quotes,
                 epochDay = today,
@@ -233,6 +243,7 @@ class QuoteOfTheDayTest {
                 localId = 1L,
                 remoteId = null,
             )
+
             val synced = testQuote(
                 text = "Twice listed",
                 localId = 2L,
@@ -460,6 +471,7 @@ class QuoteOfTheDayTest {
                 currentQuoteId = quoteId(only.single()),
                 step = 1,
             )
+
             val back = stepQuote(
                 ranking = only,
                 currentQuoteId = quoteId(only.single()),

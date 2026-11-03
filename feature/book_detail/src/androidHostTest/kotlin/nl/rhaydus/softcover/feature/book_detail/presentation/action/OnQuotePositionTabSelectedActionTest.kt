@@ -28,6 +28,7 @@ class OnQuotePositionTabSelectedActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -51,6 +52,7 @@ class OnQuotePositionTabSelectedActionTest {
                     seconds = "3",
                 ),
             )
+
             val action = OnQuotePositionTabSelectedAction(tab = QuotePositionTab.PERCENTAGE)
 
             // ----- Act -----

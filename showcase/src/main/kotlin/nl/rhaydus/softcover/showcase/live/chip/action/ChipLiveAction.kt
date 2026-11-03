@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.showcase.live.chip.state.ChipLiveUiState
 import nl.rhaydus.toad.UiAction
 
 internal sealed interface ChipLiveAction : UiAction<
-        ChipLiveDependencies,
-        ChipLiveUiState,
-        ChipLiveEvent,
-        ChipLiveLocalVariables,
-        >
+    ChipLiveDependencies,
+    ChipLiveUiState,
+    ChipLiveEvent,
+    ChipLiveLocalVariables,
+>

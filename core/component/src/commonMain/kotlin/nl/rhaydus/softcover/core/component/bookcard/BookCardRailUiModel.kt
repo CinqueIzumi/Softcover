@@ -6,11 +6,11 @@ import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.cover.CoverSource
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 /**
  * A horizontal rail of [set]'s cards, each [cardWidth] wide; a rail of stand-ins renders as loading cards.

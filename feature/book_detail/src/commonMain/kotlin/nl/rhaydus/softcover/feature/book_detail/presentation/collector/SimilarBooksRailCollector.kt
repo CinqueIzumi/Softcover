@@ -29,6 +29,7 @@ internal class SimilarBooksRailCollector : BookDetailCollector {
         scope.state
             .mapNotNull { state ->
                 val sourceId = state.book?.id ?: return@mapNotNull null
+
                 val loadedIds = state.similarBookIds ?: return@mapNotNull null
 
                 SimilarBooksRailSnapshot(

@@ -14,7 +14,7 @@ internal class OnBrightnessSelectedAction<
     S : AppearanceUiState<S>,
     E : UiEvent,
     V : LocalVariables,
-    >(
+>(
     val brightness: SchemeBrightness,
 ) : UiAction<D, S, E, V> where D : ActionDependencies, D : AppearanceDependencies {
     override suspend fun execute(

@@ -47,6 +47,7 @@ class OnSaveVerdictActionTest {
         stateFlow = MutableStateFlow(buildBookDetailUiState().copy(verdictSheetContext = VerdictSheetContext.EDIT))
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
@@ -54,12 +55,11 @@ class OnSaveVerdictActionTest {
         )
     }
 
-    private fun stubDependencies(): BookDetailDependencies =
-        mockk<BookDetailDependencies>(relaxed = true).also { mock ->
-            every {
-                mock.saveBookVerdictUseCase
-            } returns saveBookVerdictUseCase
-        }
+    private fun stubDependencies(): BookDetailDependencies = mockk<BookDetailDependencies>(relaxed = true).also { mock ->
+        every {
+            mock.saveBookVerdictUseCase
+        } returns saveBookVerdictUseCase
+    }
 
     private fun stubBook(id: Int = 42): Book = mockk<Book>().also { mock ->
         every {
@@ -103,12 +103,14 @@ class OnSaveVerdictActionTest {
         fun `saves the book with the rating, review and spoiler flag held by the open sheet draft`() = runTest {
             // ----- Arrange -----
             val book = stubBook()
+
             val sheet = draftSheet(
                 book = book,
                 rating = 3.5,
                 reviewText = "A great read",
                 hasSpoilers = true,
             )
+
             stateFlow.value = stateFlow.value.copy(verdictSheet = sheet)
             dependencies = stubDependencies()
 
@@ -144,12 +146,14 @@ class OnSaveVerdictActionTest {
         fun `saves an empty review document when the sheet draft review is blank`() = runTest {
             // ----- Arrange -----
             val book = stubBook()
+
             val sheet = draftSheet(
                 book = book,
                 rating = 4.0,
                 reviewText = "   ",
                 hasSpoilers = false,
             )
+
             stateFlow.value = stateFlow.value.copy(verdictSheet = sheet)
             dependencies = stubDependencies()
 
@@ -207,12 +211,14 @@ class OnSaveVerdictActionTest {
         fun `does not add book id to failedMutationBookIds when use case succeeds`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 42)
+
             val sheet = draftSheet(
                 book = book,
                 rating = null,
                 reviewText = "A great read",
                 hasSpoilers = false,
             )
+
             stateFlow.value = stateFlow.value.copy(verdictSheet = sheet)
             dependencies = stubDependencies()
 
@@ -243,16 +249,19 @@ class OnSaveVerdictActionTest {
         fun `adds failing book id to an existing failedMutationBookIds set without losing prior entries`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 42)
+
             val sheet = draftSheet(
                 book = book,
                 rating = null,
                 reviewText = "A great read",
                 hasSpoilers = false,
             )
+
             stateFlow.value = buildBookDetailUiState().copy(
                 failedMutationBookIds = persistentSetOf(1, 2),
                 verdictSheet = sheet,
             )
+
             dependencies = stubDependencies()
 
             coEvery {

@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
 import nl.rhaydus.toad.Collector
 
 internal sealed interface StatsAtlasCollector : Collector<
-        StatsAtlasUiState,
-        StatsAtlasEvent,
-        StatsAtlasDependencies,
-        StatsAtlasLocalVariables,
-        >
+    StatsAtlasUiState,
+    StatsAtlasEvent,
+    StatsAtlasDependencies,
+    StatsAtlasLocalVariables,
+>

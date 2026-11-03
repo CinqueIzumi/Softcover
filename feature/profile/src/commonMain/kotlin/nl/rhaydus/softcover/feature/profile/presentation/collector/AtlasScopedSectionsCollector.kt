@@ -109,9 +109,9 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
         val stats = sections.stats
         val monthlyPages = sections.monthlyPages
         val hourlyPages = sections.hourlyPages
-        val genres = stats?.genres
         val ratings = stats?.ratings
         val booksRead = stats?.booksRead ?: 0
+
         val demographics = stats?.authorDemographics?.let {
             if (hideUntaggedAuthors) it.excludingUntaggedAuthors() else it
         }

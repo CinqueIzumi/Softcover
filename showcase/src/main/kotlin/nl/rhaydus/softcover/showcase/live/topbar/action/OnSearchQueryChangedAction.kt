@@ -12,10 +12,12 @@ internal class OnSearchQueryChangedAction(val query: String) : TopbarLiveAction 
         scope: ActionScope<TopbarLiveUiState, TopbarLiveEvent, TopbarLiveLocalVariables>,
     ) {
         scope.setState {
-            it.copy(search = it.search.copy(
-                query = query,
-                active = true,
-            ),)
+            it.copy(
+                search = it.search.copy(
+                    query = query,
+                    active = true,
+                ),
+            )
         }
     }
 }

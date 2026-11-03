@@ -22,12 +22,12 @@ import androidx.compose.ui.Modifier
 import kotlinx.coroutines.launch
 import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.button.PillButton
 import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.chart.RankedBars
 import nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 /**
  * The genre ranking under its [header]. [showMore] and [showLess] are null while there is nothing to reveal

@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiSt
 import nl.rhaydus.toad.Collector
 
 internal sealed interface ReadingCollector : Collector<
-        ReadingScreenUiState,
-        ReadingScreenEvent,
-        ReadingScreenDependencies,
-        ReadingLocalVariables,
-        >
+    ReadingScreenUiState,
+    ReadingScreenEvent,
+    ReadingScreenDependencies,
+    ReadingLocalVariables,
+>

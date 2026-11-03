@@ -51,7 +51,7 @@ internal val bookEntries: ImmutableList<GalleryEntry> = persistentListOf(
             "every library, explore, reading, profile and edition surface.",
         previews = BookCardUiModel,
         content = { model, modifier ->
-            Box(modifier = modifier.then(bookCardGallerySize(model = model))) {
+            Box(modifier = modifier.bookCardGallerySize(model = model)) {
                 BookCard(
                     model = model,
                     onEvent = {},
@@ -120,8 +120,8 @@ internal val bookEntries: ImmutableList<GalleryEntry> = persistentListOf(
     ),
 )
 
-private fun bookCardGallerySize(model: BookCardUiModel): Modifier = if (model.variant is BookCardVariant.Row) {
-    Modifier.fillMaxWidth()
+private fun Modifier.bookCardGallerySize(model: BookCardUiModel): Modifier = if (model.variant is BookCardVariant.Row) {
+    fillMaxWidth()
 } else {
-    Modifier.width(140.dp)
+    width(140.dp)
 }

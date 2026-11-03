@@ -81,6 +81,7 @@ class ListsRepositoryImplRefreshTest {
         fun `when all signatures match cache fetchUserLists is never called`() = runTest {
             // ----- Arrange -----
             val userId = 5
+
             val signatures = listOf(
                 ListSignature(
                     listId = 1,
@@ -120,6 +121,7 @@ class ListsRepositoryImplRefreshTest {
             // ----- Arrange -----
             val userId = 7
             val changedList = stubBookList(id = 2)
+
             val signatures = listOf(
                 ListSignature(
                     listId = 1,
@@ -166,6 +168,7 @@ class ListsRepositoryImplRefreshTest {
             // ----- Arrange -----
             val userId = 4
             val newList = stubBookList(id = 99)
+
             val signatures = listOf(
                 ListSignature(
                     listId = 99,

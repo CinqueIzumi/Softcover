@@ -20,18 +20,18 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.image.RhaydusShimmerImage
+import nl.rhaydus.designsystem.modifier.clippedSkeletonMask
+import nl.rhaydus.designsystem.modifier.skeletonMask
+import nl.rhaydus.designsystem.theme.Corners
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.badge.Badge
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.richtext.RichText
-import nl.rhaydus.softcover.core.component.state.clippedSkeletonMask
-import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalSchemeBrightness
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRevealReviewSpoilerAction
@@ -118,7 +118,10 @@ private fun ReviewCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = quoteAlpha),
                 modifier = Modifier
                     .align(Alignment.TopStart)
-                    .padding(start = Spacing.md, top = Spacing.xxs),
+                    .padding(
+                        start = Spacing.md,
+                        top = Spacing.xxs,
+                    ),
             )
 
             Column(
@@ -138,7 +141,10 @@ private fun ReviewCard(
                 } else {
                     RichText(
                         model = review.body,
-                        modifier = Modifier.skeletonMask(visible = review.isLoading),
+                        modifier = Modifier.skeletonMask(
+                            visible = review.isLoading,
+                            shape = Corners.xs,
+                        ),
                     )
                 }
 

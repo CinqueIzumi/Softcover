@@ -76,6 +76,7 @@ private fun <K : TagKey> List<LibraryTagOption<K>>.toEntries(
             valueOf = valueOf,
         )
     }
+
     val shelfKeys = map { it.key }.toSet()
 
     val gone = selection.entries()

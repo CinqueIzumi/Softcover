@@ -22,28 +22,28 @@ internal class CelebrationLiveScreenModel(
             CelebrationLiveEvent,
             CelebrationLiveDependencies,
             CelebrationLiveLocalVariables,
-            >,
         >,
+    >,
 ) : ToadScreenModel<
-    CelebrationLiveUiState,
-    CelebrationLiveEvent,
-    CelebrationLiveDependencies,
-    Collector<
         CelebrationLiveUiState,
         CelebrationLiveEvent,
         CelebrationLiveDependencies,
-        CelebrationLiveLocalVariables,
+        Collector<
+            CelebrationLiveUiState,
+            CelebrationLiveEvent,
+            CelebrationLiveDependencies,
+            CelebrationLiveLocalVariables,
         >,
-    CelebrationLiveLocalVariables,
+        CelebrationLiveLocalVariables,
     >(
-    initialState = CelebrationLiveUiState(
-        topBar = celebrationLiveTopBar(),
-        cardBurst = restingBurst(scale = MarkAsReadBurstScale.Card),
-        screenBurst = restingBurst(scale = MarkAsReadBurstScale.Screen),
-    ),
-    initialLocalVariables = CelebrationLiveLocalVariables(),
-    initializers = initializers,
-) {
+        initialState = CelebrationLiveUiState(
+            topBar = celebrationLiveTopBar(),
+            cardBurst = restingBurst(scale = MarkAsReadBurstScale.Card),
+            screenBurst = restingBurst(scale = MarkAsReadBurstScale.Screen),
+        ),
+        initialLocalVariables = CelebrationLiveLocalVariables(),
+        initializers = initializers,
+    ) {
     override val dependencies = CelebrationLiveDependencies(
         themeStore = themeStore,
         coroutineScope = screenModelScope,

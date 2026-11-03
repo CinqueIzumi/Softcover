@@ -15,16 +15,16 @@ internal class HomeScreenModel(
     themeStore: ShowcaseThemeStore,
     initializers: List<Collector<HomeUiState, HomeEvent, HomeDependencies, HomeLocalVariables>>,
 ) : ToadScreenModel<
-    HomeUiState,
-    HomeEvent,
-    HomeDependencies,
-    Collector<HomeUiState, HomeEvent, HomeDependencies, HomeLocalVariables>,
-    HomeLocalVariables,
+        HomeUiState,
+        HomeEvent,
+        HomeDependencies,
+        Collector<HomeUiState, HomeEvent, HomeDependencies, HomeLocalVariables>,
+        HomeLocalVariables,
     >(
-    initialState = HomeUiState(),
-    initialLocalVariables = HomeLocalVariables(),
-    initializers = initializers,
-) {
+        initialState = HomeUiState(),
+        initialLocalVariables = HomeLocalVariables(),
+        initializers = initializers,
+    ) {
     override val dependencies = HomeDependencies(
         themeStore = themeStore,
         coroutineScope = screenModelScope,

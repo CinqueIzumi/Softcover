@@ -53,6 +53,7 @@ class ShelfCoverMapperTest {
                 bookId = 12,
                 title = "Dune",
             )
+
             val untitled = stubEdition(
                 id = 8,
                 bookId = 12,

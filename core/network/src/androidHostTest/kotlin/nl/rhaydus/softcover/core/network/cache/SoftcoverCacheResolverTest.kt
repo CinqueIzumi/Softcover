@@ -32,9 +32,11 @@ class SoftcoverCacheResolverTest {
         every {
             field.type
         } returns compiledType
+
         every {
             compiledType.rawType()
         } returns rawType
+
         every {
             field.responseName
         } returns "books"
@@ -72,12 +74,14 @@ class SoftcoverCacheResolverTest {
         every {
             field.responseName
         } returns responseName
+
         every {
             field.argumentValues(
                 any(),
                 any(),
             )
         } returns emptyMap()
+
         every {
             field.nameWithArguments(any())
         } returns responseName
@@ -114,6 +118,7 @@ class SoftcoverCacheResolverTest {
             every {
                 rawType.name
             } returns "books"
+
             stubArgumentValue(mapOf("id" to mapOf("_eq" to 123)))
 
             // ----- Act -----
@@ -134,6 +139,7 @@ class SoftcoverCacheResolverTest {
             every {
                 rawType.name
             } returns "editions"
+
             stubArgumentValue(mapOf("id" to mapOf("_in" to listOf(1, null, 3))))
 
             // ----- Act -----
@@ -158,6 +164,7 @@ class SoftcoverCacheResolverTest {
             every {
                 rawType.name
             } returns "authors"
+
             stubArgumentValue(mapOf("id" to mapOf("_eq" to "42")))
 
             // ----- Act -----
@@ -178,6 +185,7 @@ class SoftcoverCacheResolverTest {
             every {
                 rawType.name
             } returns "user_books"
+
             stubArgumentValue(mapOf("id" to mapOf("_in" to listOf<Int>())))
 
             // ----- Act -----
@@ -195,6 +203,7 @@ class SoftcoverCacheResolverTest {
             // ----- Arrange -----
             val sentinel = "sentinel-foreign-key"
             stubForDelegation("books")
+
             every {
                 field.argumentValue(
                     any(),

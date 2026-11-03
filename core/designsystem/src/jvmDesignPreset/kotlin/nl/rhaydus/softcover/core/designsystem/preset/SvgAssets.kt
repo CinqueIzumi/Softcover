@@ -54,6 +54,7 @@ internal object SvgAssets {
                 monochrome = false,
             ),
         )
+
         batches.forEach { batch ->
             convertBatch(
                 batch,
@@ -65,10 +66,13 @@ internal object SvgAssets {
         val launcher = androidRes.resolve("drawable/$LAUNCHER_FOREGROUND.xml")
         check(launcher.isFile) { "Missing $launcher" }
         val logos = assetsDir.resolve("Logos").apply { mkdirs() }
-        logos.resolve("launcher-foreground.svg").writeText(VectorToSvg(
-            false,
-            colorDir,
-        ).convert(launcher),)
+
+        logos.resolve("launcher-foreground.svg").writeText(
+            VectorToSvg(
+                false,
+                colorDir,
+            ).convert(launcher),
+        )
     }
 
     private fun convertBatch(
@@ -79,6 +83,7 @@ internal object SvgAssets {
         val sources = batch.dir.listFiles { file -> file.extension == "xml" && file.name.startsWith(batch.prefix) }
             .orEmpty()
             .sortedBy { it.name }
+
         val folder = assetsDir.resolve(batch.folder).apply { mkdirs() }
 
         sources.forEach { source ->
@@ -86,12 +91,16 @@ internal object SvgAssets {
                 '_',
                 '-',
             )
+
             val target = folder.resolve("$name${batch.suffix}.svg")
             check(target.exists().not()) { "Two drawables export to ${target.name}: ${source.path}" }
-            target.writeText(VectorToSvg(
-                batch.monochrome,
-                colorDir,
-            ).convert(source),)
+
+            target.writeText(
+                VectorToSvg(
+                    batch.monochrome,
+                    colorDir,
+                ).convert(source),
+            )
         }
     }
 }

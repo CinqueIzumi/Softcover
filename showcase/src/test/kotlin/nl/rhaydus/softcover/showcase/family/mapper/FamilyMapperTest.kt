@@ -17,6 +17,7 @@ class FamilyMapperTest {
             val family = GalleryFamily.entries
                 .firstOrNull { f -> GalleryRegistry.entries.count { it.family == f } > 1 }
                 .shouldNotBeNull()
+
             val expectedNames = GalleryRegistry.entries.filter { it.family == family }.map { it.name }
 
             // ----- Act -----

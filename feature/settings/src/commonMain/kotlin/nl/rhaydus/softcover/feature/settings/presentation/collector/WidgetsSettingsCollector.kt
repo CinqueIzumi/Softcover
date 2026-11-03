@@ -11,4 +11,4 @@ internal sealed interface WidgetsSettingsCollector : Collector<
     WidgetsSettingsEvent,
     WidgetsSettingsDependencies,
     WidgetsSettingsLocalVariables,
-    >
+>

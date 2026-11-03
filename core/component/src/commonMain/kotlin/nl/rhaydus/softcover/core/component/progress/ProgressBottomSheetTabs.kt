@@ -24,13 +24,13 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import nl.rhaydus.designsystem.editorial.component.EditorialSuffix
 import nl.rhaydus.designsystem.editorial.component.HeroStatNumberField
+import nl.rhaydus.designsystem.modifier.rememberShakeTrigger
+import nl.rhaydus.designsystem.modifier.shakeOnError
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.field.TextField
 import nl.rhaydus.softcover.core.component.field.TextFieldEvent
-import nl.rhaydus.softcover.core.component.modifier.rememberShakeTrigger
-import nl.rhaydus.softcover.core.component.modifier.shakeOnError
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 @Composable
@@ -171,6 +171,7 @@ private fun ColumnScope.SteppedNumberContent(
 
     fun stepBy(delta: Int) {
         val stepped = parsed + delta
+
         val next = if (max != null) stepped.coerceIn(
             0,
             max,
@@ -219,6 +220,7 @@ private fun ColumnScope.SteppedNumberContent(
                             text = "",
                             selection = newValue.selection,
                         )
+
                         return@HeroStatNumberField
                     }
 
@@ -249,7 +251,10 @@ private fun ColumnScope.SteppedNumberContent(
             if (unitSymbol != null) {
                 SoftcoverText(
                     text = unitSymbol,
-                    modifier = Modifier.padding(start = Spacing.xs, bottom = Spacing.xs),
+                    modifier = Modifier.padding(
+                        start = Spacing.xs,
+                        bottom = Spacing.xs,
+                    ),
                     style = MaterialTheme.editorialTypography.headlineMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

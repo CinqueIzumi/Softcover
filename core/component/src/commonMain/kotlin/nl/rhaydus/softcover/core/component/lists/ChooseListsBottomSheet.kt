@@ -37,18 +37,18 @@ import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.modifier.pressScaleClickable
+import nl.rhaydus.designsystem.theme.Corners
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.control.glyphSwapTransition
 import nl.rhaydus.softcover.core.component.divider.Divider
-import nl.rhaydus.softcover.core.component.modifier.tactileClickable
 import nl.rhaydus.softcover.core.component.sheet.LazySheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
@@ -137,7 +137,7 @@ private fun ChooseListsRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .tactileClickable(
+                .pressScaleClickable(
                     onClick = onClick,
                     role = Role.Checkbox,
                     enabled = row.isPending.not(),
@@ -181,6 +181,7 @@ private fun ChooseListsRow(
                 transitionSpec = {
                     val fadeIn = fadeIn(animationSpec = motionScheme.defaultEffectsSpec())
                     val fadeOut = fadeOut(animationSpec = motionScheme.defaultEffectsSpec())
+
                     val sizeTransform = SizeTransform(clip = false) { _, _ ->
                         motionScheme.defaultSpatialSpec()
                     }
@@ -267,7 +268,10 @@ private fun PartialBookmarkMark() {
 
     Box(
         modifier = Modifier
-            .size(width = 19.dp, height = 23.dp)
+            .size(
+                width = 19.dp,
+                height = 23.dp,
+            )
             .border(
                 width = 2.4.dp,
                 color = primary,

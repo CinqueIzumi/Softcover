@@ -36,6 +36,7 @@ class LengthsTest {
         fun `uses a dot separator under a comma-decimal locale`() {
             // ----- Arrange -----
             val original = Locale.getDefault()
+
             Locale.setDefault(
                 Locale(
                     "nl",

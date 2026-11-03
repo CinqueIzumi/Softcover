@@ -66,6 +66,7 @@ class ListsRepositoryImplCreateListTest {
         fun `returns the created BookList and caches it as a single-element list`() = runTest {
             // ----- Arrange -----
             val name = "My List"
+
             val created = stubBookList(
                 id = 7,
                 name = name,

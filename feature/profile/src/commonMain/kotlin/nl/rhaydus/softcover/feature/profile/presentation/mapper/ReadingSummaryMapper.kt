@@ -26,6 +26,7 @@ internal fun readingSummaryUiModel(
 ): ReadingSummaryUiModel {
     val isLoading = history == null || activity == null || today == null
     val year = today?.year ?: 0
+
     val pagesPerRecentDay = if (activity == null || today == null) {
         emptyList()
     } else {
@@ -38,6 +39,7 @@ internal fun readingSummaryUiModel(
             ]
         }
     }
+
     val recentDaysCaption = if (isLoading) {
         RECENT_WINDOW_CAPTION
     } else {

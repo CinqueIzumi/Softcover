@@ -20,6 +20,7 @@ internal class TrendingPageCallback : ActionCallback, KoinComponent {
         parameters: ActionParameters,
     ) {
         val step = parameters[StepKey] ?: return
+
         val dependencies = get<TrendingWidgetDependencies>()
         val appWidgetId = GlanceAppWidgetManager(context).getAppWidgetId(glanceId)
 

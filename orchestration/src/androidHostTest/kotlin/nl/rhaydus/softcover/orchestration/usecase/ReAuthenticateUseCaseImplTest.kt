@@ -28,6 +28,7 @@ class ReAuthenticateUseCaseImplTest {
         resetUserDataUseCase = mockk(relaxed = true)
         refreshLibraryUseCase = mockk(relaxed = true)
         refreshUserProfileStatsUseCase = mockk(relaxed = true)
+
         useCase = ReAuthenticateUseCaseImpl(
             settingsRepository = settingsRepository,
             resetUserDataUseCase = resetUserDataUseCase,
@@ -38,9 +39,11 @@ class ReAuthenticateUseCaseImplTest {
         coEvery {
             resetUserDataUseCase()
         } returns Result.success(Unit)
+
         coEvery {
             refreshLibraryUseCase()
         } returns Result.success(Unit)
+
         coEvery {
             refreshUserProfileStatsUseCase()
         } returns Result.success(Unit)
@@ -54,6 +57,7 @@ class ReAuthenticateUseCaseImplTest {
             every {
                 settingsRepository.getUserId()
             } returns flowOf(42)
+
             coEvery {
                 settingsRepository.getUserIdFromBackend()
             } returns 42
@@ -75,6 +79,7 @@ class ReAuthenticateUseCaseImplTest {
             every {
                 settingsRepository.getUserId()
             } returns flowOf(42)
+
             coEvery {
                 settingsRepository.getUserIdFromBackend()
             } returns 99
@@ -95,6 +100,7 @@ class ReAuthenticateUseCaseImplTest {
             every {
                 settingsRepository.getUserId()
             } returns flowOf(-1)
+
             coEvery {
                 settingsRepository.getUserIdFromBackend()
             } returns 99
@@ -113,6 +119,7 @@ class ReAuthenticateUseCaseImplTest {
             every {
                 settingsRepository.getUserId()
             } returns flowOf(42)
+
             coEvery {
                 settingsRepository.getUserIdFromBackend()
             } throws RuntimeException("invalid token")
@@ -132,9 +139,11 @@ class ReAuthenticateUseCaseImplTest {
             every {
                 settingsRepository.getUserId()
             } returns flowOf(42)
+
             coEvery {
                 settingsRepository.getUserIdFromBackend()
             } returns 99
+
             coEvery {
                 resetUserDataUseCase()
             } returns Result.failure(RuntimeException("wipe failed"))
@@ -153,6 +162,7 @@ class ReAuthenticateUseCaseImplTest {
             every {
                 settingsRepository.getUserId()
             } returns flowOf(-1)
+
             coEvery {
                 settingsRepository.getUserIdFromBackend()
             } returns 99

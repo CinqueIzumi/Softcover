@@ -26,9 +26,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
@@ -86,6 +86,7 @@ internal fun ScrollToTopOnVisibleSetChange(
     var previousKey by remember(tabId) {
         mutableStateOf<Triple<LibrarySortMode, SortDirection, LibraryFilters>?>(null)
     }
+
     var pendingScrollToTop by remember(tabId) { mutableStateOf(false) }
 
     // Sort or filter change just marks intent. We don't scroll here because the visible books
@@ -97,6 +98,7 @@ internal fun ScrollToTopOnVisibleSetChange(
             sortDirection,
             filters,
         )
+
         val prior = previousKey
 
         if (prior != null && prior != current) {
@@ -131,15 +133,15 @@ internal fun LayoutGrid(
         count = when (layout) {
             LibraryGridLayout.GRID_TWO_COLUMNS,
             LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY,
-                -> 2
+            -> 2
 
             LibraryGridLayout.GRID_THREE_COLUMNS,
             LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY,
-                -> 3
+            -> 3
 
             LibraryGridLayout.LIST_COMPACT,
             LibraryGridLayout.LIST_LARGE,
-                -> 1
+            -> 1
         },
     )
 

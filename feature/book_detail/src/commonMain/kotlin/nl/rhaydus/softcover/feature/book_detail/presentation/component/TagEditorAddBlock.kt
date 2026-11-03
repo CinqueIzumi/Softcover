@@ -12,13 +12,13 @@ import androidx.compose.ui.Modifier
 import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.designsystem.layout.ExpandableFlowRow
 import nl.rhaydus.designsystem.layout.FlowRowExpansion
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.field.TextField
 import nl.rhaydus.softcover.core.component.field.TextFieldEvent
 import nl.rhaydus.softcover.core.component.field.TextFieldUiModel
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -61,17 +61,15 @@ internal fun TagEditorAddBlock(
             // part-unfurled to the same depth, having never asked for it.
             key(selectedCategoryKey) {
                 ExpandableFlowRow(
+                    itemCount = suggestionChips.size,
+                    key = { index -> suggestionChips[index].key },
                     expansion = FlowRowExpansion.Progressive(linesPerExpand = 3),
                     collapsible = true,
-                ) {
-                    suggestionChips.forEach { chip ->
-                        key(chip.key) {
-                            Chip(
-                                model = chip,
-                                onEvent = onSuggestionChipEvent,
-                            )
-                        }
-                    }
+                ) { index ->
+                    Chip(
+                        model = suggestionChips[index],
+                        onEvent = onSuggestionChipEvent,
+                    )
                 }
             }
         }

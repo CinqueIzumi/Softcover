@@ -28,6 +28,7 @@ class OnShareSheetDismissActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(ProfileUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalProfileVariables()),
@@ -48,6 +49,7 @@ class OnShareSheetDismissActionTest {
                     ).requestingClose(),
                 ),
             )
+
             val action = OnShareSheetDismissAction()
 
             // ----- Act -----
@@ -82,6 +84,7 @@ class OnShareSheetDismissActionTest {
             stateFlow.value = ProfileUiState(
                 shareCapture = ShareCaptureState(progress = ShareCaptureProgress.Sharing),
             )
+
             val action = OnShareSheetDismissAction()
 
             // ----- Act -----

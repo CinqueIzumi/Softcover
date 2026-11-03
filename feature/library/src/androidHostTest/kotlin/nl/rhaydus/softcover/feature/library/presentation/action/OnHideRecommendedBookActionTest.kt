@@ -43,6 +43,7 @@ class OnHideRecommendedBookActionTest {
     fun setUp() {
         hideRecommendedBookUseCase = mockk()
         restoreRecommendedBookUseCase = mockk()
+
         scope = ActionScope(
             stateFlow = MutableStateFlow(LibraryUiState()),
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -50,6 +51,7 @@ class OnHideRecommendedBookActionTest {
         )
 
         mockkObject(SnackBarManager)
+
         every {
             SnackBarManager.showSnackBar(
                 title = any(),
@@ -73,15 +75,19 @@ class OnHideRecommendedBookActionTest {
             every {
                 mock.hideRecommendedBookUseCase
             } returns hideRecommendedBookUseCase
+
             every {
                 mock.restoreRecommendedBookUseCase
             } returns restoreRecommendedBookUseCase
+
             every {
                 mock.coroutineScope
             } returns testScope
+
             every {
                 mock.mainDispatcher
             } returns dispatcher
+
             every {
                 mock.launch(any())
             } answers { callOriginal() }
@@ -94,6 +100,7 @@ class OnHideRecommendedBookActionTest {
         fun `hides the book and shows an Undo snackbar naming it`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
+
             coEvery {
                 hideRecommendedBookUseCase(book = hidden)
             } returns Result.success(Unit)
@@ -106,6 +113,7 @@ class OnHideRecommendedBookActionTest {
 
             // ----- Assert -----
             coVerify { hideRecommendedBookUseCase(book = hidden) }
+
             verify {
                 SnackBarManager.showSnackBar(
                     title = "\"Dune\" won't be suggested again",
@@ -122,6 +130,7 @@ class OnHideRecommendedBookActionTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
             val untitled = hidden.copy(title = null)
+
             coEvery {
                 hideRecommendedBookUseCase(book = untitled)
             } returns Result.success(Unit)
@@ -148,6 +157,7 @@ class OnHideRecommendedBookActionTest {
         fun `shows no snackbar when hiding fails`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
+
             coEvery {
                 hideRecommendedBookUseCase(book = hidden)
             } returns Result.failure(RuntimeException("boom"))
@@ -175,12 +185,15 @@ class OnHideRecommendedBookActionTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
             val onActionClickSlot = slot<() -> Unit>()
+
             coEvery {
                 hideRecommendedBookUseCase(book = hidden)
             } returns Result.success(Unit)
+
             coEvery {
                 restoreRecommendedBookUseCase(bookId = 7)
             } returns Result.success(Unit)
+
             every {
                 SnackBarManager.showSnackBar(
                     title = any(),
@@ -190,6 +203,7 @@ class OnHideRecommendedBookActionTest {
                     onDismiss = any(),
                 )
             } returns Unit
+
             OnHideRecommendedBookAction(book = hidden).execute(
                 dependencies = dependencies,
                 scope = scope,

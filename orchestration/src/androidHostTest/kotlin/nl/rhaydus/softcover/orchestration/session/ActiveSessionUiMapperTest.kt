@@ -16,18 +16,23 @@ class ActiveSessionUiMapperTest {
         every {
             id
         } returns 42
+
         every {
             title
         } returns "Piranesi"
+
         every {
             this@mockk.authors
         } returns authors
+
         every {
             currentEdition
         } returns null
+
         every {
             defaultEdition
         } returns null
+
         every {
             coverUrl
         } returns ""
@@ -55,13 +60,15 @@ class ActiveSessionUiMapperTest {
         @Test
         fun `uses the book title and the first author name`() {
             // ----- Arrange -----
-            val book = book(listOf(Author(
-                1,
-                "Susanna Clarke",
-            ), Author(
-                2,
-                "Someone Else",
-            ),),)
+            val book = book(
+                listOf(Author(
+                    1,
+                    "Susanna Clarke",
+                ), Author(
+                    2,
+                    "Someone Else",
+                ),),
+            )
 
             // ----- Act -----
             val result = toActiveSessionUiModel(

@@ -45,6 +45,7 @@ class ArrangeDraftChipsSnapshotTest {
                 sortDirection = SortDirection.ASCENDING,
                 gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
             )
+
             val snapshot = ArrangeDraftChipsSnapshot(
                 draft = draft,
                 visibleTabs = persistentListOf(readingTab),

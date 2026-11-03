@@ -21,13 +21,15 @@ internal class OnFieldValueChangedAction(
                 fields = state.fields
                     .map {
                         if (it.field.key == key) {
-                            it.copy(field = it.field.copy(
-                                text = text,
-                                error = fieldError(
-                                    key = key,
+                            it.copy(
+                                field = it.field.copy(
                                     text = text,
+                                    error = fieldError(
+                                        key = key,
+                                        text = text,
+                                    ),
                                 ),
-                            ),)
+                            )
                         } else {
                             it
                         }

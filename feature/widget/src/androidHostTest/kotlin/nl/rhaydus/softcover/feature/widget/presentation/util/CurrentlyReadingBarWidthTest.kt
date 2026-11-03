@@ -33,6 +33,7 @@ class CurrentlyReadingBarWidthTest {
                 width = 180.dp,
                 height = 400.dp,
             )
+
             val wideSize = DpSize(
                 width = 320.dp,
                 height = 400.dp,
@@ -53,6 +54,7 @@ class CurrentlyReadingBarWidthTest {
                 width = 320.dp,
                 height = 320.dp,
             )
+
             val sideBySideSize = DpSize(
                 width = 320.dp,
                 height = 110.dp,
@@ -76,10 +78,12 @@ class CurrentlyReadingBarWidthTest {
                 width = 180.dp,
                 height = 400.dp,
             )
+
             val large = DpSize(
                 width = 320.dp,
                 height = 400.dp,
             )
+
             val sizes = listOf(small, large, small)
 
             // ----- Act -----

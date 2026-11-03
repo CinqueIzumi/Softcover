@@ -28,6 +28,7 @@ class ProgressHistoryDaoTest {
             builder = Room.inMemoryDatabaseBuilder(context = context),
             queryContext = testDispatcher,
         )
+
         dao = database.progressHistoryDao()
     }
 
@@ -64,6 +65,7 @@ class ProgressHistoryDaoTest {
                     pages = 3,
                 ),
             )
+
             dao.insert(
                 entity = row(
                     bookId = 1,
@@ -71,6 +73,7 @@ class ProgressHistoryDaoTest {
                     pages = 1,
                 ),
             )
+
             dao.insert(
                 entity = row(
                     bookId = 1,
@@ -100,6 +103,7 @@ class ProgressHistoryDaoTest {
                     pages = 2,
                 ),
             )
+
             dao.insert(
                 entity = row(
                     bookId = 1,
@@ -107,6 +111,7 @@ class ProgressHistoryDaoTest {
                     pages = 1,
                 ),
             )
+
             dao.insert(
                 entity = row(
                     bookId = 1,
@@ -136,6 +141,7 @@ class ProgressHistoryDaoTest {
                     pages = 1,
                 ),
             )
+
             dao.insert(
                 entity = row(
                     bookId = 2,
@@ -175,6 +181,7 @@ class ProgressHistoryDaoTest {
                     pages = 1,
                 ),
             )
+
             dao.insert(
                 entity = row(
                     bookId = 2,
@@ -210,6 +217,7 @@ class ProgressHistoryDaoTest {
                     pages = 1,
                 ),
             )
+
             dao.insert(
                 entity = row(
                     bookId = 1,
@@ -252,6 +260,7 @@ class ProgressHistoryDaoTest {
                     ),
                 ),
             )
+
             dao.replaceSyncedForBook(
                 bookId = 1,
                 entities = listOf(
@@ -302,6 +311,7 @@ class ProgressHistoryDaoTest {
                     pages = 1,
                 ),
             )
+
             dao.insert(
                 entity = row(
                     bookId = 2,
@@ -341,6 +351,7 @@ class ProgressHistoryDaoTest {
                     pages = 1,
                 ),
             )
+
             dao.insert(
                 entity = row(
                     bookId = 2,
@@ -374,6 +385,7 @@ class ProgressHistoryDaoTest {
                     pages = 1,
                 ),
             )
+
             dao.insert(
                 entity = row(
                     bookId = 1,
@@ -382,6 +394,7 @@ class ProgressHistoryDaoTest {
                     pending = true,
                 ),
             )
+
             dao.insert(
                 entity = row(
                     bookId = 2,
@@ -423,6 +436,7 @@ class ProgressHistoryDaoTest {
                     ),
                 ),
             )
+
             dao.replaceAllSynced(
                 entities = listOf(
                     row(
@@ -451,6 +465,7 @@ class ProgressHistoryDaoTest {
                     pending = true,
                 ),
             )
+
             dao.insert(
                 entity = row(
                     bookId = 1,
@@ -483,6 +498,7 @@ class ProgressHistoryDaoTest {
                     pages = 1,
                 ),
             )
+
             dao.insert(
                 entity = row(
                     bookId = 1,

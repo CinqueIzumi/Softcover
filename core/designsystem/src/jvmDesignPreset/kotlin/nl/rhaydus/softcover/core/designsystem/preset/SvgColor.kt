@@ -51,6 +51,7 @@ private fun selectorColor(
         colorDir,
         "$name.xml",
     )
+
     check(file.isFile) { "No colour resource for @color/$name in $colorDir" }
     val items = Regex("android:color=\"([^\"]+)\"").findAll(file.readText()).map { it.groupValues[1] }.toList()
 
@@ -60,16 +61,19 @@ private fun selectorColor(
 private fun hexColor(value: String): SvgColor? {
     val digits = value.removePrefix("#")
     check(digits.all { it.isDigit() || it.lowercaseChar() in 'a'..'f' }) { "Malformed colour: $value" }
+
     val expanded = if (value.length == SHORT_RGB_LENGTH || value.length == SHORT_ARGB_LENGTH) {
         digits.map { "$it$it" }.joinToString("")
     } else {
         digits
     }
+
     val argb = when (value.length) {
         RGB_LENGTH, SHORT_RGB_LENGTH -> "ff$expanded"
         ARGB_LENGTH, SHORT_ARGB_LENGTH -> expanded
         else -> error("Malformed colour: $value")
     }.lowercase(Locale.ROOT)
+
     val alpha = argb.take(2).toInt(radix = 16) / OPAQUE
 
     return if (alpha == 0f) null else SvgColor(

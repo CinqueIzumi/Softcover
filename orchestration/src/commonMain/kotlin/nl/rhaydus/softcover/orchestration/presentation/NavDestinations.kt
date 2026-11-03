@@ -9,12 +9,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.painter.Painter
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.Tab
 import kotlinx.coroutines.launch
 import nl.rhaydus.designsystem.nav.NavPulse
-import nl.rhaydus.softcover.core.component.modifier.rememberPulseScale
+import nl.rhaydus.designsystem.nav.NavPulseKey
+import nl.rhaydus.designsystem.nav.rememberPulseScale
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.core.presentation.util.LibraryNavPulseKey
 import nl.rhaydus.softcover.core.presentation.util.LocalAppUpdateState
@@ -59,9 +61,20 @@ internal expect val wideGridTabsUseDetailPane: Boolean
 
 /**
  * The `NavPulse` key for [tab]'s icon. Library keeps the shared [LibraryNavPulseKey] that Reading
- * pulses on mark-as-read; every other tab is keyed by its own [Tab] object.
+ * pulses on mark-as-read; every other tab by a [TabNavPulseKey].
  */
-internal fun navPulseKeyFor(tab: Tab): Any = if (tab == LibraryTab) LibraryNavPulseKey else tab
+internal fun navPulseKeyFor(tab: Tab): NavPulseKey = if (tab == LibraryTab) LibraryNavPulseKey else TabNavPulseKey(tab)
+
+/**
+ * The catalog icon [tab] shows in the navigation chrome.
+ */
+internal fun navIconFor(tab: Tab): SoftcoverIcon = when (tab) {
+    ReadingTab -> SoftcoverIcon.Reading
+    LibraryTab -> SoftcoverIcon.Shelf
+    ExploreTab -> SoftcoverIcon.Explore
+    SettingsTab -> SoftcoverIcon.Settings
+    else -> error("No navigation icon for $tab")
+}
 
 /**
  * Resolves [appNavTabs] into render-ready [NavItemUi]s: current selection (from the tab navigator),
@@ -82,6 +95,10 @@ internal fun rememberNavItems(): List<NavItemUi> {
 
         NavItemUi(
             tab = tab,
+            icon = drawableIconResource(
+                icon = navIconFor(tab),
+                contentDescription = tab.options.title,
+            ),
             selected = tabNavigator.current == tab,
             showBadge = tab == SettingsTab && showSettingsBadge,
             iconScale = pulseScale,
@@ -92,7 +109,7 @@ internal fun rememberNavItems(): List<NavItemUi> {
 internal class NavItemClickResolver(
     private val selectTab: (Tab) -> Unit,
     private val reselect: suspend (Tab) -> Boolean,
-    private val pulse: (Any) -> Unit,
+    private val pulse: (NavPulseKey) -> Unit,
 ) {
     fun onClick(
         item: NavItemUi,
@@ -137,7 +154,6 @@ internal fun rememberNavItemClick(): (NavItemUi) -> Unit {
 @Composable
 internal fun NavItemIcon(
     item: NavItemUi,
-    painter: Painter,
 ) {
     BadgedBox(
         badge = {
@@ -147,7 +163,7 @@ internal fun NavItemIcon(
         },
     ) {
         Icon(
-            painter = painter,
+            painter = item.icon.getIconPainter(),
             contentDescription = item.tab.options.title,
             modifier = Modifier.graphicsLayer {
                 scaleX = item.iconScale

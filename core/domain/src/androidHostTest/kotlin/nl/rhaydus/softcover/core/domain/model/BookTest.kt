@@ -69,6 +69,7 @@ class BookTest {
         every {
             it.status
         } returns BookStatus.Reading
+
         every {
             it.editionId
         } returns editionId
@@ -150,10 +151,12 @@ class BookTest {
                 owned = true,
                 title = "Owned Title",
             )
+
             val default = buildEdition(
                 id = 2,
                 title = "Default Title",
             )
+
             val book = buildBook(
                 editions = listOf(owned, default),
                 defaultEdition = default,
@@ -175,6 +178,7 @@ class BookTest {
         fun `uses the given edition's title`() {
             // ----- Arrange -----
             val book = buildBook(editions = emptyList())
+
             val edition = buildEdition(
                 id = 3,
                 title = "Edition Title",
@@ -191,6 +195,7 @@ class BookTest {
         fun `falls back to the book title when the edition title is blank`() {
             // ----- Arrange -----
             val book = buildBook(editions = emptyList())
+
             val edition = buildEdition(
                 id = 3,
                 title = " ",
@@ -207,6 +212,7 @@ class BookTest {
         fun `falls back to the book title when the edition title is null`() {
             // ----- Arrange -----
             val book = buildBook(editions = emptyList())
+
             val edition = buildEdition(
                 id = 3,
                 title = null,
@@ -301,6 +307,7 @@ class BookTest {
             val matchingEdition = buildEdition(id = 10)
             val otherEdition = buildEdition(id = 20)
             val userBook = buildUserBook(editionId = 10)
+
             val book = buildBook(
                 editions = listOf(matchingEdition, otherEdition),
                 userBook = userBook,
@@ -318,6 +325,7 @@ class BookTest {
             // ----- Arrange -----
             val editionInList = buildEdition(id = 10)
             val defaultEdition = buildEdition(id = 99)
+
             val book = buildBook(
                 editions = listOf(editionInList),
                 defaultEdition = defaultEdition,
@@ -336,6 +344,7 @@ class BookTest {
             // ----- Arrange -----
             val firstEdition = buildEdition(id = 10)
             val secondEdition = buildEdition(id = 20)
+
             val book = buildBook(
                 editions = listOf(firstEdition, secondEdition),
                 defaultEdition = null,
@@ -356,10 +365,12 @@ class BookTest {
                 id = 10,
                 owned = true,
             )
+
             val secondOwnedEdition = buildEdition(
                 id = 20,
                 owned = true,
             )
+
             val book = buildBook(
                 editions = listOf(firstOwnedEdition, secondOwnedEdition),
                 userBook = null,
@@ -379,11 +390,14 @@ class BookTest {
                 id = 10,
                 owned = true,
             )
+
             val defaultEditionMatchingEdition = buildEdition(
                 id = 20,
                 owned = false,
             )
+
             val defaultEdition = buildEdition(id = 20)
+
             val book = buildBook(
                 editions = listOf(ownedEdition, defaultEditionMatchingEdition),
                 defaultEdition = defaultEdition,
@@ -404,11 +418,14 @@ class BookTest {
                 id = 10,
                 owned = false,
             )
+
             val ownedEdition = buildEdition(
                 id = 20,
                 owned = true,
             )
+
             val userBook = buildUserBook(editionId = 10)
+
             val book = buildBook(
                 editions = listOf(userSelectedEdition, ownedEdition),
                 userBook = userBook,
@@ -450,9 +467,11 @@ class BookTest {
         fun `is true when the user book is paused`() {
             // ----- Arrange -----
             val userBook = buildUserBook(editionId = null)
+
             every {
                 userBook.status
             } returns BookStatus.Paused
+
             val book = buildBook(
                 editions = listOf(buildEdition(id = 1)),
                 userBook = userBook,
@@ -523,6 +542,7 @@ class BookTest {
                 name = "The Stormlight Archive",
                 amountOfBooks = 5,
             )
+
             val book = buildBook(editions = listOf(buildEdition(id = 1))).copy(
                 bookSeries = series,
                 positionsInSeries = emptyList(),
@@ -543,6 +563,7 @@ class BookTest {
                 name = "The Stormlight Archive",
                 amountOfBooks = 5,
             )
+
             val book = buildBook(editions = listOf(buildEdition(id = 1))).copy(
                 bookSeries = series,
                 positionsInSeries = listOf(2.0),
@@ -628,6 +649,7 @@ class BookTest {
                 7,
                 DateTimeUnit.DAY,
             )
+
             val book = buildBook(
                 editions = listOf(buildEdition(id = 1)),
                 releaseDate = futureDate,
@@ -647,6 +669,7 @@ class BookTest {
                 7,
                 DateTimeUnit.DAY,
             )
+
             val book = buildBook(
                 editions = listOf(buildEdition(id = 1)),
                 releaseDate = pastDate,
@@ -663,6 +686,7 @@ class BookTest {
         fun `isUnreleased is false for today's book releaseDate`() {
             // ----- Arrange -----
             val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+
             val book = buildBook(
                 editions = listOf(buildEdition(id = 1)),
                 releaseDate = today,
@@ -694,19 +718,23 @@ class BookTest {
         fun `isUnreleased ignores a future edition releaseDate when the book was released`() {
             // ----- Arrange -----
             val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+
             val futureDate = today.plus(
                 7,
                 DateTimeUnit.DAY,
             )
+
             val currentEdition = buildEdition(
                 id = 10,
                 owned = true,
                 releaseDate = futureDate,
             )
+
             val defaultEdition = buildEdition(
                 id = 20,
                 releaseDate = futureDate,
             )
+
             val book = buildBook(
                 editions = listOf(currentEdition),
                 defaultEdition = defaultEdition,

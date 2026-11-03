@@ -23,16 +23,16 @@ internal class RandomPickSettingsScreenModel(
     appDispatchers: AppDispatchers,
     flows: List<RandomPickSettingsCollector>,
 ) : ToadScreenModel<
-    RandomPickSettingsUiState,
-    RandomPickSettingsEvent,
-    RandomPickSettingsDependencies,
-    RandomPickSettingsCollector,
-    RandomPickSettingsLocalVariables,
+        RandomPickSettingsUiState,
+        RandomPickSettingsEvent,
+        RandomPickSettingsDependencies,
+        RandomPickSettingsCollector,
+        RandomPickSettingsLocalVariables,
     >(
-    initialState = RandomPickSettingsUiState(),
-    initialLocalVariables = RandomPickSettingsLocalVariables(),
-    initializers = flows,
-) {
+        initialState = RandomPickSettingsUiState(),
+        initialLocalVariables = RandomPickSettingsLocalVariables(),
+        initializers = flows,
+    ) {
     override val dependencies = RandomPickSettingsDependencies(
         getRandomPickSettings = getRandomPickSettings,
         saveRandomPickSettings = saveRandomPickSettings,

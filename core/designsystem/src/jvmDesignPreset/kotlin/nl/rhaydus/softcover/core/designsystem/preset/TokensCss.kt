@@ -19,6 +19,7 @@ internal object TokensCss {
         val families = type["families"] as Map<*, *>
 
         fontFaces(type).forEach(::append)
+
         append(
             block(
                 selector = ".sc-theme, :root",
@@ -29,6 +30,7 @@ internal object TokensCss {
                 ),
             ),
         )
+
         themes.filter { it != BASE_THEME }.forEach { theme ->
             append(
                 block(
@@ -40,6 +42,7 @@ internal object TokensCss {
                 ),
             )
         }
+
         styles(type).forEach { style ->
             append(
                 block(
@@ -55,13 +58,16 @@ internal object TokensCss {
 
     private fun fontFaces(type: Map<*, *>): List<String> = (type["fonts"] as List<*>).map { font ->
         font as Map<*, *>
+
         block(
             selector = "@font-face",
             declarations = listOf(
-                "font-family: ${quoted(font.text(
-                    "family",
-                    "font",
-                ),)}",
+                "font-family: ${quoted(
+                    font.text(
+                        "family",
+                        "font",
+                    ),
+                )}",
                 "src: url(\"../${font["file"]}\")",
                 "font-weight: ${font["weight"]}",
                 "font-style: ${font["style"]}",
@@ -79,12 +85,17 @@ internal object TokensCss {
                 "name",
                 "color token",
             )
+
             val value = token["value"]
+
             val light = if (value is Map<*, *>) {
-                themes.forEach { value.text(
-                    it,
-                    "color token $name",
-                ) }
+                themes.forEach {
+                    value.text(
+                        it,
+                        "color token $name",
+                    )
+                }
+
                 value.text(
                     BASE_THEME,
                     "color token $name",
@@ -98,6 +109,7 @@ internal object TokensCss {
 
             "--$name: $light"
         }
+
         val lengths = listOf("spacing", "radius").flatMap { section ->
             tokens(document.section(section)).map {
                 val name = it.text(
@@ -111,6 +123,7 @@ internal object TokensCss {
                 )}"
             }
         }
+
         val fonts = listOf(
             "--font-display: ${families.text(
                 "display",
@@ -130,6 +143,7 @@ internal object TokensCss {
         theme: String,
     ): List<String> = tokens(document.section("color")).mapNotNull { token ->
         val value = token["value"] as? Map<*, *> ?: return@mapNotNull null
+
         if (value[theme] == value[BASE_THEME]) return@mapNotNull null
 
         "--${token.text(
@@ -149,6 +163,7 @@ internal object TokensCss {
             style["family"] ?: DEFAULT_FAMILY,
             "type families",
         )}",)
+
         add("font-size: ${style["fontSize"]}")
         add("line-height: ${style["lineHeight"]}")
         add("font-weight: ${style["fontWeight"]}")

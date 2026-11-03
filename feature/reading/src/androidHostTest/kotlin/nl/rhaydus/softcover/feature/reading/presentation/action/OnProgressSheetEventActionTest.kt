@@ -50,7 +50,9 @@ class OnProgressSheetEventActionTest {
                 mock.progressSheetSlice
             } returns koin.get<ProgressSheetSlice>()
         }
+
         stateFlow = MutableStateFlow(ReadingScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ReadingLocalVariables()),
@@ -70,10 +72,12 @@ class OnProgressSheetEventActionTest {
                 21,
                 0,
             )
+
             stateFlow.value = ReadingScreenUiState(
                 bookToUpdate = PreviewData.baseBook,
                 progressSheet = ProgressSheetState(readAt = readAt),
             )
+
             val action = OnProgressSheetEventAction(event = ProgressSheetEvent.MarkAsReadRequested)
 
             // ----- Act -----
@@ -85,6 +89,7 @@ class OnProgressSheetEventActionTest {
             // ----- Assert -----
             val sent = eventChannel.tryReceive().getOrNull()
                 .shouldBeInstanceOf<ReadingScreenEvent.MarkAsReadRequestedEvent>()
+
             sent.book shouldBe PreviewData.baseBook
             sent.actionAt shouldBe readAt.toActionAt()
         }

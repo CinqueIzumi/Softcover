@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.feature.settings.presentation.state.DocumentPageUiSt
 import nl.rhaydus.toad.Collector
 
 internal sealed interface DocumentPageCollector : Collector<
-        DocumentPageUiState,
-        DocumentPageEvent,
-        DocumentPageDependencies,
-        DocumentPageLocalVariables,
-        >
+    DocumentPageUiState,
+    DocumentPageEvent,
+    DocumentPageDependencies,
+    DocumentPageLocalVariables,
+>

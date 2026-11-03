@@ -58,6 +58,7 @@ class TokensCssTest {
 
     private fun String.blockOf(selectorLine: String): String {
         val start = indexOf(selectorLine)
+
         return substring(
             start,
             indexOf(
@@ -126,6 +127,7 @@ class TokensCssTest {
                 "fixed",
                 "#abcdef",
             )
+
             val document = document(colors = listOf(fixed))
 
             // ----- Act -----
@@ -183,6 +185,7 @@ class TokensCssTest {
                 "prose",
                 family = "body",
             )
+
             val document = document(styles = listOf(prose))
 
             // ----- Act -----

@@ -42,6 +42,7 @@ class RecommendedMenuCollectorTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(ExploreScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
@@ -150,35 +151,36 @@ class RecommendedMenuCollectorTest {
         }
 
         @Test
-        fun `requests close and keeps the pending hide when the book leaves the recommended list`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val job = launch {
-                    RecommendedMenuCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-                stateFlow.value = stateWith(requestedBookId = 5)
-                val pending = PendingRecommendedHide(bookId = 5)
-                stateFlow.value = stateFlow.value.copy(
-                    recommendedMenu = SheetSession.Open(
-                        model = recommendedMenuSheetFor(
-                            book = book,
-                            eyebrow = eyebrow,
-                        ),
-                        pending = pending,
-                    ),
+        fun `requests close and keeps the pending hide when the book leaves the recommended list`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val job = launch {
+                RecommendedMenuCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(recommendedBooks = persistentListOf())
-
-                // ----- Assert -----
-                stateFlow.value.recommendedMenu.isClosing shouldBe true
-                stateFlow.value.recommendedMenu.dismissed() shouldBe pending
-                job.cancel()
             }
+
+            stateFlow.value = stateWith(requestedBookId = 5)
+            val pending = PendingRecommendedHide(bookId = 5)
+
+            stateFlow.value = stateFlow.value.copy(
+                recommendedMenu = SheetSession.Open(
+                    model = recommendedMenuSheetFor(
+                        book = book,
+                        eyebrow = eyebrow,
+                    ),
+                    pending = pending,
+                ),
+            )
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(recommendedBooks = persistentListOf())
+
+            // ----- Assert -----
+            stateFlow.value.recommendedMenu.isClosing shouldBe true
+            stateFlow.value.recommendedMenu.dismissed() shouldBe pending
+            job.cancel()
+        }
 
         @Test
         fun `requests close and keeps the pending hide when the request clears`() = runTest(UnconfinedTestDispatcher()) {
@@ -189,6 +191,7 @@ class RecommendedMenuCollectorTest {
                     dependencies = dependencies,
                 )
             }
+
             stateFlow.value = stateWith(requestedBookId = 5)
             val pending = PendingRecommendedHide(bookId = 5)
 
@@ -219,6 +222,7 @@ class RecommendedMenuCollectorTest {
                     dependencies = dependencies,
                 )
             }
+
             stateFlow.value = stateWith(requestedBookId = 5)
             stateFlow.value = stateFlow.value.copy(recommendedMenuBookId = null)
 

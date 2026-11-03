@@ -9,9 +9,8 @@ import nl.rhaydus.softcover.feature.app_update.domain.launcher.AppUpdateFlowLaun
 // always Idle on iOS, so App() never actually invokes this; bind a logged no-op so the shared wiring
 // still has a launcher to hold.
 @Composable
-internal actual fun rememberAppUpdateFlowLauncher(): AppUpdateFlowLauncher =
-    remember {
-        AppUpdateFlowLauncher {
-            AppLog.i("In-app update flow is not available on this platform.")
-        }
+internal actual fun rememberAppUpdateFlowLauncher(): AppUpdateFlowLauncher = remember {
+    AppUpdateFlowLauncher {
+        AppLog.i("In-app update flow is not available on this platform.")
     }
+}

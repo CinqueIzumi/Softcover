@@ -63,6 +63,7 @@ class Migration63To64Test {
         fun `existing progress history rows get zero pages read`() {
             // ----- Arrange -----
             connection.execSQL("DELETE FROM progress_history")
+
             connection.execSQL(
                 "INSERT INTO progress_history (bookId, actionAtEpochMillis, pages, seconds, pending) " +
                     "VALUES (1, 1000, 40, NULL, 0), (1, 2000, 90, NULL, 1)",
@@ -93,6 +94,7 @@ class Migration63To64Test {
             db.userTables() shouldBe exported.tableNames
             db.indexNames() shouldBe exported.indexNames
             db.viewNames() shouldBe exported.viewNames
+
             exported.tables.forEach {
                 db.columnNames(it.name).toSet() shouldBe it.columns.map { column -> column.name }.toSet()
             }

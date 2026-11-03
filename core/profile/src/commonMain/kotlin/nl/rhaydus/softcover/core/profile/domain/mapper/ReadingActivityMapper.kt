@@ -37,9 +37,9 @@ private fun streaksOf(readingDays: Set<LocalDate>): List<ReadingStreak> {
         val last = streaks.lastOrNull()
 
         if (last != null && last.end.plus(
-            1,
-            DateTimeUnit.DAY,
-        ) == day) {
+                1,
+                DateTimeUnit.DAY,
+            ) == day) {
             streaks[streaks.lastIndex] = last.copy(end = day)
         } else {
             streaks += ReadingStreak(

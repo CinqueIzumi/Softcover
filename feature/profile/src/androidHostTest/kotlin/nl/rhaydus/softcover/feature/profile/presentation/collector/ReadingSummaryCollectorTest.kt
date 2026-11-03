@@ -67,15 +67,18 @@ class ReadingSummaryCollectorTest {
     @BeforeEach
     fun setUp() {
         historyFlow = MutableStateFlow(ReadingHistory())
+
         activityFlow = MutableStateFlow(
             ReadingActivity(
                 pagesByDay = emptyMap(),
                 streaks = emptyList(),
             ),
         )
+
         backfilledFlow = MutableStateFlow(true)
         dateFlow = MutableStateFlow(newYearsEve)
         stateFlow = MutableStateFlow(ProfileUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalProfileVariables()),
@@ -133,6 +136,7 @@ class ReadingSummaryCollectorTest {
         fun `summarises the year of the current date on its last day`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = ReadingSummaryCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -153,6 +157,7 @@ class ReadingSummaryCollectorTest {
             // ----- Arrange -----
             historyFlow.value = readingHistory
             val collector = ReadingSummaryCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -177,6 +182,7 @@ class ReadingSummaryCollectorTest {
             // ----- Arrange -----
             backfilledFlow.value = false
             val collector = ReadingSummaryCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -198,6 +204,7 @@ class ReadingSummaryCollectorTest {
             // ----- Arrange -----
             backfilledFlow.value = false
             val collector = ReadingSummaryCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -220,6 +227,7 @@ class ReadingSummaryCollectorTest {
         fun `writes the length of a run ending today`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = ReadingSummaryCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -257,7 +265,9 @@ class ReadingSummaryCollectorTest {
                     end = newYearsEve,
                 ),
             )
+
             val collector = ReadingSummaryCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -282,6 +292,7 @@ class ReadingSummaryCollectorTest {
             // ----- Arrange -----
             backfilledFlow.value = false
             val collector = ReadingSummaryCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

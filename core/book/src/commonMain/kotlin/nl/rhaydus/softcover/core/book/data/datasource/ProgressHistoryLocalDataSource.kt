@@ -1,9 +1,11 @@
 package nl.rhaydus.softcover.core.book.data.datasource
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import nl.rhaydus.softcover.core.book.domain.model.ProgressUpdate
 import nl.rhaydus.softcover.core.database.dao.ProgressHistoryDao
 import nl.rhaydus.softcover.core.database.model.ProgressHistoryEntity
-import nl.rhaydus.softcover.core.database.model.ProgressUpdateRow
+import kotlin.time.Instant
 
 interface ProgressHistoryLocalDataSource {
     suspend fun insertPending(
@@ -14,7 +16,7 @@ interface ProgressHistoryLocalDataSource {
         pagesRead: Int,
     ): Long
 
-    fun observeAllUpdates(): Flow<List<ProgressUpdateRow>>
+    fun observeAllUpdates(): Flow<List<ProgressUpdate>>
 
     suspend fun markSynced(localId: Long)
 
@@ -41,7 +43,16 @@ internal class ProgressHistoryLocalDataSourceImpl(
         ),
     )
 
-    override fun observeAllUpdates(): Flow<List<ProgressUpdateRow>> = dao.observeAllUpdates()
+    override fun observeAllUpdates(): Flow<List<ProgressUpdate>> = dao.observeAllUpdates().map { rows ->
+        rows.map {
+            ProgressUpdate(
+                bookId = it.bookId,
+                at = Instant.fromEpochMilliseconds(it.actionAtEpochMillis),
+                pages = it.pages,
+                pagesRead = it.pagesRead,
+            )
+        }
+    }
 
     override suspend fun markSynced(localId: Long) = dao.markSynced(localId = localId)
 

@@ -37,11 +37,13 @@ class SimilarBooksLoadCollectorTest {
         loadSimilarBooksPageUseCase = mockk()
         stateFlow = MutableStateFlow(buildBookDetailUiState())
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         coEvery {
             loadSimilarBooksPageUseCase(
                 sourceBookId = any(),
@@ -50,6 +52,7 @@ class SimilarBooksLoadCollectorTest {
             )
         } answers {
             val sourceId = firstArg<Int>()
+
             Result.success(
                 buildSimilarBooksPage(
                     ids = listOf(sourceId * 100),
@@ -62,6 +65,7 @@ class SimilarBooksLoadCollectorTest {
 
     private fun stubDependencies(testScope: TestScope): BookDetailDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<BookDetailDependencies>(relaxed = true).also { mock ->
             every {
                 mock.loadSimilarBooksPageUseCase
@@ -87,10 +91,12 @@ class SimilarBooksLoadCollectorTest {
         fun `loads the first page of the loaded book on The Book lens`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
+
             stateFlow.value = stateFlow.value.copy(
                 book = buildSimilarBook(id = 5),
                 selectedLens = BookDetailLens.THE_BOOK,
             )
+
             val collector = SimilarBooksLoadCollector()
 
             // ----- Act -----
@@ -109,6 +115,7 @@ class SimilarBooksLoadCollectorTest {
                     pageSize = any(),
                 )
             }
+
             stateFlow.value.similarBookIds shouldBe listOf(500)
             localVariablesFlow.value.similarBooksSourceId shouldBe 5
             job.cancel()
@@ -118,10 +125,12 @@ class SimilarBooksLoadCollectorTest {
         fun `loads nothing while the book is still loading`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
+
             stateFlow.value = stateFlow.value.copy(
                 book = null,
                 selectedLens = BookDetailLens.THE_BOOK,
             )
+
             val collector = SimilarBooksLoadCollector()
 
             // ----- Act -----
@@ -140,6 +149,7 @@ class SimilarBooksLoadCollectorTest {
                     pageSize = any(),
                 )
             }
+
             job.cancel()
         }
 
@@ -147,17 +157,21 @@ class SimilarBooksLoadCollectorTest {
         fun `loads nothing on the Yours lens until The Book lens is selected`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
+
             stateFlow.value = stateFlow.value.copy(
                 book = buildSimilarBook(id = 5),
                 selectedLens = BookDetailLens.YOURS,
             )
+
             val collector = SimilarBooksLoadCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
                     dependencies = dependencies,
                 )
             }
+
             coVerify(exactly = 0) {
                 loadSimilarBooksPageUseCase(
                     sourceBookId = any(),
@@ -177,73 +191,80 @@ class SimilarBooksLoadCollectorTest {
                     pageSize = any(),
                 )
             }
+
             job.cancel()
         }
 
         @Test
-        fun `loads once per source book when the lens is toggled back and forth`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                dependencies = stubDependencies(this)
-                stateFlow.value = stateFlow.value.copy(
-                    book = buildSimilarBook(id = 5),
-                    selectedLens = BookDetailLens.THE_BOOK,
+        fun `loads once per source book when the lens is toggled back and forth`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            dependencies = stubDependencies(this)
+
+            stateFlow.value = stateFlow.value.copy(
+                book = buildSimilarBook(id = 5),
+                selectedLens = BookDetailLens.THE_BOOK,
+            )
+
+            val collector = SimilarBooksLoadCollector()
+
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-                val collector = SimilarBooksLoadCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(selectedLens = BookDetailLens.YOURS)
-                stateFlow.value = stateFlow.value.copy(selectedLens = BookDetailLens.THE_BOOK)
-
-                // ----- Assert -----
-                coVerify(exactly = 1) {
-                    loadSimilarBooksPageUseCase(
-                        sourceBookId = any(),
-                        offset = any(),
-                        pageSize = any(),
-                    )
-                }
-                job.cancel()
             }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(selectedLens = BookDetailLens.YOURS)
+            stateFlow.value = stateFlow.value.copy(selectedLens = BookDetailLens.THE_BOOK)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                loadSimilarBooksPageUseCase(
+                    sourceBookId = any(),
+                    offset = any(),
+                    pageSize = any(),
+                )
+            }
+
+            job.cancel()
+        }
 
         @Test
-        fun `restarts from the first page with an empty list when the source book changes`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                dependencies = stubDependencies(this)
-                stateFlow.value = stateFlow.value.copy(
-                    book = buildSimilarBook(id = 5),
-                    selectedLens = BookDetailLens.THE_BOOK,
+        fun `restarts from the first page with an empty list when the source book changes`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            dependencies = stubDependencies(this)
+
+            stateFlow.value = stateFlow.value.copy(
+                book = buildSimilarBook(id = 5),
+                selectedLens = BookDetailLens.THE_BOOK,
+            )
+
+            val collector = SimilarBooksLoadCollector()
+
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-                val collector = SimilarBooksLoadCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(book = buildSimilarBook(id = 6))
-
-                // ----- Assert -----
-                coVerify(exactly = 1) {
-                    loadSimilarBooksPageUseCase(
-                        sourceBookId = 6,
-                        offset = 0,
-                        pageSize = any(),
-                    )
-                }
-                localVariablesFlow.value.similarBooksSourceId shouldBe 6
-                localVariablesFlow.value.similarBooks.map { it.id } shouldBe listOf(600)
-                stateFlow.value.similarBookIds shouldBe listOf(600)
-                job.cancel()
             }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(book = buildSimilarBook(id = 6))
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                loadSimilarBooksPageUseCase(
+                    sourceBookId = 6,
+                    offset = 0,
+                    pageSize = any(),
+                )
+            }
+
+            localVariablesFlow.value.similarBooksSourceId shouldBe 6
+            localVariablesFlow.value.similarBooks.map { it.id } shouldBe listOf(600)
+            stateFlow.value.similarBookIds shouldBe listOf(600)
+            job.cancel()
+        }
     }
 }

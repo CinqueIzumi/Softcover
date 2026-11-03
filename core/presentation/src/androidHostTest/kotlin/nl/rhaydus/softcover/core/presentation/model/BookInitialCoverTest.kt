@@ -20,21 +20,27 @@ class BookInitialCoverTest {
         every {
             currentEdition
         } returns null
+
         every {
             defaultEdition
         } returns null
+
         every {
             coverUrl
         } returns "https://example.com/cover.jpg"
+
         every {
             userBook
         } returns null
+
         every {
             this@mockk.title
         } returns title
+
         every {
             this@mockk.seriesText
         } returns seriesText
+
         every {
             this@mockk.rating
         } returns rating
@@ -53,27 +59,35 @@ class BookInitialCoverTest {
         every {
             this@mockk.editions
         } returns editions
+
         every {
             currentEdition
         } returns current
+
         every {
             defaultEdition
         } returns null
+
         every {
             coverUrl
         } returns "https://example.com/cover.jpg"
+
         every {
             userBook
         } returns null
+
         every {
             currentRead
         } returns null
+
         every {
             title
         } returns "Dune"
+
         every {
             seriesText
         } returns null
+
         every {
             rating
         } returns 4.0
@@ -97,6 +111,7 @@ class BookInitialCoverTest {
         fun `carries the book title, rating and series text`() {
             // ----- Arrange -----
             val seriesText = "#1-2 of 6 in Dune Chronicles"
+
             val book = stubBook(
                 title = "Hyperion",
                 rating = 4.25,
@@ -120,6 +135,7 @@ class BookInitialCoverTest {
             // ----- Arrange -----
             val current = stubEdition(editionId = 1)
             val scanned = stubEdition(editionId = 2)
+
             val book = stubBookWithEditions(
                 editions = listOf(current, scanned),
                 current = current,
@@ -140,6 +156,7 @@ class BookInitialCoverTest {
         fun `falls back to the book current edition when the scanned id is null`() {
             // ----- Arrange -----
             val current = stubEdition(editionId = 1)
+
             val book = stubBookWithEditions(
                 editions = listOf(current),
                 current = current,
@@ -160,6 +177,7 @@ class BookInitialCoverTest {
         fun `falls back to the book current edition when no edition matches the scanned id`() {
             // ----- Arrange -----
             val current = stubEdition(editionId = 1)
+
             val book = stubBookWithEditions(
                 editions = listOf(current),
                 current = current,

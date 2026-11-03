@@ -106,6 +106,7 @@ private fun streakDescription(
     streaks: AtlasStreaks,
 ): String? {
     val streak = streaks.activity.streakOn(day)?.takeIf { it.days >= 2 } ?: return null
+
     val position = streak.start.daysUntil(day) + 1
 
     return when (streak) {

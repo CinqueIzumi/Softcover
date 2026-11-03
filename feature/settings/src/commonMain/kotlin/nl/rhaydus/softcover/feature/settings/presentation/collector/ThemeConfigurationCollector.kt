@@ -32,6 +32,7 @@ internal class ThemeConfigurationCollector : SettingsCollector {
 
         dependencies.getThemeConfigurationUseCase().collectLatest { configuration ->
             val spinePalette = configuration.colorPalette.toSpinePalette()
+
             val spineColourSection = spineColourSectionFor(
                 themeMode = configuration.themeMode,
                 useDynamicColor = configuration.useDynamicColor,

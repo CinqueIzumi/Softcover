@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.showcase.live.lists.state.ListsLiveUiState
 import nl.rhaydus.toad.UiAction
 
 internal sealed interface ListsLiveAction : UiAction<
-        ListsLiveDependencies,
-        ListsLiveUiState,
-        ListsLiveEvent,
-        ListsLiveLocalVariables,
-        >
+    ListsLiveDependencies,
+    ListsLiveUiState,
+    ListsLiveEvent,
+    ListsLiveLocalVariables,
+>

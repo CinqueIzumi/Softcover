@@ -194,6 +194,5 @@
 
 ### Explore search Esc (desktop)
 
-- One rung: `Modifier.dismissOnEscape` on the layout root, always enabled; the callback acts only when
-  `hasActiveSearch`, dispatching `OnQueryChangeAction(newQuery = "")` as the field's × does. Gating
-  `enabled` would steal focus from the field on the first keystroke.
+- One rung: `Modifier.onEscape(enabled = hasActiveSearch)` on the layout root, dispatching
+  `OnQueryChangeAction(newQuery = "")` as the field's × does. See the foundation's Esc-to-dismiss rule.

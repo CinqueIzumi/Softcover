@@ -32,6 +32,7 @@ class ActiveSessionBookCollectorTest {
     fun setUp() {
         activeSessionFlow = MutableStateFlow(null)
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),

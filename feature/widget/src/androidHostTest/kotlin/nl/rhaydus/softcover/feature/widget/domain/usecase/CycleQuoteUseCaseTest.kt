@@ -31,6 +31,7 @@ class CycleQuoteUseCaseTest {
         coEvery {
             repository.getSelection(appWidgetId = appWidgetId)
         } returns selection
+
         coEvery {
             repository.saveSelection(
                 appWidgetId = appWidgetId,
@@ -61,6 +62,7 @@ class CycleQuoteUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+
             saved.captured shouldBe QuoteSelection(
                 quoteId = quoteId(ranking[1]),
                 epochDay = today,
@@ -155,6 +157,7 @@ class CycleQuoteUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+
             coVerify(exactly = 0) {
                 repository.saveSelection(
                     appWidgetId = any(),

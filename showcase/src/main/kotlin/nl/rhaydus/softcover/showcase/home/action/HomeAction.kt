@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.showcase.home.state.HomeUiState
 import nl.rhaydus.toad.UiAction
 
 internal sealed interface HomeAction : UiAction<
-        HomeDependencies,
-        HomeUiState,
-        HomeEvent,
-        HomeLocalVariables,
-        >
+    HomeDependencies,
+    HomeUiState,
+    HomeEvent,
+    HomeLocalVariables,
+>

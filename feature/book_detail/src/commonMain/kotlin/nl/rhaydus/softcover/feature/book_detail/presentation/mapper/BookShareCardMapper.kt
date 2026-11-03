@@ -65,6 +65,7 @@ private fun statsLineOf(
 
             add("★ ${tenths / 10}.${tenths % 10}")
         }
+
         userRating?.let { add("Your $it/10") }
         releaseYear?.let { add(it.toString()) }
         pageCount?.takeIf { it > 0 }?.let { add("$it pages") }

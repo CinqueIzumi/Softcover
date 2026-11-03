@@ -48,6 +48,7 @@ class OnFilterDraftTagRemovedActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -98,6 +99,7 @@ class OnFilterDraftTagRemovedActionTest {
                 category = TagCategory.MOOD,
                 name = "gone",
             )
+
             stateFlow.value = stateWith(
                 filters = LibraryFilters(yourTags = TagSelection(excluded = persistentSetOf(gone))),
             )

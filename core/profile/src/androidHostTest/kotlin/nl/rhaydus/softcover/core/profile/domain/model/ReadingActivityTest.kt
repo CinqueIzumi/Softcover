@@ -46,6 +46,7 @@ class ReadingActivityTest {
             // ----- Arrange -----
             val earlier = streak("2026-05-01" to "2026-05-03")
             val current = streak("2026-06-08" to "2026-06-10")
+
             val activity = activity(
                 earlier,
                 current,
@@ -102,6 +103,7 @@ class ReadingActivityTest {
         fun `picks the longest run of the year`() {
             // ----- Arrange -----
             val longest = streak("2026-04-01" to "2026-04-05")
+
             val activity = activity(
                 streak("2026-02-01" to "2026-02-02"),
                 longest,
@@ -119,6 +121,7 @@ class ReadingActivityTest {
         fun `a run crossing 1 January counts whole for both years`() {
             // ----- Arrange -----
             val crossing = streak("2025-12-30" to "2026-01-03")
+
             val activity = activity(
                 crossing,
                 streak("2026-05-01" to "2026-05-02"),
@@ -138,6 +141,7 @@ class ReadingActivityTest {
         fun `a tie goes to the most recent run`() {
             // ----- Arrange -----
             val recent = streak("2026-09-01" to "2026-09-03")
+
             val activity = activity(
                 streak("2026-03-01" to "2026-03-03"),
                 recent,

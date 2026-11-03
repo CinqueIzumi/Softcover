@@ -24,6 +24,7 @@ class OnSearchClearedActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(topbarLiveState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(TopbarLiveLocalVariables()),
@@ -40,10 +41,12 @@ class OnSearchClearedActionTest {
                 dependencies = dependencies,
                 scope = scope,
             )
+
             OnSearchActivatedAction().execute(
                 dependencies = dependencies,
                 scope = scope,
             )
+
             val action = OnSearchClearedAction()
 
             // ----- Act -----

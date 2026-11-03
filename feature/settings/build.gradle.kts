@@ -1,6 +1,6 @@
 plugins {
-    id("softcover.kmp.library")
-    id("softcover.kmp.compose")
+    id("rhaydus.kmp.library")
+    id("rhaydus.kmp.compose")
 }
 
 // The Roadmap and What's new screens render documents published from the repo root (`ROADMAP.md`,

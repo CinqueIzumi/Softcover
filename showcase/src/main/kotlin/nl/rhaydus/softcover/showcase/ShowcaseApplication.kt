@@ -14,6 +14,7 @@ class ShowcaseApplication : Application() {
 
         startKoin {
             androidContext(this@ShowcaseApplication)
+
             modules(
                 showcaseModule,
                 liveSheetsModule,

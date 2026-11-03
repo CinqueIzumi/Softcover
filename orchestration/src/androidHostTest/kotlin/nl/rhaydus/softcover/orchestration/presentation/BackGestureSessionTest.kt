@@ -18,6 +18,7 @@ class BackGestureSessionTest {
         fun `the same top keeps the gesture as it was`() {
             // ----- Arrange -----
             val from = FakeScreen()
+
             val seeking = BackGestureSession.Seeking(
                 from = from,
                 target = FakeScreen(),

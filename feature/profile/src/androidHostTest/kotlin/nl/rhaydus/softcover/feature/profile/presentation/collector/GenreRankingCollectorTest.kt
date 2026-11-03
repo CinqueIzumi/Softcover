@@ -30,6 +30,7 @@ class GenreRankingCollectorTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(StatsAtlasUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(StatsAtlasLocalVariables()),
@@ -53,56 +54,56 @@ class GenreRankingCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `the default count maps every row, five visible, and a show-more button only`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                stateFlow.value = StatsAtlasUiState(readingStats = statsWithGenres(7))
-                val collector = GenreRankingCollector()
+        fun `the default count maps every row, five visible, and a show-more button only`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = StatsAtlasUiState(readingStats = statsWithGenres(7))
+            val collector = GenreRankingCollector()
 
-                // ----- Act -----
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Assert -----
-                stateFlow.value.genreRanking.rows.size shouldBe 7
-                stateFlow.value.genreRanking.visibleCount shouldBe 5
-                stateFlow.value.genreRankingShowMore.shouldNotBeNull()
-                stateFlow.value.genreRankingShowLess.shouldBeNull()
-                job.cancel()
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            // ----- Assert -----
+            stateFlow.value.genreRanking.rows.size shouldBe 7
+            stateFlow.value.genreRanking.visibleCount shouldBe 5
+            stateFlow.value.genreRankingShowMore.shouldNotBeNull()
+            stateFlow.value.genreRankingShowLess.shouldBeNull()
+            job.cancel()
+        }
 
         @Test
-        fun `a changed shown count rewrites the visible rows and both buttons`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                stateFlow.value = StatsAtlasUiState(readingStats = statsWithGenres(7))
-                val collector = GenreRankingCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+        fun `a changed shown count rewrites the visible rows and both buttons`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = StatsAtlasUiState(readingStats = statsWithGenres(7))
+            val collector = GenreRankingCollector()
 
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(genreRankingShownCount = 15)
-
-                // ----- Assert -----
-                stateFlow.value.genreRanking.visibleCount shouldBe 7
-                stateFlow.value.genreRankingShowMore.shouldBeNull()
-                stateFlow.value.genreRankingShowLess.shouldNotBeNull()
-                job.cancel()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(genreRankingShownCount = 15)
+
+            // ----- Assert -----
+            stateFlow.value.genreRanking.visibleCount shouldBe 7
+            stateFlow.value.genreRankingShowMore.shouldBeNull()
+            stateFlow.value.genreRankingShowLess.shouldNotBeNull()
+            job.cancel()
+        }
 
         @Test
         fun `new stats re-map the header, rows and buttons`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = StatsAtlasUiState(readingStats = statsWithGenres(7))
             val collector = GenreRankingCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -128,6 +129,7 @@ class GenreRankingCollectorTest {
                 readingStats = ReadingStats(),
                 genreEmptyCaption = "No finished books in 2025.",
             )
+
             val collector = GenreRankingCollector()
 
             // ----- Act -----

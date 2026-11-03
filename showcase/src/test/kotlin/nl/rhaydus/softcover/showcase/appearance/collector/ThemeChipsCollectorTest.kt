@@ -32,11 +32,13 @@ class ThemeChipsCollectorTest {
     fun setUp() {
         store = ShowcaseThemeStore()
         stateFlow = MutableStateFlow(HomeUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(HomeLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk<HomeDependencies>(relaxed = true).also { mock ->
             every {
                 mock.themeStore
@@ -71,6 +73,7 @@ class ThemeChipsCollectorTest {
         fun `moves the marked chips when the store changes later`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = ThemeChipsCollector<HomeUiState, HomeEvent, HomeDependencies, HomeLocalVariables>(themeStore = store)
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

@@ -56,6 +56,7 @@ class YearHistoryCollectorTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(StatsAtlasUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(StatsAtlasLocalVariables()),
@@ -91,6 +92,7 @@ class YearHistoryCollectorTest {
                 series = null,
                 metric = YearMetric.BOOKS,
             )
+
             stateFlow.value.yearHistoryChart.isLoading shouldBe true
             job.cancel()
         }
@@ -116,6 +118,7 @@ class YearHistoryCollectorTest {
                 series = null,
                 metric = YearMetric.BOOKS,
             )
+
             job.cancel()
         }
 
@@ -140,10 +143,12 @@ class YearHistoryCollectorTest {
                 series = books,
                 metric = YearMetric.BOOKS,
             )
+
             stateFlow.value.yearHistoryCaption shouldBe yearHistoryCaption(
                 series = books,
                 metric = YearMetric.BOOKS,
             )
+
             job.cancel()
         }
 
@@ -154,6 +159,7 @@ class YearHistoryCollectorTest {
                 isLoading = false,
                 readingHistory = buildReadingHistory(),
             )
+
             val job = launch {
                 YearHistoryCollector().onLaunch(
                     scope = scope,
@@ -169,10 +175,12 @@ class YearHistoryCollectorTest {
                 series = pages,
                 metric = YearMetric.PAGES,
             )
+
             stateFlow.value.yearHistoryCaption shouldBe yearHistoryCaption(
                 series = pages,
                 metric = YearMetric.PAGES,
             )
+
             job.cancel()
         }
     }
@@ -235,6 +243,7 @@ class YearHistoryCollectorTest {
         fun `returns to the busiest year when the scope changes back to all time`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = scopedState(StatsScope.CalendarYear(2023))
+
             val job = launch {
                 YearHistoryCollector().onLaunch(
                     scope = scope,

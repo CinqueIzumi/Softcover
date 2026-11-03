@@ -26,6 +26,7 @@ fun desktopAppDataDirectory(): String {
         base,
         "Softcover",
     )
+
     dir.mkdirs()
 
     return dir.absolutePath

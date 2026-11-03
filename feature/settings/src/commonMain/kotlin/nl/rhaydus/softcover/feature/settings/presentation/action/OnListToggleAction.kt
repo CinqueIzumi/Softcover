@@ -20,6 +20,7 @@ internal class OnListToggleAction(
             val updated = state.draftEnabledListIds.toPersistentSet().let { current ->
                 if (enabled) current.add(id) else current.remove(id)
             }
+
             state.copy(draftEnabledListIds = updated).withOrderedEntries()
         }
     }

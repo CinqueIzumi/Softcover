@@ -15,16 +15,16 @@ internal class ShareLiveScreenModel(
     themeStore: ShowcaseThemeStore,
     initializers: List<Collector<ShareLiveUiState, ShareLiveEvent, ShareLiveDependencies, ShareLiveLocalVariables>>,
 ) : ToadScreenModel<
-    ShareLiveUiState,
-    ShareLiveEvent,
-    ShareLiveDependencies,
-    Collector<ShareLiveUiState, ShareLiveEvent, ShareLiveDependencies, ShareLiveLocalVariables>,
-    ShareLiveLocalVariables,
+        ShareLiveUiState,
+        ShareLiveEvent,
+        ShareLiveDependencies,
+        Collector<ShareLiveUiState, ShareLiveEvent, ShareLiveDependencies, ShareLiveLocalVariables>,
+        ShareLiveLocalVariables,
     >(
-    initialState = ShareLiveUiState(),
-    initialLocalVariables = ShareLiveLocalVariables(),
-    initializers = initializers,
-) {
+        initialState = ShareLiveUiState(),
+        initialLocalVariables = ShareLiveLocalVariables(),
+        initializers = initializers,
+    ) {
     override val dependencies = ShareLiveDependencies(
         themeStore = themeStore,
         coroutineScope = screenModelScope,

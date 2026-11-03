@@ -218,6 +218,7 @@ class VerdictSheetMapperTest {
                 review = noReview,
                 cover = null,
             )
+
             val given = book.toVerdictSheetUiModel(
                 context,
                 review,

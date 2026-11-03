@@ -11,20 +11,19 @@ enum class ShareCaptureProgress {
     Saving,
 }
 
-fun SheetScaffoldUiModel.withShareCapture(progress: ShareCaptureProgress): SheetScaffoldUiModel =
-    copy(
-        footer = SheetFooterUiModel.Inline(
-            primary = SheetFooterButton(
-                label = if (progress == ShareCaptureProgress.Sharing) {
-                    shareCaptureCopy.sharingLabel
-                } else {
-                    shareCaptureCopy.shareLabel
-                },
-                running = progress == ShareCaptureProgress.Sharing,
-            ),
-            secondary = SheetFooterButton(
-                label = shareCaptureCopy.saveLabel,
-                running = progress == ShareCaptureProgress.Saving,
-            ),
+fun SheetScaffoldUiModel.withShareCapture(progress: ShareCaptureProgress): SheetScaffoldUiModel = copy(
+    footer = SheetFooterUiModel.Inline(
+        primary = SheetFooterButton(
+            label = if (progress == ShareCaptureProgress.Sharing) {
+                shareCaptureCopy.sharingLabel
+            } else {
+                shareCaptureCopy.shareLabel
+            },
+            running = progress == ShareCaptureProgress.Sharing,
         ),
-    )
+        secondary = SheetFooterButton(
+            label = shareCaptureCopy.saveLabel,
+            running = progress == ShareCaptureProgress.Saving,
+        ),
+    ),
+)

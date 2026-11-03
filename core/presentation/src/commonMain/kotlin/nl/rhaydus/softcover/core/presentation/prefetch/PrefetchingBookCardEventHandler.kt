@@ -22,6 +22,7 @@ fun <T : Any> rememberPrefetchingBookCardEventHandler(
 ): (BookCardEvent) -> Unit {
     val prefetcher = LocalBookDetailPrefetcher.current
     val currentPrefetchEnabled by rememberUpdatedState(prefetchEnabled)
+
     val resolving = rememberBookCardEventHandler(
         set = set,
         onEvent = onEvent,

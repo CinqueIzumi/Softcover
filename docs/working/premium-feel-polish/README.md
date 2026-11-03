@@ -32,8 +32,8 @@ up.
 - [ ] **0. Re-audit:** parallel `general-purpose` agents per feature check every row against the code and sweep for new findings; `findings.md` is rewritten to the result.
 - [ ] **1. Walk the findings with the user:** every row approved, rewritten or cut, with the verdict recorded on the row.
 
-Then one `softcover-implementer` brief per screen group, with tests through `softcover-test-writer`, then a
-`softcover-reviewer` round and a device check by the user before the group's box is ticked.
+Then one `rhaydus-kotlin:implementer` brief per screen group, with tests through `rhaydus-kotlin:test-writer`, then a
+`rhaydus-kotlin:reviewer` round and a device check by the user before the group's box is ticked.
 
 | Group | Rows | Status |
 |---|---|---|

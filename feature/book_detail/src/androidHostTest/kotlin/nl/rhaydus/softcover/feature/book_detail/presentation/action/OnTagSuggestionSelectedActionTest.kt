@@ -40,6 +40,7 @@ class OnTagSuggestionSelectedActionTest {
         saveUserTagsUseCase = mockk()
         recordAppliedTagsUseCase = mockk()
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -54,6 +55,7 @@ class OnTagSuggestionSelectedActionTest {
         } answers {
             Result.success(secondArg())
         }
+
         coEvery {
             recordAppliedTagsUseCase(any())
         } returns Result.success(Unit)
@@ -61,19 +63,24 @@ class OnTagSuggestionSelectedActionTest {
 
     private fun stubDependencies(testScope: TestScope): BookDetailDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<BookDetailDependencies>(relaxed = true).also { mock ->
             every {
                 mock.saveUserTagsUseCase
             } returns saveUserTagsUseCase
+
             every {
                 mock.recordAppliedTagsUseCase
             } returns recordAppliedTagsUseCase
+
             every {
                 mock.coroutineScope
             } returns testScope
+
             every {
                 mock.mainDispatcher
             } returns dispatcher
+
             every {
                 mock.launch(any())
             } answers { callOriginal() }
@@ -84,6 +91,7 @@ class OnTagSuggestionSelectedActionTest {
         every {
             this@mockk.id
         } returns id
+
         every {
             this@mockk.userBook
         } returns mockk()
@@ -114,10 +122,12 @@ class OnTagSuggestionSelectedActionTest {
         fun `adds the suggestion behind the chip key under its own category`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
+
             val suggestion = stubTag(
                 "dystopian",
                 TagCategory.GENRE,
             )
+
             stateFlow.value = loadedState(emptyList()).copy(
                 tagEditorCategory = TagCategory.MOOD,
                 tagSuggestionChips = listOf(
@@ -158,6 +168,7 @@ class OnTagSuggestionSelectedActionTest {
 
             // ----- Assert -----
             stateFlow.value shouldBe initialState
+
             coVerify(exactly = 0) {
                 saveUserTagsUseCase(
                     bookId = any(),

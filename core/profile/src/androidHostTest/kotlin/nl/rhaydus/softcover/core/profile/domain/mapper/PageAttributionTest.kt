@@ -36,6 +36,7 @@ class PageAttributionTest {
                     pages = 100,
                 ),
             )
+
             val books = listOf(
                 readBook(
                     id = 1,
@@ -109,6 +110,7 @@ class PageAttributionTest {
                     pages = 350,
                 ),
             )
+
             val books = listOf(
                 readBook(
                     id = 1,

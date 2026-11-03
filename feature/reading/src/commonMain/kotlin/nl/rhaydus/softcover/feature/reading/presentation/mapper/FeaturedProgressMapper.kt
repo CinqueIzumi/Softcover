@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.reading.presentation.mapper
 
-import kotlin.math.roundToInt
 import nl.rhaydus.common.secondsToHm
 import nl.rhaydus.softcover.core.component.statistic.StatNumberFormat
 import nl.rhaydus.softcover.core.component.statistic.StatNumberSuffix
@@ -9,6 +8,7 @@ import nl.rhaydus.softcover.core.component.statistic.StatNumberVariant
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.uibinding.progress.resolvedTotalPages
 import nl.rhaydus.softcover.feature.reading.presentation.state.FeaturedProgressUiModel
+import kotlin.math.roundToInt
 
 internal fun Book.toFeaturedProgress(): FeaturedProgressUiModel {
     val progress = currentRead?.progress ?: 0f
@@ -23,6 +23,7 @@ internal fun Book.toFeaturedProgress(): FeaturedProgressUiModel {
             format = StatNumberFormat.Duration,
             variant = StatNumberVariant.BodyStrong,
         )
+
         pageTail = edition.audioSeconds?.let { " of ${secondsToHm(it)}" }
     } else {
         pageLead = StatNumberUiModel(
@@ -31,6 +32,7 @@ internal fun Book.toFeaturedProgress(): FeaturedProgressUiModel {
             variant = StatNumberVariant.BodyStrong,
             prefix = "Page ",
         )
+
         pageTail = resolvedTotalPages().takeIf { it > 0 }?.let { " of $it" }
     }
 

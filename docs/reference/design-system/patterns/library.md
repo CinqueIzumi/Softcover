@@ -4,7 +4,7 @@
 
 - The page title is the shelf switcher: eyebrow (`PullToRefreshEyebrow`) → a title row pairing the shelf
   name (`pageTitle`, step-autosized, max 3 lines) with a trailing `primary` chevron-down → the stat
-  subtitle. The whole title row is one `tactileClickable` target opening the Shelves sheet.
+  subtitle. The whole title row is one `pressScaleClickable` target opening the Shelves sheet.
 - Below the collapsible title block: the persistent `EditorialSearchField`, the control line, then the
   shelf neighbour rail.
 - With the opt-in "Swipe between shelves" preference, a `HorizontalPager` (one page per `visibleTabs`
@@ -26,7 +26,7 @@
 
 - Beneath the control line (and any active-filter row): a fixed 48dp row between hairlines, previous shelf
   at the start, next at the end, `eyebrowSmall` uppercase, one line, ellipsised.
-- Each half of the row is one `tactileClickable` target animating one shelf across, no haptic. A missing
+- Each half of the row is one `pressScaleClickable` target animating one shelf across, no haptic. A missing
   end is an empty weighted slot, so the row never shifts.
 - Shown only with the swipe preference on, more than one visible shelf, and neither selecting nor
   rearranging. Desktop has no rail.

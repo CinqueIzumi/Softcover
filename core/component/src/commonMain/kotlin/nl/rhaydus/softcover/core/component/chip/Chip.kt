@@ -45,15 +45,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.modifier.pressScaleClickable
+import nl.rhaydus.designsystem.modifier.pressScaleToggleable
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
+import nl.rhaydus.designsystem.theme.Corners
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
-import nl.rhaydus.softcover.core.component.modifier.tactileClickable
-import nl.rhaydus.softcover.core.component.modifier.tactileToggleable
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerEditorHighlight
 
@@ -67,8 +67,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerEditorHi
 @Composable
 fun Chip(
     model: ChipUiModel,
-    onEvent: (ChipEvent) -> Unit = {},
     modifier: Modifier = Modifier,
+    onEvent: (ChipEvent) -> Unit = {},
 ) {
     ChipScaffold(
         model = model,
@@ -89,20 +89,24 @@ private fun ChipScaffold(
     modifier: Modifier,
 ) {
     val colorSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Color>()
+
     val container by animateColorAsState(
         targetValue = style.container,
         animationSpec = colorSpec,
         label = "ChipContainer",
     )
+
     val ink by animateColorAsState(
         targetValue = style.ink,
         animationSpec = colorSpec,
         label = "ChipInk",
     )
+
     val animatedStyle = style.copy(
         container = container,
         ink = ink,
     )
+
     val selectable = model.tone == ChipTone.Tonal || model.tone == ChipTone.Choice
 
     val rowModifier = modifier
@@ -225,7 +229,7 @@ private fun Modifier.chipInteraction(
             .let { base -> if (enabled) base else base.alpha(DISABLED_ALPHA) }
             .let { base ->
                 if (selectable) {
-                    base.tactileToggleable(
+                    base.pressScaleToggleable(
                         value = selected,
                         onValueChange = { onClick() },
                         role = Role.Checkbox,
@@ -234,7 +238,7 @@ private fun Modifier.chipInteraction(
                     )
                 } else if (tentative) {
                     base
-                        .tactileClickable(
+                        .pressScaleClickable(
                             onClick = onClick,
                             role = Role.Checkbox,
                             enabled = enabled,
@@ -242,7 +246,7 @@ private fun Modifier.chipInteraction(
                         )
                         .semantics { toggleableState = ToggleableState.Indeterminate }
                 } else {
-                    base.tactileClickable(
+                    base.pressScaleClickable(
                         onClick = onClick,
                         enabled = enabled,
                         hoverShape = Corners.pill,
@@ -305,6 +309,7 @@ private fun ChipLabel(
     padding: PaddingValues,
 ) {
     val eyebrow = model.face == ChipFace.Eyebrow
+
     val textStyle = if (eyebrow) {
         MaterialTheme.editorialTypography.eyebrowSmall
     } else {
@@ -314,6 +319,7 @@ private fun ChipLabel(
             textDecoration = if (model.tone == ChipTone.Excluded) TextDecoration.LineThrough else null,
         )
     }
+
     val spoilerWash = (model.leading as? ChipLeading.SpoilerToggle)?.marked == true
 
     SoftcoverText(
@@ -345,6 +351,7 @@ private fun ChipTrailingSlot(
     onDismiss: () -> Unit,
 ) {
     val end = padding.calculateRightPadding(LayoutDirection.Ltr)
+
     val insets = PaddingValues(
         start = Spacing.xs,
         top = padding.calculateTopPadding(),
@@ -369,6 +376,7 @@ private fun ChipTrailingSlot(
         is ChipTrailing.Disclosure -> {
             val playMotion = playDecorativeMotion()
             val spatialSpec = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
+
             val rotation by animateFloatAsState(
                 targetValue = if (trailing.expanded) 180f else 0f,
                 animationSpec = if (playMotion) spatialSpec else snap(),
@@ -421,7 +429,7 @@ private fun ChipIconSlot(
                 if (onClick != null) {
                     base
                         .fillMaxHeight()
-                        .tactileClickable(
+                        .pressScaleClickable(
                             onClick = onClick,
                             hoverShape = Corners.pill,
                         )

@@ -52,6 +52,7 @@ class Migration60To61Test {
                     table.name,
                     table.columns.map { it.name },
                 )
+
                 after shouldBe rowsBefore.getValue(table.name)
             }
         }
@@ -71,6 +72,7 @@ class Migration60To61Test {
             db.userTables() shouldBe exported.tableNames
             db.indexNames() shouldBe exported.indexNames
             db.viewNames() shouldBe exported.viewNames
+
             exported.tables.forEach { table ->
                 val actual = db.columnNames(table.name)
                 actual shouldBe table.columns.map { column -> column.name }

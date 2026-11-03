@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.showcase.live.control.state.ControlLiveUiState
 import nl.rhaydus.toad.UiAction
 
 internal sealed interface ControlLiveAction : UiAction<
-        ControlLiveDependencies,
-        ControlLiveUiState,
-        ControlLiveEvent,
-        ControlLiveLocalVariables,
-        >
+    ControlLiveDependencies,
+    ControlLiveUiState,
+    ControlLiveEvent,
+    ControlLiveLocalVariables,
+>

@@ -2,11 +2,10 @@ package nl.rhaydus.softcover.core.database.migration
 
 import androidx.sqlite.SQLiteConnection
 
-internal fun SQLiteConnection.userTables(): Set<String> =
-    queryStrings(
-        "SELECT name FROM sqlite_master WHERE type = 'table' " +
-            "AND name NOT LIKE 'sqlite_%' AND name NOT IN ('room_master_table', 'android_metadata')",
-    ).toSet()
+internal fun SQLiteConnection.userTables(): Set<String> = queryStrings(
+    "SELECT name FROM sqlite_master WHERE type = 'table' " +
+        "AND name NOT LIKE 'sqlite_%' AND name NOT IN ('room_master_table', 'android_metadata')",
+).toSet()
 
 internal fun SQLiteConnection.indexNames(): Set<String> =
     queryStrings("SELECT name FROM sqlite_master WHERE type = 'index' AND name NOT LIKE 'sqlite_%'")

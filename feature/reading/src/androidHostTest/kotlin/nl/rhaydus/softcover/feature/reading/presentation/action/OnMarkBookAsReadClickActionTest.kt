@@ -37,6 +37,7 @@ class OnMarkBookAsReadClickActionTest {
         markBookAsReadUseCase = mockk()
         stateFlow = MutableStateFlow(ReadingScreenUiState())
         localVariablesFlow = MutableStateFlow(ReadingLocalVariables())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
@@ -70,6 +71,7 @@ class OnMarkBookAsReadClickActionTest {
         every {
             mock.id
         } returns id
+
         every {
             mock.userBook
         } returns null

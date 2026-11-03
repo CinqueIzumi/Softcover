@@ -41,6 +41,13 @@ public fun nl.rhaydus.softcover.core.presentation.prefetch.rememberPrefetchingBo
     - onEvent: STABLE (function type)
 
 @Composable
+public fun nl.rhaydus.softcover.core.presentation.share.ProvideShareCardIoDispatcher(content: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - content: STABLE (composable function type)
+
+@Composable
 public fun nl.rhaydus.softcover.core.presentation.util.TabReselectEffect(tab: cafe.adriel.voyager.navigator.tab.Tab, onReselect: kotlin.coroutines.SuspendFunction0<kotlin.Boolean>): kotlin.Unit
   skippable: false
   restartable: true

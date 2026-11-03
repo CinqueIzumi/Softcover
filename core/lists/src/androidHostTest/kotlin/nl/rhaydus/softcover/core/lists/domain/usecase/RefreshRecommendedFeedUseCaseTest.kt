@@ -88,6 +88,7 @@ class RefreshRecommendedFeedUseCaseTest {
 
             // ----- Assert -----
             result.exceptionOrNull() shouldBe failure
+
             coVerify(exactly = 1) {
                 refreshSystemVibeBooks(
                     vibe = SystemVibe.TopPicks,

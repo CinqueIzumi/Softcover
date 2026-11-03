@@ -40,11 +40,13 @@ class MoodTilesCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(ExploreScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk<ExploreDependencies>(relaxed = true)
     }
 
@@ -144,12 +146,14 @@ class MoodTilesCollectorTest {
                 moodTags = persistentListOf(cosy),
                 loadingMoodTags = false,
             )
+
             val job = launch {
                 MoodTilesCollector().onLaunch(
                     scope = scope,
                     dependencies = dependencies,
                 )
             }
+
             val tilesAfterFirstEmit = stateFlow.value.moodTiles
 
             // ----- Act -----

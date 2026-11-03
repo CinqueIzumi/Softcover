@@ -13,7 +13,7 @@ internal class OnBackClickedAction<
     S : UiState,
     E : UiEvent,
     V : LocalVariables,
-    >(
+>(
     private val backEvent: E,
 ) : UiAction<D, S, E, V> {
     override suspend fun execute(

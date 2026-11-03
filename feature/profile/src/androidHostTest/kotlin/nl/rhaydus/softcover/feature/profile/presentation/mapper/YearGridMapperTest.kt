@@ -143,12 +143,14 @@ class YearGridMapperTest {
 
             // ----- Assert -----
             result.months.sumOf { month -> month.days.count { it is YearGridCell.Read } } shouldBe 4
+
             result.stepOf(
                 day(
                     month = 1,
                     day = 4,
                 ),
             ) shouldBe YearGridStep.Four
+
             result.stepOf(
                 day(
                     month = 1,
@@ -188,6 +190,7 @@ class YearGridMapperTest {
                 month = 4,
                 day = 14,
             )
+
             val daily = daily(
                 date to 62,
             )
@@ -209,6 +212,7 @@ class YearGridMapperTest {
                 month = 4,
                 day = 14,
             )
+
             val daily = daily(
                 date to 1,
             )

@@ -40,6 +40,7 @@ internal class AtlasChapterJumper(
 
     fun jumpTo(chapter: AtlasChapter) {
         val coordinates = chapters[chapter]?.takeIf { it.isAttached } ?: return
+
         val target = scrollState.value + (coordinates.positionInRoot().y - viewportTop).roundToInt()
 
         coroutineScope.launch { scrollState.animateScrollTo(target) }

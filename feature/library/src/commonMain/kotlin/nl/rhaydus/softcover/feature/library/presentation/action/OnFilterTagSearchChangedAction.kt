@@ -23,6 +23,7 @@ internal class OnFilterTagSearchChangedAction(
     ) {
         scope.setState { state ->
             val draft = state.filterDraft ?: return@setState state
+
             val section = draft.sectionFor(source = source)
             val selection = state.filterSheet.selection
 

@@ -28,15 +28,16 @@ import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import nl.rhaydus.common.currentLocalDate
 import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.designsystem.modifier.pressScaleClickable
+import nl.rhaydus.designsystem.modifier.skeletonMask
+import nl.rhaydus.designsystem.theme.Corners
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.designsystem.theme.StandardPreview
-import nl.rhaydus.softcover.core.component.modifier.tactileClickable
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
-import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.statistic.StatNumber
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingActivity
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingStreak
@@ -68,7 +69,7 @@ internal fun StreakStrip(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .tactileClickable(
+                .pressScaleClickable(
                     onClick = {
                         haptics.select()
 
@@ -77,7 +78,10 @@ internal fun StreakStrip(
                 )
                 .horizontalScroll(rememberScrollState())
                 .height(18.dp)
-                .skeletonMask(visible = model.isLoading),
+                .skeletonMask(
+                    visible = model.isLoading,
+                    shape = Corners.xs,
+                ),
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -129,7 +133,10 @@ internal fun StreakStrip(
             // accurate however far the user scrolls into the past.
             SoftcoverText(
                 text = "Most recent first".uppercase(),
-                modifier = Modifier.skeletonMask(visible = model.isLoading),
+                modifier = Modifier.skeletonMask(
+                    visible = model.isLoading,
+                    shape = Corners.xs,
+                ),
                 style = MaterialTheme.editorialTypography.eyebrowSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -218,6 +225,7 @@ internal fun previewReadingActivity(
         20,
         DateTimeUnit.DAY,
     )
+
     val runs = litOffsets.sorted().fold(emptyList<List<Int>>()) { runs, offset ->
         val last = runs.lastOrNull()
 
@@ -278,6 +286,7 @@ private fun StreakStripPreview() {
 private fun StreakStripSheetPreview() {
     SoftcoverTheme {
         val today = currentLocalDate()
+
         val activity = previewReadingActivity(
             today = today,
             litOffsets = setOf(0, 1, 2, 3, 5, 6, 7, 8, 9, 12, 13, 16, 17, 18, 19, 20),

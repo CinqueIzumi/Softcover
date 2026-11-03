@@ -18,7 +18,6 @@ rules all components follow are in [component-contract.md](component-contract.md
 ## Buttons & controls
 
 - **PillButton** — `button` — action pill or icon-only circle in five tones.
-- **MorphingButton** — `button` — text button that animates between the filled and tonal styles.
 - **Toggle** — `control` — filled or bare icon toggle, or a display-only switch inside a row that owns the tap.
 - **ToggleRow** — `control` — a title over an optional gloss with a trailing switch; the row is the tap target.
 - **TextField** — `field` — pill, outlined, multi-line, hero or numeral input, with an optional error state.
@@ -46,7 +45,6 @@ rules all components follow are in [component-contract.md](component-contract.md
 - **Callout** — `callout` — in-flow card for one condition, optionally with one next step.
 - **EmptyState** — `state` — placeholder when a surface has nothing to draw.
 - **OfflineEmptyStatePlaceholder** — `state` — the full-pane `EmptyState` for content that cannot load offline.
-- **SkeletonMask** — `state` — `Modifier.skeletonMask` shimmers a leaf while loading.
 - **RevealedWhenPresent** — `state` — expands a row while its value is non-null.
 - **Divider** — `divider` — hairline rule, bare, centred or vertical.
 - **Badge** — `badge` — short status or release label in six tones.
@@ -59,12 +57,11 @@ rules all components follow are in [component-contract.md](component-contract.md
 
 ## Sheets & dialogs
 
-- **AdaptiveModalSheet** — `sheet` — bottom sheet, or an animated panel when expanded.
+- **AdaptiveModalSheet** — `sheet` — foundation sheet plus the snackbar host and `Corners.xxl` panel.
 - **SheetScaffold** — `sheet` — chrome every modal sheet shares: header, body, footer and close; `SheetSession` holds its lifetime.
 - **SheetRowGroup** — `sheet` — hairline-divided single-choice rows that dismiss the sheet on selection.
 - **SheetActionRow** — `sheet` — a plain tappable menu row that acts at once.
 - **LoadingSheet** — `sheet` — full-screen blocking wait.
-- **SoftcoverDatePickerDialog** — `dialog` — single-day calendar dialog.
 - **UpdateProgressBottomSheet** — `progress` — pages, percentage or time reading-progress editor.
 - **QuoteSheet** — `quote` — the add-a-quote editor: passage, position, privacy and backdate.
 - **ProgressBar** — `progress` — determinate wavy bar.
@@ -100,21 +97,20 @@ rules all components follow are in [component-contract.md](component-contract.md
 
 ## Modifiers & helpers
 
-- **`tactileClickable` / `Selectable` / `Toggleable`** — `modifier` — the one ripple-less interaction modifier.
-- **`shakeOnError`** — `modifier` — shakes a node and plays *reject* on a failure trigger.
+- **`pressScaleClickable` / `Selectable` / `Toggleable`** — foundation `modifier` — the one ripple-less interaction modifier.
 - **`navSharedBounds`** — `modifier` — the one way to make a node a navigation shared element.
-- **`rememberPulseScale`** — `modifier` — a one-shot scale pulse each time a trigger changes.
 - **`ExitingItems`** — `transition` — keeps removed items of a non-lazy container composed, inert, while a caller-supplied exit (default fade) plays.
 - **`rememberReorderHaptics`** — `haptics` — lift, per-target tick and drop haptics for drag-to-reorder.
 - **`Haptics.play(Feedback)`** — `haptics` — plays the outcome haptic a `FeedbackEvent` carries.
 
 ## From the foundation
 
-Foundation components are listed in [`docs/rhaydus/0.3.1/CAPABILITIES.md`](../../rhaydus/0.3.1/CAPABILITIES.md).
+Foundation components are listed in [`foundation/docs/CAPABILITIES.md`](../../../foundation/docs/CAPABILITIES.md).
 The app's own usage rules:
 
 - `Cover` for book covers; `RhaydusShimmerImage` for every other image.
 - `RhaydusButton`: one filled button per region.
+- `RhaydusDatePickerDialog` for every date pick; `skeletonMask` for every loading leaf. Both take `shape = Corners.xs`.
 - `InlineErrorState` takes the editorial `bodySmall` face through `textStyle`.
 - `DropCapText` takes `dropCapFontFamily = displayFontFamily()`.
 - `StarRatingInput` and every rating glyph fill with `RatingGold`.
@@ -124,4 +120,4 @@ The app's own usage rules:
 - Pull-to-refresh draws `PullToRefreshDefaults.LoadingIndicator`, the one exception to wavy progress, under a `PullToRefreshEyebrow`.
 - `DesktopTooltip` on every icon-only desktop control; `DesktopContextMenu` mirrors a touch long-press.
 - Haptics go through `LocalHaptics.current`, never `performHapticFeedback`.
-- Press feedback goes through `tactileClickable`, never the foundation `pressScale` modifiers (detekt `ForbiddenImport`).
+- Press feedback goes through the foundation `pressScaleClickable` family; the bare `pressScale` only drives a shared `interactionSource`.

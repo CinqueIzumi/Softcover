@@ -30,17 +30,21 @@ class FocusPageEditorCollectorTest {
     @BeforeEach
     fun setUp() {
         activeSessionFlow = MutableStateFlow(null)
+
         val controller = mockk<ActiveSessionController>(relaxed = true) {
             every {
                 activeSession
             } returns activeSessionFlow
         }
+
         dependencies = mockk(relaxed = true) {
             every {
                 activeSessionController
             } returns controller
         }
+
         stateFlow = MutableStateFlow(FocusModeUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalFocusModeVariables()),
@@ -62,6 +66,7 @@ class FocusPageEditorCollectorTest {
                     pages
                 } returns totalPages
             }
+
             every {
                 currentRead
             } returns mockk(relaxed = true) {
@@ -81,6 +86,7 @@ class FocusPageEditorCollectorTest {
                 totalPages = 200,
                 currentPage = 50,
             )
+
             val collector = FocusPageEditorCollector()
 
             // ----- Act -----
@@ -106,6 +112,7 @@ class FocusPageEditorCollectorTest {
                 totalPages = 200,
                 currentPage = null,
             )
+
             val collector = FocusPageEditorCollector()
 
             // ----- Act -----
@@ -146,7 +153,9 @@ class FocusPageEditorCollectorTest {
                 totalPages = 200,
                 currentPage = 50,
             )
+
             val collector = FocusPageEditorCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -163,32 +172,34 @@ class FocusPageEditorCollectorTest {
         }
 
         @Test
-        fun `rebuilds the editor when the active session changes without overwriting the draft`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                activeSessionFlow.value = stubSession(
-                    totalPages = 200,
-                    currentPage = 50,
-                )
-                val collector = FocusPageEditorCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-                stateFlow.value = stateFlow.value.copy(pageDraft = TextFieldValue(text = "60"))
+        fun `rebuilds the editor when the active session changes without overwriting the draft`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            activeSessionFlow.value = stubSession(
+                totalPages = 200,
+                currentPage = 50,
+            )
 
-                // ----- Act -----
-                activeSessionFlow.value = stubSession(
-                    totalPages = 400,
-                    currentPage = 70,
-                )
+            val collector = FocusPageEditorCollector()
 
-                // ----- Assert -----
-                stateFlow.value.pageDraft.text shouldBe "60"
-                stateFlow.value.pageEditor.shouldNotBeNull().caption shouldBe "of 400 pages"
-                job.cancel()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            stateFlow.value = stateFlow.value.copy(pageDraft = TextFieldValue(text = "60"))
+
+            // ----- Act -----
+            activeSessionFlow.value = stubSession(
+                totalPages = 400,
+                currentPage = 70,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.pageDraft.text shouldBe "60"
+            stateFlow.value.pageEditor.shouldNotBeNull().caption shouldBe "of 400 pages"
+            job.cancel()
+        }
     }
 }

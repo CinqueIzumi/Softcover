@@ -34,6 +34,7 @@ class OnRecentSearchChipClickedActionTest {
         searchForNameUseCase = mockk()
         stateFlow = MutableStateFlow(ExploreScreenUiState())
         localVariablesFlow = MutableStateFlow(ExploreLocalVariables())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
@@ -43,6 +44,7 @@ class OnRecentSearchChipClickedActionTest {
 
     private fun stubDependencies(testScope: TestScope): ExploreDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<ExploreDependencies>(relaxed = true).also { mock ->
             every {
                 mock.searchForNameUseCase
@@ -96,6 +98,7 @@ class OnRecentSearchChipClickedActionTest {
             } returns Result.success(Unit)
 
             val directStateFlow = MutableStateFlow(ExploreScreenUiState())
+
             val directScope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables> = ActionScope(
                 stateFlow = directStateFlow,
                 localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
@@ -113,6 +116,7 @@ class OnRecentSearchChipClickedActionTest {
             stateFlow.value = ExploreScreenUiState(
                 recentSearchChips = ChipSet(payloadByKey = persistentMapOf("recent:kotlin" to "kotlin")),
             )
+
             val action = OnRecentSearchChipClickedAction(key = "recent:kotlin")
 
             // ----- Act -----

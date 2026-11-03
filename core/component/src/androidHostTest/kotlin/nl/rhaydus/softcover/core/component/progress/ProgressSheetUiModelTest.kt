@@ -41,6 +41,7 @@ class ProgressSheetUiModelTest {
                 bookTitle = title,
                 isPaused = true,
             )
+
             val reading = ProgressSheetUiModel.scaffoldFor(bookTitle = title)
 
             // ----- Assert -----
@@ -60,6 +61,7 @@ class ProgressSheetUiModelTest {
                 bookTitle = title,
                 isPaused = true,
             )
+
             val reading = ProgressSheetUiModel.scaffoldFor(bookTitle = title)
 
             // ----- Assert -----
@@ -259,6 +261,7 @@ class ProgressSheetUiModelTest {
             val known = timed(
                 totalSeconds = positiveTotal,
             )
+
             val unknown = timed(
                 totalSeconds = zeroTotal,
             )

@@ -108,6 +108,7 @@ class ReadingActivityMapperTest {
                     pages = 15,
                 ),
             )
+
             val books = listOf(
                 readBook(
                     id = 1,

@@ -76,6 +76,7 @@ internal data class LibraryFilters(
 
         if (releaseYears.isNotEmpty()) {
             val year = book?.releaseYear ?: edition.releaseYear
+
             if (year !in releaseYears) return false
         }
 
@@ -89,6 +90,7 @@ internal data class LibraryFilters(
 
         if (ratingMin != null) {
             val rating = book?.rating ?: 0.0
+
             if (rating < ratingMin) return false
         }
 
@@ -106,6 +108,7 @@ internal data class LibraryFilters(
                     name = tag.name,
                 )
             }
+
             if (hardcoverTags.matches(carried = carried).not()) return false
         }
 
@@ -116,6 +119,7 @@ internal data class LibraryFilters(
                     name = tag.name,
                 )
             }
+
             if (yourTags.matches(carried = carried).not()) return false
         }
 

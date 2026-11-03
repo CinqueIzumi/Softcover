@@ -40,15 +40,19 @@ class HowItReadSectionCollectorTest {
     fun setUp() {
         storedTraits = MutableStateFlow(BookTraits(bookId = TEST_BOOK_ID))
         observeBookTraitsUseCase = mockk()
+
         every {
             observeBookTraitsUseCase(bookId = any())
         } returns storedTraits
+
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk<BookDetailDependencies>(relaxed = true).also {
             every {
                 it.observeBookTraitsUseCase
@@ -74,70 +78,69 @@ class HowItReadSectionCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `shows the empty invitation for every started status while nothing is answered`() =
-            runTest(UnconfinedTestDispatcher()) {
-                val started = listOf(
-                    BookStatus.Reading,
-                    BookStatus.Paused,
-                    BookStatus.Read,
-                    BookStatus.DidNotFinish,
-                )
+        fun `shows the empty invitation for every started status while nothing is answered`() = runTest(UnconfinedTestDispatcher()) {
+            val started = listOf(
+                BookStatus.Reading,
+                BookStatus.Paused,
+                BookStatus.Read,
+                BookStatus.DidNotFinish,
+            )
 
-                started.forEach { status ->
-                    // ----- Arrange -----
-                    stateFlow.value = buildBookDetailUiState().copy(book = bookWith(status = status))
-                    storedTraits.value = BookTraits(bookId = TEST_BOOK_ID)
-
-                    // ----- Act -----
-                    launchCollector()
-
-                    // ----- Assert -----
-                    stateFlow.value.howItRead.shouldBeInstanceOf<HowItReadBlockUiModel.Empty>()
-                }
-            }
-
-        @Test
-        fun `shows the filled block for every started status once a trait is answered`() =
-            runTest(UnconfinedTestDispatcher()) {
-                val started = listOf(
-                    BookStatus.Reading,
-                    BookStatus.Paused,
-                    BookStatus.Read,
-                    BookStatus.DidNotFinish,
-                )
-
-                started.forEach { status ->
-                    // ----- Arrange -----
-                    stateFlow.value = buildBookDetailUiState().copy(book = bookWith(status = status))
-                    storedTraits.value = BookTraits(
-                        bookId = TEST_BOOK_ID,
-                        pace = Pace.FAST,
-                    )
-
-                    // ----- Act -----
-                    launchCollector()
-
-                    // ----- Assert -----
-                    val block = stateFlow.value.howItRead.shouldBeInstanceOf<HowItReadBlockUiModel.Filled>()
-                    block.summary shouldBe "Fast pace"
-                }
-            }
-
-        @Test
-        fun `builds no section and never observes the traits for a book still to be read`() =
-            runTest(UnconfinedTestDispatcher()) {
+            started.forEach { status ->
                 // ----- Arrange -----
-                stateFlow.value = buildBookDetailUiState().copy(book = bookWith(status = BookStatus.WantToRead))
+                stateFlow.value = buildBookDetailUiState().copy(book = bookWith(status = status))
+                storedTraits.value = BookTraits(bookId = TEST_BOOK_ID)
 
                 // ----- Act -----
                 launchCollector()
 
                 // ----- Assert -----
-                stateFlow.value.howItRead.shouldBeNull()
-                verify(exactly = 0) {
-                    observeBookTraitsUseCase(bookId = any())
-                }
+                stateFlow.value.howItRead.shouldBeInstanceOf<HowItReadBlockUiModel.Empty>()
             }
+        }
+
+        @Test
+        fun `shows the filled block for every started status once a trait is answered`() = runTest(UnconfinedTestDispatcher()) {
+            val started = listOf(
+                BookStatus.Reading,
+                BookStatus.Paused,
+                BookStatus.Read,
+                BookStatus.DidNotFinish,
+            )
+
+            started.forEach { status ->
+                // ----- Arrange -----
+                stateFlow.value = buildBookDetailUiState().copy(book = bookWith(status = status))
+
+                storedTraits.value = BookTraits(
+                    bookId = TEST_BOOK_ID,
+                    pace = Pace.FAST,
+                )
+
+                // ----- Act -----
+                launchCollector()
+
+                // ----- Assert -----
+                val block = stateFlow.value.howItRead.shouldBeInstanceOf<HowItReadBlockUiModel.Filled>()
+                block.summary shouldBe "Fast pace"
+            }
+        }
+
+        @Test
+        fun `builds no section and never observes the traits for a book still to be read`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = buildBookDetailUiState().copy(book = bookWith(status = BookStatus.WantToRead))
+
+            // ----- Act -----
+            launchCollector()
+
+            // ----- Assert -----
+            stateFlow.value.howItRead.shouldBeNull()
+
+            verify(exactly = 0) {
+                observeBookTraitsUseCase(bookId = any())
+            }
+        }
 
         @Test
         fun `builds no section when the book has not loaded`() = runTest(UnconfinedTestDispatcher()) {
@@ -152,18 +155,17 @@ class HowItReadSectionCollectorTest {
         }
 
         @Test
-        fun `reveals the section when the status moves from want to read to reading`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                stateFlow.value = buildBookDetailUiState().copy(book = bookWith(status = BookStatus.WantToRead))
-                launchCollector()
+        fun `reveals the section when the status moves from want to read to reading`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = buildBookDetailUiState().copy(book = bookWith(status = BookStatus.WantToRead))
+            launchCollector()
 
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(book = bookWith(status = BookStatus.Reading))
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(book = bookWith(status = BookStatus.Reading))
 
-                // ----- Assert -----
-                stateFlow.value.howItRead.shouldBeInstanceOf<HowItReadBlockUiModel.Empty>()
-            }
+            // ----- Assert -----
+            stateFlow.value.howItRead.shouldBeInstanceOf<HowItReadBlockUiModel.Empty>()
+        }
 
         @Test
         fun `drops the section when the book is moved back to want to read`() = runTest(UnconfinedTestDispatcher()) {
@@ -185,10 +187,12 @@ class HowItReadSectionCollectorTest {
                 bookId = TEST_BOOK_ID,
                 pace = Pace.SLOW,
             )
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = bookWith(status = BookStatus.Read),
                 howItReadExpanded = false,
             )
+
             launchCollector()
 
             // ----- Act -----

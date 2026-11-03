@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.showcase.live.quote.state.QuoteLiveUiState
 import nl.rhaydus.toad.UiAction
 
 internal sealed interface QuoteLiveAction : UiAction<
-        QuoteLiveDependencies,
-        QuoteLiveUiState,
-        QuoteLiveEvent,
-        QuoteLiveLocalVariables,
-        >
+    QuoteLiveDependencies,
+    QuoteLiveUiState,
+    QuoteLiveEvent,
+    QuoteLiveLocalVariables,
+>

@@ -26,6 +26,7 @@ class OnDatePickerDismissedActionTest {
     @BeforeEach
     fun setUp() {
         dependencies = mockk(relaxed = true)
+
         stateFlow = MutableStateFlow(
             DialogLiveUiState(
                 topBar = dialogLiveTopBar(),
@@ -33,7 +34,9 @@ class OnDatePickerDismissedActionTest {
                 datePicker = datePicker(pickedDate = null),
             ),
         )
+
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(DialogLiveLocalVariables()),

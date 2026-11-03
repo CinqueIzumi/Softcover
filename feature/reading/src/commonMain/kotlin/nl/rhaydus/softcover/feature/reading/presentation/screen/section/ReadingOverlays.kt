@@ -65,6 +65,7 @@ internal fun ReadingOverlays(
     }
 
     val verdictSheet = state.verdictSheet
+
     if (verdictBook != null && verdictSheet != null) {
         VerdictSheet(
             model = verdictSheet,

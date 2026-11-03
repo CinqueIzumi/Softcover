@@ -21,6 +21,7 @@ class RefreshUserTagsForBookUseCaseTest {
     fun setUp() {
         userTagsRepository = mockk(relaxed = true)
         getUserIdUseCase = mockk()
+
         useCase = RefreshUserTagsForBookUseCase(
             userTagsRepository = userTagsRepository,
             getUserIdUseCase = getUserIdUseCase,
@@ -41,6 +42,7 @@ class RefreshUserTagsForBookUseCaseTest {
 
             // ----- Assert -----
             result.exceptionOrNull().shouldBeInstanceOf<IllegalStateException>().message shouldBe "signed out"
+
             coVerify(exactly = 0) {
                 userTagsRepository.refreshForBook(
                     userId = any(),

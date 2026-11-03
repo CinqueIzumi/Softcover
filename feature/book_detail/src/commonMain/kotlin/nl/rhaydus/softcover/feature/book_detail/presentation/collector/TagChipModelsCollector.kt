@@ -49,6 +49,7 @@ internal class TagChipModelsCollector : BookDetailCollector {
             .distinctUntilChanged()
             .collectLatest { snapshot ->
                 val userTagChips = snapshot.userTags.map { it.toChipUiModel() }
+
                 val communityTagGroups = snapshot.communityTags.toTagCategoryChipGroups(
                     revealedTagKeys = snapshot.revealedTagKeys,
                 )
@@ -59,7 +60,7 @@ internal class TagChipModelsCollector : BookDetailCollector {
                         communityTagGroups = communityTagGroups.toImmutableList(),
                         tagEditorOpenerChip = tagEditorOpenerChip(hasTags = snapshot.userTags.isNotEmpty()),
                         userTagEditorGroups = snapshot.userTags.toUserTagEditorChipGroups(),
-                        userTagByEditorChipKey = snapshot.userTags.associateBy { it.chipKey }.toImmutableMap(),
+                        userTagByEditorChipKey = snapshot.userTags.associateBy { tag -> tag.chipKey }.toImmutableMap(),
                     )
                 }
             }

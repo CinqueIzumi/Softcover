@@ -15,18 +15,18 @@ internal class HowItReadLiveScreenModel(
     themeStore: ShowcaseThemeStore,
     initializers: List<
         Collector<HowItReadLiveUiState, HowItReadLiveEvent, HowItReadLiveDependencies, HowItReadLiveLocalVariables>,
-        >,
+    >,
 ) : ToadScreenModel<
-    HowItReadLiveUiState,
-    HowItReadLiveEvent,
-    HowItReadLiveDependencies,
-    Collector<HowItReadLiveUiState, HowItReadLiveEvent, HowItReadLiveDependencies, HowItReadLiveLocalVariables>,
-    HowItReadLiveLocalVariables,
+        HowItReadLiveUiState,
+        HowItReadLiveEvent,
+        HowItReadLiveDependencies,
+        Collector<HowItReadLiveUiState, HowItReadLiveEvent, HowItReadLiveDependencies, HowItReadLiveLocalVariables>,
+        HowItReadLiveLocalVariables,
     >(
-    initialState = HowItReadLiveUiState(),
-    initialLocalVariables = HowItReadLiveLocalVariables(),
-    initializers = initializers,
-) {
+        initialState = HowItReadLiveUiState(),
+        initialLocalVariables = HowItReadLiveLocalVariables(),
+        initializers = initializers,
+    ) {
     override val dependencies = HowItReadLiveDependencies(
         themeStore = themeStore,
         coroutineScope = screenModelScope,

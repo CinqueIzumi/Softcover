@@ -37,6 +37,7 @@ class AtlasProfileDataCollectorTest {
         observeUserProfileDataUseCase = mockk()
         observeReadingStatsBackfilledUseCase = mockk()
         stateFlow = MutableStateFlow(StatsAtlasUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(StatsAtlasLocalVariables()),
@@ -54,6 +55,7 @@ class AtlasProfileDataCollectorTest {
 
     private fun stubDependencies(testScope: TestScope): StatsAtlasDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<StatsAtlasDependencies>(relaxed = true).also { mock ->
             every {
                 mock.observeUserProfileDataUseCase
@@ -83,27 +85,27 @@ class AtlasProfileDataCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `sets userProfileData and stops loading when the library is backfilled`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val profileData = buildProfileData()
-                val dependencies = stubDependencies(this)
-                val collector = AtlasProfileDataCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+        fun `sets userProfileData and stops loading when the library is backfilled`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val profileData = buildProfileData()
+            val dependencies = stubDependencies(this)
+            val collector = AtlasProfileDataCollector()
 
-                // ----- Act -----
-                profileDataFlow.emit(profileData)
-
-                // ----- Assert -----
-                stateFlow.value.userProfileData shouldBe profileData
-                stateFlow.value.isLoading shouldBe false
-                job.cancel()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            // ----- Act -----
+            profileDataFlow.emit(profileData)
+
+            // ----- Assert -----
+            stateFlow.value.userProfileData shouldBe profileData
+            stateFlow.value.isLoading shouldBe false
+            job.cancel()
+        }
 
         @Test
         fun `keeps loading while the library is not yet backfilled`() = runTest(UnconfinedTestDispatcher()) {
@@ -111,6 +113,7 @@ class AtlasProfileDataCollectorTest {
             backfilledFlow.value = false
             val dependencies = stubDependencies(this)
             val collector = AtlasProfileDataCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -132,12 +135,14 @@ class AtlasProfileDataCollectorTest {
             backfilledFlow.value = false
             val dependencies = stubDependencies(this)
             val collector = AtlasProfileDataCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
                     dependencies = dependencies,
                 )
             }
+
             profileDataFlow.emit(buildProfileData())
 
             // ----- Act -----
@@ -153,6 +158,7 @@ class AtlasProfileDataCollectorTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
             val collector = AtlasProfileDataCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

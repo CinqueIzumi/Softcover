@@ -38,11 +38,10 @@ class RecentlyLovedCardMapperTest {
         finishedOn = finishedOn,
     )
 
-    private fun RecentlyLovedBook.toCard(libraryBook: Book = libraryBook(id = bookId)): BookCardUiModel =
-        RecentlyLovedEntry(
-            loved = this,
-            libraryBook = libraryBook,
-        ).toRecentlyLovedCard()
+    private fun RecentlyLovedBook.toCard(libraryBook: Book = libraryBook(id = bookId)): BookCardUiModel = RecentlyLovedEntry(
+        loved = this,
+        libraryBook = libraryBook,
+    ).toRecentlyLovedCard()
 
     private fun libraryBook(
         id: Int,
@@ -55,9 +54,11 @@ class RecentlyLovedCardMapperTest {
             every {
                 this@mockk.id
             } returns 99
+
             every {
                 url
             } returns editionUrl
+
             every {
                 localImagePath
             } returns null
@@ -67,18 +68,23 @@ class RecentlyLovedCardMapperTest {
             every {
                 this@mockk.id
             } returns id
+
             every {
                 this@mockk.title
             } returns title
+
             every {
                 this@mockk.authorString
             } returns authorString
+
             every {
                 currentEdition
             } returns edition
+
             every {
                 defaultEdition
             } returns null
+
             every {
                 this@mockk.coverUrl
             } returns coverUrl
@@ -187,6 +193,7 @@ class RecentlyLovedCardMapperTest {
         fun `shows the library book's title and a By-prefixed byline`() {
             // ----- Arrange -----
             val book = lovedBook()
+
             val library = libraryBook(
                 id = 7,
                 title = "Dune",
@@ -205,6 +212,7 @@ class RecentlyLovedCardMapperTest {
         fun `drops the byline when the library book's authors are blank`() {
             // ----- Arrange -----
             val book = lovedBook()
+
             val library = libraryBook(
                 id = 7,
                 authorString = "   ",
@@ -221,6 +229,7 @@ class RecentlyLovedCardMapperTest {
         fun `drops the byline when the library book's authors are empty`() {
             // ----- Arrange -----
             val book = lovedBook()
+
             val library = libraryBook(
                 id = 7,
                 authorString = "",
@@ -237,6 +246,7 @@ class RecentlyLovedCardMapperTest {
         fun `uses the library book's picked edition cover`() {
             // ----- Arrange -----
             val book = lovedBook(bookId = 7)
+
             val library = libraryBook(
                 id = 7,
                 editionUrl = "https://example.com/picked.jpg",
@@ -248,6 +258,7 @@ class RecentlyLovedCardMapperTest {
             // ----- Assert -----
             cover.source.shouldNotBeNull().shouldBeInstanceOf<CoverSource.Remote>().url shouldBe
                 "https://example.com/picked.jpg"
+
             cover.sharedTransitionKey shouldBe bookTransitionKey(
                 element = BookTransitionElement.Cover,
                 bookId = 7,
@@ -258,6 +269,7 @@ class RecentlyLovedCardMapperTest {
         fun `keeps the loved book's rating when a library book supplies the title and cover`() {
             // ----- Arrange -----
             val book = lovedBook(ratingStars = 4.5)
+
             val library = libraryBook(
                 id = 7,
                 title = "Dune",
@@ -268,6 +280,7 @@ class RecentlyLovedCardMapperTest {
 
             // ----- Assert -----
             text.title shouldBe "Dune"
+
             text.supportingLines.first() shouldBe listOf(
                 BookCardLinePart.Rating(
                     label = "4.5",
@@ -306,6 +319,7 @@ class RecentlyLovedCardMapperTest {
                 element = BookTransitionElement.Title,
                 bookId = 42,
             )
+
             column.cover.shouldNotBeNull().model.sharedTransitionKey shouldBe bookTransitionKey(
                 element = BookTransitionElement.Cover,
                 bookId = 42,

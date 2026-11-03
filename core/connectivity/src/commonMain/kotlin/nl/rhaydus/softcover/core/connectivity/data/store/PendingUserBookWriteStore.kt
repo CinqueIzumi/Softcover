@@ -75,26 +75,25 @@ internal class PendingUserBookWriteStore(
     override suspend fun hasPending(): Boolean =
         dao.getPending(maxAttempts = USER_BOOK_WRITE_MAX_ATTEMPTS).isNotEmpty()
 
-    override suspend fun getPending(maxAttempts: Int): List<PendingWrite<PendingUserBookWrite>> =
-        dao.getPending(maxAttempts = maxAttempts).mapNotNull { entity ->
-            val payload: PendingUserBookWrite? = entity.toPendingUserBookWrite()
+    override suspend fun getPending(): List<PendingWrite<PendingUserBookWrite>> = dao.getPending().mapNotNull { entity ->
+        val payload: PendingUserBookWrite? = entity.toPendingUserBookWrite()
 
-            if (payload == null) {
-                // A row whose kind we cannot parse can never be replayed, so retrying it forever only
-                // keeps it in the table. Drop it rather than let it accumulate behind the poison cap.
-                AppLog.e("Discarding unreplayable pending user-book write: unknown kind '${entity.kind}'")
+        if (payload == null) {
+            // A row whose kind we cannot parse can never be replayed, so retrying it forever only
+            // keeps it in the table. Drop it rather than let it accumulate behind the poison cap.
+            AppLog.e("Discarding unreplayable pending user-book write: unknown kind '${entity.kind}'")
 
-                dao.delete(localId = entity.localId)
+            dao.delete(localId = entity.localId)
 
-                return@mapNotNull null
-            }
-
-            PendingWrite(
-                localId = entity.localId,
-                attempts = entity.attempts,
-                payload = payload,
-            )
+            return@mapNotNull null
         }
+
+        PendingWrite(
+            localId = entity.localId,
+            attempts = entity.attempts,
+            payload = payload,
+        )
+    }
 
     override suspend fun delete(localId: Long) {
         dao.delete(localId = localId)
@@ -102,5 +101,11 @@ internal class PendingUserBookWriteStore(
 
     override suspend fun incrementAttempts(localId: Long) {
         dao.incrementAttempts(localId = localId)
+    }
+
+    override suspend fun abandon(write: PendingWrite<PendingUserBookWrite>) {
+        write.payload.progressHistoryId?.let { progressHistoryLocalDataSource.delete(localId = it) }
+
+        dao.delete(localId = write.localId)
     }
 }

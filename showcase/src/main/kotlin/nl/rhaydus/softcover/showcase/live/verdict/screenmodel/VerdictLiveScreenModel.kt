@@ -15,16 +15,16 @@ internal class VerdictLiveScreenModel(
     themeStore: ShowcaseThemeStore,
     initializers: List<Collector<VerdictLiveUiState, VerdictLiveEvent, VerdictLiveDependencies, VerdictLiveLocalVariables>>,
 ) : ToadScreenModel<
-    VerdictLiveUiState,
-    VerdictLiveEvent,
-    VerdictLiveDependencies,
-    Collector<VerdictLiveUiState, VerdictLiveEvent, VerdictLiveDependencies, VerdictLiveLocalVariables>,
-    VerdictLiveLocalVariables,
+        VerdictLiveUiState,
+        VerdictLiveEvent,
+        VerdictLiveDependencies,
+        Collector<VerdictLiveUiState, VerdictLiveEvent, VerdictLiveDependencies, VerdictLiveLocalVariables>,
+        VerdictLiveLocalVariables,
     >(
-    initialState = VerdictLiveUiState(),
-    initialLocalVariables = VerdictLiveLocalVariables(),
-    initializers = initializers,
-) {
+        initialState = VerdictLiveUiState(),
+        initialLocalVariables = VerdictLiveLocalVariables(),
+        initializers = initializers,
+    ) {
     override val dependencies = VerdictLiveDependencies(
         themeStore = themeStore,
         coroutineScope = screenModelScope,

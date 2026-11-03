@@ -196,6 +196,7 @@ class MarkdownDocumentUiModelMapperTest {
                 MarkdownDocumentBlockUiModel.Paragraph::class,
                 MarkdownDocumentBlockUiModel.ListGroup::class,
             )
+
             (model.blocks[0] as MarkdownDocumentBlockUiModel.ListGroup).items.size shouldBe 1
             (model.blocks[2] as MarkdownDocumentBlockUiModel.ListGroup).items.size shouldBe 1
         }

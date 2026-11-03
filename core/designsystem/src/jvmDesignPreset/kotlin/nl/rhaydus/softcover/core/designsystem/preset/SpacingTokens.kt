@@ -2,11 +2,11 @@ package nl.rhaydus.softcover.core.designsystem.preset
 
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.unit.Density
-import java.lang.Float as JavaFloat
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.CornerRadius
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
+import nl.rhaydus.designsystem.theme.CornerRadius
+import nl.rhaydus.designsystem.theme.Corners
+import nl.rhaydus.designsystem.theme.Spacing
 import kotlin.math.roundToInt
+import java.lang.Float as JavaFloat
 
 private const val PROBE_SIZE = 100f
 

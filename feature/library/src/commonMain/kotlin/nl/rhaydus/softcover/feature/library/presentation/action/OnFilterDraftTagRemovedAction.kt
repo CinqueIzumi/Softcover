@@ -18,6 +18,7 @@ internal class OnFilterDraftTagRemovedAction(
     ) {
         scope.setState { state ->
             val draft = state.filterDraft ?: return@setState state
+
             val value = state.availableFilterOptionsFor(draft.tabId).tagValueFor(
                 key = key,
                 filters = draft.filters,

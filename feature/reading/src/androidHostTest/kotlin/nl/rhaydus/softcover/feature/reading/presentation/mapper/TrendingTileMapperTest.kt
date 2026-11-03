@@ -94,6 +94,7 @@ class TrendingTileMapperTest {
 
             // ----- Assert -----
             val cover = result.cover.shouldNotBeNull()
+
             cover.source shouldBe CoverSource.Remote(
                 url = "https://cover/piranesi",
                 persistEditionId = null,
@@ -112,6 +113,7 @@ class TrendingTileMapperTest {
             val cover = result.cover.shouldNotBeNull()
             cover.variant shouldBe CoverVariant.Tile
             cover.coverlessTitle shouldBe "Piranesi"
+
             cover.sharedTransitionKey shouldBe bookTransitionKey(
                 element = BookTransitionElement.Cover,
                 bookId = 7,

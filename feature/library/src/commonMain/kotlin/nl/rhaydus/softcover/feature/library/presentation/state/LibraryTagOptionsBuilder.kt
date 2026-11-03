@@ -15,6 +15,7 @@ internal fun buildHardcoverTagOptions(books: List<Book>): ImmutableList<LibraryT
                 id = tag.id,
                 name = tag.name,
             )
+
             val option = counts[key] ?: LibraryTagOption(
                 key = key,
                 category = tag.category,
@@ -38,6 +39,7 @@ internal fun buildYourTagOptions(userTagsPerBook: List<List<UserTag>>): Immutabl
                 category = tag.category,
                 name = tag.name,
             )
+
             val option = counts[key] ?: LibraryTagOption(
                 key = key,
                 category = tag.category,
@@ -51,8 +53,7 @@ internal fun buildYourTagOptions(userTagsPerBook: List<List<UserTag>>): Immutabl
     return counts.values.sortedForPicker()
 }
 
-private fun <K : TagKey> Collection<LibraryTagOption<K>>.sortedForPicker(): ImmutableList<LibraryTagOption<K>> =
-    sortedWith(
-        compareByDescending<LibraryTagOption<K>> { it.count }
-            .thenBy { it.key.name.lowercase() },
-    ).toImmutableList()
+private fun <K : TagKey> Collection<LibraryTagOption<K>>.sortedForPicker(): ImmutableList<LibraryTagOption<K>> = sortedWith(
+    compareByDescending<LibraryTagOption<K>> { it.count }
+        .thenBy { it.key.name.lowercase() },
+).toImmutableList()

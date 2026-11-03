@@ -11,8 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonStyle
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.showcase.appearance.action.OnAppearanceClickedAction
 import nl.rhaydus.softcover.showcase.appearance.action.OnBackClickedAction
 import nl.rhaydus.softcover.showcase.appearance.screen.AppearanceSheetHost

@@ -36,6 +36,7 @@ internal fun currentStreakTile(
 ): StatTileUiModel {
     val days = streak?.days ?: 0
     val unit = if (days == 1) "day in a row" else "days in a row"
+
     val yesterday = today.minus(
         value = 1,
         unit = DateTimeUnit.DAY,

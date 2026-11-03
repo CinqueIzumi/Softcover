@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.toad.Collector
 
 internal sealed interface LibraryCollector : Collector<
-        LibraryUiState,
-        LibraryEvent,
-        LibraryDependencies,
-        LibraryLocalVariables,
-        >
+    LibraryUiState,
+    LibraryEvent,
+    LibraryDependencies,
+    LibraryLocalVariables,
+>

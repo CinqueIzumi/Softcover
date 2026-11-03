@@ -11,13 +11,13 @@ import nl.rhaydus.softcover.feature.lists.presentation.state.LocalCreateListVari
 import nl.rhaydus.toad.ToadScreenModel
 
 internal class CreateListScreenModel(
-    private val createListUseCase: CreateListUseCase,
+    createListUseCase: CreateListUseCase,
     dispatchers: AppDispatchers,
 ) : ToadScreenModel<CreateListUiState, CreateListEvent, CreateListDependencies, CreateListCollector, LocalCreateListVariables>(
-    initializers = emptyList(),
-    initialState = CreateListUiState(),
-    initialLocalVariables = LocalCreateListVariables(),
-) {
+        initializers = emptyList(),
+        initialState = CreateListUiState(),
+        initialLocalVariables = LocalCreateListVariables(),
+    ) {
     override val dependencies: CreateListDependencies = CreateListDependencies(
         createListUseCase = createListUseCase,
         coroutineScope = screenModelScope,

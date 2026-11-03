@@ -1,8 +1,7 @@
 package nl.rhaydus.softcover.showcase.live.dialog.screen
 
 import androidx.compose.runtime.Composable
-import nl.rhaydus.softcover.core.component.dialog.DatePickerEvent
-import nl.rhaydus.softcover.core.component.dialog.SoftcoverDatePickerDialog
+import nl.rhaydus.designsystem.component.RhaydusDatePickerDialog
 import nl.rhaydus.softcover.showcase.appearance.action.OnAppearanceClickedAction
 import nl.rhaydus.softcover.showcase.appearance.action.OnBackClickedAction
 import nl.rhaydus.softcover.showcase.appearance.screen.AppearanceSheetHost
@@ -33,15 +32,13 @@ internal fun DialogLiveLayout(
         )
     }
 
-    state.datePicker?.let { picker ->
-        SoftcoverDatePickerDialog(
-            model = picker,
-            onEvent = { event ->
-                when (event) {
-                    is DatePickerEvent.Confirmed -> runAction(OnDatePickerConfirmedAction(date = event.date))
-                    DatePickerEvent.Dismissed -> runAction(OnDatePickerDismissedAction())
-                }
-            },
+    state.datePicker?.let { initialDate ->
+        RhaydusDatePickerDialog(
+            initialDate = initialDate,
+            onDismiss = { runAction(OnDatePickerDismissedAction()) },
+            onConfirm = { date -> runAction(OnDatePickerConfirmedAction(date = date)) },
+            confirmLabel = "Confirm",
+            dismissLabel = "Cancel",
         )
     }
 

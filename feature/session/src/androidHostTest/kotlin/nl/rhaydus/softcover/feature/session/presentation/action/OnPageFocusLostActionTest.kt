@@ -35,19 +35,23 @@ class OnPageFocusLostActionTest {
     @BeforeEach
     fun setUp() {
         activeSessionFlow = MutableStateFlow(null)
+
         controller = mockk(relaxed = true) {
             every {
                 activeSession
             } returns activeSessionFlow
         }
+
         dependencies = mockk(relaxed = true) {
             every {
                 activeSessionController
             } returns controller
         }
+
         stateFlow = MutableStateFlow(FocusModeUiState())
         localVariablesFlow = MutableStateFlow(LocalFocusModeVariables(isFirstFocusEvent = false))
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,

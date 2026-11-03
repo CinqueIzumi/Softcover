@@ -47,6 +47,7 @@ class AndroidLegacySecureApiKeyStorageTest {
         }
 
         val dispatcher = UnconfinedTestDispatcher()
+
         dispatchers = AppDispatchers(
             main = dispatcher,
             io = dispatcher,
@@ -93,11 +94,10 @@ class AndroidLegacySecureApiKeyStorageTest {
         }
     }
 
-    private fun buildStorage(): AndroidLegacySecureApiKeyStorage =
-        AndroidLegacySecureApiKeyStorage(
-            context = context,
-            dispatchers = dispatchers,
-        )
+    private fun buildStorage(): AndroidLegacySecureApiKeyStorage = AndroidLegacySecureApiKeyStorage(
+        context = context,
+        dispatchers = dispatchers,
+    )
 
     private fun storageFile(): File = File(
         tempDir,

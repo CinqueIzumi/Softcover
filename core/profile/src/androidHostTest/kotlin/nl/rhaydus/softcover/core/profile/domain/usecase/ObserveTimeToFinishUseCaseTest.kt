@@ -27,6 +27,7 @@ class ObserveTimeToFinishUseCaseTest {
     fun setUp() {
         getAllUserBooksUseCase = mockk()
         dispatcher = StandardTestDispatcher()
+
         useCase = ObserveTimeToFinishUseCase(
             getAllUserBooksUseCase = getAllUserBooksUseCase,
             appDispatchers = AppDispatchers(
@@ -69,9 +70,11 @@ class ObserveTimeToFinishUseCaseTest {
                     ),
                 ),
             )
+
             every {
                 getAllUserBooksUseCase()
             } returns flowOf(books)
+
             val range = StatsRange.Bounded(
                 start = LocalDate.parse("2026-01-01"),
                 endInclusive = LocalDate.parse("2026-12-31"),
@@ -111,6 +114,7 @@ class ObserveTimeToFinishUseCaseTest {
                     ),
                 ),
             )
+
             every {
                 getAllUserBooksUseCase()
             } returns flowOf(books)

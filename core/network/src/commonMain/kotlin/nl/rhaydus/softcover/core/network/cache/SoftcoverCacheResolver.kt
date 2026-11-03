@@ -67,10 +67,12 @@ internal object SoftcoverCacheResolver : CacheResolver {
         }
 
         (idArg["_in"] as? List<*>)?.let { ids ->
-            return ids.filterNotNull().map { id -> CacheKey(
-                typeName,
-                id.toString(),
-            ) }
+            return ids.filterNotNull().map { id ->
+                CacheKey(
+                    typeName,
+                    id.toString(),
+                )
+            }
         }
 
         return null

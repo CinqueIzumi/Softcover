@@ -219,6 +219,7 @@ internal class UserBookCacheGate(
                     fetched.books,
                     window,
                 )
+
                 val toCache: List<Book> = selectToCache(reconciled)
 
                 booksLocalDataSource.cacheBooks(books = toCache)

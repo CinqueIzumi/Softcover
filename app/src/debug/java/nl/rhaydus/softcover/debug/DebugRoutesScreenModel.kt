@@ -7,16 +7,16 @@ import nl.rhaydus.toad.ToadScreenModel
 class DebugRoutesScreenModel(
     appDispatchers: AppDispatchers,
 ) : ToadScreenModel<
-    DebugRoutesUiState,
-    DebugRoutesEvent,
-    DebugRoutesDependencies,
-    DebugRoutesCollector,
-    DebugRoutesLocalVariables,
+        DebugRoutesUiState,
+        DebugRoutesEvent,
+        DebugRoutesDependencies,
+        DebugRoutesCollector,
+        DebugRoutesLocalVariables,
     >(
-    initialState = DebugRoutesUiState(),
-    initialLocalVariables = DebugRoutesLocalVariables(),
-    initializers = emptyList(),
-) {
+        initialState = DebugRoutesUiState(),
+        initialLocalVariables = DebugRoutesLocalVariables(),
+        initializers = emptyList(),
+    ) {
     override val dependencies = DebugRoutesDependencies(
         mainDispatcher = appDispatchers.main,
         coroutineScope = screenModelScope,

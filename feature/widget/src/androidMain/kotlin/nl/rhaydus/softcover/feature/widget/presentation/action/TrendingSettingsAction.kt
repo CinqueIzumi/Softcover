@@ -11,4 +11,4 @@ internal sealed interface TrendingSettingsAction : UiAction<
     TrendingSettingsUiState,
     TrendingSettingsEvent,
     TrendingSettingsLocalVariables,
-    >
+>

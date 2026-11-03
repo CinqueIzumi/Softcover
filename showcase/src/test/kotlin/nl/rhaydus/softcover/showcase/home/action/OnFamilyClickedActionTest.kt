@@ -26,6 +26,7 @@ class OnFamilyClickedActionTest {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(HomeUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(HomeLocalVariables()),

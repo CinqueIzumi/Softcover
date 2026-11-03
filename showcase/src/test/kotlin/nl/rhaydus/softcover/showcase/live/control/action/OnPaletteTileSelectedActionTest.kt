@@ -25,6 +25,7 @@ class OnPaletteTileSelectedActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(controlLiveState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ControlLiveLocalVariables()),

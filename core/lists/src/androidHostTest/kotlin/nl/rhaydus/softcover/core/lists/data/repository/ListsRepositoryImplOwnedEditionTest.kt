@@ -100,10 +100,12 @@ class ListsRepositoryImplOwnedEditionTest {
             val editionId = 10
             val bookId = 5
             val ownedListId = 99
+
             val edition = stubEdition(
                 id = editionId,
                 bookId = bookId,
             )
+
             val realListBook = stubListBook(
                 listBookId = 42,
                 listId = ownedListId,
@@ -160,10 +162,12 @@ class ListsRepositoryImplOwnedEditionTest {
             // ----- Arrange -----
             val editionId = 10
             val bookId = 5
+
             val edition = stubEdition(
                 id = editionId,
                 bookId = bookId,
             )
+
             val realListBook = stubListBook(
                 listBookId = 42,
                 bookId = bookId,
@@ -205,15 +209,18 @@ class ListsRepositoryImplOwnedEditionTest {
             // ----- Arrange -----
             val editionId = 10
             val bookId = 5
+
             val edition = stubEdition(
                 id = editionId,
                 bookId = bookId,
             )
+
             val snapshot = stubListBook(
                 listBookId = 7,
                 bookId = bookId,
                 editionId = editionId,
             )
+
             val remoteError = RuntimeException("network error")
 
             coEvery {
@@ -248,10 +255,12 @@ class ListsRepositoryImplOwnedEditionTest {
             // ----- Arrange -----
             val editionId = 10
             val bookId = 5
+
             val edition = stubEdition(
                 id = editionId,
                 bookId = bookId,
             )
+
             val remoteError = RuntimeException("network error")
 
             coEvery {
@@ -280,6 +289,7 @@ class ListsRepositoryImplOwnedEditionTest {
             // ----- Arrange -----
             val editionId = 10
             val bookId = 5
+
             val edition = stubEdition(
                 id = editionId,
                 bookId = bookId,
@@ -314,10 +324,12 @@ class ListsRepositoryImplOwnedEditionTest {
         fun `happy path — removes locally, calls remote, caches updated BookList`() = runTest {
             // ----- Arrange -----
             val editionId = 10
+
             val snapshot = stubListBook(
                 listBookId = 5,
                 editionId = editionId,
             )
+
             val updatedBookList = stubBookList()
 
             coEvery {
@@ -367,6 +379,7 @@ class ListsRepositoryImplOwnedEditionTest {
         fun `on a retryable failure returns normally, does not restore the entry and enqueues REMOVE_LIST_BOOK`() = runTest {
             // ----- Arrange -----
             val editionId = 10
+
             val snapshot = stubListBook(
                 listBookId = 5,
                 editionId = editionId,
@@ -404,10 +417,12 @@ class ListsRepositoryImplOwnedEditionTest {
         fun `on a rejected failure restores the snapshot, rethrows and does not enqueue`() = runTest {
             // ----- Arrange -----
             val editionId = 10
+
             val snapshot = stubListBook(
                 listBookId = 5,
                 editionId = editionId,
             )
+
             val remoteError = RuntimeException("rejected")
 
             coEvery {
@@ -437,10 +452,12 @@ class ListsRepositoryImplOwnedEditionTest {
         fun `when enqueueing a retryable failure also fails, restores the snapshot and rethrows the queue error`() = runTest {
             // ----- Arrange -----
             val editionId = 10
+
             val snapshot = stubListBook(
                 listBookId = 5,
                 editionId = editionId,
             )
+
             val queueError = IllegalStateException("queue full")
 
             coEvery {
@@ -470,6 +487,7 @@ class ListsRepositoryImplOwnedEditionTest {
         fun `cancellation — rethrows CancellationException without re-caching snapshot`() = runTest {
             // ----- Arrange -----
             val editionId = 10
+
             val snapshot = stubListBook(
                 listBookId = 5,
                 editionId = editionId,

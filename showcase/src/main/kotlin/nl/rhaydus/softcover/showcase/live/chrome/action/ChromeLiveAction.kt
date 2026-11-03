@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.showcase.live.chrome.state.ChromeLiveUiState
 import nl.rhaydus.toad.UiAction
 
 internal sealed interface ChromeLiveAction : UiAction<
-        ChromeLiveDependencies,
-        ChromeLiveUiState,
-        ChromeLiveEvent,
-        ChromeLiveLocalVariables,
-        >
+    ChromeLiveDependencies,
+    ChromeLiveUiState,
+    ChromeLiveEvent,
+    ChromeLiveLocalVariables,
+>

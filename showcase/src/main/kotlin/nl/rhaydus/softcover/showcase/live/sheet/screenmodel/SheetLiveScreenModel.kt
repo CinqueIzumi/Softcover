@@ -15,16 +15,16 @@ internal class SheetLiveScreenModel(
     themeStore: ShowcaseThemeStore,
     initializers: List<Collector<SheetLiveUiState, SheetLiveEvent, SheetLiveDependencies, SheetLiveLocalVariables>>,
 ) : ToadScreenModel<
-    SheetLiveUiState,
-    SheetLiveEvent,
-    SheetLiveDependencies,
-    Collector<SheetLiveUiState, SheetLiveEvent, SheetLiveDependencies, SheetLiveLocalVariables>,
-    SheetLiveLocalVariables,
+        SheetLiveUiState,
+        SheetLiveEvent,
+        SheetLiveDependencies,
+        Collector<SheetLiveUiState, SheetLiveEvent, SheetLiveDependencies, SheetLiveLocalVariables>,
+        SheetLiveLocalVariables,
     >(
-    initialState = SheetLiveUiState(),
-    initialLocalVariables = SheetLiveLocalVariables(),
-    initializers = initializers,
-) {
+        initialState = SheetLiveUiState(),
+        initialLocalVariables = SheetLiveLocalVariables(),
+        initializers = initializers,
+    ) {
     override val dependencies = SheetLiveDependencies(
         themeStore = themeStore,
         coroutineScope = screenModelScope,

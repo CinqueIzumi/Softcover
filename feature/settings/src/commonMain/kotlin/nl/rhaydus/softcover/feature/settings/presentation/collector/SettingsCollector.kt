@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUi
 import nl.rhaydus.toad.Collector
 
 internal sealed interface SettingsCollector : Collector<
-        SettingsScreenUiState,
-        SettingsScreenEvent,
-        SettingsScreenDependencies,
-        SettingsLocalVariables,
-        >
+    SettingsScreenUiState,
+    SettingsScreenEvent,
+    SettingsScreenDependencies,
+    SettingsLocalVariables,
+>

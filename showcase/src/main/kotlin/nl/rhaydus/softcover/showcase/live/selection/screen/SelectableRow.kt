@@ -10,9 +10,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
-import nl.rhaydus.softcover.core.component.modifier.tactileToggleable
+import nl.rhaydus.designsystem.modifier.pressScaleToggleable
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 @Composable
 internal fun SelectableRow(
@@ -25,7 +25,7 @@ internal fun SelectableRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .tactileToggleable(
+            .pressScaleToggleable(
                 value = selected,
                 onValueChange = { onToggle() },
                 role = Role.Checkbox,

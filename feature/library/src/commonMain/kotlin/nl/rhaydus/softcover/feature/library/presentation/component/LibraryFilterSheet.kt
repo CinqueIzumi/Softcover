@@ -18,15 +18,16 @@ import androidx.compose.ui.Modifier
 import nl.rhaydus.designsystem.component.LocalModalSheetForm
 import nl.rhaydus.designsystem.layout.ExpandableFlowRow
 import nl.rhaydus.designsystem.model.ModalSheetForm
+import nl.rhaydus.designsystem.theme.Corners
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
+import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.LazySheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterSheetEvent
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterSheetSelection
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterSheetUiModel
@@ -106,40 +107,31 @@ private fun LazyListScope.facetItems(
 ) {
     if (selection.showOwnershipFormat) {
         item(key = "ownershipFormat") {
-            FacetSection(label = selection.ownershipFormatHeader) {
-                (selection.ownershipChips + selection.formatChips).forEach { chip ->
-                    Chip(
-                        model = chip,
-                        onEvent = onChipEvent,
-                    )
-                }
-            }
+            FacetSection(
+                label = selection.ownershipFormatHeader,
+                chips = selection.ownershipChips + selection.formatChips,
+                onChipEvent = onChipEvent,
+            )
         }
     }
 
     if (selection.showReleaseYear) {
         item(key = "releaseYear") {
-            FacetSection(label = selection.releaseYearHeader) {
-                selection.releaseYearChips.forEach { chip ->
-                    Chip(
-                        model = chip,
-                        onEvent = onChipEvent,
-                    )
-                }
-            }
+            FacetSection(
+                label = selection.releaseYearHeader,
+                chips = selection.releaseYearChips,
+                onChipEvent = onChipEvent,
+            )
         }
     }
 
     if (selection.showReadYear) {
         item(key = "readYear") {
-            FacetSection(label = selection.readYearHeader) {
-                selection.readYearChips.forEach { chip ->
-                    Chip(
-                        model = chip,
-                        onEvent = onChipEvent,
-                    )
-                }
-            }
+            FacetSection(
+                label = selection.readYearHeader,
+                chips = selection.readYearChips,
+                onChipEvent = onChipEvent,
+            )
         }
     }
 
@@ -163,14 +155,11 @@ private fun LazyListScope.facetItems(
 
     if (selection.showRating) {
         item(key = "rating") {
-            FacetSection(label = selection.ratingHeader) {
-                selection.ratingChips.forEach { chip ->
-                    Chip(
-                        model = chip,
-                        onEvent = onChipEvent,
-                    )
-                }
-            }
+            FacetSection(
+                label = selection.ratingHeader,
+                chips = selection.ratingChips,
+                onChipEvent = onChipEvent,
+            )
         }
     }
 }
@@ -178,25 +167,36 @@ private fun LazyListScope.facetItems(
 @Composable
 private fun FacetSection(
     label: SectionHeaderUiModel,
-    chips: @Composable () -> Unit,
+    chips: List<ChipUiModel>,
+    onChipEvent: (ChipEvent) -> Unit,
 ) {
     Column(modifier = Modifier.padding(bottom = Spacing.xl)) {
         SectionHeader(model = label)
 
         Spacer(modifier = Modifier.height(Spacing.sm))
 
-        FacetChipLine(chips = chips)
+        FacetChipLine(
+            chips = chips,
+            onChipEvent = onChipEvent,
+        )
     }
 }
 
 /** The fixed-width desktop panel can't scroll a chip row sideways with a pointer, so there the chips wrap. */
 @Composable
 internal fun FacetChipLine(
-    chips: @Composable () -> Unit,
+    chips: List<ChipUiModel>,
+    onChipEvent: (ChipEvent) -> Unit,
 ) {
     if (LocalModalSheetForm.current == ModalSheetForm.PANEL) {
-        ExpandableFlowRow {
-            chips()
+        ExpandableFlowRow(
+            itemCount = chips.size,
+            key = { index -> chips[index].key },
+        ) { index ->
+            Chip(
+                model = chips[index],
+                onEvent = onChipEvent,
+            )
         }
     } else {
         Row(
@@ -204,7 +204,12 @@ internal fun FacetChipLine(
             horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            chips()
+            chips.forEach { chip ->
+                Chip(
+                    model = chip,
+                    onEvent = onChipEvent,
+                )
+            }
         }
     }
 }

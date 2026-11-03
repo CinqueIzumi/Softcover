@@ -1,5 +1,4 @@
 import groovy.json.JsonSlurper
-import java.io.File
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.ConfigurableFileCollection
@@ -14,6 +13,7 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.work.DisableCachingByDefault
+import java.io.File
 
 /**
  * Assembles the Claude Design System `project/` tree the publish skill uploads as-is: the committed
@@ -58,26 +58,31 @@ abstract class DesignPresetBundleTask : DefaultTask() {
 
         copyScreenPages(out)
         copyTokens(out)
+
         File(
             out,
             "assets",
         ).listFiles { file -> file.isDirectory }.orEmpty().sorted().forEach(::writeAssetReadme)
 
         val entries = readIndex()
+
         val missingFolders = entries.mapNotNull { it.handWrittenFolder }.filterNot { folder ->
             File(
                 out,
                 "components/$folder",
             ).isDirectory
         }
+
         if (missingFolders.isNotEmpty()) {
             throw GradleException("design/project/components has no hand-written folder: ${missingFolders.joinToString()}")
         }
+
         entries.filter { it.handWrittenFolder == null }.forEach { entry ->
             copyRenders(
                 entry,
                 out,
             )
+
             writeComponent(
                 entry,
                 out,
@@ -94,27 +99,33 @@ abstract class DesignPresetBundleTask : DefaultTask() {
                     "${page.path} is missing; the screen pages are copied from docs/reference/design-system/patterns",
                 )
             }
+
             val target = File(
                 out,
                 "screens/${page.name}",
             )
+
             if (target.exists()) {
                 throw GradleException(
                     "${target.relativeTo(out)} exists in design/project and is copied from the screen pages",
                 )
             }
+
             page.copyTo(target)
         }
     }
 
     private fun copyTokens(out: File) {
         val tokens = tokensDir.get().asFile
+
         tokens.walkTopDown().filter { it.isFile }.forEach { file ->
             val target = File(
                 out,
                 file.relativeTo(tokens).path,
             )
+
             if (target.exists()) throw GradleException("${target.relativeTo(out)} exists in design/project and in the exporter output")
+
             file.copyTo(target)
         }
     }
@@ -122,6 +133,7 @@ abstract class DesignPresetBundleTask : DefaultTask() {
     private fun writeAssetReadme(group: File) {
         val files = group.listFiles { file -> file.isFile && file.name != README }.orEmpty().sortedBy { it.name }
         val singleInk = files.isNotEmpty() && files.all { it.readText().contains(CURRENT_COLOR) }
+
         val intro = if (singleInk) {
             "Single-ink vector files. Each is drawn in `$CURRENT_COLOR`, so set its colour with the CSS `color` property."
         } else {
@@ -147,10 +159,12 @@ abstract class DesignPresetBundleTask : DefaultTask() {
             rendersDir.get().asFile,
             "index.json",
         )
+
         if (index.isFile.not()) throw GradleException("${index.path} is missing; run the render task first")
 
         return (JsonSlurper().parse(index) as? List<*>).orEmpty().mapNotNull { raw ->
             val map = raw as? Map<*, *> ?: return@mapNotNull null
+
             Entry(
                 name = map["name"].toString(),
                 family = map["family"].toString(),
@@ -160,6 +174,7 @@ abstract class DesignPresetBundleTask : DefaultTask() {
                 handWrittenFolder = map["handWrittenFolder"] as? String,
                 fixtures = (map["fixtures"] as? List<*>).orEmpty().mapNotNull { fixture ->
                     val item = fixture as? Map<*, *> ?: return@mapNotNull null
+
                     Fixture(
                         label = item["label"].toString(),
                         slug = item["slug"].toString(),
@@ -179,10 +194,13 @@ abstract class DesignPresetBundleTask : DefaultTask() {
                     rendersDir.get().asFile,
                     "$theme/${entry.path}/${fixture.slug}.png",
                 )
+
                 if (source.isFile.not()) return@forEach
+
                 if (source.length() > MAX_RENDER_BYTES) {
                     throw GradleException("${source.name} for ${entry.name} is over 512 KB")
                 }
+
                 source.copyTo(
                     File(
                         out,
@@ -202,7 +220,9 @@ abstract class DesignPresetBundleTask : DefaultTask() {
             out,
             "components/${entry.name}",
         )
+
         if (dir.exists()) throw GradleException("components/${entry.name} exists in design/project and is generated")
+
         dir.mkdirs()
 
         val shown = entry.fixtures.filter {
@@ -211,6 +231,7 @@ abstract class DesignPresetBundleTask : DefaultTask() {
                 "renders/light/${entry.path}/${it.slug}.png",
             ).isFile
         }
+
         File(
             dir,
             "preview.html",
@@ -221,6 +242,7 @@ abstract class DesignPresetBundleTask : DefaultTask() {
                 out,
             ),
         )
+
         File(
             dir,
             README,
@@ -240,14 +262,17 @@ abstract class DesignPresetBundleTask : DefaultTask() {
                 out,
                 "renders/light/${entry.path}/${it.slug}.png",
             )
+
             24 + pngHeight(png) / DENSITY + 16
         }
+
         val columns = (1..shown.size).firstOrNull { count ->
             gridHeight(
                 heights,
                 count,
             ) + 2 * PAD <= MAX_HEIGHT
         } ?: shown.size.coerceAtLeast(1)
+
         val cardHeight = (
             gridHeight(
                 heights,
@@ -257,17 +282,22 @@ abstract class DesignPresetBundleTask : DefaultTask() {
             MIN_HEIGHT,
             MAX_HEIGHT,
         )
+
         val gridWidth = columns * RENDER_WIDTH + (columns - 1) * GAP + 2 * PAD
         val cardWidth = if (columns > 1) " width=$gridWidth" else ""
         val group = escape(entry.family)
+
         val figures = shown.joinToString("\n") { fixture ->
             val path = "../../renders/{theme}/${entry.path}/${fixture.slug}.png"
+
             val lightSrc = path.replace(
                 "{theme}",
                 "light",
             )
+
             val label = escape(fixture.label)
             val alt = escape(entry.name)
+
             """  <figure>
     <figcaption>$label</figcaption>
     <img data-path="$path" src="$lightSrc" alt="$alt: $label">
@@ -304,12 +334,15 @@ $figures
 
     private fun verifyBundle(out: File) {
         val files = out.walkTopDown().filter { it.isFile }.toList()
+
         val forbidden = files.map { it.relativeTo(out).path }.filter { path ->
             path in FORBIDDEN || path.startsWith("api/")
         }
+
         if (forbidden.isNotEmpty()) throw GradleException("The bundle must not contain: ${forbidden.joinToString()}")
 
         logger.lifecycle("design preset bundle: ${files.size} files (limit ${maxFiles.get()})")
+
         if (files.size > maxFiles.get()) throw GradleException("The bundle has ${files.size} files; the limit is ${maxFiles.get()}")
     }
 
@@ -320,7 +353,9 @@ $figures
 
     private fun pngHeight(file: File): Int = file.inputStream().use { stream ->
         val header = stream.readNBytes(PNG_HEADER_BYTES)
+
         if (header.size < PNG_HEADER_BYTES) throw GradleException("${file.path} is not a PNG")
+
         (20..23).fold(0) { acc, index -> (acc shl 8) or (header[index].toInt() and 0xFF) }
     }
 

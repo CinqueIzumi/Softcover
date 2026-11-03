@@ -19,6 +19,7 @@ import nl.rhaydus.softcover.core.component.bookcard.rememberBookCardEntryCoordin
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.screen.MarkAsReadController
+import nl.rhaydus.softcover.feature.reading.presentation.screen.markAsReadSlide
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -89,7 +90,10 @@ internal fun ReadingBooksColumn(
                         coordinator = entry,
                         index = index,
                     )
-                        .then(controller.slideModifier(bookId)),
+                        .markAsReadSlide(
+                            controller,
+                            bookId,
+                        ),
                 )
             }
         }

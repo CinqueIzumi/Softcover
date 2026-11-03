@@ -1,5 +1,5 @@
 # Design System
-The visual and interaction language for Softcover, as deltas from the vendored [foundation design system](../rhaydus/0.3.1/design-system-foundations.md). Maintenance follows [`.claude/rules/docs.md`](../../.claude/rules/docs.md).
+The visual and interaction language for Softcover, as deltas from the [foundation design system](../../foundation/docs/design-system-foundations.md). Maintenance follows [`.claude/rules/docs.md`](../../.claude/rules/docs.md).
 
 ---
 

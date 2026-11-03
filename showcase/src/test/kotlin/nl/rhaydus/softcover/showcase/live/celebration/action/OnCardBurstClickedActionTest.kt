@@ -26,6 +26,7 @@ class OnCardBurstClickedActionTest {
     @BeforeEach
     fun setUp() {
         dependencies = mockk(relaxed = true)
+
         stateFlow = MutableStateFlow(
             CelebrationLiveUiState(
                 topBar = celebrationLiveTopBar(),
@@ -33,7 +34,9 @@ class OnCardBurstClickedActionTest {
                 screenBurst = restingBurst(MarkAsReadBurstScale.Screen),
             ),
         )
+
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(CelebrationLiveLocalVariables()),

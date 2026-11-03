@@ -6,8 +6,8 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -30,6 +30,7 @@ class ObserveReadingActivityUseCaseTest {
     fun setUp() {
         observeProgressUpdatesUseCase = mockk()
         getReadUserBooksUseCase = mockk()
+
         every {
             getReadUserBooksUseCase()
         } returns flowOf(emptyList<Book>())
@@ -74,6 +75,7 @@ class ObserveReadingActivityUseCaseTest {
                     ),
                 ),
             )
+
             every {
                 observeProgressUpdatesUseCase()
             } returns updates
@@ -98,6 +100,7 @@ class ObserveReadingActivityUseCaseTest {
         fun `re-emits when a finished book's remainder appears`() = runTest {
             // ----- Arrange -----
             val readBooks = MutableStateFlow(emptyList<Book>())
+
             every {
                 observeProgressUpdatesUseCase()
             } returns flowOf(
@@ -109,6 +112,7 @@ class ObserveReadingActivityUseCaseTest {
                     ),
                 ),
             )
+
             every {
                 getReadUserBooksUseCase()
             } returns readBooks
@@ -130,6 +134,7 @@ class ObserveReadingActivityUseCaseTest {
                     3,
                     12,
                 )] shouldBe 60
+
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -143,6 +148,7 @@ class ObserveReadingActivityUseCaseTest {
                     pagesRead = 20,
                 ),
             )
+
             every {
                 observeProgressUpdatesUseCase()
             } returns flowOf(
@@ -159,6 +165,7 @@ class ObserveReadingActivityUseCaseTest {
                         day = 10,
                     ),
                 )
+
                 awaitComplete()
             }
         }

@@ -17,7 +17,7 @@ internal object ReadingProgressSheetHost : ProgressSheetHost<
     ReadingScreenEvent,
     ReadingScreenDependencies,
     ReadingLocalVariables,
-    > {
+> {
     override fun bookOf(state: ReadingScreenUiState): Book? = state.bookToUpdate
 
     override fun sheetOf(state: ReadingScreenUiState): ProgressSheetState = state.progressSheet

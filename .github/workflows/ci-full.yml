@@ -8,9 +8,6 @@ name: CI (full gate)
 on:
   push:
     branches: [main, 'release/**', 'hotfix/**', 'chore/**']
-  # The Roadmap workflow pushes chore/roadmap-sync with GITHUB_TOKEN, which never fires a push
-  # workflow, and dispatches this one instead.
-  workflow_dispatch:
 
 # Keyed by commit so a later push never cancels a run whose checks a PR may still need.
 concurrency:
@@ -28,6 +25,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          submodules: true
           fetch-depth: 0
 
       - name: Set up JDK 17
@@ -63,6 +61,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          submodules: true
           fetch-depth: 0
 
       - name: Set up JDK 17
@@ -91,6 +90,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4

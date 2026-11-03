@@ -73,6 +73,7 @@ internal class ApiKeyLocalDataSourceImpl(
                         key = API_KEY,
                         value = key,
                     )
+
                     apiKeyFlow.value = key
                 }
 

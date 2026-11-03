@@ -31,6 +31,7 @@ class PreviousQueriesCollectorTest {
         queriesFlow = MutableSharedFlow()
         getPreviousSearchQueriesUseCase = mockk()
         stateFlow = MutableStateFlow(ExploreScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
@@ -54,6 +55,7 @@ class PreviousQueriesCollectorTest {
         fun `updates to the latest list when flow emits multiple times`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = PreviousQueriesCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

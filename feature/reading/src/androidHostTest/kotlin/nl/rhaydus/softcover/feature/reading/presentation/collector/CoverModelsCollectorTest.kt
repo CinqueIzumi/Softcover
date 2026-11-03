@@ -31,11 +31,13 @@ class CoverModelsCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(ReadingScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ReadingLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk<ReadingScreenDependencies>(relaxed = true)
     }
 
@@ -77,6 +79,7 @@ class CoverModelsCollectorTest {
                     ),
                 ),
             )
+
             val collector = CoverModelsCollector()
 
             // ----- Act -----
@@ -124,6 +127,7 @@ class CoverModelsCollectorTest {
                     authors = emptyList(),
                 ),),
             )
+
             val collector = CoverModelsCollector()
 
             // ----- Act -----
@@ -154,7 +158,9 @@ class CoverModelsCollectorTest {
                     ),),
                 ),),
             )
+
             val collector = CoverModelsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

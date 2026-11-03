@@ -16,16 +16,16 @@ internal class ChipLiveScreenModel(
     themeStore: ShowcaseThemeStore,
     initializers: List<Collector<ChipLiveUiState, ChipLiveEvent, ChipLiveDependencies, ChipLiveLocalVariables>>,
 ) : ToadScreenModel<
-    ChipLiveUiState,
-    ChipLiveEvent,
-    ChipLiveDependencies,
-    Collector<ChipLiveUiState, ChipLiveEvent, ChipLiveDependencies, ChipLiveLocalVariables>,
-    ChipLiveLocalVariables,
+        ChipLiveUiState,
+        ChipLiveEvent,
+        ChipLiveDependencies,
+        Collector<ChipLiveUiState, ChipLiveEvent, ChipLiveDependencies, ChipLiveLocalVariables>,
+        ChipLiveLocalVariables,
     >(
-    initialState = chipLiveState(),
-    initialLocalVariables = ChipLiveLocalVariables(),
-    initializers = initializers,
-) {
+        initialState = chipLiveState(),
+        initialLocalVariables = ChipLiveLocalVariables(),
+        initializers = initializers,
+    ) {
     override val dependencies = ChipLiveDependencies(
         themeStore = themeStore,
         coroutineScope = screenModelScope,

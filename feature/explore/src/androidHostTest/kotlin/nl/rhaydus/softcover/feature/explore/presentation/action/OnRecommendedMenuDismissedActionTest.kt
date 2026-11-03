@@ -44,6 +44,7 @@ class OnRecommendedMenuDismissedActionTest {
     fun setUp() {
         hideRecommendedBookUseCase = mockk()
         dependencies = mockk(relaxed = true)
+
         every {
             dependencies.hideRecommendedBookUseCase
         } returns hideRecommendedBookUseCase
@@ -54,11 +55,13 @@ class OnRecommendedMenuDismissedActionTest {
         } returns Result.failure(IllegalStateException("stop"))
 
         stateFlow = MutableStateFlow(ExploreScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         mockkObject(SnackBarManager)
     }
 
@@ -111,6 +114,7 @@ class OnRecommendedMenuDismissedActionTest {
                     name = "Someone Else",
                 ),
             )
+
             pend(
                 bookId = 3,
                 books = listOf(book(authors = authors)),

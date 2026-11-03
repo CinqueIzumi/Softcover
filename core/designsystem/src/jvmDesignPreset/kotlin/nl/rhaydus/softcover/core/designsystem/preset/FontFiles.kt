@@ -34,6 +34,7 @@ internal object FontFiles {
         target: File,
     ) {
         target.mkdirs()
+
         faces(fontsDir).forEach { face ->
             face.file.copyTo(
                 File(

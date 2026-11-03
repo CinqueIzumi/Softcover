@@ -47,17 +47,21 @@ class RecentlyLovedCardsCollectorTest {
     fun setUp() {
         stateFlow = MutableStateFlow(StatsAtlasUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(StatsAtlasLocalVariables()),
             eventChannel = eventChannel,
         )
+
         libraryBooks = MutableStateFlow(emptyList())
+
         observeBooksByIdsUseCase = mockk {
             every {
                 this@mockk(any())
             } returns libraryBooks
         }
+
         dependencies = mockk(relaxed = true) {
             every {
                 observeBooksByIdsUseCase
@@ -74,9 +78,11 @@ class RecentlyLovedCardsCollectorTest {
             every {
                 this@mockk.id
             } returns 500 + id
+
             every {
                 url
             } returns editionUrl
+
             every {
                 localImagePath
             } returns null
@@ -86,21 +92,27 @@ class RecentlyLovedCardsCollectorTest {
             every {
                 this@mockk.id
             } returns id
+
             every {
                 title
             } returns "Library $id"
+
             every {
                 authorString
             } returns "Author $id"
+
             every {
                 currentEdition
             } returns edition
+
             every {
                 defaultEdition
             } returns null
+
             every {
                 coverUrl
             } returns "https://example.com/default$id.jpg"
+
             every {
                 userBook
             } returns if (hasUserBook) mockk<UserBook>() else null
@@ -164,6 +176,7 @@ class RecentlyLovedCardsCollectorTest {
                 readingStats = ReadingStats(),
                 readingHistory = readingHistory(emptyList()),
             )
+
             val collector = RecentlyLovedCardsCollector()
 
             // ----- Act -----
@@ -201,6 +214,7 @@ class RecentlyLovedCardsCollectorTest {
                 BookCardKey.Book(bookId = 2),
                 BookCardKey.Book(bookId = 3),
             )
+
             job.cancel()
         }
 
@@ -210,6 +224,7 @@ class RecentlyLovedCardsCollectorTest {
             libraryBooks.value = libraryBooksFor(2)
             stateFlow.value = StatsAtlasUiState(readingHistory = readingHistory(lovedBooks(2)))
             val collector = RecentlyLovedCardsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -245,42 +260,46 @@ class RecentlyLovedCardsCollectorTest {
 
             // ----- Assert -----
             val recentlyLoved = stateFlow.value.recentlyLoved
+
             recentlyLoved[BookCardKey.Book(bookId = 2)] shouldBe RecentlyLovedEntry(
                 loved = books[1],
                 libraryBook = library,
             )
+
             recentlyLoved[BookCardKey.Book(bookId = 1)].shouldBeNull()
             recentlyLoved[BookCardKey.Book(bookId = 4)].shouldBeNull()
             job.cancel()
         }
 
         @Test
-        fun `maps the loved books rather than stand-ins while a refresh is still loading`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                libraryBooks.value = libraryBooksFor(2)
-                stateFlow.value = StatsAtlasUiState(
-                    isLoading = true,
-                    readingHistory = readingHistory(lovedBooks(2)),
-                )
-                val collector = RecentlyLovedCardsCollector()
+        fun `maps the loved books rather than stand-ins while a refresh is still loading`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            libraryBooks.value = libraryBooksFor(2)
 
-                // ----- Act -----
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+            stateFlow.value = StatsAtlasUiState(
+                isLoading = true,
+                readingHistory = readingHistory(lovedBooks(2)),
+            )
 
-                // ----- Assert -----
-                stateFlow.value.recentlyLoved.cards.map { it.key } shouldBe listOf(
-                    BookCardKey.Book(bookId = 1),
-                    BookCardKey.Book(bookId = 2),
+            val collector = RecentlyLovedCardsCollector()
+
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-                stateFlow.value.recentlyLoved.cards.forEach { it.isLoading shouldBe false }
-                job.cancel()
             }
+
+            // ----- Assert -----
+            stateFlow.value.recentlyLoved.cards.map { it.key } shouldBe listOf(
+                BookCardKey.Book(bookId = 1),
+                BookCardKey.Book(bookId = 2),
+            )
+
+            stateFlow.value.recentlyLoved.cards.forEach { it.isLoading shouldBe false }
+            job.cancel()
+        }
 
         @Test
         fun `observes the library books of only the first three loved books`() = runTest(UnconfinedTestDispatcher()) {
@@ -310,6 +329,7 @@ class RecentlyLovedCardsCollectorTest {
                     editionUrl = "https://example.com/picked.jpg",
                 ),
             )
+
             stateFlow.value = StatsAtlasUiState(readingHistory = readingHistory(lovedBooks(1)))
             val collector = RecentlyLovedCardsCollector()
 
@@ -327,52 +347,51 @@ class RecentlyLovedCardsCollectorTest {
         }
 
         @Test
-        fun `leaves out a loved book that is absent from Room`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                libraryBooks.value = emptyList()
-                stateFlow.value = StatsAtlasUiState(readingHistory = readingHistory(lovedBooks(1)))
-                val collector = RecentlyLovedCardsCollector()
+        fun `leaves out a loved book that is absent from Room`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            libraryBooks.value = emptyList()
+            stateFlow.value = StatsAtlasUiState(readingHistory = readingHistory(lovedBooks(1)))
+            val collector = RecentlyLovedCardsCollector()
 
-                // ----- Act -----
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Assert -----
-                stateFlow.value.recentlyLoved.cards.shouldBeEmpty()
-                job.cancel()
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            // ----- Assert -----
+            stateFlow.value.recentlyLoved.cards.shouldBeEmpty()
+            job.cancel()
+        }
 
         @Test
-        fun `leaves out a loved book whose Room book has no user book`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                libraryBooks.value = listOf(
-                    libraryBook(
-                        id = 1,
-                        editionUrl = "https://example.com/picked.jpg",
-                        hasUserBook = false,
-                    ),
+        fun `leaves out a loved book whose Room book has no user book`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            libraryBooks.value = listOf(
+                libraryBook(
+                    id = 1,
+                    editionUrl = "https://example.com/picked.jpg",
+                    hasUserBook = false,
+                ),
+            )
+
+            stateFlow.value = StatsAtlasUiState(readingHistory = readingHistory(lovedBooks(1)))
+            val collector = RecentlyLovedCardsCollector()
+
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-                stateFlow.value = StatsAtlasUiState(readingHistory = readingHistory(lovedBooks(1)))
-                val collector = RecentlyLovedCardsCollector()
-
-                // ----- Act -----
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Assert -----
-                stateFlow.value.recentlyLoved.cards.shouldBeEmpty()
-                job.cancel()
             }
+
+            // ----- Assert -----
+            stateFlow.value.recentlyLoved.cards.shouldBeEmpty()
+            job.cancel()
+        }
 
         @Test
         fun `updates the card when Room emits a book with a changed edition`() = runTest(UnconfinedTestDispatcher()) {
@@ -383,8 +402,10 @@ class RecentlyLovedCardsCollectorTest {
                     editionUrl = "https://example.com/first.jpg",
                 ),
             )
+
             stateFlow.value = StatsAtlasUiState(readingHistory = readingHistory(lovedBooks(1)))
             val collector = RecentlyLovedCardsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -413,6 +434,7 @@ class RecentlyLovedCardsCollectorTest {
                 libraryBook(id = 1),
                 libraryBook(id = 2),
             )
+
             stateFlow.value = StatsAtlasUiState(readingHistory = readingHistory(lovedBooks(3)))
             val collector = RecentlyLovedCardsCollector()
 
@@ -430,6 +452,7 @@ class RecentlyLovedCardsCollectorTest {
                 BookCardKey.Book(bookId = 2),
                 BookCardKey.Book(bookId = 3),
             )
+
             job.cancel()
         }
     }

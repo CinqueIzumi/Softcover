@@ -31,6 +31,7 @@ class EnrichDismissedContinueSeriesMetadataUseCaseTest {
         every {
             exploreRepository.dismissedContinueSeriesBooks
         } returns flowOf(emptyList())
+
         every {
             exploreRepository.dismissedContinueSeries
         } returns flowOf(emptyList())
@@ -101,6 +102,7 @@ class EnrichDismissedContinueSeriesMetadataUseCaseTest {
                     ),
                 ),
             )
+
             every {
                 exploreRepository.dismissedContinueSeries
             } returns flowOf(
@@ -120,13 +122,16 @@ class EnrichDismissedContinueSeriesMetadataUseCaseTest {
             // ----- Assert -----
             coVerify(exactly = 0) { booksRepository.fetchBookById(any()) }
             verify(exactly = 0) { booksRepository.books }
+
             coVerify(exactly = 0) {
                 exploreRepository.fetchNextInSeries(
                     any(),
                     any(),
                 )
             }
+
             coVerify(exactly = 0) { exploreRepository.dismissContinueSeriesBook(any()) }
+
             coVerify(exactly = 0) {
                 exploreRepository.dismissContinueSeries(
                     any(),
@@ -145,6 +150,7 @@ class EnrichDismissedContinueSeriesMetadataUseCaseTest {
                 bookId = 1,
                 title = null,
             )
+
             val alreadyEnriched = dismissedBook(
                 bookId = 2,
                 title = "Foundation",
@@ -182,6 +188,7 @@ class EnrichDismissedContinueSeriesMetadataUseCaseTest {
                 authorText = null,
                 bookCount = null,
             )
+
             val alreadyEnriched = dismissedSeries(
                 seriesId = 20,
                 seriesName = "Dune Saga",
@@ -216,6 +223,7 @@ class EnrichDismissedContinueSeriesMetadataUseCaseTest {
                     bookCount = seed.bookSeries?.amountOfBooks,
                 )
             }
+
             coVerify(exactly = 0) {
                 exploreRepository.fetchNextInSeries(
                     seriesId = 20,
@@ -348,6 +356,7 @@ class EnrichDismissedContinueSeriesMetadataUseCaseTest {
                 seriesId = 100,
                 seriesName = "Foundation",
             )
+
             val unrelatedBook = bookInSeries(
                 id = 2,
                 seriesId = 999,
@@ -371,6 +380,7 @@ class EnrichDismissedContinueSeriesMetadataUseCaseTest {
                     bookCount = localBook.bookSeries?.amountOfBooks,
                 )
             }
+
             coVerify(exactly = 0) {
                 exploreRepository.fetchNextInSeries(
                     any(),
@@ -522,6 +532,7 @@ class EnrichDismissedContinueSeriesMetadataUseCaseTest {
                 bookId = 1,
                 title = null,
             )
+
             val succeedingBook = dismissedBook(
                 bookId = 2,
                 title = null,
@@ -563,6 +574,7 @@ class EnrichDismissedContinueSeriesMetadataUseCaseTest {
                     ),
                 )
             }
+
             coVerify(exactly = 0) {
                 exploreRepository.dismissContinueSeriesBook(book = match { it.bookId == 1 })
             }
@@ -575,6 +587,7 @@ class EnrichDismissedContinueSeriesMetadataUseCaseTest {
                 seriesId = 500,
                 seriesName = null,
             )
+
             val succeedingSeries = dismissedSeries(
                 seriesId = 600,
                 seriesName = null,
@@ -621,6 +634,7 @@ class EnrichDismissedContinueSeriesMetadataUseCaseTest {
                     bookCount = seed.bookSeries?.amountOfBooks,
                 )
             }
+
             coVerify(exactly = 0) {
                 exploreRepository.dismissContinueSeries(
                     seriesId = 500,
@@ -644,6 +658,7 @@ class EnrichDismissedContinueSeriesMetadataUseCaseTest {
                     title = null,
                 )
             }
+
             val series = (501..504).map { seriesId ->
                 dismissedSeries(
                     seriesId = seriesId,
@@ -654,9 +669,11 @@ class EnrichDismissedContinueSeriesMetadataUseCaseTest {
             every {
                 exploreRepository.dismissedContinueSeriesBooks
             } returns flowOf(books)
+
             every {
                 exploreRepository.dismissedContinueSeries
             } returns flowOf(series)
+
             every {
                 booksRepository.books
             } returns flowOf(emptyList())
@@ -689,12 +706,14 @@ class EnrichDismissedContinueSeriesMetadataUseCaseTest {
             coVerify(exactly = 5) {
                 booksRepository.fetchBookById(id = any())
             }
+
             coVerify(exactly = 3) {
                 exploreRepository.fetchNextInSeries(
                     seriesId = any(),
                     afterPosition = 0.0,
                 )
             }
+
             coVerify(exactly = 0) {
                 exploreRepository.fetchNextInSeries(
                     seriesId = 504,
@@ -712,6 +731,7 @@ class EnrichDismissedContinueSeriesMetadataUseCaseTest {
                     title = null,
                 )
             }
+
             val series = (501..503).map { seriesId ->
                 dismissedSeries(
                     seriesId = seriesId,
@@ -722,9 +742,11 @@ class EnrichDismissedContinueSeriesMetadataUseCaseTest {
             every {
                 exploreRepository.dismissedContinueSeriesBooks
             } returns flowOf(books)
+
             every {
                 exploreRepository.dismissedContinueSeries
             } returns flowOf(series)
+
             every {
                 booksRepository.books
             } returns flowOf(emptyList())
@@ -757,6 +779,7 @@ class EnrichDismissedContinueSeriesMetadataUseCaseTest {
             coVerify(exactly = 5) {
                 booksRepository.fetchBookById(id = any())
             }
+
             coVerify(exactly = 3) {
                 exploreRepository.fetchNextInSeries(
                     seriesId = any(),

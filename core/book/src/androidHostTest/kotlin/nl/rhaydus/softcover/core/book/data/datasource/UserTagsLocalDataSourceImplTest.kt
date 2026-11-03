@@ -114,6 +114,7 @@ class UserTagsLocalDataSourceImplTest {
                 category = TagCategory.MOOD,
                 name = "Dark",
             )
+
             every {
                 dao.observeAll()
             } returns flowOf(shuffledRows + otherBookRow)

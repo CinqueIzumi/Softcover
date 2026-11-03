@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.showcase.live.dialog.mapper
 
 import kotlinx.datetime.LocalDate
-import nl.rhaydus.softcover.core.component.dialog.DatePickerUiModel
 import nl.rhaydus.softcover.core.component.gallery.GalleryFamily
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.showcase.live.overlaypage.model.OverlayTriggerUiModel
@@ -18,6 +17,8 @@ internal fun datePickerTrigger(pickedDate: LocalDate?): OverlayTriggerUiModel = 
     },
 )
 
-internal fun datePicker(pickedDate: LocalDate?): DatePickerUiModel = DatePickerUiModel(
-    initialDate = pickedDate ?: DatePickerUiModel.previews.getValue("Opens on a day").initialDate,
+internal fun datePicker(pickedDate: LocalDate?): LocalDate = pickedDate ?: LocalDate(
+    year = 2026,
+    month = 3,
+    day = 14,
 )

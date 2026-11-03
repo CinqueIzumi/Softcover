@@ -33,11 +33,13 @@ class HowItReadSheetCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk(relaxed = true)
     }
 
@@ -62,6 +64,7 @@ class HowItReadSheetCollectorTest {
         fun `opens the sheet with a model of the draft while a draft exists`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val draft = HowItReadDraft(paceKey = "pace-fast")
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = titledBook(),
                 howItReadDraft = draft,
@@ -81,6 +84,7 @@ class HowItReadSheetCollectorTest {
                 book = titledBook(),
                 howItReadDraft = HowItReadDraft(),
             )
+
             launchCollector()
             val edited = HowItReadDraft(paceKey = "pace-slow")
 
@@ -98,6 +102,7 @@ class HowItReadSheetCollectorTest {
                 book = titledBook(),
                 howItReadDraft = HowItReadDraft(),
             )
+
             launchCollector()
 
             // ----- Act -----

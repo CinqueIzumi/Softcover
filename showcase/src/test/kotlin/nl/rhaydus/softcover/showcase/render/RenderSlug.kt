@@ -25,6 +25,7 @@ internal fun uniqueSlugs(labels: List<String>): List<String> {
 
     return labels.mapIndexed { index, label ->
         val base = label.toSlug(fallback = "fixture-${index + 1}")
+
         val slug = generateSequence(1) { it + 1 }
             .map { if (it == 1) base else "$base-$it" }
             .first { taken.add(it) }

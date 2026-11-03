@@ -70,6 +70,7 @@ class Migration59To60Test {
             db.userTables() shouldBe exported.tableNames
             db.indexNames() shouldBe exported.indexNames
             db.viewNames() shouldBe exported.viewNames
+
             exported.tables.forEach {
                 db.columnNames(it.name) shouldBe it.columns.map { column -> column.name }
             }

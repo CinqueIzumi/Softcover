@@ -91,11 +91,10 @@ internal fun ratingsAverageUiModel(ratings: RatingsDistribution?): StatNumberUiM
  * The "How you score" header, with a headline chosen from [RatingBand] (average + distribution shape),
  * never from the bare average.
  */
-internal fun RatingBand.toRatingsHistogramHeader(): SectionHeaderUiModel.Section =
-    SectionHeaderUiModel.Section(
-        eyebrow = RATINGS_HISTOGRAM_EYEBROW,
-        headline = toRatingsHistogramHeadline(),
-    )
+internal fun RatingBand.toRatingsHistogramHeader(): SectionHeaderUiModel.Section = SectionHeaderUiModel.Section(
+    eyebrow = RATINGS_HISTOGRAM_EYEBROW,
+    headline = toRatingsHistogramHeadline(),
+)
 
 /**
  * Inside a narrower [scope] a reader with too few ratings to classify is told the count instead of
@@ -110,6 +109,7 @@ internal fun ratingsHistogramHeader(
     if (phrase == null || ratings.band != RatingBand.NEW_READER) return ratings.band.toRatingsHistogramHeader()
 
     val total = ratings.totalRatings
+
     val rated = when (total) {
         0 -> "No rated books"
         1 -> "1 rated book"

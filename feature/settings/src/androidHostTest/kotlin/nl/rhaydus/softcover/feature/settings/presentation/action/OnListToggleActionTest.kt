@@ -28,11 +28,12 @@ class OnListToggleActionTest {
         LibraryVisibilitySettingsUiState,
         LibraryVisibilitySettingsEvent,
         LibraryVisibilitySettingsLocalVariables,
-        >
+    >
 
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(LibraryVisibilitySettingsUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryVisibilitySettingsLocalVariables()),
@@ -42,6 +43,7 @@ class OnListToggleActionTest {
 
     private fun stubDependencies(testScope: TestScope): LibraryVisibilitySettingsDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<LibraryVisibilitySettingsDependencies>(relaxed = true).also { mock ->
             every {
                 mock.coroutineScope
@@ -83,7 +85,9 @@ class OnListToggleActionTest {
                 draftEnabledListIds = persistentSetOf(10),
                 initialized = true,
             )
+
             val dependencies = stubDependencies(this)
+
             val action = OnListToggleAction(
                 id = 20,
                 enabled = true,
@@ -112,7 +116,9 @@ class OnListToggleActionTest {
                 draftEnabledListIds = persistentSetOf(),
                 initialized = true,
             ).withOrderedEntries()
+
             val dependencies = stubDependencies(this)
+
             val action = OnListToggleAction(
                 id = 20,
                 enabled = true,
@@ -128,6 +134,7 @@ class OnListToggleActionTest {
             val entry = stateFlow.value.orderedEntries
                 .filterIsInstance<LibraryTabEntry.CustomList>()
                 .single()
+
             entry.listVisibilityToggle.checked shouldBe true
         }
 
@@ -138,7 +145,9 @@ class OnListToggleActionTest {
                 draftEnabledListIds = persistentSetOf(10, 20, 30),
                 initialized = true,
             )
+
             val dependencies = stubDependencies(this)
+
             val action = OnListToggleAction(
                 id = 20,
                 enabled = false,

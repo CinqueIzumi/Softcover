@@ -39,6 +39,7 @@ class SegmentRetentionTest {
                 live = emptyList(),
                 initialLoading = false,
             )
+
             val live = slices("A B")
 
             // ----- Act -----
@@ -57,10 +58,12 @@ class SegmentRetentionTest {
         fun `label dropped from live stays as departing at its old index`() {
             // ----- Arrange -----
             val initial = slices("A B C")
+
             val retention = SegmentRetention(
                 live = initial,
                 initialLoading = false,
             )
+
             val next = slices("A C")
 
             // ----- Act -----
@@ -79,10 +82,12 @@ class SegmentRetentionTest {
         fun `new label arriving next to existing ones is entering`() {
             // ----- Arrange -----
             val initial = slices("A B")
+
             val retention = SegmentRetention(
                 live = initial,
                 initialLoading = false,
             )
+
             val next = slices("A B C")
 
             // ----- Act -----
@@ -100,14 +105,17 @@ class SegmentRetentionTest {
         fun `departing label that comes back returns to live`() {
             // ----- Arrange -----
             val initial = slices("A B")
+
             val retention = SegmentRetention(
                 live = initial,
                 initialLoading = false,
             )
+
             retention.sync(
                 live = slices("A"),
                 isLoading = false,
             )
+
             val back = slices("A B")
 
             // ----- Act -----
@@ -129,6 +137,7 @@ class SegmentRetentionTest {
                 live = emptyList(),
                 initialLoading = true,
             )
+
             val loaded = slices("A B")
 
             // ----- Act -----
@@ -147,10 +156,12 @@ class SegmentRetentionTest {
         fun `loaded to loading edge marks nothing entering or departing`() {
             // ----- Arrange -----
             val initial = slices("A B")
+
             val retention = SegmentRetention(
                 live = initial,
                 initialLoading = false,
             )
+
             val placeholders = slices("X Y Z")
 
             // ----- Act -----
@@ -172,10 +183,12 @@ class SegmentRetentionTest {
         fun `removes only the departing entry with that label`() {
             // ----- Arrange -----
             val initial = slices("A B C")
+
             val retention = SegmentRetention(
                 live = initial,
                 initialLoading = false,
             )
+
             retention.sync(
                 live = slices("A"),
                 isLoading = false,
@@ -193,6 +206,7 @@ class SegmentRetentionTest {
         fun `is a no-op for a live label`() {
             // ----- Arrange -----
             val initial = slices("A B")
+
             val retention = SegmentRetention(
                 live = initial,
                 initialLoading = false,
@@ -209,14 +223,17 @@ class SegmentRetentionTest {
         fun `is a no-op when repeated`() {
             // ----- Arrange -----
             val initial = slices("A B")
+
             val retention = SegmentRetention(
                 live = initial,
                 initialLoading = false,
             )
+
             retention.sync(
                 live = slices("A"),
                 isLoading = false,
             )
+
             retention.release("B")
 
             // ----- Act -----

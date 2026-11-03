@@ -48,11 +48,13 @@ class MastheadCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk(relaxed = true)
     }
 
@@ -74,6 +76,7 @@ class MastheadCollectorTest {
                     ),
                 ),
             )
+
             val collector = MastheadCollector()
 
             // ----- Act -----
@@ -98,11 +101,14 @@ class MastheadCollectorTest {
                 itemCount = 0,
                 totalPages = 0,
             )
+
             val tabs = listOf(readTab, wantToReadTab, currentlyReadingTab, customListTab)
+
             stateFlow.value = LibraryUiState(
                 visibleTabs = tabs.toImmutableList(),
                 tabStatsByTab = (tabs.associate { it.id to emptyStats }).toImmutableMap(),
             )
+
             val collector = MastheadCollector()
 
             // ----- Act -----
@@ -123,136 +129,139 @@ class MastheadCollectorTest {
         }
 
         @Test
-        fun `formatted count includes the page count when totalPages is positive`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                stateFlow.value = LibraryUiState(
-                    visibleTabs = persistentListOf(readTab),
-                    tabStatsByTab = persistentMapOf(
-                        readTab.id to LibraryTabStats(
-                            itemCount = 5,
-                            totalPages = 250,
-                        ),
+        fun `formatted count includes the page count when totalPages is positive`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(
+                visibleTabs = persistentListOf(readTab),
+                tabStatsByTab = persistentMapOf(
+                    readTab.id to LibraryTabStats(
+                        itemCount = 5,
+                        totalPages = 250,
                     ),
-                )
-                val collector = MastheadCollector()
+                ),
+            )
 
-                // ----- Act -----
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+            val collector = MastheadCollector()
 
-                // ----- Assert -----
-                val counts = stateFlow.value.mastheads.getValue(readTab.id).subtitle as PageMastheadSubtitle.Counts
-                counts.titles shouldBe StatNumberUiModel(
-                    value = 5.0,
-                    format = StatNumberFormat.Plain,
-                    variant = StatNumberVariant.Body,
-                    suffix = StatNumberSuffix.Plural(
-                        one = " title",
-                        other = " titles",
-                    ),
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-                counts.pages shouldBe StatNumberUiModel(
-                    value = 250.0,
-                    variant = StatNumberVariant.Body,
-                    prefix = " · ",
-                    suffix = StatNumberSuffix.Plural(
-                        one = " page",
-                        other = " pages",
-                    ),
-                )
-                job.cancel()
             }
+
+            // ----- Assert -----
+            val counts = stateFlow.value.mastheads.getValue(readTab.id).subtitle as PageMastheadSubtitle.Counts
+
+            counts.titles shouldBe StatNumberUiModel(
+                value = 5.0,
+                format = StatNumberFormat.Plain,
+                variant = StatNumberVariant.Body,
+                suffix = StatNumberSuffix.Plural(
+                    one = " title",
+                    other = " titles",
+                ),
+            )
+
+            counts.pages shouldBe StatNumberUiModel(
+                value = 250.0,
+                variant = StatNumberVariant.Body,
+                prefix = " · ",
+                suffix = StatNumberSuffix.Plural(
+                    one = " page",
+                    other = " pages",
+                ),
+            )
+
+            job.cancel()
+        }
 
         @Test
-        fun `formatted count omits the page count when totalPages is zero`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                stateFlow.value = LibraryUiState(
-                    visibleTabs = persistentListOf(readTab),
-                    tabStatsByTab = persistentMapOf(
-                        readTab.id to LibraryTabStats(
-                            itemCount = 5,
-                            totalPages = 0,
-                        ),
+        fun `formatted count omits the page count when totalPages is zero`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(
+                visibleTabs = persistentListOf(readTab),
+                tabStatsByTab = persistentMapOf(
+                    readTab.id to LibraryTabStats(
+                        itemCount = 5,
+                        totalPages = 0,
                     ),
+                ),
+            )
+
+            val collector = MastheadCollector()
+
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-                val collector = MastheadCollector()
-
-                // ----- Act -----
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Assert -----
-                val counts = stateFlow.value.mastheads.getValue(readTab.id).subtitle as PageMastheadSubtitle.Counts
-                counts.titles.value shouldBe 5.0
-                counts.pages.shouldBeNull()
-                job.cancel()
             }
+
+            // ----- Assert -----
+            val counts = stateFlow.value.mastheads.getValue(readTab.id).subtitle as PageMastheadSubtitle.Counts
+            counts.titles.value shouldBe 5.0
+            counts.pages.shouldBeNull()
+            job.cancel()
+        }
 
         @Test
-        fun `a tab whose stats have not landed shows the loading stand-in counts`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                stateFlow.value = LibraryUiState(visibleTabs = persistentListOf(readTab))
-                val collector = MastheadCollector()
+        fun `a tab whose stats have not landed shows the loading stand-in counts`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(visibleTabs = persistentListOf(readTab))
+            val collector = MastheadCollector()
 
-                // ----- Act -----
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Assert -----
-                val counts = stateFlow.value.mastheads.getValue(readTab.id).subtitle as PageMastheadSubtitle.Counts
-                counts.titles.value shouldBe 128.0
-                counts.titles.isLoading shouldBe true
-                counts.pages.shouldNotBeNull().value shouldBe 34_000.0
-                counts.pages.shouldNotBeNull().isLoading shouldBe true
-                job.cancel()
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            // ----- Assert -----
+            val counts = stateFlow.value.mastheads.getValue(readTab.id).subtitle as PageMastheadSubtitle.Counts
+            counts.titles.value shouldBe 128.0
+            counts.titles.isLoading shouldBe true
+            counts.pages.shouldNotBeNull().value shouldBe 34_000.0
+            counts.pages.shouldNotBeNull().isLoading shouldBe true
+            job.cancel()
+        }
 
         @Test
-        fun `only the visible tabs whose stats have not landed are loading`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                stateFlow.value = LibraryUiState(
-                    visibleTabs = persistentListOf(LibraryTab.All, readTab, wantToReadTab),
-                    tabStatsByTab = persistentMapOf(
-                        readTab.id to LibraryTabStats(
-                            itemCount = 1,
-                            totalPages = 0,
-                        ),
+        fun `only the visible tabs whose stats have not landed are loading`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(
+                visibleTabs = persistentListOf(LibraryTab.All, readTab, wantToReadTab),
+                tabStatsByTab = persistentMapOf(
+                    readTab.id to LibraryTabStats(
+                        itemCount = 1,
+                        totalPages = 0,
                     ),
-                )
-                val collector = MastheadCollector()
+                ),
+            )
 
-                // ----- Act -----
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+            val collector = MastheadCollector()
 
-                // ----- Assert -----
-                stateFlow.value.mastheads.mapValues { it.value.isLoading } shouldBe mapOf(
-                    LibraryTab.All.id to true,
-                    readTab.id to false,
-                    wantToReadTab.id to true,
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-                job.cancel()
             }
+
+            // ----- Assert -----
+            stateFlow.value.mastheads.mapValues { it.value.isLoading } shouldBe mapOf(
+                LibraryTab.All.id to true,
+                readTab.id to false,
+                wantToReadTab.id to true,
+            )
+
+            job.cancel()
+        }
 
         @Test
         fun `a tab stops loading once its stats land`() = runTest(UnconfinedTestDispatcher()) {
@@ -261,13 +270,16 @@ class MastheadCollectorTest {
                 visibleTabs = persistentListOf(readTab),
                 tabStatsByTab = persistentMapOf(),
             )
+
             val collector = MastheadCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
                     dependencies = dependencies,
                 )
             }
+
             stateFlow.value.mastheads.getValue(readTab.id).isLoading shouldBe true
 
             // ----- Act -----
@@ -289,30 +301,32 @@ class MastheadCollectorTest {
         }
 
         @Test
-        fun `the refresh action is disabled and the eyebrow changes only while loading`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                stateFlow.value = LibraryUiState(
-                    visibleTabs = persistentListOf(readTab),
-                    isLoading = true,
+        fun `the refresh action is disabled and the eyebrow changes only while loading`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(
+                visibleTabs = persistentListOf(readTab),
+                isLoading = true,
+            )
+
+            val collector = MastheadCollector()
+
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-                val collector = MastheadCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-                val loadingEyebrow = stateFlow.value.mastheads.getValue(readTab.id).eyebrow
-                stateFlow.value.mastheadRefresh.enabled shouldBe false
-
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(isLoading = false)
-
-                // ----- Assert -----
-                stateFlow.value.mastheadRefresh.enabled shouldBe true
-                stateFlow.value.mastheads.getValue(readTab.id).eyebrow shouldNotBe loadingEyebrow
-                job.cancel()
             }
+
+            val loadingEyebrow = stateFlow.value.mastheads.getValue(readTab.id).eyebrow
+            stateFlow.value.mastheadRefresh.enabled shouldBe false
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(isLoading = false)
+
+            // ----- Assert -----
+            stateFlow.value.mastheadRefresh.enabled shouldBe true
+            stateFlow.value.mastheads.getValue(readTab.id).eyebrow shouldNotBe loadingEyebrow
+            job.cancel()
+        }
     }
 }

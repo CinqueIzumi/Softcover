@@ -77,6 +77,7 @@ internal fun QuoteDraft.toPosition(book: Book): QuotePosition? = when (book.reso
     QuotePositionTab.TIME -> {
         val total = book.quoteAudioTotal
         val entered = enteredSeconds.takeIf { it > 0 }
+
         if (total == null || entered == null) {
             null
         } else {
@@ -157,7 +158,9 @@ private fun Book.positionInputFor(
 
 private fun Book.toProgressAdvanceRow(draft: QuoteDraft): ToggleRowUiModel<String>? {
     val position = draft.toPosition(book = this) ?: return null
+
     val advance = progressAdvanceFor(position) ?: return null
+
     val isAudiobook = currentEdition?.isAudiobook == true
 
     return ToggleRowUiModel(

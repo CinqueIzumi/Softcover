@@ -19,19 +19,19 @@ internal class FamilyScreenModel(
     initializers: List<Collector<FamilyUiState, FamilyEvent, FamilyDependencies, FamilyLocalVariables>>,
     family: GalleryFamily,
 ) : ToadScreenModel<
-    FamilyUiState,
-    FamilyEvent,
-    FamilyDependencies,
-    Collector<FamilyUiState, FamilyEvent, FamilyDependencies, FamilyLocalVariables>,
-    FamilyLocalVariables,
+        FamilyUiState,
+        FamilyEvent,
+        FamilyDependencies,
+        Collector<FamilyUiState, FamilyEvent, FamilyDependencies, FamilyLocalVariables>,
+        FamilyLocalVariables,
     >(
-    initialState = FamilyUiState(
-        topBar = familyTopBar(family = family),
-        entries = entrySections(family = family),
-    ),
-    initialLocalVariables = FamilyLocalVariables(),
-    initializers = initializers,
-) {
+        initialState = FamilyUiState(
+            topBar = familyTopBar(family = family),
+            entries = entrySections(family = family),
+        ),
+        initialLocalVariables = FamilyLocalVariables(),
+        initializers = initializers,
+    ) {
     override val dependencies = FamilyDependencies(
         themeStore = themeStore,
         coroutineScope = screenModelScope,

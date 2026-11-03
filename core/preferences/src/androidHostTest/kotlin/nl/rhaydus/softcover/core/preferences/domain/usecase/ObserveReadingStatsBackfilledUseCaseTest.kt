@@ -29,6 +29,7 @@ class ObserveReadingStatsBackfilledUseCaseTest {
             every {
                 settingsRepository.authorDemographicsBackfilled
             } returns flowOf(true)
+
             every {
                 settingsRepository.authorRolesBackfilled
             } returns flowOf(true)
@@ -46,6 +47,7 @@ class ObserveReadingStatsBackfilledUseCaseTest {
             every {
                 settingsRepository.authorDemographicsBackfilled
             } returns flowOf(true)
+
             every {
                 settingsRepository.authorRolesBackfilled
             } returns flowOf(false)
@@ -63,6 +65,7 @@ class ObserveReadingStatsBackfilledUseCaseTest {
             every {
                 settingsRepository.authorDemographicsBackfilled
             } returns flowOf(false)
+
             every {
                 settingsRepository.authorRolesBackfilled
             } returns flowOf(true)

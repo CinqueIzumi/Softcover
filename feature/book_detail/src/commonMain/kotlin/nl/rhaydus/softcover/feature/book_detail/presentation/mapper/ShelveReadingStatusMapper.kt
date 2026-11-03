@@ -10,6 +10,7 @@ import kotlin.math.roundToInt
 
 internal fun Book.toShelveReadingStatus(): ShelveReadingStatusUiModel? {
     val read = currentRead ?: return null
+
     val isAudiobook = currentEdition?.isAudiobook == true
 
     return ShelveReadingStatusUiModel(

@@ -39,6 +39,7 @@ class OnLoadMoreSearchResultsActionTest {
         searchByMoodUseCase = mockk()
         stateFlow = MutableStateFlow(ExploreScreenUiState())
         localVariablesFlow = MutableStateFlow(ExploreLocalVariables())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
@@ -48,6 +49,7 @@ class OnLoadMoreSearchResultsActionTest {
 
     private fun stubDependencies(testScope: TestScope): ExploreDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<ExploreDependencies>(relaxed = true).also { mock ->
             every {
                 mock.searchForNameUseCase
@@ -77,11 +79,13 @@ class OnLoadMoreSearchResultsActionTest {
         fun `is a no-op when isLoading is true`() = runTest {
             // ----- Arrange -----
             dependencies = mockk(relaxed = true)
+
             stateFlow.value = stateFlow.value.copy(
                 isLoading = true,
                 loadingMoreQueriedBooks = false,
                 queriedBooksHasMore = true,
             )
+
             val stateBefore = stateFlow.value
             val localVariablesBefore = localVariablesFlow.value
 
@@ -100,11 +104,13 @@ class OnLoadMoreSearchResultsActionTest {
         fun `is a no-op when loadingMoreQueriedBooks is true`() = runTest {
             // ----- Arrange -----
             dependencies = mockk(relaxed = true)
+
             stateFlow.value = stateFlow.value.copy(
                 isLoading = false,
                 loadingMoreQueriedBooks = true,
                 queriedBooksHasMore = true,
             )
+
             val stateBefore = stateFlow.value
             val localVariablesBefore = localVariablesFlow.value
 
@@ -123,11 +129,13 @@ class OnLoadMoreSearchResultsActionTest {
         fun `is a no-op when queriedBooksHasMore is false`() = runTest {
             // ----- Arrange -----
             dependencies = mockk(relaxed = true)
+
             stateFlow.value = stateFlow.value.copy(
                 isLoading = false,
                 loadingMoreQueriedBooks = false,
                 queriedBooksHasMore = false,
             )
+
             val stateBefore = stateFlow.value
             val localVariablesBefore = localVariablesFlow.value
 
@@ -180,10 +188,12 @@ class OnLoadMoreSearchResultsActionTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
             val searchText = "foundation"
+
             stateFlow.value = stateFlow.value.copy(
                 searchText = searchText,
                 sortMode = ExploreSortMode.POPULARITY,
             )
+
             localVariablesFlow.value = localVariablesFlow.value.copy(searchResultsPage = 2)
 
             coEvery {
@@ -208,6 +218,7 @@ class OnLoadMoreSearchResultsActionTest {
                     page = 3,
                 )
             }
+
             localVariablesFlow.value.searchResultsPage shouldBe 3
             localVariablesFlow.value.queryJob.shouldNotBeNull()
         }
@@ -216,12 +227,14 @@ class OnLoadMoreSearchResultsActionTest {
         fun `invokes searchByMoodUseCase with the incremented page when a mood filter is active`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
+
             val mood = MoodTag(
                 id = 1,
                 label = "Cozy",
                 slug = "cozy",
                 bookCount = 10,
             )
+
             stateFlow.value = stateFlow.value.copy(activeMoodFilter = mood)
 
             coEvery {
@@ -244,6 +257,7 @@ class OnLoadMoreSearchResultsActionTest {
                     page = 2,
                 )
             }
+
             coVerify(exactly = 0) {
                 searchForNameUseCase(
                     name = any(),

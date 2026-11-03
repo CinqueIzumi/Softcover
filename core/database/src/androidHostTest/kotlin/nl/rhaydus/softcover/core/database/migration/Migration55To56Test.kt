@@ -97,12 +97,14 @@ class Migration55To56Test {
         fun `every v55 table except book_highlights keeps identical rows`() {
             // ----- Arrange -----
             val kept = schema55.tables.filter { it.name != "book_highlights" }
+
             val rowsBefore = kept.associate { table ->
                 table.name to connection.snapshot(
                     table.name,
                     table.columns.map { it.name },
                 )
             }
+
             kept.forEach { rowsBefore.getValue(it.name).size shouldBe 1 }
 
             // ----- Act -----
@@ -135,8 +137,10 @@ class Migration55To56Test {
         fun `a second remote id is rejected by the unique index`() {
             // ----- Arrange -----
             migration.migrate(connection)
+
             val insert = "INSERT INTO book_quotes (remoteId, bookId, text, privacySettingId, " +
                 "actionAtEpochMillis, syncState) VALUES (7, 1, 'a', 1, 1, 'SYNCED')"
+
             connection.execSQL(insert)
 
             // ----- Act & Assert -----
@@ -147,6 +151,7 @@ class Migration55To56Test {
         fun `several rows without a remote id coexist`() {
             // ----- Arrange -----
             migration.migrate(connection)
+
             val insert = "INSERT INTO book_quotes (remoteId, bookId, text, privacySettingId, " +
                 "actionAtEpochMillis, syncState) VALUES (NULL, 1, 'a', 1, 1, 'PENDING_INSERT')"
 

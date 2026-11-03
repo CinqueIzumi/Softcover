@@ -25,13 +25,14 @@ class OnDiscardLibraryVisibilityChangesActionTest {
         LibraryVisibilitySettingsUiState,
         LibraryVisibilitySettingsEvent,
         LibraryVisibilitySettingsLocalVariables,
-        >
+    >
 
     @BeforeEach
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(LibraryVisibilitySettingsUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryVisibilitySettingsLocalVariables()),
@@ -47,6 +48,7 @@ class OnDiscardLibraryVisibilityChangesActionTest {
             stateFlow.value = LibraryVisibilitySettingsUiState(
                 discardSheet = SheetSession.Open(model = discardSheetScaffold()),
             )
+
             val action = OnDiscardLibraryVisibilityChangesAction()
 
             // ----- Act -----
@@ -83,6 +85,7 @@ class OnDiscardLibraryVisibilityChangesActionTest {
             stateFlow.value = LibraryVisibilitySettingsUiState(
                 discardSheet = SheetSession.Open(model = discardSheetScaffold()),
             )
+
             val action = OnDiscardLibraryVisibilityChangesAction()
 
             // ----- Act -----

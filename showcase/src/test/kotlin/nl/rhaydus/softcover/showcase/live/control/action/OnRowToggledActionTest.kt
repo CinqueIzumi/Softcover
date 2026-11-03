@@ -24,6 +24,7 @@ class OnRowToggledActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(controlLiveState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ControlLiveLocalVariables()),
@@ -38,6 +39,7 @@ class OnRowToggledActionTest {
             // ----- Arrange -----
             val before = stateFlow.value.toggleRows
             val target = before.first()
+
             val action = OnRowToggledAction(
                 key = target.key,
                 checked = target.checked.not(),
@@ -59,6 +61,7 @@ class OnRowToggledActionTest {
         fun `an unknown key changes no row`() = runTest {
             // ----- Arrange -----
             val before = stateFlow.value.toggleRows
+
             val action = OnRowToggledAction(
                 key = "missing",
                 checked = true,

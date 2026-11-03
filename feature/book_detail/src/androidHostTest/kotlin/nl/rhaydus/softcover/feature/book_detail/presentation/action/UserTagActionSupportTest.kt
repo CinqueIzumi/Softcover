@@ -45,6 +45,7 @@ class UserTagActionSupportTest {
         stateFlow = MutableStateFlow(buildBookDetailUiState())
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
@@ -58,19 +59,24 @@ class UserTagActionSupportTest {
 
     private fun stubDependencies(testScope: TestScope): BookDetailDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<BookDetailDependencies>(relaxed = true).also { mock ->
             every {
                 mock.saveUserTagsUseCase
             } returns saveUserTagsUseCase
+
             every {
                 mock.recordAppliedTagsUseCase
             } returns recordAppliedTagsUseCase
+
             every {
                 mock.coroutineScope
             } returns testScope
+
             every {
                 mock.mainDispatcher
             } returns dispatcher
+
             every {
                 mock.launch(any())
             } answers { callOriginal() }
@@ -119,6 +125,7 @@ class UserTagActionSupportTest {
             coVerify(exactly = 1) {
                 recordAppliedTagsUseCase(saved)
             }
+
             eventChannel.tryReceive().getOrNull() shouldBe null
         }
 
@@ -143,6 +150,7 @@ class UserTagActionSupportTest {
 
             // ----- Assert -----
             eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.MutationFailedEvent>()
+
             coVerify(exactly = 0) {
                 recordAppliedTagsUseCase(any())
             }
@@ -190,6 +198,7 @@ class UserTagActionSupportTest {
                 firstGate.await()
                 Result.success(first)
             }
+
             coEvery {
                 saveUserTagsUseCase(
                     bookId = 1,
@@ -201,6 +210,7 @@ class UserTagActionSupportTest {
                 newSet = first,
                 dependencies = dependencies,
             )
+
             val firstJob = localVariablesFlow.value.tagSaveJob.shouldNotBeNull()
 
             // ----- Act -----
@@ -208,13 +218,16 @@ class UserTagActionSupportTest {
                 newSet = second,
                 dependencies = dependencies,
             )
+
             firstGate.complete(Unit)
 
             // ----- Assert -----
             firstJob.isCancelled shouldBe true
+
             coVerify(exactly = 0) {
                 recordAppliedTagsUseCase(first)
             }
+
             coVerify(exactly = 1) {
                 recordAppliedTagsUseCase(second)
             }

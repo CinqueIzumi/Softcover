@@ -10,10 +10,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.badge.Badge
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.showcase.home.model.FamilyRowUiModel
 
@@ -27,7 +27,10 @@ internal fun FamilyRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onClick)
-                .padding(horizontal = Spacing.xl, vertical = Spacing.md),
+                .padding(
+                    horizontal = Spacing.xl,
+                    vertical = Spacing.md,
+                ),
         ) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(Spacing.xs),

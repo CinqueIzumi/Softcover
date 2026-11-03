@@ -5,9 +5,9 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -38,6 +38,7 @@ class OnRefreshActionTest {
         refreshRecommendedFeedUseCase = mockk()
         refreshTrigger = MutableStateFlow(0L)
         stateFlow = MutableStateFlow(ExploreScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
@@ -165,6 +166,7 @@ class OnRefreshActionTest {
         fun `keeps refreshing until the slower of the two refreshes finishes`() = runTest {
             // ----- Arrange -----
             val recommendationsGate = CompletableDeferred<Result<Unit>>()
+
             coEvery {
                 refreshRecommendedFeedUseCase(maxAge = any())
             } coAnswers {
@@ -178,6 +180,7 @@ class OnRefreshActionTest {
                     scope = scope,
                 )
             }
+
             runCurrent()
             val refreshingWhilePending = stateFlow.value.isRefreshing
             recommendationsGate.complete(Result.success(Unit))

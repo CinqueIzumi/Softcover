@@ -21,6 +21,7 @@ internal class OnScopeSelectedAction(val statsScope: StatsScope) : StatsAtlasAct
         val selectedKey = statsScopeKey(statsScope)
 
         scope.setLocalVariables { it.copy(hasUserPickedScope = true) }
+
         scope.setState {
             it.copy(
                 selectedScopeKey = selectedKey,

@@ -15,6 +15,7 @@ internal fun updateProgressIntent(
 ).apply {
     data = "softcover://widget/update-progress/$bookId".toUri()
     flags = Intent.FLAG_ACTIVITY_NEW_TASK
+
     putExtra(
         EXTRA_BOOK_ID,
         bookId,

@@ -428,6 +428,7 @@ internal class BooksLocalDataSourceImpl(
         }
 
         val orderBy = mode.toOrderByFragment(direction = direction)
+
         val sql = """
             SELECT b.*
             FROM books b
@@ -475,6 +476,7 @@ internal class BooksLocalDataSourceImpl(
             """.trimIndent()
         } else {
             val orderBy = mode.toOrderByFragment(direction = direction)
+
             """
                 SELECT b.*
                 FROM books b
@@ -528,6 +530,7 @@ internal class BooksLocalDataSourceImpl(
 
     override suspend fun removeUserBooksById(ids: List<Int>) {
         val bookIds = ids.mapNotNull { dao.getBookIdByUserBookId(userBookId = it) }
+
         val pathsToDelete = bookIds.flatMap { bookId ->
             dao.getEditionImageRefsByBookId(bookId = bookId).mapNotNull { it.localImagePath }
         }
@@ -581,14 +584,17 @@ internal class BooksLocalDataSourceImpl(
 
             upstream.collect { entities ->
                 val next = HashMap<Int, Pair<BookFullEntity, Book>>(entities.size)
+
                 val models = entities.map { entity ->
                     val id = entity.book.id
                     val prior = previous[id]
+
                     val model = if (prior != null && prior.first == entity) {
                         prior.second
                     } else {
                         entity.toModel()
                     }
+
                     next[id] = entity to model
                     model
                 }

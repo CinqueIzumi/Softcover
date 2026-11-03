@@ -13,6 +13,7 @@ class ShowcaseActivity : ComponentActivity() {
             statusBarStyle = transparentSystemBarStyle(darkTheme = null),
             navigationBarStyle = transparentSystemBarStyle(darkTheme = null),
         )
+
         super.onCreate(savedInstanceState)
 
         setContent { ShowcaseRoot() }

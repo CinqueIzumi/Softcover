@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.showcase.live.verdict.state.VerdictLiveUiState
 import nl.rhaydus.toad.UiAction
 
 internal sealed interface VerdictLiveAction : UiAction<
-        VerdictLiveDependencies,
-        VerdictLiveUiState,
-        VerdictLiveEvent,
-        VerdictLiveLocalVariables,
-        >
+    VerdictLiveDependencies,
+    VerdictLiveUiState,
+    VerdictLiveEvent,
+    VerdictLiveLocalVariables,
+>

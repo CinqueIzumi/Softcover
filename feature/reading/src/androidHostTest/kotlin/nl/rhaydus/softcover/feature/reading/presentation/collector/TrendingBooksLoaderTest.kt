@@ -36,6 +36,7 @@ class TrendingBooksLoaderTest {
         observeTrendingBooksUseCase = mockk()
         refreshTrendingBooksUseCase = mockk()
         stateFlow = MutableStateFlow(ReadingScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ReadingLocalVariables()),
@@ -73,6 +74,7 @@ class TrendingBooksLoaderTest {
             val second = mockk<Book>()
             trendingFlow.value = listOf(first)
             val loader = TrendingBooksLoader()
+
             backgroundScope.launch {
                 loader.onLaunch(
                     scope = scope,

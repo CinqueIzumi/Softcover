@@ -232,6 +232,7 @@ class YearGridTest {
                 x,
                 5f,
             ).shouldNotBeNull()
+
             val day = model.months[cell.y].days[cell.x] as YearGridCell.Read
 
             // ----- Assert -----

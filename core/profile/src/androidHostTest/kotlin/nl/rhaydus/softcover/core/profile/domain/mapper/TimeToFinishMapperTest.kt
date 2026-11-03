@@ -1,9 +1,9 @@
 package nl.rhaydus.softcover.core.profile.domain.mapper
 
 import io.kotest.matchers.shouldBe
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
-import kotlinx.datetime.DateTimeUnit
 import nl.rhaydus.softcover.core.profile.domain.model.LengthBand
 import nl.rhaydus.softcover.core.profile.domain.model.ReadDuration
 import org.junit.jupiter.api.Nested

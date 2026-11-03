@@ -48,6 +48,7 @@ class OnToggleListMembershipActionTest {
         defaultEdition = mockk()
         addBookToListUseCase = mockk()
         removeBookFromListUseCase = mockk()
+
         coEvery {
             addBookToListUseCase(
                 listId = any(),
@@ -55,19 +56,23 @@ class OnToggleListMembershipActionTest {
                 edition = any(),
             )
         } returns Result.success(Unit)
+
         coEvery {
             removeBookFromListUseCase(
                 listId = any(),
                 bookId = any(),
             )
         } returns Result.success(Unit)
+
         stateFlow = MutableStateFlow(buildBookDetailUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
             eventChannel = eventChannel,
         )
+
         dependencies = mockk<BookDetailDependencies>(relaxed = true).also {
             every {
                 it.addBookToListUseCase
@@ -116,6 +121,7 @@ class OnToggleListMembershipActionTest {
         fun `adds the book with its current edition when it is not a member`() = runTest {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState().copy(book = stubBook())
+
             val action = OnToggleListMembershipAction(
                 listId = 3,
                 isMember = false,
@@ -135,12 +141,14 @@ class OnToggleListMembershipActionTest {
                     edition = currentEdition,
                 )
             }
+
             coVerify(exactly = 0) {
                 removeBookFromListUseCase(
                     listId = any(),
                     bookId = any(),
                 )
             }
+
             val sentEvent = eventChannel.tryReceive().getOrNull()
             sentEvent.shouldBeInstanceOf<BookDetailEvent.MutationSucceededEvent>().feedback shouldBe Feedback.Routine
         }
@@ -149,6 +157,7 @@ class OnToggleListMembershipActionTest {
         fun `falls back to the default edition when there is no current edition`() = runTest {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState().copy(book = stubBook(current = null))
+
             val action = OnToggleListMembershipAction(
                 listId = 3,
                 isMember = false,
@@ -174,6 +183,7 @@ class OnToggleListMembershipActionTest {
         fun `removes the book when it is already a member`() = runTest {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState().copy(book = stubBook())
+
             val action = OnToggleListMembershipAction(
                 listId = 3,
                 isMember = true,
@@ -192,6 +202,7 @@ class OnToggleListMembershipActionTest {
                     bookId = 7,
                 )
             }
+
             coVerify(exactly = 0) {
                 addBookToListUseCase(
                     listId = any(),
@@ -199,6 +210,7 @@ class OnToggleListMembershipActionTest {
                     edition = any(),
                 )
             }
+
             val sentEvent = eventChannel.tryReceive().getOrNull()
             sentEvent.shouldBeInstanceOf<BookDetailEvent.MutationSucceededEvent>().feedback shouldBe null
         }
@@ -225,6 +237,7 @@ class OnToggleListMembershipActionTest {
                     edition = any(),
                 )
             }
+
             stateFlow.value.listsBeingMutated shouldBe emptySet()
         }
 
@@ -237,6 +250,7 @@ class OnToggleListMembershipActionTest {
                     default = null,
                 ),
             )
+
             val action = OnToggleListMembershipAction(
                 listId = 3,
                 isMember = false,
@@ -265,6 +279,7 @@ class OnToggleListMembershipActionTest {
                 book = stubBook(),
                 listsBeingMutated = persistentSetOf(3),
             )
+
             val action = OnToggleListMembershipAction(
                 listId = 3,
                 isMember = false,
@@ -284,6 +299,7 @@ class OnToggleListMembershipActionTest {
                     edition = any(),
                 )
             }
+
             stateFlow.value.listsBeingMutated shouldBe setOf(3)
         }
 
@@ -294,6 +310,7 @@ class OnToggleListMembershipActionTest {
                 book = stubBook(),
                 listsBeingMutated = persistentSetOf(4),
             )
+
             val action = OnToggleListMembershipAction(
                 listId = 3,
                 isMember = false,
@@ -313,6 +330,7 @@ class OnToggleListMembershipActionTest {
                     edition = currentEdition,
                 )
             }
+
             stateFlow.value.listsBeingMutated shouldBe setOf(4)
         }
 
@@ -320,6 +338,7 @@ class OnToggleListMembershipActionTest {
         fun `releases the list again after a failed mutation`() = runTest {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState().copy(book = stubBook())
+
             coEvery {
                 addBookToListUseCase(
                     listId = any(),
@@ -327,6 +346,7 @@ class OnToggleListMembershipActionTest {
                     edition = any(),
                 )
             } returns Result.failure(IllegalStateException("offline"))
+
             val action = OnToggleListMembershipAction(
                 listId = 3,
                 isMember = false,
@@ -351,6 +371,7 @@ class OnToggleListMembershipActionTest {
                 book = stubBook(),
                 userLists = persistentListOf(stubList()),
             )
+
             val job = backgroundScope.launch {
                 OnToggleListMembershipAction(
                     listId = 3,
@@ -365,9 +386,11 @@ class OnToggleListMembershipActionTest {
             runCurrent()
             val mutatedBeforeChange = stateFlow.value.listsBeingMutated
             val completedBeforeChange = job.isCompleted
+
             stateFlow.update { current ->
                 current.copy(userLists = persistentListOf(stubList(7)))
             }
+
             runCurrent()
 
             // ----- Assert -----
@@ -386,6 +409,7 @@ class OnToggleListMembershipActionTest {
                 book = stubBook(),
                 userLists = persistentListOf(stubList()),
             )
+
             val job = backgroundScope.launch {
                 OnToggleListMembershipAction(
                     listId = 3,
@@ -395,12 +419,14 @@ class OnToggleListMembershipActionTest {
                     scope = scope,
                 )
             }
+
             runCurrent()
 
             // ----- Act -----
             stateFlow.update { current ->
                 current.copy(userLists = persistentListOf())
             }
+
             runCurrent()
 
             // ----- Assert -----
@@ -415,6 +441,7 @@ class OnToggleListMembershipActionTest {
                 book = stubBook(),
                 userLists = persistentListOf(stubList()),
             )
+
             val job = backgroundScope.launch {
                 OnToggleListMembershipAction(
                     listId = 3,
@@ -448,6 +475,7 @@ class OnToggleListMembershipActionTest {
                 book = stubBook(),
                 userLists = persistentListOf(stubList()),
             )
+
             val job = backgroundScope.launch {
                 OnToggleListMembershipAction(
                     listId = 3,
@@ -457,6 +485,7 @@ class OnToggleListMembershipActionTest {
                     scope = scope,
                 )
             }
+
             runCurrent()
             val mutatedBeforeCancel = stateFlow.value.listsBeingMutated
 
@@ -477,6 +506,7 @@ class OnToggleListMembershipActionTest {
                 book = stubBook(),
                 userLists = persistentListOf(stubList()),
             )
+
             coEvery {
                 addBookToListUseCase(
                     listId = any(),
@@ -484,6 +514,7 @@ class OnToggleListMembershipActionTest {
                     edition = any(),
                 )
             } returns Result.failure(IllegalStateException("offline"))
+
             val job = backgroundScope.launch {
                 OnToggleListMembershipAction(
                     listId = 3,

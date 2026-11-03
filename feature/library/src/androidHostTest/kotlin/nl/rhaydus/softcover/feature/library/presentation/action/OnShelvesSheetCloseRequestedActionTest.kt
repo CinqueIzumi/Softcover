@@ -28,6 +28,7 @@ class OnShelvesSheetCloseRequestedActionTest {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(LibraryUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -62,6 +63,7 @@ class OnShelvesSheetCloseRequestedActionTest {
         fun `leaves the session for the collector to hide and keeps a manage-shelves request`() = runTest {
             // ----- Arrange -----
             val open = openShelvesSession(pending = ManageShelves)
+
             stateFlow.value = LibraryUiState(
                 shelvesSheet = open,
                 isShelvesSheetRequested = true,

@@ -33,6 +33,7 @@ class BookDetailUiStateTest {
         every {
             mock.id
         } returns id
+
         every {
             mock.releaseYear
         } returns releaseYear
@@ -47,12 +48,15 @@ class BookDetailUiStateTest {
         every {
             mock.releaseYear
         } returns releaseYear
+
         every {
             mock.userBook
         } returns userBook
+
         every {
             mock.currentEdition
         } returns currentEdition
+
         every {
             mock.editions
         } returns editions
@@ -71,10 +75,12 @@ class BookDetailUiStateTest {
             // ----- Arrange -----
             val preview = stubEdition(id = 5)
             val bookEdition = stubEdition(id = 10)
+
             val book = stubBook(
                 userBook = null,
                 currentEdition = bookEdition,
             )
+
             val state = buildBookDetailUiState().copy(
                 book = book,
                 previewEdition = preview,
@@ -91,10 +97,12 @@ class BookDetailUiStateTest {
         fun `falls back to book currentEdition when off-shelf and no preview`() {
             // ----- Arrange -----
             val bookEdition = stubEdition(id = 10)
+
             val book = stubBook(
                 userBook = null,
                 currentEdition = bookEdition,
             )
+
             val state = buildBookDetailUiState().copy(
                 book = book,
                 previewEdition = null,
@@ -111,11 +119,13 @@ class BookDetailUiStateTest {
         fun `falls back to initialCover currentEdition when off-shelf, no preview, and no book`() {
             // ----- Arrange -----
             val coverEdition = stubEdition(id = 20)
+
             val initialCover = BookInitialCover(
                 currentEdition = coverEdition,
                 defaultEdition = null,
                 fallbackCoverUrl = null,
             )
+
             val state = buildBookDetailUiState().copy(
                 book = null,
                 previewEdition = null,
@@ -135,10 +145,12 @@ class BookDetailUiStateTest {
             val preview = stubEdition(id = 5)
             val bookEdition = stubEdition(id = 10)
             val userBook = mockk<UserBook>()
+
             val book = stubBook(
                 userBook = userBook,
                 currentEdition = bookEdition,
             )
+
             val state = buildBookDetailUiState().copy(
                 book = book,
                 previewEdition = preview,
@@ -157,11 +169,13 @@ class BookDetailUiStateTest {
             val scannedEdition = stubEdition(id = 42)
             val shelvedEdition = stubEdition(id = 99)
             val userBook = stubUserBook(editionId = 99)
+
             val book = stubBook(
                 userBook = userBook,
                 currentEdition = shelvedEdition,
                 editions = persistentListOf(scannedEdition, shelvedEdition),
             )
+
             val state = buildBookDetailUiState().copy(
                 book = book,
                 scannedEditionId = 42,
@@ -178,11 +192,13 @@ class BookDetailUiStateTest {
         fun `resolves scanned edition from editions when the book does not carry it`() {
             // ----- Arrange -----
             val scannedEdition = stubEdition(id = 42)
+
             val book = stubBook(
                 userBook = null,
                 currentEdition = null,
                 editions = persistentListOf(stubEdition(id = 1)),
             )
+
             val state = buildBookDetailUiState().copy(
                 book = book,
                 editions = persistentListOf(scannedEdition),
@@ -201,10 +217,12 @@ class BookDetailUiStateTest {
             // ----- Arrange -----
             val bookEdition = stubEdition(id = 10)
             val userBook = stubUserBook(editionId = 10)
+
             val book = stubBook(
                 userBook = userBook,
                 currentEdition = bookEdition,
             )
+
             val state = buildBookDetailUiState().copy(
                 book = book,
                 scannedEditionId = null,
@@ -221,11 +239,13 @@ class BookDetailUiStateTest {
         fun `resolves scanned edition from initialCover currentEdition when editions list is empty`() {
             // ----- Arrange -----
             val coverEdition = stubEdition(id = 7)
+
             val initialCover = BookInitialCover(
                 currentEdition = coverEdition,
                 defaultEdition = null,
                 fallbackCoverUrl = null,
             )
+
             val state = buildBookDetailUiState().copy(
                 book = null,
                 editions = persistentListOf(),
@@ -327,6 +347,7 @@ class BookDetailUiStateTest {
         fun `isEditionOwned returns true when edition id is in the owned list`() {
             // ----- Arrange -----
             val edition = stubEdition(id = 77)
+
             val state = buildBookDetailUiState().copy(
                 userLists = persistentListOf(ownedList(77)),
             )
@@ -342,6 +363,7 @@ class BookDetailUiStateTest {
         fun `isEditionOwned returns false when edition id is not in the owned list`() {
             // ----- Arrange -----
             val edition = stubEdition(id = 99)
+
             val state = buildBookDetailUiState().copy(
                 userLists = persistentListOf(ownedList(77)),
             )
@@ -357,12 +379,14 @@ class BookDetailUiStateTest {
         fun `isEditionOwned returns false when no list has slug owned`() {
             // ----- Arrange -----
             val edition = stubEdition(id = 77)
+
             val nonOwnedList = BookList(
                 id = 2,
                 name = "Favorites",
                 slug = "favorites",
                 books = listOf(listBook(77)),
             )
+
             val state = buildBookDetailUiState().copy(
                 userLists = persistentListOf(nonOwnedList),
             )
@@ -397,9 +421,11 @@ class BookDetailUiStateTest {
         every {
             mock.title
         } returns title
+
         every {
             mock.rating
         } returns rating
+
         every {
             mock.seriesText
         } returns seriesText
@@ -510,11 +536,13 @@ class BookDetailUiStateTest {
         fun `uses the displayed edition year when it is set`() {
             // ----- Arrange -----
             val edition = stubEdition(releaseYear = 2011)
+
             val book = stubBook(
                 userBook = null,
                 currentEdition = edition,
                 releaseYear = 1999,
             )
+
             val state = buildBookDetailUiState().copy(book = book)
 
             // ----- Act -----
@@ -528,11 +556,13 @@ class BookDetailUiStateTest {
         fun `falls back to the book year when the edition year is -1`() {
             // ----- Arrange -----
             val edition = stubEdition(releaseYear = -1)
+
             val book = stubBook(
                 userBook = null,
                 currentEdition = edition,
                 releaseYear = 1999,
             )
+
             val state = buildBookDetailUiState().copy(book = book)
 
             // ----- Act -----
@@ -550,6 +580,7 @@ class BookDetailUiStateTest {
                 currentEdition = null,
                 releaseYear = 1999,
             )
+
             val state = buildBookDetailUiState().copy(book = book)
 
             // ----- Act -----
@@ -584,6 +615,7 @@ class BookDetailUiStateTest {
                 userBook = null,
                 currentEdition = stubEdition(id = 7),
             )
+
             val state = buildBookDetailUiState().copy(
                 book = book,
                 failedMutationEditionIds = persistentSetOf(
@@ -606,6 +638,7 @@ class BookDetailUiStateTest {
                 userBook = null,
                 currentEdition = stubEdition(id = 7),
             )
+
             val state = buildBookDetailUiState().copy(
                 book = book,
                 failedMutationEditionIds = persistentSetOf(8),
@@ -647,6 +680,7 @@ class BookDetailUiStateTest {
                     mock.title
                 } returns "Piranesi"
             }
+
             val state = buildBookDetailUiState().copy(pendingShelfStatus = BookStatus.Reading)
 
             // ----- Act -----
@@ -667,6 +701,7 @@ class BookDetailUiStateTest {
                     mock.title
                 } returns "Piranesi"
             }
+
             val state = buildBookDetailUiState().copy(pendingShelfStatus = BookStatus.Reading)
 
             // ----- Act -----
@@ -720,6 +755,7 @@ class BookDetailUiStateTest {
                     mock.title
                 } returns "Piranesi"
             }
+
             val state = buildBookDetailUiState().withBook(book = book)
 
             // ----- Act -----
@@ -741,6 +777,7 @@ class BookDetailUiStateTest {
             every {
                 mock.status
             } returns status
+
             every {
                 mock.userBook
             } returns userBook
@@ -765,6 +802,7 @@ class BookDetailUiStateTest {
                 status = BookStatus.None,
                 userBook = null,
             )
+
             val state = buildBookDetailUiState()
                 .copy(
                     book = book,
@@ -785,6 +823,7 @@ class BookDetailUiStateTest {
                 status = BookStatus.None,
                 userBook = null,
             )
+
             val state = buildBookDetailUiState().copy(book = book)
 
             // ----- Act -----
@@ -801,6 +840,7 @@ class BookDetailUiStateTest {
                 status = BookStatus.Read,
                 userBook = stubUserBook(),
             )
+
             val state = buildBookDetailUiState()
                 .copy(
                     book = book,

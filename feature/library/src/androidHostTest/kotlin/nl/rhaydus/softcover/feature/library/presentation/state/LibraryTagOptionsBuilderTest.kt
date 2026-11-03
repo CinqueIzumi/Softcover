@@ -168,10 +168,12 @@ class LibraryTagOptionsBuilderTest {
         fun `keeps a same-named tag of another category as a separate option`() {
             // ----- Arrange -----
             val mood = userTag("cozy")
+
             val genre = UserTag(
                 name = "cozy",
                 category = TagCategory.GENRE,
             )
+
             val perBook = listOf(listOf(mood, genre))
 
             // ----- Act -----

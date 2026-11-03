@@ -46,10 +46,12 @@ class UserTagsRepositoryImplTest {
     fun setUp() {
         remote = mockk()
         local = FakeUserTagsLocalDataSource()
+
         gate = UserBookCacheGate(
             booksLocalDataSource = mockk<BooksLocalDataSource>(relaxed = true),
             userTagsLocalDataSource = local,
         )
+
         repository = UserTagsRepositoryImpl(
             userTagsRemoteDataSource = remote,
             userTagsLocalDataSource = local,
@@ -69,10 +71,12 @@ class UserTagsRepositoryImplTest {
                     count = 42,
                 ),
             )
+
             local.replaceForBook(
                 bookId = bookId,
                 tags = previous,
             )
+
             coEvery {
                 remote.saveTags(
                     bookId = bookId,
@@ -95,6 +99,7 @@ class UserTagsRepositoryImplTest {
         fun `the requested set is visible locally while the server call is in flight`() = runTest {
             // ----- Arrange -----
             var seenDuringCall: List<UserTag> = emptyList()
+
             coEvery {
                 remote.saveTags(
                     bookId = bookId,
@@ -122,6 +127,7 @@ class UserTagsRepositoryImplTest {
                 bookId = bookId,
                 tags = previous,
             )
+
             coEvery {
                 remote.saveTags(
                     bookId = bookId,
@@ -151,10 +157,12 @@ class UserTagsRepositoryImplTest {
                     category = TagCategory.MOOD,
                 ),
             )
+
             local.replaceForBook(
                 bookId = bookId,
                 tags = previous,
             )
+
             coEvery {
                 remote.saveTags(
                     bookId = bookId,
@@ -165,6 +173,7 @@ class UserTagsRepositoryImplTest {
                     bookId = bookId,
                     rows = newer,
                 )
+
                 error("offline")
             }
 
@@ -188,6 +197,7 @@ class UserTagsRepositoryImplTest {
                 bookId = bookId,
                 tags = previous,
             )
+
             coEvery {
                 remote.saveTags(
                     bookId = bookId,
@@ -218,6 +228,7 @@ class UserTagsRepositoryImplTest {
                     count = 42,
                 ),
             )
+
             coEvery {
                 remote.saveTags(
                     bookId = bookId,

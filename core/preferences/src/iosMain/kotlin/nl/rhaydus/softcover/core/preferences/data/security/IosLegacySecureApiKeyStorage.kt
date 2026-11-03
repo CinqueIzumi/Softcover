@@ -64,10 +64,12 @@ internal class IosLegacySecureApiKeyStorage(
                 )
 
                 val result = alloc<CFTypeRefVar>()
+
                 val status = SecItemCopyMatching(
                     query,
                     result.ptr,
                 )
+
                 CFRelease(query)
 
                 if (status != errSecSuccess) return@memScoped null
@@ -98,6 +100,7 @@ internal class IosLegacySecureApiKeyStorage(
                         kSecAttrService to cfService,
                         kSecAttrAccount to cfAccount,
                     )
+
                     SecItemDelete(query)
                     CFRelease(query)
                 }

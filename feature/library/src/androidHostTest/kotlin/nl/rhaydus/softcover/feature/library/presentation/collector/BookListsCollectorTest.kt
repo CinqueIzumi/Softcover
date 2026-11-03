@@ -40,6 +40,7 @@ class BookListsCollectorTest {
         getAllUserListsUseCase = mockk()
         getEnabledListIdsAsFlowUseCase = mockk()
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -69,9 +70,11 @@ class BookListsCollectorTest {
         every {
             this@mockk.id
         } returns id
+
         every {
             url
         } returns "https://example.com/cover.jpg"
+
         every {
             localImagePath
         } returns null
@@ -85,15 +88,19 @@ class BookListsCollectorTest {
         every {
             this@mockk.shownEdition
         } returns shownEdition
+
         every {
             this@mockk.edition
         } returns rowEdition
+
         every {
             this@mockk.editionId
         } returns 0
+
         every {
             this@mockk.addedAt
         } returns addedAt
+
         every {
             this@mockk.book
         } returns null
@@ -124,16 +131,20 @@ class BookListsCollectorTest {
             // ----- Arrange -----
             val edition = stubEdition()
             val listBook = stubListBook(shownEdition = edition)
+
             val list = stubBookList(
                 id = 5,
                 name = "Owned",
                 listBooks = listOf(listBook),
             )
+
             val tabId = LibraryTab.CustomList(
                 listId = 5,
                 listName = "Owned",
             ).id
+
             val collector = BookListsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -154,20 +165,25 @@ class BookListsCollectorTest {
         fun `renders the shown edition rather than the row's edition`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val shown = stubEdition()
+
             val listBook = stubListBook(
                 shownEdition = shown,
                 rowEdition = stubEdition(),
             )
+
             val list = stubBookList(
                 id = 5,
                 name = "Owned",
                 listBooks = listOf(listBook),
             )
+
             val tabId = LibraryTab.CustomList(
                 listId = 5,
                 listName = "Owned",
             ).id
+
             val collector = BookListsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -188,21 +204,26 @@ class BookListsCollectorTest {
         fun `keys the date added by the shown edition's id`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val shown = stubEdition(id = 42)
+
             val listBook = stubListBook(
                 shownEdition = shown,
                 rowEdition = stubEdition(id = 7),
                 addedAt = "2024-03-01",
             )
+
             val list = stubBookList(
                 id = 5,
                 name = "Owned",
                 listBooks = listOf(listBook),
             )
+
             val tabId = LibraryTab.CustomList(
                 listId = 5,
                 listName = "Owned",
             ).id
+
             val collector = BookListsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -224,16 +245,20 @@ class BookListsCollectorTest {
             // ----- Arrange -----
             val listBookNoEdition = stubListBook(shownEdition = null)
             val listBookWithEdition = stubListBook(shownEdition = stubEdition())
+
             val list = stubBookList(
                 id = 1,
                 name = "Owned",
                 listBooks = listOf(listBookNoEdition, listBookWithEdition),
             )
+
             val tabId = LibraryTab.CustomList(
                 listId = 1,
                 listName = "Owned",
             ).id
+
             val collector = BookListsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -255,16 +280,20 @@ class BookListsCollectorTest {
             // ----- Arrange -----
             val edition = stubEdition()
             val listBook = stubListBook(shownEdition = edition)
+
             val disabledList = stubBookList(
                 id = 99,
                 name = "Hidden",
                 listBooks = listOf(listBook),
             )
+
             val disabledTabId = LibraryTab.CustomList(
                 listId = 99,
                 listName = "Hidden",
             ).id
+
             val collector = BookListsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -286,16 +315,20 @@ class BookListsCollectorTest {
             // ----- Arrange -----
             val edition = stubEdition()
             val listBook = stubListBook(shownEdition = edition)
+
             val list = stubBookList(
                 id = 3,
                 name = "Owned",
                 listBooks = listOf(listBook),
             )
+
             val tabId = LibraryTab.CustomList(
                 listId = 3,
                 listName = "Owned",
             ).id
+
             val collector = BookListsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

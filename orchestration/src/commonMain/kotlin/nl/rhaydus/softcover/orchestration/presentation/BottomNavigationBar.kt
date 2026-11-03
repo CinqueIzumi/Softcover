@@ -17,10 +17,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.RhaydusIconToggleButton
-import nl.rhaydus.designsystem.icon.RhaydusIconResource
 import nl.rhaydus.designsystem.model.IconToggleButtonStyle
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -30,16 +29,11 @@ internal fun DockedBottomNavigationBar() {
 
     NavigationBar {
         navItems.forEach { item ->
-            val iconPainter = item.tab.options.icon ?: return@forEach
-
             NavigationBarItem(
                 selected = item.selected,
                 onClick = { onNavItemClick(item) },
                 icon = {
-                    NavItemIcon(
-                        item = item,
-                        painter = iconPainter,
-                    )
+                    NavItemIcon(item = item)
                 },
                 label = { SoftcoverText(text = item.tab.options.title) },
             )
@@ -58,16 +52,11 @@ internal fun BottomFloatingBar(modifier: Modifier = Modifier) {
         modifier = modifier,
     ) {
         navItems.forEach { item ->
-            val iconPainter = item.tab.options.icon ?: return@forEach
-
             Box {
                 RhaydusIconToggleButton(
                     checked = item.selected,
                     onCheckedChange = { onNavItemClick(item) },
-                    icon = RhaydusIconResource.Custom(
-                        painter = iconPainter,
-                        contentDescription = item.tab.options.title,
-                    ),
+                    icon = item.icon,
                     style = IconToggleButtonStyle.FILLED,
                     modifier = Modifier
                         .padding(horizontal = Spacing.xxs)
@@ -82,7 +71,10 @@ internal fun BottomFloatingBar(modifier: Modifier = Modifier) {
                         containerColor = MaterialTheme.colorScheme.inversePrimary,
                         modifier = Modifier
                             .align(Alignment.TopEnd)
-                            .offset(x = -Spacing.xs, y = Spacing.xxxs)
+                            .offset(
+                                x = -Spacing.xs,
+                                y = Spacing.xxxs,
+                            )
                             .size(10.dp),
                     )
                 }

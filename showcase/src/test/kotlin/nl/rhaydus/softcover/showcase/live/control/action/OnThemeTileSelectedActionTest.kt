@@ -25,6 +25,7 @@ class OnThemeTileSelectedActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(controlLiveState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ControlLiveLocalVariables()),
@@ -57,6 +58,7 @@ class OnThemeTileSelectedActionTest {
                 dependencies = dependencies,
                 scope = scope,
             )
+
             val action = OnThemeTileSelectedAction(painting = ThemeTilePainting.DARK)
 
             // ----- Act -----

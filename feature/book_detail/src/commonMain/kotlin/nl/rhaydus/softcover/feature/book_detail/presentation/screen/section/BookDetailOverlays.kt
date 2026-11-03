@@ -3,8 +3,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.screen.section
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.Composable
-import nl.rhaydus.softcover.core.component.dialog.DatePickerEvent
-import nl.rhaydus.softcover.core.component.dialog.SoftcoverDatePickerDialog
+import nl.rhaydus.designsystem.component.RhaydusDatePickerDialog
 import nl.rhaydus.softcover.core.component.lists.ChooseListsBottomSheet
 import nl.rhaydus.softcover.core.component.lists.ChooseListsEvent
 import nl.rhaydus.softcover.core.component.lists.ListMembership
@@ -140,6 +139,7 @@ internal fun BookDetailOverlays(
     }
 
     val tagEditorSheet = state.tagEditorSheet
+
     if (state.showTagEditorSheet && tagEditorSheet != null) {
         TagEditorBottomSheet(
             model = tagEditorSheet,
@@ -193,6 +193,7 @@ internal fun BookDetailOverlays(
 
     val verdictBook = state.book
     val verdictSheet = state.verdictSheet
+
     if (state.verdictSheetContext != null && verdictBook != null && verdictSheet != null) {
         VerdictSheet(
             model = verdictSheet,
@@ -211,6 +212,7 @@ internal fun BookDetailOverlays(
     }
 
     val editionSheet = state.editionSheet.modelOrNull
+
     if (editionSheet != null) {
         EditionBottomSheetSelector(
             model = editionSheet,
@@ -236,17 +238,15 @@ internal fun BookDetailOverlays(
         )
     }
 
-    val deadlinePicker = state.deadlinePicker
-    if (deadlinePicker != null) {
-        SoftcoverDatePickerDialog(
-            model = deadlinePicker,
-            onEvent = { event ->
-                when (event) {
-                    is DatePickerEvent.Confirmed -> runAction(OnDeadlinePickedAction(date = event.date))
+    val deadlinePickerDate = state.deadlinePickerDate
 
-                    DatePickerEvent.Dismissed -> runAction(OnDismissDeadlinePickerAction())
-                }
-            },
+    if (deadlinePickerDate != null) {
+        RhaydusDatePickerDialog(
+            initialDate = deadlinePickerDate,
+            onDismiss = { runAction(OnDismissDeadlinePickerAction()) },
+            onConfirm = { date -> runAction(OnDeadlinePickedAction(date = date)) },
+            confirmLabel = "Confirm",
+            dismissLabel = "Cancel",
         )
     }
 

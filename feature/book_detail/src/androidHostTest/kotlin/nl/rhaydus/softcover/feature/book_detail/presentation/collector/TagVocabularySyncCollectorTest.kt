@@ -33,6 +33,7 @@ class TagVocabularySyncCollectorTest {
         syncUserTagVocabularyUseCase = mockk()
         stateFlow = MutableStateFlow(buildBookDetailUiState())
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
@@ -42,6 +43,7 @@ class TagVocabularySyncCollectorTest {
 
     private fun stubDependencies(testScope: TestScope): BookDetailDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<BookDetailDependencies>(relaxed = true).also { mock ->
             every {
                 mock.syncUserTagVocabularyUseCase
@@ -69,8 +71,10 @@ class TagVocabularySyncCollectorTest {
             coEvery {
                 syncUserTagVocabularyUseCase()
             } returns Result.success(Unit)
+
             val dependencies = stubDependencies(this)
             val collector = TagVocabularySyncCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -93,8 +97,10 @@ class TagVocabularySyncCollectorTest {
             coEvery {
                 syncUserTagVocabularyUseCase()
             } returns Result.success(Unit)
+
             val dependencies = stubDependencies(this)
             val collector = TagVocabularySyncCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -117,8 +123,10 @@ class TagVocabularySyncCollectorTest {
             coEvery {
                 syncUserTagVocabularyUseCase()
             } returns Result.success(Unit)
+
             val dependencies = stubDependencies(this)
             val collector = TagVocabularySyncCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

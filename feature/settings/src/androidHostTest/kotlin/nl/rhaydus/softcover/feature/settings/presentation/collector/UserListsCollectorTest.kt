@@ -29,7 +29,7 @@ class UserListsCollectorTest {
         LibraryVisibilitySettingsUiState,
         LibraryVisibilitySettingsEvent,
         LibraryVisibilitySettingsLocalVariables,
-        >
+    >
     private lateinit var listsFlow: MutableSharedFlow<List<BookList>>
 
     @BeforeEach
@@ -37,6 +37,7 @@ class UserListsCollectorTest {
         listsFlow = MutableSharedFlow()
         getAllUserListsUseCase = mockk()
         stateFlow = MutableStateFlow(LibraryVisibilitySettingsUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryVisibilitySettingsLocalVariables()),
@@ -80,15 +81,19 @@ class UserListsCollectorTest {
                 id = 1,
                 name = "Zebra",
             )
+
             val listA = stubBookList(
                 id = 2,
                 name = "apple",
             )
+
             val listM = stubBookList(
                 id = 3,
                 name = "Middle",
             )
+
             val collector = UserListsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -101,9 +106,11 @@ class UserListsCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.availableLists.map { it.name } shouldBe listOf("apple", "Middle", "Zebra")
+
             stateFlow.value.orderedEntries
                 .filterIsInstance<LibraryTabEntry.CustomList>()
                 .map { it.listName } shouldBe listOf("apple", "Middle", "Zebra")
+
             job.cancel()
         }
     }

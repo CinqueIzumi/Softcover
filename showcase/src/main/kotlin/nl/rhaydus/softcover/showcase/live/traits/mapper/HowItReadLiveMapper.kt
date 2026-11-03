@@ -16,10 +16,9 @@ internal fun howItReadHeader(): SectionHeaderUiModel = SectionHeaderUiModel.Labe
 
 internal fun howItReadEmptyBlock(): HowItReadBlockUiModel = HowItReadBlockUiModel.previews.getValue("Empty")
 
-internal fun HowItReadSheetUiModel.hasAnswers(): Boolean =
-    balance.value != null || listOf(pace, characters, writingStyle).any { group ->
-        group.rows.any { row -> row.chips.any { chip -> chip.selected || chip.tone == ChipTone.TonalDashed } }
-    }
+internal fun HowItReadSheetUiModel.hasAnswers(): Boolean = balance.value != null || listOf(pace, characters, writingStyle).any { group ->
+    group.rows.any { row -> row.chips.any { chip -> chip.selected || chip.tone == ChipTone.TonalDashed } }
+}
 
 internal fun howItReadBlock(expanded: Boolean): HowItReadBlockUiModel = HowItReadBlockUiModel.previews.getValue(
     if (expanded) "Filled, expanded" else "Filled, collapsed",
@@ -51,12 +50,11 @@ private fun HowItReadChipGroupUiModel.mapRows(transform: (ChipSet<String>) -> Ch
     rows = rows.map(transform).toImmutableList(),
 )
 
-private fun ChipSet<String>.choosing(key: String): ChipSet<String> =
-    if (get(key) == null) {
-        this
-    } else {
-        withChips { chip -> chip.copy(selected = chip.key == key && chip.selected.not()) }
-    }
+private fun ChipSet<String>.choosing(key: String): ChipSet<String> = if (get(key) == null) {
+    this
+} else {
+    withChips { chip -> chip.copy(selected = chip.key == key && chip.selected.not()) }
+}
 
 private fun ChipSet<String>.toggling(key: String): ChipSet<String> = withChips { chip ->
     if (chip.key == key) chip.copy(selected = chip.selected.not()) else chip

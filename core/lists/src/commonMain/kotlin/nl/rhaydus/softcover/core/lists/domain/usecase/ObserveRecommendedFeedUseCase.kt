@@ -45,6 +45,7 @@ class ObserveRecommendedFeedUseCase internal constructor(
         } else {
             SystemVibe.Recommendations
         }
+
         val books = if (source == SystemVibe.TopPicks) top.books else recommended.books
 
         RecommendedFeed(

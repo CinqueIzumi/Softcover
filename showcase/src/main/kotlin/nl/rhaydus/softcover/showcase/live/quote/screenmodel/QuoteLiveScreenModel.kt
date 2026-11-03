@@ -15,16 +15,16 @@ internal class QuoteLiveScreenModel(
     themeStore: ShowcaseThemeStore,
     initializers: List<Collector<QuoteLiveUiState, QuoteLiveEvent, QuoteLiveDependencies, QuoteLiveLocalVariables>>,
 ) : ToadScreenModel<
-    QuoteLiveUiState,
-    QuoteLiveEvent,
-    QuoteLiveDependencies,
-    Collector<QuoteLiveUiState, QuoteLiveEvent, QuoteLiveDependencies, QuoteLiveLocalVariables>,
-    QuoteLiveLocalVariables,
+        QuoteLiveUiState,
+        QuoteLiveEvent,
+        QuoteLiveDependencies,
+        Collector<QuoteLiveUiState, QuoteLiveEvent, QuoteLiveDependencies, QuoteLiveLocalVariables>,
+        QuoteLiveLocalVariables,
     >(
-    initialState = QuoteLiveUiState(),
-    initialLocalVariables = QuoteLiveLocalVariables(),
-    initializers = initializers,
-) {
+        initialState = QuoteLiveUiState(),
+        initialLocalVariables = QuoteLiveLocalVariables(),
+        initializers = initializers,
+    ) {
     override val dependencies = QuoteLiveDependencies(
         themeStore = themeStore,
         coroutineScope = screenModelScope,

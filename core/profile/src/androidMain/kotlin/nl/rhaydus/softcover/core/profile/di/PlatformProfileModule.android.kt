@@ -11,6 +11,7 @@ import org.koin.dsl.module
 actual val platformProfileModule: Module = module {
     single<ProfileCacheDataStore> {
         val filesDir = androidContext().filesDir.path
+
         ProfileCacheDataStore(
             store = createProfileCacheDataStore(FileSystem.SYSTEM) {
                 "$filesDir/datastore/profile_cache.json".toPath()

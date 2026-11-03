@@ -12,10 +12,12 @@ internal class OnSearchActivatedAction : TopbarLiveAction {
         scope: ActionScope<TopbarLiveUiState, TopbarLiveEvent, TopbarLiveLocalVariables>,
     ) {
         scope.setState {
-            it.copy(search = it.search.copy(
-                active = true,
-                focused = true,
-            ),)
+            it.copy(
+                search = it.search.copy(
+                    active = true,
+                    focused = true,
+                ),
+            )
         }
     }
 }

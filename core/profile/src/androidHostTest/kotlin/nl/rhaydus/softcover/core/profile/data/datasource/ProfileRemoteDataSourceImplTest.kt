@@ -42,6 +42,7 @@ class ProfileRemoteDataSourceImplTest {
     @BeforeEach
     fun setUp() {
         apolloClient = mockk()
+
         dataSource = ProfileRemoteDataSourceImpl(
             apolloClient = apolloClient,
         )

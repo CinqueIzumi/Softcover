@@ -5,19 +5,14 @@ import com.apollographql.apollo.api.Optional
 import kotlinx.coroutines.withContext
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.CreateListBookMutation
-import nl.rhaydus.softcover.CreateListBookMutation.Data.Insert_list_book.List_book.Companion.listBookFragment as createListBookListBookFragment
 import nl.rhaydus.softcover.CreateListMutation
-import nl.rhaydus.softcover.CreateListMutation.Data.Insert_list.List.Companion.listFragment as createListListFragment
 import nl.rhaydus.softcover.GetUserBookListsQuery
-import nl.rhaydus.softcover.GetUserBookListsQuery.Data.Me.List.Companion.listFragment as userListsListFragment
 import nl.rhaydus.softcover.GetUserListSignaturesQuery
 import nl.rhaydus.softcover.MarkEditionAsOwnedMutation
 import nl.rhaydus.softcover.MarkEditionAsOwnedMutation.Data.Edition_owned.List_book.Companion.listBookFragment
 import nl.rhaydus.softcover.RemoveListBookMutation
-import nl.rhaydus.softcover.RemoveListBookMutation.Data.Delete_list_book.List.Companion.listFragment as removeListBookListFragment
 import nl.rhaydus.softcover.UpdateListBookPositionsMutation
 import nl.rhaydus.softcover.UpdateListMutation
-import nl.rhaydus.softcover.UpdateListMutation.Data.ListResponse.List.Companion.listFragment as updateListListFragment
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
@@ -36,6 +31,11 @@ import nl.rhaydus.softcover.type.List_books_bool_exp
 import nl.rhaydus.softcover.type.List_books_set_input
 import nl.rhaydus.softcover.type.List_books_updates
 import nl.rhaydus.softcover.type.Lists_bool_exp
+import nl.rhaydus.softcover.CreateListBookMutation.Data.Insert_list_book.List_book.Companion.listBookFragment as createListBookListBookFragment
+import nl.rhaydus.softcover.CreateListMutation.Data.Insert_list.List.Companion.listFragment as createListListFragment
+import nl.rhaydus.softcover.GetUserBookListsQuery.Data.Me.List.Companion.listFragment as userListsListFragment
+import nl.rhaydus.softcover.RemoveListBookMutation.Data.Delete_list_book.List.Companion.listFragment as removeListBookListFragment
+import nl.rhaydus.softcover.UpdateListMutation.Data.ListResponse.List.Companion.listFragment as updateListListFragment
 
 interface ListsRemoteDataSource {
     /**
@@ -94,26 +94,25 @@ internal class ListsRemoteDataSourceImpl(
     private val apolloClient: ApolloClient,
     private val appDispatchers: AppDispatchers,
 ) : ListsRemoteDataSource {
-    override suspend fun fetchListSignatures(): List<ListSignature> =
-        withContext(appDispatchers.io) {
-            val result = apolloClient.safeQuery(
-                GetUserListSignaturesQuery(),
+    override suspend fun fetchListSignatures(): List<ListSignature> = withContext(appDispatchers.io) {
+        val result = apolloClient.safeQuery(
+            GetUserListSignaturesQuery(),
+        )
+
+        val lists = result.me.firstOrNull()?.lists
+            ?: throw Exception("No lists were found")
+
+        lists.map { list ->
+            ListSignature(
+                listId = list.id,
+                signature = buildListSignature(
+                    updatedAt = list.updated_at,
+                    count = list.list_books_aggregate.aggregate?.count ?: 0,
+                    maxListBookUpdatedAt = list.list_books_aggregate.aggregate?.max?.updated_at,
+                ),
             )
-
-            val lists = result.me.firstOrNull()?.lists
-                ?: throw Exception("No lists were found")
-
-            lists.map { list ->
-                ListSignature(
-                    listId = list.id,
-                    signature = buildListSignature(
-                        updatedAt = list.updated_at,
-                        count = list.list_books_aggregate.aggregate?.count ?: 0,
-                        maxListBookUpdatedAt = list.list_books_aggregate.aggregate?.max?.updated_at,
-                    ),
-                )
-            }
         }
+    }
 
     override suspend fun fetchUserLists(
         userId: Int,

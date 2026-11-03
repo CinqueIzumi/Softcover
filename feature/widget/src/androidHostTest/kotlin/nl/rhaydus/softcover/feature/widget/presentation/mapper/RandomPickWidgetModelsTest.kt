@@ -42,9 +42,11 @@ class RandomPickWidgetModelsTest {
         every {
             this@mockk.id
         } returns id
+
         every {
             displayTitle
         } returns "Title $id"
+
         every {
             authorString
         } returns "Author $id"
@@ -236,6 +238,7 @@ class RandomPickWidgetModelsTest {
                 // ----- Assert -----
                 val content = awaitItem().content
                     .shouldBeInstanceOf<RandomPickWidgetUiModel.Content.EmptyPool>()
+
                 content.eyebrow shouldBe "WHAT NEXT? · OWNED"
                 awaitComplete()
             }
@@ -253,6 +256,7 @@ class RandomPickWidgetModelsTest {
                     authorName = "Edition author",
                 ),
             )
+
             val flow = models(
                 resolution = Result.success(
                     RandomPickResolution.Resolved(
@@ -267,6 +271,7 @@ class RandomPickWidgetModelsTest {
                 // ----- Assert -----
                 val content = awaitItem().content
                     .shouldBeInstanceOf<RandomPickWidgetUiModel.Content.Picked>()
+
                 content.title shouldBe "Edition title"
                 content.author shouldBe "Edition author"
                 cancelAndIgnoreRemainingEvents()
@@ -303,6 +308,7 @@ class RandomPickWidgetModelsTest {
                 // ----- Assert -----
                 val content = awaitItem().content
                     .shouldBeInstanceOf<RandomPickWidgetUiModel.Content.Picked>()
+
                 content.bookId shouldBe 3
                 content.title shouldBe "Title 3"
                 content.author shouldBe "Author 3"
@@ -337,12 +343,14 @@ class RandomPickWidgetModelsTest {
                 // ----- Assert -----
                 val first = awaitItem().content
                     .shouldBeInstanceOf<RandomPickWidgetUiModel.Content.Picked>()
+
                 first.title shouldBe "Title 3"
                 first.cover shouldBe RandomPickWidgetUiModel.Cover.Pending
                 first.artwork.shouldBeNull()
 
                 val second = awaitItem().content
                     .shouldBeInstanceOf<RandomPickWidgetUiModel.Content.Picked>()
+
                 second.cover shouldBe RandomPickWidgetUiModel.Cover.Loaded(uri = uri)
                 second.artwork shouldBe artwork
                 awaitComplete()
@@ -371,10 +379,12 @@ class RandomPickWidgetModelsTest {
                 // ----- Assert -----
                 val first = awaitItem().content
                     .shouldBeInstanceOf<RandomPickWidgetUiModel.Content.Picked>()
+
                 first.imagesPending shouldBe true
 
                 val second = awaitItem().content
                     .shouldBeInstanceOf<RandomPickWidgetUiModel.Content.Picked>()
+
                 second.cover shouldBe RandomPickWidgetUiModel.Cover.Missing
                 second.imagesPending shouldBe false
                 awaitComplete()
@@ -398,6 +408,7 @@ class RandomPickWidgetModelsTest {
                 // ----- Assert -----
                 val content = awaitItem().content
                     .shouldBeInstanceOf<RandomPickWidgetUiModel.Content.Picked>()
+
                 content.cover shouldBe RandomPickWidgetUiModel.Cover.Missing
                 awaitComplete()
             }
@@ -407,6 +418,7 @@ class RandomPickWidgetModelsTest {
         fun `a new cover height produces the cover again at that height and emits it`() = runTest {
             // ----- Arrange -----
             val heights = MutableStateFlow(200)
+
             val flow = models(
                 resolution = Result.success(
                     RandomPickResolution.Resolved(
@@ -423,6 +435,7 @@ class RandomPickWidgetModelsTest {
 
                 // ----- Act -----
                 heights.value = 320
+
                 val content = awaitItem().content
                     .shouldBeInstanceOf<RandomPickWidgetUiModel.Content.Picked>()
 
@@ -437,6 +450,7 @@ class RandomPickWidgetModelsTest {
         fun `a height change does not emit the pending cover again`() = runTest {
             // ----- Arrange -----
             val heights = MutableStateFlow(200)
+
             val flow = models(
                 resolution = Result.success(
                     RandomPickResolution.Resolved(
@@ -455,10 +469,12 @@ class RandomPickWidgetModelsTest {
                 awaitItem().content
                     .shouldBeInstanceOf<RandomPickWidgetUiModel.Content.Picked>()
                     .cover shouldBe RandomPickWidgetUiModel.Cover.Pending
+
                 awaitItem()
 
                 // ----- Act -----
                 heights.value = 320
+
                 val content = awaitItem().content
                     .shouldBeInstanceOf<RandomPickWidgetUiModel.Content.Picked>()
 
@@ -526,6 +542,7 @@ class RandomPickWidgetModelsTest {
 
                 val picked = awaitItem().content
                     .shouldBeInstanceOf<RandomPickWidgetUiModel.Content.Picked>()
+
                 picked.eyebrow shouldBe "WHAT NEXT? · OWNED"
                 cancelAndIgnoreRemainingEvents()
             }
@@ -547,6 +564,7 @@ class RandomPickWidgetModelsTest {
 
             // ----- Act -----
             val contents = mutableListOf<RandomPickWidgetUiModel.Content>()
+
             flow.test {
                 contents += awaitItem().content
                 contents += awaitItem().content
@@ -579,6 +597,7 @@ class RandomPickWidgetModelsTest {
 
             // ----- Act -----
             val contents = mutableListOf<RandomPickWidgetUiModel.Content>()
+
             flow.test {
                 contents += awaitItem().content
                 contents += awaitItem().content
@@ -612,6 +631,7 @@ class RandomPickWidgetModelsTest {
 
             // ----- Act -----
             val contents = mutableListOf<RandomPickWidgetUiModel.Content>()
+
             flow.test {
                 contents += awaitItem().content
                 contents += awaitItem().content
@@ -686,6 +706,7 @@ class RandomPickWidgetModelsTest {
 
             // ----- Act -----
             val contents = mutableListOf<RandomPickWidgetUiModel.Content>()
+
             flow.test {
                 contents += awaitItem().content
                 settingsChanges.emit(changeTo(RandomPickSource.Owned))
@@ -714,6 +735,7 @@ class RandomPickWidgetModelsTest {
 
             // ----- Act -----
             val contents = mutableListOf<RandomPickWidgetUiModel.Content>()
+
             flow.test {
                 contents += awaitItem().content
                 contents += awaitItem().content

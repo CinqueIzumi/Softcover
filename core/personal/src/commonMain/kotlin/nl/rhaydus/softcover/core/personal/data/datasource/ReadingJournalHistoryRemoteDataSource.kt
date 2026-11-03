@@ -63,20 +63,19 @@ internal class ReadingJournalHistoryRemoteDataSourceImpl(
     private suspend fun fetchAllJournalRows(
         bookId: Int,
         userId: Int,
-    ): List<GetReadingJournalHistoryQuery.Data.Reading_journal> =
-        fetchAllPagesOrThrow(
-            pageSize = PAGE_SIZE,
-            maxPages = MAX_PAGES,
-        ) { limit, offset ->
-            apolloClient.safeQuery(
-                query = GetReadingJournalHistoryQuery(
-                    bookId = bookId,
-                    userId = userId,
-                    limit = limit,
-                    offset = offset,
-                ),
-            ).reading_journals
-        }
+    ): List<GetReadingJournalHistoryQuery.Data.Reading_journal> = fetchAllPagesOrThrow(
+        pageSize = PAGE_SIZE,
+        maxPages = MAX_PAGES,
+    ) { limit, offset ->
+        apolloClient.safeQuery(
+            query = GetReadingJournalHistoryQuery(
+                bookId = bookId,
+                userId = userId,
+                limit = limit,
+                offset = offset,
+            ),
+        ).reading_journals
+    }
 }
 
 // Hardcover returns at most 100 rows per request, and a short page ends paging, so a larger size truncates silently.

@@ -170,6 +170,7 @@ class ReadingDayMapperTest {
                     pages = 250,
                 ),
             )
+
             val books = listOf(
                 readBook(
                     id = 1,
@@ -213,6 +214,7 @@ class ReadingDayMapperTest {
                     pages = 280,
                 ),
             )
+
             val books = listOf(
                 readBook(
                     id = 1,
@@ -317,6 +319,7 @@ class ReadingDayMapperTest {
                     pages = 90,
                 ),
             )
+
             val books = listOf(
                 readBook(
                     id = 1,
@@ -335,6 +338,7 @@ class ReadingDayMapperTest {
                 updates = updates,
                 books = books,
             )
+
             val activity = toReadingActivity(
                 updates = updates,
                 readBooks = books,
@@ -415,6 +419,7 @@ class ReadingDayMapperTest {
                     pages = 80,
                 ),
             )
+
             val books = listOf(
                 readBook(
                     id = 5,
@@ -468,14 +473,17 @@ class ReadingDayMapperTest {
                 hour = 14,
                 minute = 30,
             )
+
             result.bookFor(1).lastUpdateAt shouldBe LocalTime(
                 hour = 14,
                 minute = 30,
             )
+
             result.bookFor(2).firstUpdateAt shouldBe LocalTime(
                 hour = 7,
                 minute = 15,
             )
+
             result.bookFor(2).lastUpdateAt shouldBe LocalTime(
                 hour = 21,
                 minute = 5,

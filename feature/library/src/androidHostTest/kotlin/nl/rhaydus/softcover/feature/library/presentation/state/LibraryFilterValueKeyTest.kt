@@ -44,6 +44,7 @@ class LibraryFilterValueKeyTest {
                 ),
                 ratingBuckets = persistentListOf(4.0),
             )
+
             val filters = LibraryFilters(
                 hardcoverTags = TagSelection(included = persistentSetOf(hardcoverFiction)),
                 yourTags = TagSelection(included = persistentSetOf(yoursCozy)),
@@ -56,6 +57,7 @@ class LibraryFilterValueKeyTest {
 
             // ----- Act -----
             val optionsChips = buildLibraryFilterChips(options = options)
+
             val tagValueByIncludeKey = TagSource.entries
                 .flatMap { source ->
                     options.tagEntries(
@@ -70,12 +72,14 @@ class LibraryFilterValueKeyTest {
                     )?.let { value -> entry.includeKey to value }
                 }
                 .toMap()
+
             val optionsValueByKey = optionsChips.ownershipChips.payloadByKey +
                 optionsChips.formatChips.payloadByKey +
                 optionsChips.releaseYearChips.payloadByKey +
                 optionsChips.readYearChips.payloadByKey +
                 optionsChips.ratingChips.payloadByKey +
                 tagValueByIncludeKey
+
             val activeValueByKey = buildLibraryActiveFilterChips(filters = filters).chips.payloadByKey
 
             // ----- Assert -----
@@ -103,6 +107,7 @@ class LibraryFilterValueKeyTest {
                 ),
                 direction = TagDirection.INCLUDE,
             )
+
             val yours = LibraryFilterValue.YourTag(
                 key = yoursCozy,
                 direction = TagDirection.INCLUDE,
@@ -123,6 +128,7 @@ class LibraryFilterValueKeyTest {
                 key = hardcoverFiction,
                 direction = TagDirection.INCLUDE,
             )
+
             val exclude = LibraryFilterValue.HardcoverTag(
                 key = hardcoverFiction,
                 direction = TagDirection.EXCLUDE,
@@ -143,6 +149,7 @@ class LibraryFilterValueKeyTest {
                 key = yoursCozy,
                 direction = TagDirection.INCLUDE,
             )
+
             val exclude = LibraryFilterValue.YourTag(
                 key = yoursCozy,
                 direction = TagDirection.EXCLUDE,
@@ -163,6 +170,7 @@ class LibraryFilterValueKeyTest {
                 key = yoursCozy,
                 direction = TagDirection.INCLUDE,
             )
+
             val genre = LibraryFilterValue.YourTag(
                 key = yoursCozy.copy(category = TagCategory.GENRE),
                 direction = TagDirection.INCLUDE,

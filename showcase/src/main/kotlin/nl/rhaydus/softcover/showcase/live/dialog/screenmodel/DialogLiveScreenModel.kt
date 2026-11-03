@@ -17,19 +17,19 @@ internal class DialogLiveScreenModel(
     themeStore: ShowcaseThemeStore,
     initializers: List<Collector<DialogLiveUiState, DialogLiveEvent, DialogLiveDependencies, DialogLiveLocalVariables>>,
 ) : ToadScreenModel<
-    DialogLiveUiState,
-    DialogLiveEvent,
-    DialogLiveDependencies,
-    Collector<DialogLiveUiState, DialogLiveEvent, DialogLiveDependencies, DialogLiveLocalVariables>,
-    DialogLiveLocalVariables,
+        DialogLiveUiState,
+        DialogLiveEvent,
+        DialogLiveDependencies,
+        Collector<DialogLiveUiState, DialogLiveEvent, DialogLiveDependencies, DialogLiveLocalVariables>,
+        DialogLiveLocalVariables,
     >(
-    initialState = DialogLiveUiState(
-        topBar = dialogLiveTopBar(),
-        trigger = datePickerTrigger(pickedDate = null),
-    ),
-    initialLocalVariables = DialogLiveLocalVariables(),
-    initializers = initializers,
-) {
+        initialState = DialogLiveUiState(
+            topBar = dialogLiveTopBar(),
+            trigger = datePickerTrigger(pickedDate = null),
+        ),
+        initialLocalVariables = DialogLiveLocalVariables(),
+        initializers = initializers,
+    ) {
     override val dependencies = DialogLiveDependencies(
         themeStore = themeStore,
         coroutineScope = screenModelScope,

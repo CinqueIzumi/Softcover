@@ -30,11 +30,13 @@ class EndSessionPauseSheetCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk<BookDetailDependencies>(relaxed = true)
     }
 
@@ -91,6 +93,7 @@ class EndSessionPauseSheetCollectorTest {
             // ----- Arrange -----
             val staleState = stateFlow.value.copy(endSessionPauseRequested = true)
             var openAfterStaleEmission: Boolean? = null
+
             val lateEmittingState = object : MutableStateFlow<BookDetailUiState> by stateFlow {
                 override suspend fun collect(collector: FlowCollector<BookDetailUiState>): Nothing {
                     collector.emit(staleState)
@@ -98,6 +101,7 @@ class EndSessionPauseSheetCollectorTest {
                     stateFlow.collect(collector)
                 }
             }
+
             val lateScope = ActionScope(
                 stateFlow = lateEmittingState,
                 localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),

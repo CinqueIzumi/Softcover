@@ -16,9 +16,9 @@ sealed class LibraryTab(
         val status: UserBookStatus,
         label: String,
     ) : LibraryTab(
-        id = idFor(status = status),
-        label = label,
-    ) {
+            id = idFor(status = status),
+            label = label,
+        ) {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
 
@@ -51,9 +51,9 @@ sealed class LibraryTab(
         val listId: Int,
         val listName: String,
     ) : LibraryTab(
-        id = idFor(listId = listId),
-        label = listName,
-    ) {
+            id = idFor(listId = listId),
+            label = listName,
+        ) {
         companion object {
             fun idFor(listId: Int): String = "list-$listId"
         }

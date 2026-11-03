@@ -10,6 +10,7 @@ fun main(args: Array<String>) {
     val mode = args.firstOrNull() ?: error("Expected a mode: export or check")
     val options = args.drop(1).associate { it.removePrefix("--").substringBefore('=') to it.substringAfter('=') }
     val moduleDir = File(options.getValue("module-dir"))
+
     val fontsDir = File(
         moduleDir,
         "src/commonMain/composeResources/font",
@@ -38,18 +39,22 @@ private fun export(
     outDir.mkdirs()
 
     val tokens = DesignTokens.build(fontsDir)
+
     File(
         outDir,
         "tokens.json",
     ).writeText(Json.write(tokens))
+
     File(
         outDir,
         "components/softcover-tokens.css",
     ).apply { parentFile.mkdirs() }.writeText(TokensCss.render(tokens))
+
     File(
         outDir,
         "Palettes.md",
     ).writeText(PalettesMarkdown.render())
+
     FontFiles.copyTo(
         fontsDir,
         File(
@@ -57,6 +62,7 @@ private fun export(
             "fonts",
         ),
     )
+
     SvgAssets.export(
         moduleDir,
         File(
@@ -71,6 +77,7 @@ private fun verifyContent(
     designDir: File,
 ) {
     val names = DesignTokens.names(DesignTokens.build(fontsDir)).toSet()
+
     val problems = ContentCheck.problems(
         designDir,
         names,

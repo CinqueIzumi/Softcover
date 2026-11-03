@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.showcase.live.progress.state.ProgressLiveUiState
 import nl.rhaydus.toad.UiAction
 
 internal sealed interface ProgressLiveAction : UiAction<
-        ProgressLiveDependencies,
-        ProgressLiveUiState,
-        ProgressLiveEvent,
-        ProgressLiveLocalVariables,
-        >
+    ProgressLiveDependencies,
+    ProgressLiveUiState,
+    ProgressLiveEvent,
+    ProgressLiveLocalVariables,
+>

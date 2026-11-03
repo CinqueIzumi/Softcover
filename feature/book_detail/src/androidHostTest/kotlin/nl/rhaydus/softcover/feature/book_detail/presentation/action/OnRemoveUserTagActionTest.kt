@@ -39,6 +39,7 @@ class OnRemoveUserTagActionTest {
         saveUserTagsUseCase = mockk()
         recordAppliedTagsUseCase = mockk()
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -53,6 +54,7 @@ class OnRemoveUserTagActionTest {
         } answers {
             Result.success(secondArg())
         }
+
         coEvery {
             recordAppliedTagsUseCase(any())
         } returns Result.success(Unit)
@@ -60,19 +62,24 @@ class OnRemoveUserTagActionTest {
 
     private fun stubDependencies(testScope: TestScope): BookDetailDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<BookDetailDependencies>(relaxed = true).also { mock ->
             every {
                 mock.saveUserTagsUseCase
             } returns saveUserTagsUseCase
+
             every {
                 mock.recordAppliedTagsUseCase
             } returns recordAppliedTagsUseCase
+
             every {
                 mock.coroutineScope
             } returns testScope
+
             every {
                 mock.mainDispatcher
             } returns dispatcher
+
             every {
                 mock.launch(any())
             } answers { callOriginal() }
@@ -83,6 +90,7 @@ class OnRemoveUserTagActionTest {
         every {
             this@mockk.id
         } returns id
+
         every {
             this@mockk.userBook
         } returns mockk()
@@ -115,9 +123,11 @@ class OnRemoveUserTagActionTest {
             val dependencies = stubDependencies(this)
             val toRemove = stubTag("fantasy")
             val other = stubTag("sci-fi")
+
             stateFlow.value = loadedState(listOf(toRemove, other)).copy(
                 userTagByEditorChipKey = persistentMapOf("chip" to toRemove),
             )
+
             val action = OnRemoveUserTagAction(chipKey = "chip")
 
             // ----- Act -----
@@ -139,17 +149,21 @@ class OnRemoveUserTagActionTest {
         fun `keeps a tag with the same name but a different category`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
+
             val toRemove = stubTag(
                 "cozy",
                 TagCategory.GENRE,
             )
+
             val sameName = stubTag(
                 "cozy",
                 TagCategory.MOOD,
             )
+
             stateFlow.value = loadedState(listOf(toRemove, sameName)).copy(
                 userTagByEditorChipKey = persistentMapOf("chip" to toRemove),
             )
+
             val action = OnRemoveUserTagAction(chipKey = "chip")
 
             // ----- Act -----
@@ -172,10 +186,12 @@ class OnRemoveUserTagActionTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
             val tag = stubTag("fantasy")
+
             stateFlow.value = loadedState(listOf(tag)).copy(
                 book = null,
                 userTagByEditorChipKey = persistentMapOf("chip" to tag),
             )
+
             val initialState = stateFlow.value
 
             // ----- Act -----
@@ -186,6 +202,7 @@ class OnRemoveUserTagActionTest {
 
             // ----- Assert -----
             stateFlow.value shouldBe initialState
+
             coVerify(exactly = 0) {
                 saveUserTagsUseCase(
                     bookId = any(),
@@ -199,9 +216,11 @@ class OnRemoveUserTagActionTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
             val tag = stubTag("fantasy")
+
             stateFlow.value = loadedState(listOf(tag)).copy(
                 userTagByEditorChipKey = persistentMapOf("chip" to tag),
             )
+
             val initialState = stateFlow.value
 
             // ----- Act -----
@@ -212,6 +231,7 @@ class OnRemoveUserTagActionTest {
 
             // ----- Assert -----
             stateFlow.value shouldBe initialState
+
             coVerify(exactly = 0) {
                 saveUserTagsUseCase(
                     bookId = any(),
@@ -225,10 +245,12 @@ class OnRemoveUserTagActionTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
             val tag = stubTag("fantasy")
+
             stateFlow.value = loadedState(listOf(tag)).copy(
                 userTagsLoad = UserTagsLoad.Loading,
                 userTagByEditorChipKey = persistentMapOf("chip" to tag),
             )
+
             val initialState = stateFlow.value
 
             // ----- Act -----
@@ -239,6 +261,7 @@ class OnRemoveUserTagActionTest {
 
             // ----- Assert -----
             stateFlow.value shouldBe initialState
+
             coVerify(exactly = 0) {
                 saveUserTagsUseCase(
                     bookId = any(),
@@ -252,10 +275,12 @@ class OnRemoveUserTagActionTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
             val tag = stubTag("fantasy")
+
             stateFlow.value = loadedState(listOf(tag)).copy(
                 userTagsLoad = UserTagsLoad.Failed,
                 userTagByEditorChipKey = persistentMapOf("chip" to tag),
             )
+
             val initialState = stateFlow.value
 
             // ----- Act -----
@@ -266,6 +291,7 @@ class OnRemoveUserTagActionTest {
 
             // ----- Assert -----
             stateFlow.value shouldBe initialState
+
             coVerify(exactly = 0) {
                 saveUserTagsUseCase(
                     bookId = any(),

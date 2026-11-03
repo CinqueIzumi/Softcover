@@ -26,6 +26,7 @@ class ProfileLocalDataSourceImplTest {
     @BeforeEach
     fun setUp() {
         store = mockk()
+
         dataSource = ProfileLocalDataSourceImpl(
             profileCacheDataStore = ProfileCacheDataStore(store = store),
         )
@@ -38,7 +39,7 @@ class ProfileLocalDataSourceImplTest {
             store.updateData(any())
         } coAnswers {
             val transform = firstArg<suspend (ProfileCacheEntity) -> ProfileCacheEntity>()
-            transform(seed).also { result = it }
+            transform(seed).also { updated -> result = updated }
         }
 
         return { result }

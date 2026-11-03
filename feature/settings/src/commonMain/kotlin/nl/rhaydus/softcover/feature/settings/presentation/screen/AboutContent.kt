@@ -7,11 +7,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.SettingsMenuRow
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.SettingsMenuRowTarget
@@ -92,7 +92,7 @@ private fun CreditsSection(
         Spacer(modifier = Modifier.height(Spacing.md))
 
         SettingsRowGroup {
-            row {
+            DividedRow {
                 SettingsMenuRow(
                     title = "Hardcover.app",
                     gloss = "Every book, cover and rating comes from its API.",
@@ -126,7 +126,7 @@ private fun SourceSection(
         Spacer(modifier = Modifier.height(Spacing.md))
 
         SettingsRowGroup {
-            row {
+            DividedRow {
                 SettingsMenuRow(
                     title = "View the code on GitHub",
                     gloss = "Read the code, or help build it.",
@@ -134,7 +134,8 @@ private fun SourceSection(
                     target = SettingsMenuRowTarget.ExternalLink(onClick = { openUrl(GITHUB_REPO_URL) }),
                 )
             }
-            row {
+
+            DividedRow {
                 SettingsMenuRow(
                     title = "What's new",
                     gloss = "What changed in each version.",
@@ -142,7 +143,8 @@ private fun SourceSection(
                     target = SettingsMenuRowTarget.SubPage(onClick = onWhatsNewClick),
                 )
             }
-            row {
+
+            DividedRow {
                 SettingsMenuRow(
                     title = "Roadmap",
                     gloss = "What's coming next, in the order it's planned.",
@@ -169,7 +171,7 @@ private fun ContactSection(
         Spacer(modifier = Modifier.height(Spacing.md))
 
         SettingsRowGroup {
-            row {
+            DividedRow {
                 SettingsMenuRow(
                     title = "Report an issue",
                     gloss = "Found a bug? Let us know on GitHub.",
@@ -177,7 +179,8 @@ private fun ContactSection(
                     target = SettingsMenuRowTarget.ExternalLink(onClick = { openUrl(GITHUB_ISSUES_URL) }),
                 )
             }
-            row {
+
+            DividedRow {
                 SettingsMenuRow(
                     title = DISCORD_USERNAME,
                     gloss = "The developer's Discord username.",
@@ -185,7 +188,8 @@ private fun ContactSection(
                     target = SettingsMenuRowTarget.Copyable,
                 )
             }
-            row {
+
+            DividedRow {
                 SettingsMenuRow(
                     title = "Join the Hardcover Discord",
                     gloss = "Softcover has its own channel in the official server.",

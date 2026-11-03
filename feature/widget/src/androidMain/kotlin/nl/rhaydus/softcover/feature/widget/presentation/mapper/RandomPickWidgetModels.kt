@@ -82,6 +82,7 @@ internal fun randomPickWidgetModels(
             )
         }.transformLatest { inputs ->
             val change = inputs.settingsChange
+
             val settled = FlowCollector<RandomPickWidgetUiModel> { model ->
                 if (model.content !is RandomPickWidgetUiModel.Content.Switching) lastSettled = model
 

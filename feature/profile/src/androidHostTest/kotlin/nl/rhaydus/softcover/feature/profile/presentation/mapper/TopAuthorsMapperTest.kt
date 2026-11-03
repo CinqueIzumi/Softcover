@@ -31,9 +31,11 @@ class TopAuthorsMapperTest {
             every {
                 this@mockk.id
             } returns 99
+
             every {
                 url
             } returns coverUrl
+
             every {
                 localImagePath
             } returns null
@@ -43,15 +45,19 @@ class TopAuthorsMapperTest {
             every {
                 this@mockk.id
             } returns id
+
             every {
                 title
             } returns "A Wizard of Earthsea"
+
             every {
                 currentEdition
             } returns edition
+
             every {
                 defaultEdition
             } returns null
+
             every {
                 this@mockk.coverUrl
             } returns coverUrl
@@ -119,6 +125,7 @@ class TopAuthorsMapperTest {
 
             // ----- Assert -----
             val cover = lead.shouldBeInstanceOf<BookCardLead.Cover>().cover.model
+
             cover.source.shouldNotBeNull().shouldBeInstanceOf<CoverSource.Remote>().url shouldBe
                 "https://example.com/lead.jpg"
         }

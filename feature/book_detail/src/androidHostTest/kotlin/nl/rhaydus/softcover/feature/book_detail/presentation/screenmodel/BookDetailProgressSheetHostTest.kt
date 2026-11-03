@@ -42,6 +42,7 @@ class BookDetailProgressSheetHostTest {
         stateFlow = MutableStateFlow(buildBookDetailUiState())
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
@@ -51,19 +52,24 @@ class BookDetailProgressSheetHostTest {
 
     private fun stubDependencies(testScope: TestScope): BookDetailDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<BookDetailDependencies>(relaxed = true).also { mock ->
             every {
                 mock.recordBookProgressUseCase
             } returns recordBookProgressUseCase
+
             every {
                 mock.markBookAsReadUseCase
             } returns markBookAsReadUseCase
+
             every {
                 mock.coroutineScope
             } returns testScope
+
             every {
                 mock.mainDispatcher
             } returns dispatcher
+
             every {
                 mock.launch(any())
             } answers { callOriginal() }
@@ -74,6 +80,7 @@ class BookDetailProgressSheetHostTest {
         every {
             mock.id
         } returns id
+
         every {
             mock.userBook
         } returns null
@@ -205,9 +212,11 @@ class BookDetailProgressSheetHostTest {
         fun `cancels the prior job for the same book and stores the new one`() = runTest {
             // ----- Arrange -----
             val priorJob = Job()
+
             localVariablesFlow.value = BookDetailLocalVariables(
                 bookMutationJobs = mapOf(42 to priorJob),
             )
+
             val dependencies = stubDependencies(this)
             stubRecord(Result.success(null))
 
@@ -228,9 +237,11 @@ class BookDetailProgressSheetHostTest {
         fun `leaves another book's job running`() = runTest {
             // ----- Arrange -----
             val otherJob = Job()
+
             localVariablesFlow.value = BookDetailLocalVariables(
                 bookMutationJobs = mapOf(7 to otherJob),
             )
+
             val dependencies = stubDependencies(this)
             stubRecord(Result.success(null))
 
@@ -255,6 +266,7 @@ class BookDetailProgressSheetHostTest {
             // ----- Arrange -----
             val book = stubBook()
             val dependencies = stubDependencies(this)
+
             coEvery {
                 markBookAsReadUseCase(
                     book = any(),

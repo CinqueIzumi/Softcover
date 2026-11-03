@@ -223,6 +223,7 @@ class YearHistoryMapperTest {
                 series = series,
                 metric = YearMetric.BOOKS,
             ).columns
+
             val pages = chartOf(
                 series = series,
                 metric = YearMetric.PAGES,

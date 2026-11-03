@@ -33,11 +33,13 @@ class OnDeleteReviewActionTest {
     fun setUp() {
         updateBookReviewUseCase = mockk()
         stateFlow = MutableStateFlow(buildBookDetailUiState().copy(verdictSheetContext = VerdictSheetContext.EDIT))
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk<BookDetailDependencies>(relaxed = true).also { mock ->
             every {
                 mock.updateBookReviewUseCase

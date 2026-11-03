@@ -24,6 +24,7 @@ class OnSearchDismissedActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(topbarLiveState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(TopbarLiveLocalVariables()),
@@ -40,10 +41,12 @@ class OnSearchDismissedActionTest {
                 dependencies = dependencies,
                 scope = scope,
             )
+
             OnSearchActivatedAction().execute(
                 dependencies = dependencies,
                 scope = scope,
             )
+
             val action = OnSearchDismissedAction()
 
             // ----- Act -----
@@ -65,6 +68,7 @@ class OnSearchDismissedActionTest {
                 dependencies = dependencies,
                 scope = scope,
             )
+
             val action = OnSearchDismissedAction()
 
             // ----- Act -----

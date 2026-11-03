@@ -21,14 +21,15 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isSpecified
 import kotlinx.collections.immutable.ImmutableList
+import nl.rhaydus.designsystem.modifier.skeletonMask
+import nl.rhaydus.designsystem.theme.Corners
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.modifier.navSharedBounds
-import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.component.transition.BookTransitionKey
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.tabularFigures
 
@@ -165,7 +166,10 @@ private fun TitleRow(
             modifier = Modifier
                 .padding(top = (lineHeightDp - iconSize) / 2)
                 .size(iconSize)
-                .skeletonMask(visible = isLoading),
+                .skeletonMask(
+                    visible = isLoading,
+                    shape = Corners.xs,
+                ),
         )
 
         title(Modifier.weight(1f))
@@ -188,7 +192,10 @@ private fun SupportingLine(
                     style = style,
                     color = color,
                     modifier = Modifier
-                        .skeletonMask(visible = isLoading)
+                        .skeletonMask(
+                            visible = isLoading,
+                            shape = Corners.xs,
+                        )
                         .clearAndSetSemantics {},
                 )
             }
@@ -249,7 +256,10 @@ internal fun RatingLabel(
             tint = RatingGold,
             modifier = Modifier
                 .size(iconSize)
-                .skeletonMask(visible = isLoading),
+                .skeletonMask(
+                    visible = isLoading,
+                    shape = Corners.xs,
+                ),
         )
 
         SoftcoverText(

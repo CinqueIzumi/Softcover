@@ -11,4 +11,4 @@ internal sealed interface TrendingSettingsCollector : Collector<
     TrendingSettingsEvent,
     TrendingSettingsDependencies,
     TrendingSettingsLocalVariables,
-    >
+>

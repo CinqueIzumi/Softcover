@@ -1,6 +1,6 @@
 plugins {
-    id("softcover.kmp.library")
-    id("softcover.kmp.compose")
+    id("rhaydus.kmp.library")
+    id("rhaydus.kmp.compose")
 }
 
 kotlin {
@@ -10,7 +10,7 @@ kotlin {
 
     // :orchestration aggregates the whole module graph and hosts App(), so it is the module that
     // ships the iOS app framework the Xcode project embeds. The iOS targets themselves are declared
-    // by the softcover.kmp.library convention plugin; re-declaring them here is idempotent and only
+    // by the rhaydus.kmp.library convention plugin; re-declaring them here is idempotent and only
     // attaches the framework binary. Only this module exports a framework — keeping binaries.framework
     // out of the convention plugin avoids emitting one for every library module. The whole graph is
     // statically linked in, so no explicit `export(...)` is needed; Swift only calls MainViewController

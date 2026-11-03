@@ -28,7 +28,6 @@ class AuthInterceptorTest {
         authTokenProvider = mockk()
         chain = mockk()
 
-        @Suppress("UNCHECKED_CAST")
         every {
             chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
         } returns emptyFlow()
@@ -38,6 +37,7 @@ class AuthInterceptorTest {
         every {
             authTokenProvider.apiKey
         } returns flowOf(token)
+
         return AuthInterceptor(authTokenProvider = authTokenProvider)
     }
 
@@ -49,7 +49,6 @@ class AuthInterceptorTest {
             val interceptor = buildInterceptor("my-secret-key")
             val capturedRequest = slot<ApolloRequest<GetUserBookListsQuery.Data>>()
 
-            @Suppress("UNCHECKED_CAST")
             every {
                 chain.proceed(capture(capturedRequest))
             } returns emptyFlow()
@@ -63,6 +62,7 @@ class AuthInterceptorTest {
             // ----- Assert -----
             val authHeader = capturedRequest.captured.httpHeaders
                 ?.firstOrNull { it.name == "Authorization" }
+
             authHeader?.value shouldBe "Bearer my-secret-key"
         }
 
@@ -72,7 +72,6 @@ class AuthInterceptorTest {
             val interceptor = buildInterceptor(null)
             val capturedRequest = slot<ApolloRequest<GetUserBookListsQuery.Data>>()
 
-            @Suppress("UNCHECKED_CAST")
             every {
                 chain.proceed(capture(capturedRequest))
             } returns emptyFlow()
@@ -86,6 +85,7 @@ class AuthInterceptorTest {
             // ----- Assert -----
             val authHeader = capturedRequest.captured.httpHeaders
                 ?.firstOrNull { it.name == "Authorization" }
+
             authHeader shouldBe null
         }
 
@@ -95,7 +95,6 @@ class AuthInterceptorTest {
             val interceptor = buildInterceptor("   ")
             val capturedRequest = slot<ApolloRequest<GetUserBookListsQuery.Data>>()
 
-            @Suppress("UNCHECKED_CAST")
             every {
                 chain.proceed(capture(capturedRequest))
             } returns emptyFlow()
@@ -109,6 +108,7 @@ class AuthInterceptorTest {
             // ----- Assert -----
             val authHeader = capturedRequest.captured.httpHeaders
                 ?.firstOrNull { it.name == "Authorization" }
+
             authHeader shouldBe null
         }
 
@@ -118,7 +118,6 @@ class AuthInterceptorTest {
             val interceptor = buildInterceptor("")
             val capturedRequest = slot<ApolloRequest<GetUserBookListsQuery.Data>>()
 
-            @Suppress("UNCHECKED_CAST")
             every {
                 chain.proceed(capture(capturedRequest))
             } returns emptyFlow()
@@ -132,6 +131,7 @@ class AuthInterceptorTest {
             // ----- Assert -----
             val authHeader = capturedRequest.captured.httpHeaders
                 ?.firstOrNull { it.name == "Authorization" }
+
             authHeader shouldBe null
         }
     }
@@ -144,16 +144,17 @@ class AuthInterceptorTest {
             every {
                 authTokenProvider.apiKey
             } returnsMany listOf(flowOf("first-key"), flowOf("second-key"))
+
             val interceptor = AuthInterceptor(authTokenProvider = authTokenProvider)
 
             val captured1 = slot<ApolloRequest<GetUserBookListsQuery.Data>>()
 
-            @Suppress("UNCHECKED_CAST")
             every {
                 chain.proceed(capture(captured1))
             } returns emptyFlow()
 
-            // ----- Act — first intercept reads "first-key" -----
+            // ----- Act -----
+            // first intercept reads "first-key"
             interceptor.intercept(
                 baseRequest,
                 chain,
@@ -161,12 +162,12 @@ class AuthInterceptorTest {
 
             val captured2 = slot<ApolloRequest<GetUserBookListsQuery.Data>>()
 
-            @Suppress("UNCHECKED_CAST")
             every {
                 chain.proceed(capture(captured2))
             } returns emptyFlow()
 
-            // ----- Act — second intercept reads "second-key" fresh from the provider -----
+            // ----- Act -----
+            // second intercept reads "second-key" fresh from the provider
             interceptor.intercept(
                 baseRequest,
                 chain,

@@ -30,6 +30,7 @@ class OnDayDetailBookTappedActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(StatsAtlasUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(StatsAtlasLocalVariables()),
@@ -46,6 +47,7 @@ class OnDayDetailBookTappedActionTest {
                 bookId = 7,
                 initialCover = null,
             )
+
             stateFlow.value = StatsAtlasUiState(dayDetailSheet = SheetSession.Open(model = model))
 
             // ----- Act -----

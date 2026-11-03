@@ -29,16 +29,16 @@ internal class UpdateProgressScreenModel(
     appDispatchers: AppDispatchers,
     flows: List<UpdateProgressCollector>,
 ) : ToadScreenModel<
-    UpdateProgressUiState,
-    UpdateProgressEvent,
-    UpdateProgressDependencies,
-    UpdateProgressCollector,
-    UpdateProgressLocalVariables,
+        UpdateProgressUiState,
+        UpdateProgressEvent,
+        UpdateProgressDependencies,
+        UpdateProgressCollector,
+        UpdateProgressLocalVariables,
     >(
-    initialState = UpdateProgressUiState(),
-    initialLocalVariables = UpdateProgressLocalVariables(),
-    initializers = flows,
-) {
+        initialState = UpdateProgressUiState(),
+        initialLocalVariables = UpdateProgressLocalVariables(),
+        initializers = flows,
+    ) {
     override val dependencies = UpdateProgressDependencies(
         context = context,
         getUserIdAsFlow = getUserIdAsFlow,

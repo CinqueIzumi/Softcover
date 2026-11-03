@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
 import nl.rhaydus.toad.Collector
 
 internal sealed interface ScanCollector : Collector<
-        ScanUiState,
-        ScanEvent,
-        ScanDependencies,
-        LocalScanVariables,
-        >
+    ScanUiState,
+    ScanEvent,
+    ScanDependencies,
+    LocalScanVariables,
+>

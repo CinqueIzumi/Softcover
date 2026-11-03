@@ -44,6 +44,7 @@ class OnHideRecommendedBookActionTest {
     fun setUp() {
         hideRecommendedBookUseCase = mockk()
         restoreRecommendedBookUseCase = mockk()
+
         scope = ActionScope(
             stateFlow = MutableStateFlow(ExploreScreenUiState()),
             localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),

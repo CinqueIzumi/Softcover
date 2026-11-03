@@ -27,6 +27,7 @@ import org.koin.dsl.module
 actual val platformAppUpdateModule: Module = module {
     single<AppUpdateManager> {
         val context = androidContext()
+
         if (context.isDebuggable()) {
             FakeAppUpdateManager(context)
         } else {

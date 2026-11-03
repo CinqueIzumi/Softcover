@@ -35,11 +35,10 @@ enum class SoftcoverNotificationChannel(
 
     companion object {
         /** The delivery channel for a logical [NotificationCategory]. */
-        fun forCategory(category: NotificationCategory): SoftcoverNotificationChannel =
-            when (category) {
-                NotificationCategory.Reading -> Reading
-                NotificationCategory.Milestones -> Milestones
-                NotificationCategory.Session -> Session
-            }
+        fun forCategory(category: NotificationCategory): SoftcoverNotificationChannel = when (category) {
+            NotificationCategory.Reading -> Reading
+            NotificationCategory.Milestones -> Milestones
+            NotificationCategory.Session -> Session
+        }
     }
 }

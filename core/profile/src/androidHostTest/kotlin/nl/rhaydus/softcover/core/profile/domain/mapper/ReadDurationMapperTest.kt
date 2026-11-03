@@ -42,6 +42,7 @@ class ReadDurationMapperTest {
                     it.days,
                 )
             }
+
             val expected = listOf(
                 Triple(
                     7,
@@ -49,6 +50,7 @@ class ReadDurationMapperTest {
                     5,
                 ),
             )
+
             actual shouldBe expected
         }
 

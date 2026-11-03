@@ -23,6 +23,7 @@ class OnPageShakeEndedActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(FocusModeUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalFocusModeVariables(isFirstFocusEvent = false)),

@@ -37,6 +37,7 @@ internal class AndroidLegacySecureApiKeyStorage(
                 val ciphertext = input.readBytes()
 
                 val cipher = Cipher.getInstance(TRANSFORMATION)
+
                 cipher.init(
                     Cipher.DECRYPT_MODE,
                     secretKey,

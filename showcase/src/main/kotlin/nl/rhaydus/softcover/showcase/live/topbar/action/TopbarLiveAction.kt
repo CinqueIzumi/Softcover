@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.showcase.live.topbar.state.TopbarLiveUiState
 import nl.rhaydus.toad.UiAction
 
 internal sealed interface TopbarLiveAction : UiAction<
-        TopbarLiveDependencies,
-        TopbarLiveUiState,
-        TopbarLiveEvent,
-        TopbarLiveLocalVariables,
-        >
+    TopbarLiveDependencies,
+    TopbarLiveUiState,
+    TopbarLiveEvent,
+    TopbarLiveLocalVariables,
+>

@@ -115,6 +115,7 @@ class LibraryActiveFilterChipsBuilderTest {
 
             // ----- Assert -----
             result.chips.chips.single().label shouldBe "Not Fiction"
+
             result.chips["hardcover:exclude:1"] shouldBe LibraryFilterValue.HardcoverTag(
                 key = tagFiction,
                 direction = TagDirection.EXCLUDE,
@@ -131,6 +132,7 @@ class LibraryActiveFilterChipsBuilderTest {
 
             // ----- Assert -----
             result.chips.chips.single().label shouldBe "Not cozy"
+
             result.chips["yours:exclude:MOOD:cozy"] shouldBe LibraryFilterValue.YourTag(
                 key = tagCozy,
                 direction = TagDirection.EXCLUDE,
@@ -144,6 +146,7 @@ class LibraryActiveFilterChipsBuilderTest {
                 category = TagCategory.MOOD,
                 name = "slow",
             )
+
             val filters = LibraryFilters(
                 yourTags = TagSelection(
                     included = persistentSetOf(tagCozy),
@@ -310,14 +313,17 @@ class LibraryActiveFilterChipsBuilderTest {
 
             // ----- Assert -----
             result.chips.chips.forEach { chip -> (result.chips[chip.key] != null) shouldBe true }
+
             result.chips["hardcover:include:1"] shouldBe LibraryFilterValue.HardcoverTag(
                 key = tagFiction,
                 direction = TagDirection.INCLUDE,
             )
+
             result.chips["yours:include:MOOD:cozy"] shouldBe LibraryFilterValue.YourTag(
                 key = tagCozy,
                 direction = TagDirection.INCLUDE,
             )
+
             result.chips["format:ebook"] shouldBe LibraryFilterValue.Format(value = "ebook")
             result.chips["releaseYear:2021"] shouldBe LibraryFilterValue.ReleaseYear(year = 2021)
             result.chips["readYear:2020"] shouldBe LibraryFilterValue.ReadYear(year = 2020)

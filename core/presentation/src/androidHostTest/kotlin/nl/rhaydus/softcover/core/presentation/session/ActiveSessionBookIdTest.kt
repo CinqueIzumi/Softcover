@@ -20,6 +20,7 @@ class ActiveSessionBookIdTest {
     @BeforeEach
     fun setUp() {
         activeSession = MutableStateFlow(null)
+
         controller = mockk<ActiveSessionController>().also { mock ->
             every {
                 mock.activeSession
@@ -43,6 +44,7 @@ class ActiveSessionBookIdTest {
         fun `emits null while no session runs`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val emitted = mutableListOf<Int?>()
+
             backgroundScope.launch {
                 controller.activeSessionBookId().toList(emitted)
             }
@@ -58,6 +60,7 @@ class ActiveSessionBookIdTest {
         fun `emits the running session's book id and null again when it ends`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val emitted = mutableListOf<Int?>()
+
             backgroundScope.launch {
                 controller.activeSessionBookId().toList(emitted)
             }
@@ -74,9 +77,11 @@ class ActiveSessionBookIdTest {
         fun `does not re-emit when a new session state is for the same book`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val emitted = mutableListOf<Int?>()
+
             backgroundScope.launch {
                 controller.activeSessionBookId().toList(emitted)
             }
+
             activeSession.value = sessionFor(bookId = 7)
 
             // ----- Act -----
@@ -90,9 +95,11 @@ class ActiveSessionBookIdTest {
         fun `emits the new id when the session switches to another book`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val emitted = mutableListOf<Int?>()
+
             backgroundScope.launch {
                 controller.activeSessionBookId().toList(emitted)
             }
+
             activeSession.value = sessionFor(bookId = 7)
 
             // ----- Act -----

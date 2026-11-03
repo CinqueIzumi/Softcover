@@ -29,11 +29,13 @@ class RefreshActionTest {
     fun setUp() {
         refreshLibraryUseCase = mockk()
         stateFlow = MutableStateFlow(ReadingScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ReadingLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk<ReadingScreenDependencies>(relaxed = true).also { mock ->
             every {
                 mock.refreshLibraryUseCase

@@ -178,6 +178,7 @@ class BookStatsLineMapperTest {
             parts shouldHaveSize 3
             parts[0] shouldBe BookCardLinePart.Text(text = "1965")
             parts[1] shouldBe BookCardLinePart.Text(text = "12 readers")
+
             parts[2] shouldBe BookCardLinePart.Rating(
                 label = "4.2",
                 contentDescription = "Rated 4.2 out of 5",

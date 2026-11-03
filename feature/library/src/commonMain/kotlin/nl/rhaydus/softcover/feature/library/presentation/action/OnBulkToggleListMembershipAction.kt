@@ -39,6 +39,7 @@ internal class OnBulkToggleListMembershipAction(
         if (listId in state.listsBeingMutated) return
 
         val list = state.customLists.firstOrNull { it.id == listId } ?: return
+
         val books = state.resolveSelectedBooks()
 
         if (books.isEmpty()) return
@@ -72,7 +73,7 @@ internal class OnBulkToggleListMembershipAction(
 
                 ListMembership.NONE,
                 ListMembership.PARTIAL,
-                    -> {
+                -> {
                     for (book in books) {
                         if (book.id in existingBookIdsOnList) continue
 

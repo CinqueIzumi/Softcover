@@ -18,10 +18,10 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.theme.Corners
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 /**
  * A small pill of chrome reporting a status in one word or a short phrase — a reading deadline's
@@ -33,6 +33,7 @@ fun Badge(
     modifier: Modifier = Modifier,
 ) {
     val scheme = MaterialTheme.colorScheme
+
     val (container, content) = when (model.tone) {
         BadgeTone.Primary -> scheme.primary to scheme.onPrimary
         BadgeTone.PrimaryContainer -> scheme.primaryContainer to scheme.onPrimaryContainer
@@ -41,6 +42,7 @@ fun Badge(
         BadgeTone.Neutral -> scheme.surfaceContainerHigh to scheme.onSurfaceVariant
         BadgeTone.Scrim -> Color.Black.copy(alpha = 0.55f) to Color.White
     }
+
     val padding = when (model.size) {
         BadgeSize.Compact -> PaddingValues(
             horizontal = Spacing.xxs,
@@ -52,6 +54,7 @@ fun Badge(
             vertical = Spacing.xxs,
         )
     }
+
     val style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold)
 
     Surface(

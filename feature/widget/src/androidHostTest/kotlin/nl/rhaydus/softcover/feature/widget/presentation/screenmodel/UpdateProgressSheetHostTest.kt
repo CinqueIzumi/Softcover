@@ -48,6 +48,7 @@ class UpdateProgressSheetHostTest {
         recordBookProgress = mockk(relaxed = true)
         markBookAsRead = mockk(relaxed = true)
         localVariablesFlow = MutableStateFlow(UpdateProgressLocalVariables())
+
         scope = ActionScope(
             stateFlow = MutableStateFlow(UpdateProgressUiState()),
             localVariablesFlow = localVariablesFlow,
@@ -80,15 +81,15 @@ class UpdateProgressSheetHostTest {
         }
     }
 
-    private fun dependenciesFor(testScope: TestScope): UpdateProgressDependencies =
-        stubDependencies(testScope).also { dependencies ->
-            every {
-                dependencies.recordBookProgress
-            } returns recordBookProgress
-            every {
-                dependencies.markBookAsRead
-            } returns markBookAsRead
-        }
+    private fun dependenciesFor(testScope: TestScope): UpdateProgressDependencies = stubDependencies(testScope).also { dependencies ->
+        every {
+            dependencies.recordBookProgress
+        } returns recordBookProgress
+
+        every {
+            dependencies.markBookAsRead
+        } returns markBookAsRead
+    }
 
     @Nested
     inner class Record {
@@ -129,12 +130,14 @@ class UpdateProgressSheetHostTest {
             stubRecordGated(gate)
             val dependencies = dependenciesFor(this)
             val book = stubPagedBook(pages = 100)
+
             UpdateProgressSheetHost.record(
                 book = book,
                 entry = entry,
                 dependencies = dependencies,
                 scope = scope,
             )
+
             val firstJob = localVariablesFlow.value.mutationJob.shouldNotBeNull()
 
             // ----- Act -----
@@ -284,6 +287,7 @@ class UpdateProgressSheetHostTest {
                     actionAt = any(),
                 )
             } returns Result.success(ShelfMutationOutcome.Applied)
+
             val dependencies = dependenciesFor(this)
             val book = stubPagedBook(pages = 100)
 
@@ -315,6 +319,7 @@ class UpdateProgressSheetHostTest {
                     actionAt = any(),
                 )
             } returns Result.success(ShelfMutationOutcome.Applied)
+
             val dependencies = dependenciesFor(this)
 
             // ----- Act -----
@@ -342,6 +347,7 @@ class UpdateProgressSheetHostTest {
                     actionAt = any(),
                 )
             } returns Result.success(ShelfMutationOutcome.NoChange)
+
             val dependencies = dependenciesFor(this)
 
             // ----- Act -----
@@ -366,6 +372,7 @@ class UpdateProgressSheetHostTest {
                     actionAt = any(),
                 )
             } returns Result.failure(IllegalStateException("boom"))
+
             val dependencies = dependenciesFor(this)
 
             // ----- Act -----
@@ -385,6 +392,7 @@ class UpdateProgressSheetHostTest {
         fun `a new write cancels the previous in-flight write`() = runTest {
             // ----- Arrange -----
             val gate = CompletableDeferred<Unit>()
+
             coEvery {
                 markBookAsRead(
                     book = any(),
@@ -395,14 +403,17 @@ class UpdateProgressSheetHostTest {
                 gate.await()
                 Result.success(ShelfMutationOutcome.NoChange)
             }
+
             val dependencies = dependenciesFor(this)
             val book = stubPagedBook(pages = 100)
+
             UpdateProgressSheetHost.markAsRead(
                 book = book,
                 actionAt = null,
                 dependencies = dependencies,
                 scope = scope,
             )
+
             val firstJob = localVariablesFlow.value.mutationJob.shouldNotBeNull()
 
             // ----- Act -----
@@ -442,20 +453,25 @@ class UpdateProgressSheetHostTest {
             val gate = CompletableDeferred<Unit>()
             stubRecordGated(gate)
             val dependencies = dependenciesFor(this)
+
             UpdateProgressSheetHost.record(
                 book = stubPagedBook(pages = 100),
                 entry = entry,
                 dependencies = dependencies,
                 scope = scope,
             )
+
             var returned = false
+
             val waiter = launch {
                 UpdateProgressSheetHost.awaitPendingWrite(
                     dependencies = dependencies,
                     scope = scope,
                 )
+
                 returned = true
             }
+
             runCurrent()
             val returnedWhileInFlight = returned
 
@@ -488,9 +504,11 @@ class UpdateProgressSheetHostTest {
             verify(exactly = 1) {
                 dependencies.openVerdict(99)
             }
+
             verify(exactly = 0) {
                 dependencies.showSaveFailed()
             }
+
             eventChannel.tryReceive().getOrNull() shouldBe UpdateProgressEvent.Finished
         }
 
@@ -501,6 +519,7 @@ class UpdateProgressSheetHostTest {
                 finishedBookId = 99,
                 writeFailed = true,
             )
+
             val dependencies = dependenciesFor(this)
 
             // ----- Act -----
@@ -513,9 +532,11 @@ class UpdateProgressSheetHostTest {
             verify(exactly = 1) {
                 dependencies.showSaveFailed()
             }
+
             verify(exactly = 0) {
                 dependencies.openVerdict(any())
             }
+
             eventChannel.tryReceive().getOrNull() shouldBe UpdateProgressEvent.Finished
         }
 
@@ -534,9 +555,11 @@ class UpdateProgressSheetHostTest {
             verify(exactly = 0) {
                 dependencies.openVerdict(any())
             }
+
             verify(exactly = 0) {
                 dependencies.showSaveFailed()
             }
+
             eventChannel.tryReceive().getOrNull() shouldBe UpdateProgressEvent.Finished
         }
     }

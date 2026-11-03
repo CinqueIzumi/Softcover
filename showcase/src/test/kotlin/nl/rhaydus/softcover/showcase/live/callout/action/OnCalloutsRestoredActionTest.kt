@@ -27,6 +27,7 @@ class OnCalloutsRestoredActionTest {
     @BeforeEach
     fun setUp() {
         dependencies = mockk(relaxed = true)
+
         stateFlow = MutableStateFlow(
             CalloutLiveUiState(
                 topBar = calloutLiveTopBar(),
@@ -34,7 +35,9 @@ class OnCalloutsRestoredActionTest {
                 callouts = liveCallouts(),
             ),
         )
+
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(CalloutLiveLocalVariables()),
@@ -51,6 +54,7 @@ class OnCalloutsRestoredActionTest {
                 banners = persistentListOf(),
                 callouts = persistentListOf(),
             )
+
             val action = OnCalloutsRestoredAction()
 
             // ----- Act -----

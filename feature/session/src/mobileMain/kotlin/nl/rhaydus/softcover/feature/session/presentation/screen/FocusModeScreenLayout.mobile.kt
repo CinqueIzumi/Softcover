@@ -17,9 +17,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.layout.cappedContentWidth
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionUiModel
 import nl.rhaydus.softcover.feature.session.presentation.action.FocusModeAction
 import nl.rhaydus.softcover.feature.session.presentation.screen.section.FocusReadingPanel
@@ -59,7 +59,10 @@ internal actual fun FocusModeScreenLayout(
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
                     .cappedContentWidth()
-                    .padding(horizontal = Spacing.gutter, vertical = Spacing.md),
+                    .padding(
+                        horizontal = Spacing.gutter,
+                        vertical = Spacing.md,
+                    ),
             )
 
             val closeIcon = drawableIconResource(

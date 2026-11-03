@@ -23,11 +23,13 @@ class DesignPresetBundleConventionPlugin : Plugin<Project> {
             handWrittenFiles.from(fileTree(handWritten))
             val patterns = layout.projectDirectory.dir("docs/reference/design-system/patterns")
             screenPages.from(SCREEN_PAGES.map { patterns.file(it) })
+
             tokensDir.fileProvider(
                 provider {
                     project(":core:designsystem").tasks.getByName("exportDesignTokens").outputs.files.singleFile
                 },
             )
+
             rendersDir.set(layout.buildDirectory.dir("design-preset/renders"))
             bundleDir.set(layout.buildDirectory.dir("design-preset/project"))
             maxFiles.set(MAX_FILES)

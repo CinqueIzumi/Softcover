@@ -35,6 +35,7 @@ internal class MastheadCollector : ReadingCollector {
             .distinctUntilChanged()
             .collectLatest { snapshot ->
                 val title = greetingForNow()
+
                 val subtitle = PageMastheadSubtitle.Text(
                     text = buildSubtitle(
                         bookCount = snapshot.bookCount,

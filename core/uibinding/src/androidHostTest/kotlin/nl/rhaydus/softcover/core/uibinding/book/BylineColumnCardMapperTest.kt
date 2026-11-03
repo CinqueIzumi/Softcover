@@ -83,10 +83,12 @@ class BylineColumnCardMapperTest {
             // ----- Assert -----
             card.column().text.byline shouldBe "By Susanna Clarke, Neil Gaiman"
             card.column().text.title shouldBe "Piranesi"
+
             card.column().cover shouldBe BookCardCover(
                 model = cover,
                 badge = overlay,
             )
+
             card.key shouldBe BookCardKey.Book(bookId = 7)
         }
 
@@ -131,6 +133,7 @@ class BylineColumnCardMapperTest {
                 coverBadge = null,
                 hasMenu = true,
             )
+
             val withoutMenu = input.toBylineColumnCard(
                 cover = cover,
                 coverBadge = null,
@@ -188,6 +191,7 @@ class BylineColumnCardMapperTest {
                 count = count,
                 hasMenu = true,
             )
+
             val withoutMenu = bylineColumnStandIns(count = count)
 
             // ----- Assert -----

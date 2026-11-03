@@ -28,6 +28,7 @@ class OnApiKeyValueChangeActionTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(OnboardingUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalOnboardingVariables()),
@@ -41,6 +42,7 @@ class OnApiKeyValueChangeActionTest {
 
     private fun stubDependencies(testScope: TestScope): OnboardingDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<OnboardingDependencies>(relaxed = true).also { mock ->
             every {
                 mock.coroutineScope
@@ -109,9 +111,11 @@ class OnApiKeyValueChangeActionTest {
         fun `keeps the save button disabled for a non-blank value while loading`() = runTest {
             // ----- Arrange -----
             val base = stateWithApiKey(text = "old-key")
+
             stateFlow.value = base.copy(
                 loadingSheet = SheetSession.Open(model = onboardingLoadingSheet(progress = null)),
             )
+
             dependencies = stubDependencies(this)
             val action = OnApiKeyValueChangeAction(newValue = "new-key")
 
@@ -129,11 +133,13 @@ class OnApiKeyValueChangeActionTest {
         fun `keeps the save button disabled while the sheet is still closing`() = runTest {
             // ----- Arrange -----
             val base = stateWithApiKey(text = "old-key")
+
             stateFlow.value = base.copy(
                 loadingSheet = SheetSession.Open(
                     model = onboardingLoadingSheet(progress = 0f).requestingClose(),
                 ),
             )
+
             dependencies = stubDependencies(this)
 
             // ----- Act -----
@@ -166,9 +172,11 @@ class OnApiKeyValueChangeActionTest {
         fun `clears a previous field error when the text changes`() = runTest {
             // ----- Arrange -----
             val base = stateWithApiKey(text = "old-key")
+
             stateFlow.value = base.copy(
                 apiKeyField = base.apiKeyField.copy(error = TextFieldError(message = "rejected")),
             )
+
             dependencies = stubDependencies(this)
             val action = OnApiKeyValueChangeAction(newValue = "new-key")
 

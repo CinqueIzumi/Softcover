@@ -16,16 +16,16 @@ internal class ControlLiveScreenModel(
     themeStore: ShowcaseThemeStore,
     initializers: List<Collector<ControlLiveUiState, ControlLiveEvent, ControlLiveDependencies, ControlLiveLocalVariables>>,
 ) : ToadScreenModel<
-    ControlLiveUiState,
-    ControlLiveEvent,
-    ControlLiveDependencies,
-    Collector<ControlLiveUiState, ControlLiveEvent, ControlLiveDependencies, ControlLiveLocalVariables>,
-    ControlLiveLocalVariables,
+        ControlLiveUiState,
+        ControlLiveEvent,
+        ControlLiveDependencies,
+        Collector<ControlLiveUiState, ControlLiveEvent, ControlLiveDependencies, ControlLiveLocalVariables>,
+        ControlLiveLocalVariables,
     >(
-    initialState = controlLiveState(),
-    initialLocalVariables = ControlLiveLocalVariables(),
-    initializers = initializers,
-) {
+        initialState = controlLiveState(),
+        initialLocalVariables = ControlLiveLocalVariables(),
+        initializers = initializers,
+    ) {
     override val dependencies = ControlLiveDependencies(
         themeStore = themeStore,
         coroutineScope = screenModelScope,

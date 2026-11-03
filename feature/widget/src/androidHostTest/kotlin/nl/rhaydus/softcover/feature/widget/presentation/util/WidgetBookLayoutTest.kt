@@ -153,6 +153,7 @@ class WidgetBookLayoutTest {
                 fixedRowsDp = 40,
                 fontScale = 1f,
             )
+
             val scaled = sideTitleLines(
                 size = size,
                 fixedRowsDp = 40,
@@ -170,6 +171,7 @@ class WidgetBookLayoutTest {
                 width = 390.dp,
                 height = 250.dp,
             )
+
             val fixedRowsDp = 68
             val fontScale = 1.3f
             val worstCaseLineDp = 25
@@ -181,11 +183,13 @@ class WidgetBookLayoutTest {
                 fixedRowsDp = fixedRowsDp,
                 fontScale = fontScale,
             )
+
             val showsAuthor = sideShowsAuthor(
                 size = size,
                 fixedRowsDp = fixedRowsDp,
                 fontScale = fontScale,
             )
+
             val author = if (showsAuthor) worstCaseAuthorDp else 0
 
             // ----- Assert -----
@@ -289,6 +293,7 @@ class WidgetBookLayoutTest {
                 width = 110.dp,
                 height = 150.dp,
             )
+
             val tall = DpSize(
                 width = 110.dp,
                 height = 300.dp,
@@ -319,6 +324,7 @@ class WidgetBookLayoutTest {
                 width = 500.dp,
                 height = 300.dp,
             )
+
             val narrow = DpSize(
                 width = 110.dp,
                 height = 200.dp,

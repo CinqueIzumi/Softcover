@@ -45,6 +45,7 @@ class ReadingLifeCollectorTest {
         observeReadingStatsBackfilledUseCase = mockk()
         stateFlow = MutableStateFlow(ProfileUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalProfileVariables()),
@@ -66,6 +67,7 @@ class ReadingLifeCollectorTest {
 
     private fun stubDependencies(testScope: TestScope): ProfileDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<ProfileDependencies>(relaxed = true).also { mock ->
             every {
                 mock.observeReadingStatsUseCase
@@ -92,54 +94,55 @@ class ReadingLifeCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `updates the reading stats and history once the library is backfilled`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val stats = ReadingStats(
-                    booksRead = 12,
-                    totalPages = 3400,
+        fun `updates the reading stats and history once the library is backfilled`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val stats = ReadingStats(
+                booksRead = 12,
+                totalPages = 3400,
+            )
+
+            val history = ReadingHistory(trackedYears = 3)
+            val dependencies = stubDependencies(this)
+            val collector = ReadingLifeCollector()
+
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
                 )
-                val history = ReadingHistory(trackedYears = 3)
-                val dependencies = stubDependencies(this)
-                val collector = ReadingLifeCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                readingStatsFlow.value = stats
-                readingHistoryFlow.value = history
-
-                // ----- Assert -----
-                stateFlow.value.readingStats shouldBe stats
-                stateFlow.value.readingHistory shouldBe history
-                job.cancel()
             }
+
+            // ----- Act -----
+            readingStatsFlow.value = stats
+            readingHistoryFlow.value = history
+
+            // ----- Assert -----
+            stateFlow.value.readingStats shouldBe stats
+            stateFlow.value.readingHistory shouldBe history
+            job.cancel()
+        }
 
         @Test
-        fun `leaves the reading stats and history unset while the library is not backfilled`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                backfilledFlow.value = false
-                val dependencies = stubDependencies(this)
-                val collector = ReadingLifeCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+        fun `leaves the reading stats and history unset while the library is not backfilled`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            backfilledFlow.value = false
+            val dependencies = stubDependencies(this)
+            val collector = ReadingLifeCollector()
 
-                // ----- Act -----
-                readingStatsFlow.value = ReadingStats(booksRead = 12)
-
-                // ----- Assert -----
-                stateFlow.value.readingStats shouldBe null
-                stateFlow.value.readingHistory shouldBe null
-                job.cancel()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
             }
+
+            // ----- Act -----
+            readingStatsFlow.value = ReadingStats(booksRead = 12)
+
+            // ----- Assert -----
+            stateFlow.value.readingStats shouldBe null
+            stateFlow.value.readingHistory shouldBe null
+            job.cancel()
+        }
     }
 }

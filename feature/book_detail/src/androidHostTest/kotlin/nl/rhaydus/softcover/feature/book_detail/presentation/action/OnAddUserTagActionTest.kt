@@ -38,6 +38,7 @@ class OnAddUserTagActionTest {
         saveUserTagsUseCase = mockk()
         recordAppliedTagsUseCase = mockk()
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -52,6 +53,7 @@ class OnAddUserTagActionTest {
         } answers {
             Result.success(secondArg())
         }
+
         coEvery {
             recordAppliedTagsUseCase(any())
         } returns Result.success(Unit)
@@ -59,19 +61,24 @@ class OnAddUserTagActionTest {
 
     private fun stubDependencies(testScope: TestScope): BookDetailDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<BookDetailDependencies>(relaxed = true).also { mock ->
             every {
                 mock.saveUserTagsUseCase
             } returns saveUserTagsUseCase
+
             every {
                 mock.recordAppliedTagsUseCase
             } returns recordAppliedTagsUseCase
+
             every {
                 mock.coroutineScope
             } returns testScope
+
             every {
                 mock.mainDispatcher
             } returns dispatcher
+
             every {
                 mock.launch(any())
             } answers { callOriginal() }
@@ -82,6 +89,7 @@ class OnAddUserTagActionTest {
         every {
             this@mockk.id
         } returns id
+
         every {
             this@mockk.userBook
         } returns mockk()
@@ -126,6 +134,7 @@ class OnAddUserTagActionTest {
 
             // ----- Assert -----
             stateFlow.value shouldBe initialState
+
             coVerify(exactly = 0) {
                 saveUserTagsUseCase(
                     bookId = any(),
@@ -152,6 +161,7 @@ class OnAddUserTagActionTest {
 
             // ----- Assert -----
             stateFlow.value shouldBe initialState
+
             coVerify(exactly = 0) {
                 saveUserTagsUseCase(
                     bookId = any(),
@@ -178,6 +188,7 @@ class OnAddUserTagActionTest {
 
             // ----- Assert -----
             stateFlow.value shouldBe initialState
+
             coVerify(exactly = 0) {
                 saveUserTagsUseCase(
                     bookId = any(),
@@ -190,15 +201,19 @@ class OnAddUserTagActionTest {
         fun `adds a tag with the same name in a different category`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
+
             val existing = stubTag(
                 "cozy",
                 TagCategory.GENRE,
             )
+
             val added = stubTag(
                 "cozy",
                 TagCategory.MOOD,
             )
+
             stateFlow.value = loadedState(listOf(existing))
+
             val action = OnAddUserTagAction(
                 name = "cozy",
                 category = TagCategory.MOOD,
@@ -224,10 +239,12 @@ class OnAddUserTagActionTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
             val existing = stubTag("sci-fi")
+
             stateFlow.value = loadedState(
                 listOf(existing),
                 bookId = 7,
             )
+
             val action = OnAddUserTagAction(
                 name = "  epic  ",
                 category = TagCategory.TAG,
@@ -259,6 +276,7 @@ class OnAddUserTagActionTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
             stateFlow.value = loadedState(emptyList()).copy(tagEditorInput = "epic")
+
             val action = OnAddUserTagAction(
                 name = "  epic  ",
                 category = TagCategory.TAG,
@@ -317,6 +335,7 @@ class OnAddUserTagActionTest {
 
             // ----- Assert -----
             stateFlow.value shouldBe initialState
+
             coVerify(exactly = 0) {
                 saveUserTagsUseCase(
                     bookId = any(),
@@ -343,6 +362,7 @@ class OnAddUserTagActionTest {
 
             // ----- Assert -----
             stateFlow.value shouldBe initialState
+
             coVerify(exactly = 0) {
                 saveUserTagsUseCase(
                     bookId = any(),

@@ -59,6 +59,7 @@ private fun LocalDate.toBylineLabel(today: LocalDate): String {
         char(' ')
         monthName(MonthNames.ENGLISH_ABBREVIATED)
     }
+
     val base = formatter.format(this)
 
     return if (year == today.year) base else "$base $year"

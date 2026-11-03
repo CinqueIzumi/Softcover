@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiSt
 import nl.rhaydus.toad.UiAction
 
 internal sealed interface OnboardingAction : UiAction<
-        OnboardingDependencies,
-        OnboardingUiState,
-        OnboardingEvent,
-        LocalOnboardingVariables,
-        >
+    OnboardingDependencies,
+    OnboardingUiState,
+    OnboardingEvent,
+    LocalOnboardingVariables,
+>

@@ -29,6 +29,7 @@ internal object ContentCheck {
         val unknownInBrandBook = brandBook?.let { file ->
             references(file, backticked) { '-' in it && it.substringBefore('-') in prefixes }
         }.orEmpty()
+
         val unknownInCss = css?.let { references(it, cssVariable) { true } }.orEmpty()
         val hardCoded = css?.let { hardCodedColours(it) }.orEmpty()
 

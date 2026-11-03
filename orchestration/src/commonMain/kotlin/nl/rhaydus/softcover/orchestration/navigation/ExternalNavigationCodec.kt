@@ -6,13 +6,12 @@ import nl.rhaydus.softcover.core.presentation.navigation.TabDestination
 private const val PREFIX = "softcover://open/"
 
 // Wire literals are persisted in PendingIntents that outlive app updates; never derive them from enum names.
-internal fun ExternalNavigationRequest.toUriString(): String =
-    PREFIX + when (this) {
-        is ExternalNavigationRequest.OpenTab -> "tab/${destination.wireName()}"
-        is ExternalNavigationRequest.OpenBook -> "book/$bookId"
-        is ExternalNavigationRequest.OpenBookVerdict -> "book/$bookId/verdict"
-        ExternalNavigationRequest.OpenFocusMode -> "focus"
-    }
+internal fun ExternalNavigationRequest.toUriString(): String = PREFIX + when (this) {
+    is ExternalNavigationRequest.OpenTab -> "tab/${destination.wireName()}"
+    is ExternalNavigationRequest.OpenBook -> "book/$bookId"
+    is ExternalNavigationRequest.OpenBookVerdict -> "book/$bookId/verdict"
+    ExternalNavigationRequest.OpenFocusMode -> "focus"
+}
 
 internal fun parseExternalNavigationRequest(uri: String): ExternalNavigationRequest? {
     if (uri.startsWith(PREFIX).not()) return null
@@ -44,19 +43,17 @@ private fun parseBook(segments: List<String>): ExternalNavigationRequest? {
     }
 }
 
-private fun TabDestination.wireName(): String =
-    when (this) {
-        TabDestination.READING -> "reading"
-        TabDestination.LIBRARY -> "library"
-        TabDestination.EXPLORE -> "explore"
-        TabDestination.SETTINGS -> "settings"
-    }
+private fun TabDestination.wireName(): String = when (this) {
+    TabDestination.READING -> "reading"
+    TabDestination.LIBRARY -> "library"
+    TabDestination.EXPLORE -> "explore"
+    TabDestination.SETTINGS -> "settings"
+}
 
-private fun tabFromWireName(name: String): TabDestination? =
-    when (name) {
-        "reading" -> TabDestination.READING
-        "library" -> TabDestination.LIBRARY
-        "explore" -> TabDestination.EXPLORE
-        "settings" -> TabDestination.SETTINGS
-        else -> null
-    }
+private fun tabFromWireName(name: String): TabDestination? = when (name) {
+    "reading" -> TabDestination.READING
+    "library" -> TabDestination.LIBRARY
+    "explore" -> TabDestination.EXPLORE
+    "settings" -> TabDestination.SETTINGS
+    else -> null
+}

@@ -28,6 +28,7 @@ class UserTagVocabularyDaoTest {
             builder = Room.inMemoryDatabaseBuilder(context = context),
             queryContext = testDispatcher,
         )
+
         dao = database.userTagVocabularyDao()
     }
 
@@ -81,6 +82,7 @@ class UserTagVocabularyDaoTest {
                 category = "genre",
                 name = "sci-fi",
             )
+
             val userTwoEntity = UserTagVocabularyEntity(
                 userId = 2,
                 category = "genre",
@@ -107,11 +109,13 @@ class UserTagVocabularyDaoTest {
                 category = "genre",
                 name = "sci-fi",
             )
+
             val userTwoEntity = UserTagVocabularyEntity(
                 userId = 2,
                 category = "genre",
                 name = "fantasy",
             )
+
             dao.upsertAll(listOf(userOneEntity, userTwoEntity))
 
             // ----- Act -----
@@ -121,6 +125,7 @@ class UserTagVocabularyDaoTest {
             dao.observe(userId = 1).test {
                 awaitItem() shouldBe emptyList()
             }
+
             dao.observe(userId = 2).test {
                 awaitItem() shouldBe listOf(userTwoEntity)
             }
@@ -157,6 +162,7 @@ class UserTagVocabularyDaoTest {
                 name = "sci-fi",
                 usageCount = 12,
             )
+
             dao.upsertAll(listOf(existing))
 
             val conflicting = UserTagVocabularyEntity(
@@ -186,11 +192,13 @@ class UserTagVocabularyDaoTest {
                 category = "genre",
                 name = "sci-fi",
             )
+
             val userTwoEntity = UserTagVocabularyEntity(
                 userId = 2,
                 category = "genre",
                 name = "fantasy",
             )
+
             dao.upsertAll(listOf(userOneEntity, userTwoEntity))
 
             val newRows = listOf(
@@ -212,6 +220,7 @@ class UserTagVocabularyDaoTest {
             dao.observe(userId = 1).test {
                 awaitItem() shouldBe newRows
             }
+
             dao.observe(userId = 2).test {
                 awaitItem() shouldBe listOf(userTwoEntity)
             }

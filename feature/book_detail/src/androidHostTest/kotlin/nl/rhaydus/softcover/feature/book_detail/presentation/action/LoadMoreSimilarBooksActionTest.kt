@@ -38,6 +38,7 @@ class LoadMoreSimilarBooksActionTest {
         loadSimilarBooksPageUseCase = mockk()
         stateFlow = MutableStateFlow(buildBookDetailUiState())
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables(similarBooksSourceId = SOURCE_ID))
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
@@ -47,6 +48,7 @@ class LoadMoreSimilarBooksActionTest {
 
     private fun stubDependencies(testScope: TestScope): BookDetailDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<BookDetailDependencies>(relaxed = true).also { mock ->
             every {
                 mock.loadSimilarBooksPageUseCase
@@ -89,6 +91,7 @@ class LoadMoreSimilarBooksActionTest {
                     pageSize = any(),
                 )
             }
+
             stateFlow.value.isLoadingSimilarBooks shouldBe false
             runningJob.cancel()
         }
@@ -113,6 +116,7 @@ class LoadMoreSimilarBooksActionTest {
                     pageSize = any(),
                 )
             }
+
             stateFlow.value.isLoadingSimilarBooks shouldBe false
         }
 
@@ -142,6 +146,7 @@ class LoadMoreSimilarBooksActionTest {
         fun `stores the first page, advances the offset and settles the flags`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
+
             coEvery {
                 loadSimilarBooksPageUseCase(
                     sourceBookId = SOURCE_ID,
@@ -173,10 +178,12 @@ class LoadMoreSimilarBooksActionTest {
         fun `requests the next page from the stored offset and appends after the loaded books`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
+
             localVariablesFlow.value = localVariablesFlow.value.copy(
                 similarBooks = listOf(buildSimilarBook(id = 10), buildSimilarBook(id = 11)),
                 similarBooksOffset = 2,
             )
+
             coEvery {
                 loadSimilarBooksPageUseCase(
                     sourceBookId = SOURCE_ID,
@@ -206,10 +213,12 @@ class LoadMoreSimilarBooksActionTest {
         fun `drops books of a new page that are already loaded`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
+
             localVariablesFlow.value = localVariablesFlow.value.copy(
                 similarBooks = listOf(buildSimilarBook(id = 10), buildSimilarBook(id = 11)),
                 similarBooksOffset = 2,
             )
+
             coEvery {
                 loadSimilarBooksPageUseCase(
                     sourceBookId = SOURCE_ID,
@@ -241,15 +250,19 @@ class LoadMoreSimilarBooksActionTest {
                 id = 10,
                 canonicalId = 50,
             )
+
             val otherEdition = buildSimilarBook(
                 id = 11,
                 canonicalId = 50,
             )
+
             dependencies = stubDependencies(this)
+
             localVariablesFlow.value = localVariablesFlow.value.copy(
                 similarBooks = listOf(loadedBook),
                 similarBooksOffset = 1,
             )
+
             coEvery {
                 loadSimilarBooksPageUseCase(
                     sourceBookId = SOURCE_ID,
@@ -280,12 +293,15 @@ class LoadMoreSimilarBooksActionTest {
                 id = 10,
                 canonicalId = 50,
             )
+
             val canonicalBook = buildSimilarBook(id = 50)
             dependencies = stubDependencies(this)
+
             localVariablesFlow.value = localVariablesFlow.value.copy(
                 similarBooks = listOf(loadedBook),
                 similarBooksOffset = 1,
             )
+
             coEvery {
                 loadSimilarBooksPageUseCase(
                     sourceBookId = SOURCE_ID,
@@ -313,6 +329,7 @@ class LoadMoreSimilarBooksActionTest {
         fun `requests again from the advanced offset when the first page is filtered empty`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
+
             coEvery {
                 loadSimilarBooksPageUseCase(
                     sourceBookId = SOURCE_ID,
@@ -325,6 +342,7 @@ class LoadMoreSimilarBooksActionTest {
                     hasMore = true,
                 ),
             )
+
             coEvery {
                 loadSimilarBooksPageUseCase(
                     sourceBookId = SOURCE_ID,
@@ -354,6 +372,7 @@ class LoadMoreSimilarBooksActionTest {
         fun `does not chase an empty page when the ranking is spent`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
+
             coEvery {
                 loadSimilarBooksPageUseCase(
                     sourceBookId = SOURCE_ID,
@@ -381,6 +400,7 @@ class LoadMoreSimilarBooksActionTest {
                     pageSize = any(),
                 )
             }
+
             stateFlow.value.similarBookIds shouldBe emptyList()
             stateFlow.value.similarBooksHasMore shouldBe false
         }
@@ -389,6 +409,7 @@ class LoadMoreSimilarBooksActionTest {
         fun `stops chasing empty pages after a bounded number of requests`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
+
             coEvery {
                 loadSimilarBooksPageUseCase(
                     sourceBookId = SOURCE_ID,
@@ -397,6 +418,7 @@ class LoadMoreSimilarBooksActionTest {
                 )
             } answers {
                 val offset = secondArg<Int>()
+
                 Result.success(
                     SimilarBooksPage(
                         books = emptyList(),
@@ -420,6 +442,7 @@ class LoadMoreSimilarBooksActionTest {
                     pageSize = any(),
                 )
             }
+
             stateFlow.value.similarBookIds shouldBe emptyList()
             stateFlow.value.similarBooksHasMore shouldBe true
             stateFlow.value.isLoadingSimilarBooks shouldBe false
@@ -429,6 +452,7 @@ class LoadMoreSimilarBooksActionTest {
         fun `collapses the section when the first page fails`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
+
             coEvery {
                 loadSimilarBooksPageUseCase(
                     sourceBookId = SOURCE_ID,
@@ -452,10 +476,12 @@ class LoadMoreSimilarBooksActionTest {
         fun `keeps the loaded cards and stops paging when a later page fails`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
+
             localVariablesFlow.value = localVariablesFlow.value.copy(
                 similarBooks = listOf(buildSimilarBook(id = 10), buildSimilarBook(id = 11)),
                 similarBooksOffset = 2,
             )
+
             coEvery {
                 loadSimilarBooksPageUseCase(
                     sourceBookId = SOURCE_ID,

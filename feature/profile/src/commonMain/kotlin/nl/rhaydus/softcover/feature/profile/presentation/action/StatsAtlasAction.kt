@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
 import nl.rhaydus.toad.UiAction
 
 internal sealed interface StatsAtlasAction : UiAction<
-        StatsAtlasDependencies,
-        StatsAtlasUiState,
-        StatsAtlasEvent,
-        StatsAtlasLocalVariables,
-        >
+    StatsAtlasDependencies,
+    StatsAtlasUiState,
+    StatsAtlasEvent,
+    StatsAtlasLocalVariables,
+>

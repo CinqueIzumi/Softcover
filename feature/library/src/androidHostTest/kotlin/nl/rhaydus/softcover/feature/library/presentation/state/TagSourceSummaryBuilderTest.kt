@@ -102,10 +102,12 @@ class TagSourceSummaryBuilderTest {
                 name = "a",
                 count = 3,
             )
+
             val second = yours(
                 name = "b",
                 count = 2,
             )
+
             val filters = LibraryFilters(
                 yourTags = TagSelection(
                     included = persistentSetOf(second.key),
@@ -134,6 +136,7 @@ class TagSourceSummaryBuilderTest {
                 name = "a",
                 count = 3,
             )
+
             val filters = LibraryFilters(yourTags = TagSelection(excluded = persistentSetOf(tag.key)))
 
             // ----- Act -----
@@ -156,6 +159,7 @@ class TagSourceSummaryBuilderTest {
                 name = "a",
                 count = 3,
             )
+
             val filters = LibraryFilters(yourTags = TagSelection(included = persistentSetOf(tag.key)))
 
             // ----- Act -----
@@ -188,6 +192,7 @@ class TagSourceSummaryBuilderTest {
                     ),
                 ),
             )
+
             val filters = LibraryFilters(
                 hardcoverTags = TagSelection(
                     included = persistentSetOf(
@@ -217,12 +222,14 @@ class TagSourceSummaryBuilderTest {
                 category = TagCategory.MOOD,
                 name = "gone",
             )
+
             val options = yoursOptions(
                 yours(
                     name = "cozy",
                     count = 2,
                 ),
             )
+
             val filters = LibraryFilters(yourTags = TagSelection(excluded = persistentSetOf(goneKey)))
 
             // ----- Act -----
@@ -246,6 +253,7 @@ class TagSourceSummaryBuilderTest {
                 id = 99,
                 name = "gone",
             )
+
             val filters = LibraryFilters(hardcoverTags = TagSelection(included = persistentSetOf(goneKey)))
 
             // ----- Act -----
@@ -276,6 +284,7 @@ class TagSourceSummaryBuilderTest {
 
             // ----- Act -----
             val empty = buildYours(options = options)
+
             val typed = buildYours(
                 options = options,
                 section = TagSectionDraft(search = "a"),
@@ -310,6 +319,7 @@ class TagSourceSummaryBuilderTest {
 
             // ----- Act -----
             val yoursSummary = buildYours(options = options)
+
             val hardcoverSummary = buildTagSourceSummary(
                 source = TagSource.HARDCOVER,
                 options = options,
@@ -357,6 +367,7 @@ class TagSourceSummaryBuilderTest {
                 name = "cozy",
                 count = 9,
             )
+
             val options = yoursOptions(
                 chosen,
                 yours(
@@ -364,6 +375,7 @@ class TagSourceSummaryBuilderTest {
                     count = 1,
                 ),
             )
+
             val filters = LibraryFilters(yourTags = TagSelection(included = persistentSetOf(chosen.key)))
 
             // ----- Act -----
@@ -663,6 +675,7 @@ class TagSourceSummaryBuilderTest {
                 count = 3,
                 category = TagCategory.GENRE,
             )
+
             val options = yoursOptions(
                 yours(
                     name = "cozy",
@@ -671,6 +684,7 @@ class TagSourceSummaryBuilderTest {
                 ),
                 chosen,
             )
+
             val filters = LibraryFilters(yourTags = TagSelection(included = persistentSetOf(chosen.key)))
 
             // ----- Act -----
@@ -691,6 +705,7 @@ class TagSourceSummaryBuilderTest {
                 name = "fantasy",
                 count = 3,
             )
+
             val filters = LibraryFilters(yourTags = TagSelection(included = persistentSetOf(only.key)))
 
             // ----- Act -----
@@ -730,6 +745,7 @@ class TagSourceSummaryBuilderTest {
                 category = TagCategory.MOOD,
                 name = "gone",
             )
+
             val filters = LibraryFilters(yourTags = TagSelection(included = persistentSetOf(goneKey)))
 
             // ----- Act -----

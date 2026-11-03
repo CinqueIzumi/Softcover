@@ -30,6 +30,7 @@ class BookUserTagDaoTest {
             builder = Room.inMemoryDatabaseBuilder(context = context),
             queryContext = testDispatcher,
         )
+
         dao = database.bookUserTagDao()
         bookDao = database.bookDao()
     }
@@ -87,12 +88,15 @@ class BookUserTagDaoTest {
             insertBook(id = 1)
             insertBook(id = 2)
             insertBook(id = 3)
+
             val seeded = tags(
                 1 to "old",
                 2 to "old",
                 3 to "keep",
             )
+
             dao.insertAll(seeded)
+
             val replacement = tags(
                 1 to "new",
                 2 to "fresh",
@@ -115,10 +119,12 @@ class BookUserTagDaoTest {
             // ----- Arrange -----
             insertBook(id = 1)
             insertBook(id = 2)
+
             val seeded = tags(
                 1 to "old",
                 2 to "old",
             )
+
             dao.insertAll(seeded)
 
             // ----- Act -----
@@ -140,11 +146,13 @@ class BookUserTagDaoTest {
             // ----- Arrange -----
             insertBook(id = 1)
             insertBook(id = 2)
+
             val seeded = tags(
                 1 to "old",
                 1 to "older",
                 2 to "keep",
             )
+
             dao.insertAll(seeded)
 
             // ----- Act -----
@@ -188,10 +196,12 @@ class BookUserTagDaoTest {
             // ----- Arrange -----
             insertBook(id = 1)
             insertBook(id = 2)
+
             val seeded = tags(
                 1 to "gone",
                 2 to "stays",
             )
+
             dao.insertAll(seeded)
 
             // ----- Act -----
@@ -228,11 +238,13 @@ class BookUserTagDaoTest {
             // ----- Arrange -----
             insertBook(id = 1)
             insertBook(id = 2)
+
             val seeded = tags(
                 1 to "shared",
                 1 to "only-old",
                 2 to "shared",
             )
+
             dao.insertAll(seeded)
 
             // ----- Act -----
@@ -243,6 +255,7 @@ class BookUserTagDaoTest {
 
             // ----- Assert -----
             dao.getForBook(bookId = 1).shouldBeEmpty()
+
             dao.getForBook(bookId = 2) shouldContainExactlyInAnyOrder
                 tags(
                     2 to "shared",
@@ -274,10 +287,12 @@ class BookUserTagDaoTest {
             // ----- Arrange -----
             insertBook(id = 1)
             insertBook(id = 2)
+
             val seeded = tags(
                 1 to "a",
                 2 to "b",
             )
+
             dao.insertAll(seeded)
 
             // ----- Act -----

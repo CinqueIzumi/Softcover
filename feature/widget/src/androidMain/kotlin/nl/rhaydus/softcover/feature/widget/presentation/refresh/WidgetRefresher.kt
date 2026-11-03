@@ -208,7 +208,7 @@ internal class WidgetRefresher(
             changes = { changes().merge() },
             debounce = DEBOUNCE,
         )
-            .onEach { refresh(widgets.filter { targets == null || it.javaClass in targets }) }
+            .onEach { refresh(widgets.filter { widget -> targets == null || widget.javaClass in targets }) }
             .launchIn(applicationScope.scope)
     }
 

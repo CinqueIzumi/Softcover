@@ -11,8 +11,7 @@ import nl.rhaydus.softcover.feature.settings.domain.repository.RoadmapRepository
 class RefreshRoadmapUseCase(
     private val roadmapRepository: RoadmapRepository,
 ) {
-    suspend operator fun invoke(force: Boolean = false): Result<Unit> =
-        runCatchingLogged(context = "Failed to refresh the roadmap") {
-            roadmapRepository.refreshRoadmap(force = force)
-        }
+    suspend operator fun invoke(force: Boolean = false): Result<Unit> = runCatchingLogged(context = "Failed to refresh the roadmap") {
+        roadmapRepository.refreshRoadmap(force = force)
+    }
 }

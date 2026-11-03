@@ -53,6 +53,7 @@ private fun nearestRank(
     fraction: Double,
 ): Int {
     val rank = ceil(fraction * sorted.size).toInt()
+
     val index = (rank - 1).coerceIn(
         minimumValue = 0,
         maximumValue = sorted.lastIndex,

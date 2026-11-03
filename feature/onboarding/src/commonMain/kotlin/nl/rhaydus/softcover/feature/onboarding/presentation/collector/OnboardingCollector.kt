@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiSt
 import nl.rhaydus.toad.Collector
 
 internal sealed interface OnboardingCollector : Collector<
-        OnboardingUiState,
-        OnboardingEvent,
-        OnboardingDependencies,
-        LocalOnboardingVariables,
-        >
+    OnboardingUiState,
+    OnboardingEvent,
+    OnboardingDependencies,
+    LocalOnboardingVariables,
+>

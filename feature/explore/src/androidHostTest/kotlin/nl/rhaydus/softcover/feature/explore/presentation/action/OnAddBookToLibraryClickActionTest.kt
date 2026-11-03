@@ -34,6 +34,7 @@ class OnAddBookToLibraryClickActionTest {
     fun setUp() {
         markBookAsWantToReadUseCase = mockk()
         stateFlow = MutableStateFlow(ExploreScreenUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
@@ -43,6 +44,7 @@ class OnAddBookToLibraryClickActionTest {
 
     private fun stubDependencies(testScope: TestScope): ExploreDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+
         return mockk<ExploreDependencies>(relaxed = true).also { mock ->
             every {
                 mock.markBookAsWantToReadUseCase
@@ -92,6 +94,7 @@ class OnAddBookToLibraryClickActionTest {
             coVerify {
                 markBookAsWantToReadUseCase(book = book)
             }
+
             eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<ExploreEvent.BookAddedEvent>()
         }
 

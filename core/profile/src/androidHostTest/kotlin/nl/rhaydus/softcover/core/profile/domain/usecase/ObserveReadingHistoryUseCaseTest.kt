@@ -29,6 +29,7 @@ class ObserveReadingHistoryUseCaseTest {
     fun setUp() {
         getReadUserBooksUseCase = mockk()
         val dispatcher = UnconfinedTestDispatcher()
+
         useCase = ObserveReadingHistoryUseCase(
             getReadUserBooksUseCase = getReadUserBooksUseCase,
             appDispatchers = AppDispatchers(
@@ -51,6 +52,7 @@ class ObserveReadingHistoryUseCaseTest {
                 finishedAt = "2025-05-01",
                 pages = 10,
             ),)
+
             every {
                 getReadUserBooksUseCase()
             } returns flowOf(books)
@@ -71,6 +73,7 @@ class ObserveReadingHistoryUseCaseTest {
                 id = 1,
                 finishedAt = "2025-05-01",
             ),)
+
             every {
                 getReadUserBooksUseCase()
             } returns flowOf(

@@ -61,11 +61,13 @@ class BookDeadlineRepositoryImplTest {
             repository.observe(bookId = 42).test {
                 val item = awaitItem()
                 item.shouldNotBeNull().bookId shouldBe 42
+
                 item.deadlineDate shouldBe LocalDate(
                     2026,
                     7,
                     10,
                 )
+
                 item.initialPerDay shouldBe 8f
                 awaitComplete()
             }
@@ -97,6 +99,7 @@ class BookDeadlineRepositoryImplTest {
                 setAt = "2026-04-01",
                 initialPerDay = 10f,
             )
+
             val entity2 = buildEntity(
                 bookId = 2,
                 deadlineDate = "2026-06-15",
@@ -129,11 +132,13 @@ class BookDeadlineRepositoryImplTest {
                 4,
                 20,
             )
+
             val deadlineDate = LocalDate(
                 2026,
                 5,
                 20,
             )  // 30 days away
+
             // 300 units, current 0 → 300 remaining / 30 days = 10f
             val entitySlot = slot<BookDeadlineEntity>()
 
@@ -166,6 +171,7 @@ class BookDeadlineRepositoryImplTest {
                 4,
                 20,
             )
+
             val deadlineDate = today  // 0 days until deadline
             // 200 units remaining, 0 days → initialPerDay = remaining.toFloat()
             val entitySlot = slot<BookDeadlineEntity>()
@@ -196,11 +202,13 @@ class BookDeadlineRepositoryImplTest {
                 4,
                 20,
             )
+
             val deadlineDate = LocalDate(
                 2026,
                 4,
                 19,
             )  // yesterday
+
             val entitySlot = slot<BookDeadlineEntity>()
 
             coEvery {
@@ -229,11 +237,13 @@ class BookDeadlineRepositoryImplTest {
                 4,
                 20,
             )
+
             val deadlineDate = LocalDate(
                 2026,
                 5,
                 20,
             )
+
             val entitySlot = slot<BookDeadlineEntity>()
 
             coEvery {

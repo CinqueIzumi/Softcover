@@ -27,12 +27,11 @@ fun DeadlineProgress.toBadgeUiModel(): BadgeUiModel {
 }
 
 /** A deadline's progress as a cover overlay, greyscaled exactly on [DeadlineStatus.Expired]. */
-fun DeadlineProgress.toCoverOverlayUiModel(): CoverOverlayUiModel =
-    CoverOverlayUiModel(
-        badge = toBadgeUiModel(),
-        corner = CoverOverlayCorner.TopEnd,
-        grayscale = status == DeadlineStatus.Expired,
-    )
+fun DeadlineProgress.toCoverOverlayUiModel(): CoverOverlayUiModel = CoverOverlayUiModel(
+    badge = toBadgeUiModel(),
+    corner = CoverOverlayCorner.TopEnd,
+    grayscale = status == DeadlineStatus.Expired,
+)
 
 /**
  * A deadline's progress as the summary line's text, in [dateStyle]'s date format. The pace is the
@@ -68,13 +67,12 @@ fun DeadlineProgress.toDeadlineSummaryUiModel(
 fun DeadlineProgress.toDeadlineRowUiModel(
     dateStyle: DateStyle,
     isPaused: Boolean = false,
-): DeadlineRowUiModel =
-    DeadlineRowUiModel(
-        title = "Finish by ${dateStyle.formatter.format(deadline)}",
-        badge = if (isPaused) null else toBadgeUiModel(),
-        goal = if (isPaused) "On hold. Resume to get back on pace." else goalText(),
-        isExpired = isExpired,
-    )
+): DeadlineRowUiModel = DeadlineRowUiModel(
+    title = "Finish by ${dateStyle.formatter.format(deadline)}",
+    badge = if (isPaused) null else toBadgeUiModel(),
+    goal = if (isPaused) "On hold. Resume to get back on pace." else goalText(),
+    isExpired = isExpired,
+)
 
 private fun DeadlineProgress.goalText(): String {
     if (isExpired) {
@@ -85,10 +83,12 @@ private fun DeadlineProgress.goalText(): String {
 
     val verb = if (unit == DeadlineUnit.SECONDS) "Listen to" else "Read"
     val dayLabel = if (daysRemaining == 1L) "day" else "days"
+
     val pace = formatPacePerDay(
         amount = ceil(requiredPerDay).toInt(),
         unit = unit,
     )
+
     val base = "$verb $pace for the next $daysRemaining $dayLabel to finish on time."
 
     if (isOnTrack || unitsBehindSchedule <= 0) return base

@@ -29,6 +29,7 @@ class OnShareSheetOpenActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(ProfileUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalProfileVariables()),
@@ -46,6 +47,7 @@ class OnShareSheetOpenActionTest {
                 readingHistory = buildShareReadingHistory(),
                 userProfileData = buildShareProfile(),
             )
+
             val action = OnShareSheetOpenAction()
 
             // ----- Act -----
@@ -66,6 +68,7 @@ class OnShareSheetOpenActionTest {
                 readingHistory = buildShareReadingHistory(),
                 userProfileData = buildShareProfile(),
             )
+
             val action = OnShareSheetOpenAction()
 
             // ----- Act -----
@@ -87,6 +90,7 @@ class OnShareSheetOpenActionTest {
                 userProfileData = buildShareProfile(),
                 shareCapture = ShareCaptureState(progress = ShareCaptureProgress.Saving),
             )
+
             val action = OnShareSheetOpenAction()
 
             // ----- Act -----
@@ -106,6 +110,7 @@ class OnShareSheetOpenActionTest {
                 readingStats = buildShareReadingStats(),
                 readingHistory = buildShareReadingHistory(),
             )
+
             val action = OnShareSheetOpenAction()
 
             // ----- Act -----

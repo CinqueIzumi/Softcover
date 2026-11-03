@@ -40,6 +40,7 @@ class ReadingProgressSheetHostTest {
         stubOutcome(Result.success(null))
         stateFlow = MutableStateFlow(ReadingScreenUiState())
         localVariablesFlow = MutableStateFlow(ReadingLocalVariables())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
@@ -98,11 +99,13 @@ class ReadingProgressSheetHostTest {
         fun `records the entry's page, seconds and backdate for the book`() = runTest {
             // ----- Arrange -----
             val book = stubBook()
+
             val backdated = ProgressEntry(
                 newPage = 150,
                 newSeconds = 3600,
                 actionAt = "2026-07-21T21:00:00",
             )
+
             val dependencies = stubDependencies(this)
 
             // ----- Act -----
@@ -207,9 +210,11 @@ class ReadingProgressSheetHostTest {
         fun `cancels the prior job for the same book id and stores a new one`() = runTest {
             // ----- Arrange -----
             val priorJob = Job()
+
             localVariablesFlow.value = ReadingLocalVariables(
                 bookMutationJobs = mapOf(7 to priorJob),
             )
+
             val dependencies = stubDependencies(this)
 
             // ----- Act -----
@@ -229,9 +234,11 @@ class ReadingProgressSheetHostTest {
         fun `leaves the job of a different book running`() = runTest {
             // ----- Arrange -----
             val otherJob = Job()
+
             localVariablesFlow.value = ReadingLocalVariables(
                 bookMutationJobs = mapOf(8 to otherJob),
             )
+
             val dependencies = stubDependencies(this)
 
             // ----- Act -----
@@ -267,8 +274,10 @@ class ReadingProgressSheetHostTest {
             // ----- Assert -----
             val sent = eventChannel.tryReceive().getOrNull()
                 .shouldBeInstanceOf<ReadingScreenEvent.MarkAsReadRequestedEvent>()
+
             sent.book shouldBe book
             sent.actionAt shouldBe "2026-07-21T21:00:00"
+
             coVerify(exactly = 0) {
                 recordBookProgress(
                     book = any(),
@@ -295,6 +304,7 @@ class ReadingProgressSheetHostTest {
             // ----- Assert -----
             val sent = eventChannel.tryReceive().getOrNull()
                 .shouldBeInstanceOf<ReadingScreenEvent.MarkAsReadRequestedEvent>()
+
             sent.actionAt.shouldBeNull()
         }
     }
@@ -305,10 +315,12 @@ class ReadingProgressSheetHostTest {
         fun `clears bookToUpdate and leaves the rest of the state alone`() = runTest {
             // ----- Arrange -----
             val prompted = stubBook(id = 3)
+
             stateFlow.value = ReadingScreenUiState(
                 bookToUpdate = stubBook(),
                 verdictPromptBook = prompted,
             )
+
             val dependencies = stubDependencies(this)
 
             // ----- Act -----

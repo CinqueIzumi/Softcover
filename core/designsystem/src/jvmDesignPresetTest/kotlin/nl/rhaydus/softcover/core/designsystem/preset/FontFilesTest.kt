@@ -82,6 +82,7 @@ class FontFilesTest {
                 fontsDir,
                 "inter.ttf",
             ).writeText("")
+
             File(
                 fontsDir,
                 "notes.txt",
@@ -117,6 +118,7 @@ class FontFilesTest {
                 fontsDir,
                 "fraunces_semibold_italic.ttf",
             ).writeText("")
+
             File(
                 fontsDir,
                 "inter_bold.ttf",
@@ -147,6 +149,7 @@ class FontFilesTest {
                     "fraunces",
                 )
             }
+
             error.message.shouldContain("fraunces_")
         }
     }

@@ -255,6 +255,7 @@ class GenreRankingMapperTest {
                 slices = genres,
                 shownCount = 9,
             )
+
             val beyond = genreRankingShowMore(
                 slices = genres,
                 shownCount = 15,

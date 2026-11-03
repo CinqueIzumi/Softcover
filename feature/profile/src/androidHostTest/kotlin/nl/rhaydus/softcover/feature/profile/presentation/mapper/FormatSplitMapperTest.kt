@@ -319,8 +319,10 @@ class FormatSplitMapperTest {
 
             // ----- Assert -----
             chart.segments.map { it.label } shouldBe listOf("Print", "Audiobook", "Print and audio", "Unknown")
+
             chart.segments.map { it.tone } shouldBe
                 listOf(ChartTone.Lead, ChartTone.Third, ChartTone.Fourth, ChartTone.Unknown)
+
             chart.segments.map { it.share } shouldBe listOf("20%", "40%", "20%", "20%")
             chart.isLoading shouldBe false
             chart.variant shouldBe ProportionChartVariant.Keys

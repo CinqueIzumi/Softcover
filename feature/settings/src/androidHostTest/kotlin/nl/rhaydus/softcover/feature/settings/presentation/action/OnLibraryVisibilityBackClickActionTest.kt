@@ -25,13 +25,14 @@ class OnLibraryVisibilityBackClickActionTest {
         LibraryVisibilitySettingsUiState,
         LibraryVisibilitySettingsEvent,
         LibraryVisibilitySettingsLocalVariables,
-        >
+    >
 
     @BeforeEach
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(LibraryVisibilitySettingsUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryVisibilitySettingsLocalVariables()),
@@ -48,6 +49,7 @@ class OnLibraryVisibilityBackClickActionTest {
                 draftEnabledStatusCodes = persistentSetOf(1),
                 initialized = true,
             )
+
             val action = OnLibraryVisibilityBackClickAction()
 
             // ----- Act -----
@@ -67,6 +69,7 @@ class OnLibraryVisibilityBackClickActionTest {
             stateFlow.value = LibraryVisibilitySettingsUiState(
                 initialized = true,
             )
+
             val action = OnLibraryVisibilityBackClickAction()
 
             // ----- Act -----
@@ -88,6 +91,7 @@ class OnLibraryVisibilityBackClickActionTest {
                 initialized = true,
                 isSaving = true,
             )
+
             val action = OnLibraryVisibilityBackClickAction()
 
             // ----- Act -----

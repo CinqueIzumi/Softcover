@@ -33,11 +33,13 @@ class YourReadsCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(buildBookDetailUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk(relaxed = true)
     }
 
@@ -103,6 +105,7 @@ class YourReadsCollectorTest {
                 ),
                 dateStyle = DateStyle.YEAR_MONTH_DAY,
             )
+
             val collector = YourReadsCollector()
 
             // ----- Act -----
@@ -144,12 +147,14 @@ class YourReadsCollectorTest {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState().copy(book = stubBook(reads = listOf(read(id = 1))))
             val collector = YourReadsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
                     dependencies = dependencies,
                 )
             }
+
             stateFlow.value.yourReads.shouldNotBeNull().rows.size shouldBe 1
 
             // ----- Act -----
@@ -181,7 +186,9 @@ class YourReadsCollectorTest {
                 ),
                 dateStyle = DateStyle.YEAR_MONTH_DAY,
             )
+
             val collector = YourReadsCollector()
+
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

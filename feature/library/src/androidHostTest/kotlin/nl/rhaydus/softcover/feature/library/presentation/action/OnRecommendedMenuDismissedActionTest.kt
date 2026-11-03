@@ -37,6 +37,7 @@ class OnRecommendedMenuDismissedActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -44,6 +45,7 @@ class OnRecommendedMenuDismissedActionTest {
         )
 
         mockkObject(SnackBarManager)
+
         every {
             SnackBarManager.showSnackBar(
                 title = any(),
@@ -53,6 +55,7 @@ class OnRecommendedMenuDismissedActionTest {
                 onDismiss = any(),
             )
         } returns Unit
+
         coEvery {
             dependencies.hideRecommendedBookUseCase(book = any())
         } returns Result.success(Unit)
@@ -72,11 +75,13 @@ class OnRecommendedMenuDismissedActionTest {
                 id = 1,
                 name = "Frank Herbert",
             )
+
             val book = recommendedBook(
                 id = 7,
                 title = "Dune",
                 authors = listOf(author),
             )
+
             stateFlow.value = LibraryUiState(
                 recommendedBooks = persistentListOf(book),
                 recommendedMenu = openRecommendedMenuSession(
@@ -103,6 +108,7 @@ class OnRecommendedMenuDismissedActionTest {
                     ),
                 )
             }
+
             stateFlow.value.recommendedMenu shouldBe SheetSession.Closed
             stateFlow.value.recommendedMenuBookId shouldBe null
         }
@@ -111,6 +117,7 @@ class OnRecommendedMenuDismissedActionTest {
         fun `hides nothing and clears the sheet when it was dismissed without a choice`() = runTest {
             // ----- Arrange -----
             val book = recommendedBook(id = 7)
+
             stateFlow.value = LibraryUiState(
                 recommendedBooks = persistentListOf(book),
                 recommendedMenu = openRecommendedMenuSession(book = book),
@@ -127,6 +134,7 @@ class OnRecommendedMenuDismissedActionTest {
             coVerify(exactly = 0) {
                 dependencies.hideRecommendedBookUseCase(book = any())
             }
+
             stateFlow.value.recommendedMenu shouldBe SheetSession.Closed
             stateFlow.value.recommendedMenuBookId shouldBe null
         }
@@ -152,6 +160,7 @@ class OnRecommendedMenuDismissedActionTest {
             coVerify(exactly = 0) {
                 dependencies.hideRecommendedBookUseCase(book = any())
             }
+
             stateFlow.value.recommendedMenu shouldBe SheetSession.Closed
         }
     }

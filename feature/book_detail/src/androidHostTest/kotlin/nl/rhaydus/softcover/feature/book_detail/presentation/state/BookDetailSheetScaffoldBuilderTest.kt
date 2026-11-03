@@ -143,6 +143,7 @@ class BookDetailSheetScaffoldBuilderTest {
                     ),
                 ),
             )
+
             val selectedEdition = buildEdition(id = 1)
 
             // ----- Act -----
@@ -191,6 +192,7 @@ class BookDetailSheetScaffoldBuilderTest {
                     ),
                 ),
             )
+
             val selectedEdition = buildEdition(id = 1)
 
             // ----- Act -----
@@ -319,6 +321,7 @@ class BookDetailSheetScaffoldBuilderTest {
                 hasExpandableText = false,
                 tagPicker = null,
             )
+
             val withoutUpdateCard = shareSheetFor(
                 card = card,
                 bookTitle = bookTitle,
@@ -493,12 +496,14 @@ class BookDetailSheetScaffoldBuilderTest {
         fun `expanded tag picker gives the preview less height than a collapsed one`() {
             // ----- Arrange -----
             val candidates = mapOf(TagCategory.GENRE to listOf("Fantasy", "Mystery"))
+
             val expandedPicker = shareTagPickerFor(
                 variant = ShareCardVariant.BOOK,
                 candidates = candidates,
                 selected = setOf("Fantasy"),
                 expanded = true,
             )
+
             val collapsedPicker = shareTagPickerFor(
                 variant = ShareCardVariant.BOOK,
                 candidates = candidates,
@@ -516,6 +521,7 @@ class BookDetailSheetScaffoldBuilderTest {
                 hasExpandableText = false,
                 tagPicker = expandedPicker,
             )
+
             val collapsed = shareSheetFor(
                 card = card,
                 bookTitle = "Dune",
@@ -550,6 +556,7 @@ class BookDetailSheetScaffoldBuilderTest {
                 hasExpandableText = false,
                 tagPicker = collapsedPicker,
             )
+
             val withoutPicker = shareSheetFor(
                 card = card,
                 bookTitle = "Dune",

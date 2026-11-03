@@ -25,6 +25,7 @@ class OnNameShakeEndedActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(CreateListUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalCreateListVariables()),
@@ -44,6 +45,7 @@ class OnNameShakeEndedActionTest {
                     shaking = true,
                 ),
             )
+
             stateFlow.value = stateFlow.value.copy(nameField = errorField)
 
             // ----- Act -----

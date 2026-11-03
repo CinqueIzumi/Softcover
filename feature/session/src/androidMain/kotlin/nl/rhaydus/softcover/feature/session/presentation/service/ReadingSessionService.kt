@@ -182,10 +182,12 @@ internal class ReadingSessionService : Service() {
             .setSmallIcon(R.drawable.ic_reading)
             .setContentTitle(title)
             .setContentText(if (isPaused) pausedText(elapsed = elapsed) else author)
-            .setColor(ContextCompat.getColor(
-                this,
-                R.color.notification_accent,
-            ),)
+            .setColor(
+                ContextCompat.getColor(
+                    this,
+                    R.color.notification_accent,
+                ),
+            )
             .setOngoing(true)
             // setOnlyAlertOnce (but deliberately NOT setSilent): the alerting Session channel lets the
             // notification chime once when the session starts so it lands on the lock screen, while
@@ -299,11 +301,10 @@ internal class ReadingSessionService : Service() {
         )
     }
 
-    private fun pausedText(elapsed: Duration): String =
-        getString(
-            R.string.session_notification_paused,
-            formatSessionElapsed(elapsed = elapsed),
-        )
+    private fun pausedText(elapsed: Duration): String = getString(
+        R.string.session_notification_paused,
+        formatSessionElapsed(elapsed = elapsed),
+    )
 
     override fun onDestroy() {
         serviceScope.cancel()
@@ -344,6 +345,7 @@ private fun ActiveSession.progressSubtitle(): String? {
     if (edition?.isAudiobook == true) return null
 
     val currentPage = book.currentRead?.currentPage ?: return null
+
     val percent = book.currentRead?.progress?.let { "${it.toInt()}%" }
 
     return if (percent != null) "Page $currentPage · $percent" else "Page $currentPage"

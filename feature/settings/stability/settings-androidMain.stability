@@ -421,7 +421,7 @@ internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.section.S
     - content: STABLE (composable function type)
 
 @Composable
-public fun nl.rhaydus.softcover.feature.settings.presentation.screen.section.SettingsRowGroupScope.row(content: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit
+public fun nl.rhaydus.softcover.feature.settings.presentation.screen.section.SettingsRowGroupScope.DividedRow(content: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:

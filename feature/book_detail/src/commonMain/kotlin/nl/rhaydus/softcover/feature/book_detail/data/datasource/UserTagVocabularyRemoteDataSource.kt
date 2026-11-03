@@ -30,19 +30,18 @@ internal class UserTagVocabularyRemoteDataSourceImpl(
                 )
             }
 
-    private suspend fun fetchAllTagRows(userId: Int): List<FindUserTagVocabularyQuery.Data.Tag> =
-        fetchAllPagesOrThrow(
-            pageSize = PAGE_SIZE,
-            maxPages = MAX_PAGES,
-        ) { limit, offset ->
-            apolloClient.safeQuery(
-                query = FindUserTagVocabularyQuery(
-                    userId = userId,
-                    limit = limit,
-                    offset = offset,
-                ),
-            ).tags
-        }
+    private suspend fun fetchAllTagRows(userId: Int): List<FindUserTagVocabularyQuery.Data.Tag> = fetchAllPagesOrThrow(
+        pageSize = PAGE_SIZE,
+        maxPages = MAX_PAGES,
+    ) { limit, offset ->
+        apolloClient.safeQuery(
+            query = FindUserTagVocabularyQuery(
+                userId = userId,
+                limit = limit,
+                offset = offset,
+            ),
+        ).tags
+    }
 }
 
 // Request-multiplier budget: ceiling of PAGE_SIZE * MAX_PAGES rows before the fetch fails.

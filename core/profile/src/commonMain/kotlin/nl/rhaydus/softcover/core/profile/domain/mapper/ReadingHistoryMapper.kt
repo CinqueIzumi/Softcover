@@ -24,8 +24,10 @@ internal fun List<Book>.toReadingHistory(today: LocalDate): ReadingHistory {
             )
         }
     }
+
     val years = dated.map { it.finishDate.year }.distinct().sortedDescending()
     val booksPerYear = dated.groupingBy { it.finishDate.year }.eachCount()
+
     val pagesPerYear = dated.groupBy { it.finishDate.year }
         .mapValues { (_, books) -> books.sumOf { it.book.statsPages() } }
 

@@ -33,6 +33,7 @@ class OnLoaderFinishedActionTest {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(OnboardingUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalOnboardingVariables()),

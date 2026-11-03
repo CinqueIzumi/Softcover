@@ -41,6 +41,7 @@ class LibraryFilterSheetSelectionTest {
                     ) to LibraryFilterValue.Owned(owned = false),
                 ).toChipSet(),
             )
+
             val draft = LibraryFilterDraft(
                 tabId = LibraryTab.All.id,
                 filters = LibraryFilters(owned = true),
@@ -73,6 +74,7 @@ class LibraryFilterSheetSelectionTest {
                     ) to LibraryFilterValue.Format(value = "hardcover"),
                 ).toChipSet(),
             )
+
             val draft = LibraryFilterDraft(
                 tabId = LibraryTab.All.id,
                 filters = LibraryFilters(formats = persistentSetOf("ebook")),
@@ -105,6 +107,7 @@ class LibraryFilterSheetSelectionTest {
                     ) to LibraryFilterValue.ReleaseYear(year = 2019),
                 ).toChipSet(),
             )
+
             val draft = LibraryFilterDraft(
                 tabId = LibraryTab.All.id,
                 filters = LibraryFilters(releaseYears = persistentSetOf(2020)),
@@ -137,6 +140,7 @@ class LibraryFilterSheetSelectionTest {
                     ) to LibraryFilterValue.ReadYear(year = 2020),
                 ).toChipSet(),
             )
+
             val draft = LibraryFilterDraft(
                 tabId = LibraryTab.Status.idFor(status = UserBookStatus.READ),
                 filters = LibraryFilters(readYear = 2021),
@@ -169,6 +173,7 @@ class LibraryFilterSheetSelectionTest {
                     ) to LibraryFilterValue.RatingMin(threshold = 3.5),
                 ).toChipSet(),
             )
+
             val draft = LibraryFilterDraft(
                 tabId = LibraryTab.All.id,
                 filters = LibraryFilters(ratingMin = 4.0),
@@ -193,9 +198,11 @@ class LibraryFilterSheetSelectionTest {
                 key = "format:unknown",
                 label = "unknown",
             )
+
             val chips = LibraryFilterChips(
                 formatChips = ChipSet(chips = persistentListOf(untouchedChip)),
             )
+
             val draft = LibraryFilterDraft(
                 tabId = LibraryTab.All.id,
                 filters = LibraryFilters(formats = persistentSetOf("unknown")),
@@ -279,6 +286,7 @@ class LibraryFilterSheetSelectionTest {
                     ) to LibraryFilterValue.Owned(owned = true),
                 ).toChipSet(),
             )
+
             val draft = LibraryFilterDraft(tabId = LibraryTab.All.id)
 
             // ----- Act -----
@@ -305,6 +313,7 @@ class LibraryFilterSheetSelectionTest {
                     ) to LibraryFilterValue.Format(value = "Hardcover"),
                 ).toChipSet(),
             )
+
             val draft = LibraryFilterDraft(tabId = LibraryTab.All.id)
 
             // ----- Act -----
@@ -331,6 +340,7 @@ class LibraryFilterSheetSelectionTest {
                     ) to LibraryFilterValue.ReleaseYear(year = 2020),
                 ).toChipSet(),
             )
+
             val draft = LibraryFilterDraft(tabId = LibraryTab.All.id)
 
             // ----- Act -----
@@ -357,6 +367,7 @@ class LibraryFilterSheetSelectionTest {
                     ) to LibraryFilterValue.ReadYear(year = 2021),
                 ).toChipSet(),
             )
+
             val draft = LibraryFilterDraft(tabId = LibraryTab.All.id)
 
             // ----- Act -----
@@ -383,6 +394,7 @@ class LibraryFilterSheetSelectionTest {
                     ) to LibraryFilterValue.RatingMin(threshold = 4.0),
                 ).toChipSet(),
             )
+
             val draft = LibraryFilterDraft(tabId = LibraryTab.All.id)
 
             // ----- Act -----
@@ -432,6 +444,7 @@ class LibraryFilterSheetSelectionTest {
                     ) to LibraryFilterValue.RatingMin(threshold = 4.0),
                 ).toChipSet(),
             )
+
             val draft = LibraryFilterDraft(tabId = LibraryTab.All.id)
 
             // ----- Act -----
@@ -470,6 +483,7 @@ class LibraryFilterSheetSelectionTest {
                     ),
                 ),
             )
+
             val draft = LibraryFilterDraft(
                 tabId = LibraryTab.All.id,
                 filters = LibraryFilters(
@@ -503,6 +517,7 @@ class LibraryFilterSheetSelectionTest {
                     ),
                 ),
             )
+
             val draft = LibraryFilterDraft(tabId = LibraryTab.All.id)
 
             // ----- Act -----
@@ -537,6 +552,7 @@ class LibraryFilterSheetSelectionTest {
                     ),
                 ),
             )
+
             val draft = LibraryFilterDraft(
                 tabId = LibraryTab.All.id,
                 yourTagsSection = TagSectionDraft(search = "coz"),
@@ -567,6 +583,7 @@ class LibraryFilterSheetSelectionTest {
                     ),
                 ),
             )
+
             val draft = LibraryFilterDraft(tabId = LibraryTab.All.id)
 
             // ----- Act -----

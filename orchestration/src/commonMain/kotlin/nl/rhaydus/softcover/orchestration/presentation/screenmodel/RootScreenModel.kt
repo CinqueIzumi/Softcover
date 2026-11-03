@@ -16,10 +16,10 @@ internal class RootScreenModel(
     flows: List<RootCollector>,
     appDispatchers: AppDispatchers,
 ) : ToadScreenModel<RootUiState, RootEvent, RootDependencies, RootCollector, RootLocalVariables>(
-    initialState = RootUiState(),
-    initialLocalVariables = RootLocalVariables,
-    initializers = flows,
-) {
+        initialState = RootUiState(),
+        initialLocalVariables = RootLocalVariables,
+        initializers = flows,
+    ) {
     override val dependencies = RootDependencies(
         networkAvailabilityProvider = networkAvailabilityProvider,
         offlineCopy = offlineCopy,

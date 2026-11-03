@@ -23,13 +23,13 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.divider.VerticalDivider
 import nl.rhaydus.softcover.core.component.topbar.EditorialTopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SchemeBrightness
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnLogOutSheetOpenAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnShareSheetOpenAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
@@ -154,7 +154,12 @@ private fun TwoColumnProfile(
                 .width(320.dp)
                 .fillMaxHeight()
                 .verticalScroll(rememberScrollState())
-                .padding(start = Spacing.gutter, end = Spacing.gutter, top = Spacing.xs, bottom = Spacing.xl),
+                .padding(
+                    start = Spacing.gutter,
+                    end = Spacing.gutter,
+                    top = Spacing.xs,
+                    bottom = Spacing.xl,
+                ),
         ) {
             ProfileIdentity(
                 state = state,
@@ -184,7 +189,12 @@ private fun TwoColumnProfile(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(scrollState)
-                    .padding(start = Spacing.gutter, end = Spacing.gutter, top = Spacing.xs, bottom = Spacing.xl),
+                    .padding(
+                        start = Spacing.gutter,
+                        end = Spacing.gutter,
+                        top = Spacing.xs,
+                        bottom = Spacing.xl,
+                    ),
             ) {
                 Column(modifier = Modifier.widthIn(max = 640.dp)) {
                     SummaryAndShareRows(
@@ -220,7 +230,10 @@ private fun SingleColumnProfile(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(scrollState)
-                .padding(horizontal = Spacing.gutter, vertical = Spacing.xs),
+                .padding(
+                    horizontal = Spacing.gutter,
+                    vertical = Spacing.xs,
+                ),
         ) {
             ProfileIdentity(
                 state = state,

@@ -35,6 +35,7 @@ internal object TypeTokens {
             fontsDir,
             DISPLAY_FILE_PREFIX,
         )
+
         val bodyName = FontFiles.familyOf(
             fontsDir,
             BODY_FILE_PREFIX,
@@ -145,10 +146,12 @@ internal object TypeTokens {
         check(features == null || features == TABULAR_FIGURES) { "$name uses unsupported font features: $features" }
 
         val entry = linkedMapOf<String, Any?>("name" to name)
+
         if (style.fontFamily != groupFamily) entry["family"] = familyKey(
             name,
             style.fontFamily,
         )
+
         entry["fontSize"] = style.fontSize.value.toPx()
         entry["lineHeight"] = style.lineHeight.value.toPx()
         entry["fontWeight"] = style.fontWeight?.weight ?: REGULAR_WEIGHT

@@ -21,9 +21,9 @@ import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.dismiss
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
-import kotlin.time.TimeSource
 import kotlinx.coroutines.delay
 import nl.rhaydus.designsystem.util.SnackBarManager
+import kotlin.time.TimeSource
 
 private const val SHORT_DURATION_MILLIS = 4_000L
 private const val LONG_DURATION_MILLIS = 10_000L
@@ -101,6 +101,7 @@ internal fun SnackbarSurface(
                 snackbarData = target,
                 modifier = snackbarModifier.semantics {
                     liveRegion = LiveRegionMode.Polite
+
                     dismiss {
                         target.dismiss()
                         true
@@ -119,11 +120,13 @@ private fun SnackbarTimeout(data: SnackbarData?) {
         if (data == null) return@LaunchedEffect
 
         val hasAction = data.visuals.actionLabel != null
+
         val baseMillis = when (data.visuals.duration) {
             SnackbarDuration.Indefinite -> return@LaunchedEffect
             SnackbarDuration.Long -> LONG_DURATION_MILLIS
             SnackbarDuration.Short -> SHORT_DURATION_MILLIS
         }
+
         val durationMillis = accessibilityManager?.calculateRecommendedTimeoutMillis(
             originalTimeoutMillis = baseMillis,
             containsIcons = hasAction,

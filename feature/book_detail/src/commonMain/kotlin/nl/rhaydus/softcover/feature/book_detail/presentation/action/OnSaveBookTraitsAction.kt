@@ -16,6 +16,7 @@ internal class OnSaveBookTraitsAction : BookDetailAction {
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
         val draft = scope.currentState.howItReadDraft ?: return
+
         val traits = draft.toBookTraits(bookId = scope.currentState.bookId)
 
         scope.setState { it.copy(howItReadDraft = null) }

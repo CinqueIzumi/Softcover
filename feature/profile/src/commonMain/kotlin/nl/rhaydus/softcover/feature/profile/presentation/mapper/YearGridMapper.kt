@@ -67,6 +67,7 @@ internal fun yearGrid(
                         month = monthIndex + 1,
                         day = dayIndex + 1,
                     )
+
                     val pages = pagesByDay[date]
 
                     if (pages == null) {

@@ -33,6 +33,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import nl.rhaydus.designsystem.image.RhaydusShimmerImage
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.rememberCoverImageRequest
@@ -40,7 +41,6 @@ import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.supportsBlur
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.OverMediaInk
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.OverMediaScrim
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
@@ -153,7 +153,10 @@ internal fun BookShareCardFrame(
                         model = cover,
                         modifier = when (format) {
                             ShareCardFormat.Story -> Modifier
-                                .weight(1f, fill = false)
+                                .weight(
+                                    1f,
+                                    fill = false,
+                                )
                                 .widthIn(max = 200.dp)
 
                             ShareCardFormat.FullText -> Modifier.width(200.dp)

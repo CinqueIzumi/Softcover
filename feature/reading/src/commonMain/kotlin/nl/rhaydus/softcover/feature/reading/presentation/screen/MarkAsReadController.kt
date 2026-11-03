@@ -24,7 +24,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
  */
 @Stable
 internal class MarkAsReadController(
-    private val slideDistancePx: Float,
+    val slideDistancePx: Float,
     private val playMotion: Boolean,
     private val navPulse: NavPulse,
     private val runAction: (ReadingAction) -> Unit,
@@ -93,6 +93,7 @@ internal class MarkAsReadController(
         val targetId = slidingBookId ?: return
 
         slideProgress.snapTo(targetValue = 0f)
+
         slideProgress.animateTo(
             targetValue = 1f,
             animationSpec = slideSpec,
@@ -111,14 +112,17 @@ internal class MarkAsReadController(
         slideProgress.snapTo(targetValue = 0f)
         slidingBookId = null
     }
+}
 
-    fun slideModifier(bookId: Int): Modifier =
-        if (bookId == slidingBookId) {
-            Modifier.graphicsLayer {
-                translationY = slideProgress.value * slideDistancePx
-                alpha = 1f - slideProgress.value
-            }
-        } else {
-            Modifier
-        }
+/** Slides and fades this element out while [controller] is celebrating [bookId]; otherwise a no-op. */
+internal fun Modifier.markAsReadSlide(
+    controller: MarkAsReadController,
+    bookId: Int,
+): Modifier = if (bookId == controller.slidingBookId) {
+    graphicsLayer {
+        translationY = controller.slideProgress.value * controller.slideDistancePx
+        alpha = 1f - controller.slideProgress.value
+    }
+} else {
+    this
 }

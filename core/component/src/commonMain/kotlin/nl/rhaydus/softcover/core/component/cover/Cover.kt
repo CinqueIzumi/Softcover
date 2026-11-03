@@ -39,10 +39,10 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import nl.rhaydus.designsystem.modifier.skeletonMask
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
+import nl.rhaydus.designsystem.theme.Corners
 import nl.rhaydus.softcover.core.component.modifier.navSharedBounds
-import nl.rhaydus.softcover.core.component.state.skeletonMask
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 
 private const val COVER_ASPECT_RATIO = 2f / 3f
 
@@ -84,6 +84,7 @@ fun Cover(
     val contentDescription = coverlessFallback?.let { "Cover of $it" }
 
     val shape = model.variant.shape()
+
     val imageModifier = if (model.variant.elevation() > 0.dp) {
         Modifier
             .shadow(
@@ -123,7 +124,7 @@ fun Cover(
     ) {
         CoverImage(
             request = request,
-            imageModifier = imageModifier,
+            modifier = imageModifier,
             contentDescription = contentDescription,
             model = model,
         )
@@ -133,20 +134,23 @@ fun Cover(
 @Composable
 private fun CoverImage(
     request: ImageRequest,
-    imageModifier: Modifier,
+    modifier: Modifier,
     contentDescription: String?,
     model: CoverUiModel,
 ) {
     var settled by remember { mutableStateOf<Painter?>(null) }
     val previous = remember(request) { settled }
+
     val painter = rememberAsyncImagePainter(
         model = request,
         placeholder = previous,
         contentScale = ContentScale.Fit,
     )
+
     val state by painter.state.collectAsState()
 
     val context = LocalPlatformContext.current
+
     val inMemory = remember(request) {
         val cache = SingletonImageLoader.get(context).memoryCache
         val key = request.memoryCacheKey?.let { MemoryCache.Key(it) }
@@ -168,12 +172,15 @@ private fun CoverImage(
 
     val loaded = (state as? AsyncImagePainter.State.Success)?.painter ?: previous
     val intrinsic = loaded?.intrinsicSize
+
     val ratio = if (intrinsic != null && intrinsic.isSpecified && intrinsic.height > 0f) {
         intrinsic.width / intrinsic.height
     } else {
         COVER_ASPECT_RATIO
     }
+
     val loadingState = state as? AsyncImagePainter.State.Loading
+
     val hasNothingToShow = state is AsyncImagePainter.State.Empty ||
         (loadingState != null && loadingState.painter == null)
 
@@ -184,7 +191,7 @@ private fun CoverImage(
         val width = maxWidth
 
         Box(
-            modifier = imageModifier
+            modifier = modifier
                 .width(width)
                 .requiredHeight(width / ratio)
                 .skeletonMask(
@@ -358,6 +365,7 @@ private fun persistFromDiskCache(
 ) {
     coroutineScope.launch {
         val diskCache = imageLoader.diskCache ?: return@launch
+
         val snapshot = diskCache.openSnapshot(url) ?: return@launch
 
         snapshot.use {

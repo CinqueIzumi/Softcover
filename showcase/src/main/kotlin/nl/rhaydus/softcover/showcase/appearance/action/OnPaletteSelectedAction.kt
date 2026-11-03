@@ -14,7 +14,7 @@ internal class OnPaletteSelectedAction<
     S : AppearanceUiState<S>,
     E : UiEvent,
     V : LocalVariables,
-    >(
+>(
     val palette: SpinePalette,
 ) : UiAction<D, S, E, V> where D : ActionDependencies, D : AppearanceDependencies {
     override suspend fun execute(

@@ -19,6 +19,7 @@ internal class OnSimilarBookClickAction(
         val locals = scope.currentLocalVariables
 
         val sourceId = locals.similarBooksSourceId ?: return
+
         val book = locals.similarBooks.firstOrNull { it.id == bookId } ?: return
 
         scope.sendEvent(

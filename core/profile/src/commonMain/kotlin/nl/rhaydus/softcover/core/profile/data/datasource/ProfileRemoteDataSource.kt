@@ -14,6 +14,7 @@ internal class ProfileRemoteDataSourceImpl(
 ) : ProfileRemoteDataSource {
     override suspend fun getUserProfileSnapshot(): UserProfileSnapshot {
         val data = apolloClient.safeQuery(query = GetUserProfileDataQuery())
+
         val me = data
             .me
             .firstOrNull()

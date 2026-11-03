@@ -38,6 +38,7 @@ class RoadmapPageSourceTest {
     fun setUp() {
         observeRoadmapUseCase = mockk()
         refreshRoadmapUseCase = mockk()
+
         source = RoadmapPageSource(
             observeRoadmapUseCase = observeRoadmapUseCase,
             refreshRoadmapUseCase = refreshRoadmapUseCase,

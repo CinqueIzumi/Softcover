@@ -30,6 +30,10 @@ import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
  * [review] is a [TextFieldValue] so the selection and the IME's composing range survive the round trip.
  * [markChips] are the toolbar's chips, already carrying whether the selection holds each mark and
  * whether a selection exists.
+ *
+ * [opened] is the draft the sheet opened with. `scaffold.dismissible` is stored, not derived, and is false
+ * exactly while the current [draft] differs from [opened], so only the sheet's own buttons close it and a
+ * stray swipe, tap outside or back cannot lose the edit. `reduce` and `carryingDraftOf` are its only writers.
  */
 @Immutable
 data class VerdictSheetUiModel(
@@ -39,7 +43,17 @@ data class VerdictSheetUiModel(
     val marks: ImmutableList<RichTextMark>,
     val spoilers: ToggleRowUiModel<String>,
     val markChips: ImmutableMap<RichTextMarkType, ChipUiModel>,
+    val opened: VerdictDraft,
 ) {
+    /** The draft the sheet holds right now. */
+    val draft: VerdictDraft
+        get() = VerdictDraft(
+            rating = rating,
+            reviewText = review.text,
+            marks = marks,
+            spoilersChecked = spoilers.checked,
+        )
+
     companion object : UiModelPreviews<VerdictSheetUiModel> {
         private val markChips: ImmutableMap<RichTextMarkType, ChipUiModel> = RichTextMarkType.entries
             .associateWith { mark ->
@@ -90,6 +104,12 @@ data class VerdictSheetUiModel(
                     checked = false,
                 ),
                 markChips = markChips,
+                opened = VerdictDraft(
+                    rating = null,
+                    reviewText = "",
+                    marks = persistentListOf(),
+                    spoilersChecked = false,
+                ),
             ),
             "Edit, rated with a review" to VerdictSheetUiModel(
                 scaffold = finishedScaffold.copy(
@@ -129,6 +149,23 @@ data class VerdictSheetUiModel(
                     checked = true,
                 ),
                 markChips = markChips,
+                opened = VerdictDraft(
+                    rating = 4.5,
+                    reviewText = REVIEW,
+                    marks = persistentListOf(
+                        RichTextMark(
+                            start = 2,
+                            end = 13,
+                            type = RichTextMarkType.ITALIC,
+                        ),
+                        RichTextMark(
+                            start = 55,
+                            end = 69,
+                            type = RichTextMarkType.SPOILER,
+                        ),
+                    ),
+                    spoilersChecked = true,
+                ),
             ),
         )
     }

@@ -68,8 +68,7 @@ data class ChipSet<out P>(
     }
 }
 
-fun <P> Iterable<Pair<ChipUiModel, P>>.toChipSet(): ChipSet<P> =
-    ChipSet(
-        chips = map { it.first }.toImmutableList(),
-        payloadByKey = associate { it.first.key to it.second }.toImmutableMap(),
-    )
+fun <P> Iterable<Pair<ChipUiModel, P>>.toChipSet(): ChipSet<P> = ChipSet(
+    chips = map { it.first }.toImmutableList(),
+    payloadByKey = associate { it.first.key to it.second }.toImmutableMap(),
+)

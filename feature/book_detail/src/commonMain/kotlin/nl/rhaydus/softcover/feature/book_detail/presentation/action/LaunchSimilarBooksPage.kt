@@ -21,6 +21,7 @@ internal fun launchSimilarBooksPage(
     dependencies: BookDetailDependencies,
 ) {
     val locals = scope.currentLocalVariables
+
     val sourceId = locals.similarBooksSourceId ?: return
 
     if (locals.similarBooksLoadJob?.isActive == true || scope.currentState.similarBooksHasMore.not()) return

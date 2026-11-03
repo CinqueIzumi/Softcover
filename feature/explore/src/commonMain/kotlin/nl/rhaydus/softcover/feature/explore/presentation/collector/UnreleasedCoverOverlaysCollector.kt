@@ -68,16 +68,16 @@ internal class UnreleasedCoverOverlaysCollector : ExploreCollector {
     }
 }
 
-private fun List<Book>.toUnreleasedCoverOverlays(): Map<Int, CoverOverlayUiModel> =
-    mapNotNull { book ->
-        val releaseDate = book.releaseDate
-        if (book.isUnreleased && releaseDate != null) {
-            book.id to CoverOverlayUiModel(
-                badge = releaseDate.toCompactUnreleasedBadgeUiModel(),
-                corner = CoverOverlayCorner.TopStart,
-                grayscale = false,
-            )
-        } else {
-            null
-        }
-    }.toMap()
+private fun List<Book>.toUnreleasedCoverOverlays(): Map<Int, CoverOverlayUiModel> = mapNotNull { book ->
+    val releaseDate = book.releaseDate
+
+    if (book.isUnreleased && releaseDate != null) {
+        book.id to CoverOverlayUiModel(
+            badge = releaseDate.toCompactUnreleasedBadgeUiModel(),
+            corner = CoverOverlayCorner.TopStart,
+            grayscale = false,
+        )
+    } else {
+        null
+    }
+}.toMap()

@@ -9,9 +9,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import nl.rhaydus.softcover.core.component.modifier.tactileClickable
+import nl.rhaydus.designsystem.modifier.pressScaleClickable
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.profile.presentation.state.AtlasContentsRowUiModel
 
@@ -24,7 +24,7 @@ internal fun AtlasContentsRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .tactileClickable(onClick = onClick)
+            .pressScaleClickable(onClick = onClick)
             .padding(vertical = Spacing.md),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.md),

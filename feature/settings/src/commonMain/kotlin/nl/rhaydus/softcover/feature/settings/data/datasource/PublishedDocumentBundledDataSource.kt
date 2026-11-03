@@ -18,8 +18,7 @@ internal interface PublishedDocumentBundledDataSource {
 internal class PublishedDocumentBundledDataSourceImpl(
     private val appDispatchers: AppDispatchers,
 ) : PublishedDocumentBundledDataSource {
-    override suspend fun readBundledDocument(key: PublishedDocumentKey): PublishedDocument =
-        withContext(appDispatchers.io) {
-            Res.readBytes(key.bundledPath).decodeToString().toBundledPublishedDocument()
-        }
+    override suspend fun readBundledDocument(key: PublishedDocumentKey): PublishedDocument = withContext(appDispatchers.io) {
+        Res.readBytes(key.bundledPath).decodeToString().toBundledPublishedDocument()
+    }
 }

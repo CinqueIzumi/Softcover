@@ -40,6 +40,7 @@ class OnUpdateToScannedEditionClickActionTest {
         updateBookEditionUseCase = mockk()
         stateFlow = MutableStateFlow(buildBookDetailUiState())
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -89,10 +90,12 @@ class OnUpdateToScannedEditionClickActionTest {
             // ----- Arrange -----
             val userBook = stubUserBook()
             val book = stubBook(userBook = userBook)
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
                 scannedEditionId = 42,
             )
+
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -128,10 +131,12 @@ class OnUpdateToScannedEditionClickActionTest {
             // ----- Arrange -----
             val userBook = stubUserBook()
             val book = stubBook(userBook = userBook)
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
                 scannedEditionId = 42,
             )
+
             dependencies = stubDependencies(this)
             Dispatchers.setMain(UnconfinedTestDispatcher(testScheduler))
 
@@ -161,11 +166,13 @@ class OnUpdateToScannedEditionClickActionTest {
             // ----- Arrange -----
             val userBook = stubUserBook()
             val book = stubBook(userBook = userBook)
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
                 scannedEditionId = 42,
                 isUpdatingScannedEdition = true,
             )
+
             dependencies = stubDependencies(this)
 
             val action = OnUpdateToScannedEditionClickAction()
@@ -189,10 +196,12 @@ class OnUpdateToScannedEditionClickActionTest {
         fun `does not invoke use case when userBook is null`() = runTest {
             // ----- Arrange -----
             val book = stubBook(userBook = null)
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
                 scannedEditionId = 42,
             )
+
             dependencies = stubDependencies(this)
 
             val action = OnUpdateToScannedEditionClickAction()
@@ -217,10 +226,12 @@ class OnUpdateToScannedEditionClickActionTest {
             // ----- Arrange -----
             val userBook = stubUserBook()
             val book = stubBook(userBook = userBook)
+
             stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
                 scannedEditionId = null,
             )
+
             dependencies = stubDependencies(this)
 
             val action = OnUpdateToScannedEditionClickAction()

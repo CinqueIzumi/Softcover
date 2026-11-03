@@ -16,16 +16,16 @@ internal class ChromeLiveScreenModel(
     themeStore: ShowcaseThemeStore,
     initializers: List<Collector<ChromeLiveUiState, ChromeLiveEvent, ChromeLiveDependencies, ChromeLiveLocalVariables>>,
 ) : ToadScreenModel<
-    ChromeLiveUiState,
-    ChromeLiveEvent,
-    ChromeLiveDependencies,
-    Collector<ChromeLiveUiState, ChromeLiveEvent, ChromeLiveDependencies, ChromeLiveLocalVariables>,
-    ChromeLiveLocalVariables,
+        ChromeLiveUiState,
+        ChromeLiveEvent,
+        ChromeLiveDependencies,
+        Collector<ChromeLiveUiState, ChromeLiveEvent, ChromeLiveDependencies, ChromeLiveLocalVariables>,
+        ChromeLiveLocalVariables,
     >(
-    initialState = chromeLiveState(),
-    initialLocalVariables = ChromeLiveLocalVariables(),
-    initializers = initializers,
-) {
+        initialState = chromeLiveState(),
+        initialLocalVariables = ChromeLiveLocalVariables(),
+        initializers = initializers,
+    ) {
     override val dependencies = ChromeLiveDependencies(
         themeStore = themeStore,
         coroutineScope = screenModelScope,

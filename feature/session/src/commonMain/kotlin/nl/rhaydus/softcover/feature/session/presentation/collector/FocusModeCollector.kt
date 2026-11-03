@@ -7,8 +7,8 @@ import nl.rhaydus.softcover.feature.session.presentation.state.LocalFocusModeVar
 import nl.rhaydus.toad.Collector
 
 internal sealed interface FocusModeCollector : Collector<
-        FocusModeUiState,
-        FocusModeEvent,
-        FocusModeDependencies,
-        LocalFocusModeVariables,
-        >
+    FocusModeUiState,
+    FocusModeEvent,
+    FocusModeDependencies,
+    LocalFocusModeVariables,
+>

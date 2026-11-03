@@ -27,6 +27,7 @@ class OnDatePickerConfirmedActionTest {
     @BeforeEach
     fun setUp() {
         dependencies = mockk(relaxed = true)
+
         stateFlow = MutableStateFlow(
             DialogLiveUiState(
                 topBar = dialogLiveTopBar(),
@@ -34,7 +35,9 @@ class OnDatePickerConfirmedActionTest {
                 datePicker = datePicker(pickedDate = null),
             ),
         )
+
         eventChannel = Channel(Channel.BUFFERED)
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(DialogLiveLocalVariables()),
@@ -52,6 +55,7 @@ class OnDatePickerConfirmedActionTest {
                 month = 3,
                 day = 14,
             )
+
             val action = OnDatePickerConfirmedAction(date = date)
 
             // ----- Act -----

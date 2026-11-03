@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.mapper
 
-import kotlin.math.roundToInt
 import kotlinx.collections.immutable.PersistentMap
 import kotlinx.collections.immutable.plus
 import kotlinx.collections.immutable.toPersistentMap
@@ -9,6 +8,7 @@ import nl.rhaydus.softcover.core.domain.model.BookTraits
 import nl.rhaydus.softcover.core.domain.model.TraitAnswer
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.HowItReadAnswer
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.HowItReadDraft
+import kotlin.math.roundToInt
 
 private val BALANCE_RANGE = 0..BALANCE_MAX
 

@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.motion
+import nl.rhaydus.designsystem.theme.motion
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.min
@@ -72,6 +72,7 @@ fun MarkAsReadBurst(
         if (playMotion.not()) return@LaunchedEffect
 
         progress.snapTo(targetValue = 0f)
+
         progress.animateTo(
             targetValue = 1f,
             animationSpec = celebration,
@@ -82,12 +83,14 @@ fun MarkAsReadBurst(
 
     Canvas(modifier = modifier) {
         val current = progress.value
+
         if (current == 0f) return@Canvas
 
         val centre = Offset(
             x = size.width / 2f,
             y = size.height / 2f,
         )
+
         val maxRadius = min(
             a = size.width,
             b = size.height,

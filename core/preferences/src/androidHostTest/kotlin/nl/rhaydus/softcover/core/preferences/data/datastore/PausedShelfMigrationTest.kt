@@ -113,6 +113,7 @@ class PausedShelfMigrationTest {
                 "status-2",
                 "status-3",
             )
+
             val settings = AppSettingsEntity(libraryTabOrder = order)
 
             // ----- Act -----

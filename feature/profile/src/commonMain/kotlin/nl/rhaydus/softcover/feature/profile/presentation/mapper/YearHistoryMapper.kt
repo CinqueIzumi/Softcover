@@ -44,6 +44,7 @@ internal fun yearHistoryChartUiModel(
     }
 
     val maxCount = series.maxOfOrNull { it.count } ?: 0
+
     val leadIndex = when {
         litYear != null -> series.indexOfFirst { it.year == litYear && it.count > 0 }
         maxCount > 0 -> series.indexOfFirst { it.count == maxCount }

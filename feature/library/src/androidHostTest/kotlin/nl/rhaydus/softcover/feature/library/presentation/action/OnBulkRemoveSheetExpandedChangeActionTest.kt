@@ -26,6 +26,7 @@ class OnBulkRemoveSheetExpandedChangeActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
@@ -58,6 +59,7 @@ class OnBulkRemoveSheetExpandedChangeActionTest {
         fun `showing the sheet again leaves a closing session for the collector to replace`() = runTest {
             // ----- Arrange -----
             val closing = openBulkRemoveSession(closing = true)
+
             stateFlow.value = LibraryUiState(
                 selectedBookIds = persistentSetOf(1),
                 bulkRemoveSheet = closing,

@@ -28,6 +28,7 @@ class HiddenRecommendationDaoTest {
             builder = Room.inMemoryDatabaseBuilder(context = context),
             queryContext = testDispatcher,
         )
+
         dao = database.hiddenRecommendationDao()
     }
 

@@ -37,6 +37,7 @@ class StatsAtlasUiStateTest {
                     unknownCount = 0,
                 ),
             )
+
             val state = StatsAtlasUiState(
                 readingStats = statsWith(demographics),
                 hideUntaggedAuthors = false,
@@ -65,6 +66,7 @@ class StatsAtlasUiStateTest {
                     unknownCount = 0,
                 ),
             )
+
             val state = StatsAtlasUiState(
                 readingStats = statsWith(demographics),
                 hideUntaggedAuthors = false,
@@ -93,6 +95,7 @@ class StatsAtlasUiStateTest {
                     unknownCount = 0,
                 ),
             )
+
             val state = StatsAtlasUiState(
                 readingStats = statsWith(demographics),
                 hideUntaggedAuthors = true,
@@ -147,6 +150,7 @@ class StatsAtlasUiStateTest {
                     day = 1,
                 ),
             )
+
             val state = StatsAtlasUiState(readingHistory = historyLoving(listOf(loved)))
 
             // ----- Act -----
@@ -258,6 +262,7 @@ class StatsAtlasUiStateTest {
         fun `resolves the selected key through the chip set`() {
             // ----- Arrange -----
             val key = statsScopeKey(StatsScope.CalendarYear(2025))
+
             val state = StatsAtlasUiState(
                 selectedScopeKey = key,
                 scopeChips = atlasScopeChips(

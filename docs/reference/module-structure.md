@@ -3,7 +3,7 @@
 The two-axes / tier model, what goes in `core` vs `feature` vs `orchestration`, cross-feature
 navigation, the placing-a-new-thing decision flow, the review checklist, and the naming / folder
 conventions are governed by the foundation
-[`docs/rhaydus/0.3.1/architecture.md`](../rhaydus/0.3.1/architecture.md) (§1–3, §5, §8–10). Read it
+[`foundation/docs/architecture.md`](../../foundation/docs/architecture.md) (§1–3, §5, §8–10). Read it
 first — it is the source of truth for how code is categorized, grouped, and placed across the Gradle
 modules, and for the allowed dependency directions (`:app → :orchestration → :feature:* → :core:*`,
 gated so the graph stays an acyclic DAG).
@@ -89,9 +89,9 @@ only on modules **below** its tier.
 | `core:identity` | `GetUserIdUseCase`, `UpdateApiKeyUseCase` (storage lives in `core:preferences/data`) |
 | `core:connectivity` | offline write-queue / sync infra (contracts in `core:domain/connectivity`) |
 | `core:designsystem` | **Tokens and the system-bar seam.** Material 3 theme, editorial typography, the icon/illustration catalogs, modifiers, the bottom-chrome padding seam, shared-element scopes, and the Android system-bar seam (`presentation/systembar/`: `transparentSystemBarStyle`, `ApplySystemBarAppearance`), plus the build-time token exporter in the `jvmDesignPreset` source set (`.claude/rules/build-wiring.md` § Design preset tasks). Holds **zero project dependencies** — asserted by `checkModuleGraph`, with a scoped detekt `ForbiddenImport` closing the source-level half. See the three rows below for where its components live |
-| `core:component` | The component library: every component the app renders, driven by a UI model. Depends on `core:designsystem` and nothing else — domain, data, DI, navigation and Apollo are build failures (`checkModuleGraph` for the dependency graph, a scoped detekt `ForbiddenImport` for the source). One directory per family, model + component + fixtures together: `badge/`, `bookcard/`, `button/`, `callout/`, `celebration/`, `chart/`, `chip/`, `chrome/`, `control/`, `cover/`, `deadline/`, `dialog/`, `divider/`, `document/`, `field/`, `header/`, `lists/`, `progress/`, `quote/`, `richtext/`, `selection/`, `share/`, `sheet/`, `snackbar/`, `state/`, `statistic/`, `topbar/`, `traits/`, `transition/`, `verdict/`, `gallery/` so far. `transition/` owns `BookTransitionKey`, `BookTransitionElement` and the `bookTransitionKey` builder, the only minter of a key. It owns its own `composeResources` for the copy that belongs to a component rather than to a feature (the offline banner and offline screen say the same thing on every surface that shows them) |
+| `core:component` | The component library: every component the app renders, driven by a UI model. Depends on `core:designsystem` and nothing else — domain, data, DI, navigation and Apollo are build failures (`checkModuleGraph` for the dependency graph, a scoped detekt `ForbiddenImport` for the source). One directory per family, model + component + fixtures together: `badge/`, `bookcard/`, `button/`, `callout/`, `celebration/`, `chart/`, `chip/`, `chrome/`, `control/`, `cover/`, `deadline/`, `dialog/`, `divider/`, `document/`, `field/`, `header/`, `lists/`, `progress/`, `quote/`, `richtext/`, `selection/`, `share/`, `sheet/`, `snackbar/`, `state/`, `statistic/`, `topbar/`, `traits/`, `transition/`, `verdict/`, `gallery/` so far. `share/` owns `LocalShareCardIoDispatcher`, which throws when unmounted. `transition/` owns `BookTransitionKey`, `BookTransitionElement` and the `bookTransitionKey` builder, the only minter of a key. It owns its own `composeResources` for the copy that belongs to a component rather than to a feature (the offline banner and offline screen say the same thing on every surface that shows them) |
 | `core:uibinding` | Adapters mapping a domain model to the UI type that renders it, for mappings two or more consumers need. `api`-exposes both sides of every mapping — `core:domain`, `core:component`, `core:designsystem` — so a consumer sees the type it maps from and the type it maps to without re-declaring either. Residents: `ColorPalette.toSpinePalette()` (the reader's persisted spine colour as the design system's palette token) and `ThemeMode.toSchemeBrightness(systemInDark)` (the appearance preference as the design system's brightness token); the `ReviewDocument` ↔ `RichTextUiModel` pair, which is **bidirectional** because the verdict sheet is an editor and the edited model has to travel back out to be persisted; `ProgressUnit` ↔ `ProgressSheetTab` plus `Book.toProgressSheetUiModel()`; the two `List<BookList>` → `ChooseListsUiModel` entry points (single-book and bulk); and `Book.toVerdictSheetUiModel(context, review, cover)` with its `VerdictSheetContext` input (`verdict/`). The last three were promoted straight here rather than starting feature-local, because each landed with two consumers already (R6). Three more join it on the same grounds: `DeadlineProgress` → the badge / cover-overlay / summary-line models (`deadline/`), the three `LocalDate` → unreleased-badge mappers (`toCompactUnreleasedBadgeUiModel`, `toProminentUnreleasedBadgeUiModel`, `toFeaturedUnreleasedBadgeUiModel`; `release/`), and the two neutral date formatters `formatCompactDate` / `formatLongDate` (`date/`) — the latter named for the shape they render rather than for releases, since the roadmap's "Last updated" footer is a non-release consumer. `bookStatsLine(releaseYear, usersCount, rating)` (`book/`) builds the "year · N readers · ★ rating" supporting line Library's large rows render; Explore's search rows draw the same line and are its second consumer. `Book.transitionKey(element, surface)` (`book/`) delegates to the `bookTransitionKey` builder in `core:component`. Beside it, `BookCardTextFormats.kt` holds the card text every `BookCard` mapper shares: `byline` ("By X"), `ratingPart` (the rating label with its spoken description) and the uppercase `seriesEyebrow`; the neutral `percentLabel` ("42%") sits in `format/`, shared by card, chart and progress mappers. `session/` holds `endSessionPauseSheetScaffold` and `ConfirmedPause` |
-| `core:presentation` | The non-component residents evicted from `core:designsystem`: the cross-tier contracts whose impls live in orchestration (`AppNavigator`, `AppEntryPoint`, `BookDetailPresenter`, `CreateListPresenter`, `ActiveSessionController` (with its `activeSessionBookId` / `stopSessionThen` helpers), `SessionAuthenticator`, `ReadingSessionLauncher`), the nav destinations (`ScreenDestination`, `TabDestination`, `TransientNavArg`, `BookInitialCover`), `LibraryTab`, API-error mapping (`toUserMessage` / `onApiFailure`), `SplashState` / `ReAuthState`, `BookDetailPrefetcher` (with `rememberPrefetchingBookCardEventHandler`, the card-event handler that prefetches on press), the app-update composition locals, the reader's appearance preference as composition state (`LocalThemeConfiguration`), the `DebugRoutesContent` seam, `UndoableBookRemover` (the Undo-snackbar window shared by every remove-from-library entry point), `LocalCoverImagePersister` / `ProvideCoverImagePersister` (mounted once in `App.kt`), and `presentationModule` — the app's one Koin module below the feature tier, which also binds `core:component`'s `OfflineCopy` to `ResourceOfflineCopy` (the component library cannot use DI). `api`-depends on `core:domain` and `core:component` (the latter for `ActiveSession`'s `CoverUiModel` and for the cover-persister seam); `implementation` on `core:book`. **Not** on `core:designsystem` |
+| `core:presentation` | The non-component residents evicted from `core:designsystem`: the cross-tier contracts whose impls live in orchestration (`AppNavigator`, `AppEntryPoint`, `BookDetailPresenter`, `CreateListPresenter`, `ActiveSessionController` (with its `activeSessionBookId` / `stopSessionThen` helpers), `SessionAuthenticator`, `ReadingSessionLauncher`), the nav destinations (`ScreenDestination`, `TabDestination`, `BookInitialCover`), `LibraryTab`, API-error mapping (`toUserMessage` / `onApiFailure`), `SplashState` / `ReAuthState`, `BookDetailPrefetcher` (with `rememberPrefetchingBookCardEventHandler`, the card-event handler that prefetches on press), the app-update composition locals, the reader's appearance preference as composition state (`LocalThemeConfiguration`), the `DebugRoutesContent` seam, `UndoableBookRemover` (the Undo-snackbar window shared by every remove-from-library entry point), `LocalCoverImagePersister` / `ProvideCoverImagePersister` and `ProvideShareCardIoDispatcher` (each mounted once in `App.kt`), and `presentationModule` — the app's one Koin module below the feature tier, which also binds `core:component`'s `OfflineCopy` to `ResourceOfflineCopy` (the component library cannot use DI). `api`-depends on `core:domain` and `core:component` (the latter for `ActiveSession`'s `CoverUiModel` and for the cover-persister seam); `implementation` on `core:book`. **Not** on `core:designsystem` |
 | `core:progresssheet` | The update-progress sheet's screen logic, shared by every screen that shows the sheet: `ProgressSheetSlice` (the feeds that keep the sheet current, plus tab, draft, backdate, submit and dismiss handling), `ProgressSheetState`, `ProgressEntry` and the `ProgressSheetHost` seam a TOAD screen implements to record the write. The slice's constructor is `internal`, so `core:preferences` stays an `implementation` edge |
 | `core:network` | Apollo client, interceptors, `safeQuery` / `safeMutation`, and the plain-HTTP seam `safeGetText` |
 | `core:database` | Room database, migrations, **all** persisted entities + DAOs (incl. those a feature's data source uses) |
@@ -138,8 +138,6 @@ component/
 + cover/       Cover  CoverUiModel  CoverVariant  CoverSource
 +              CoverlessTitleCover  MonogramCoverMetrics
 + deadline/    DeadlineSummaryLine(+UiModel, +Tone)
-+ dialog/      SoftcoverDatePickerDialog  DatePickerUiModel  DatePickerEvent
-+              PickerDates (internal)
 + divider/     Divider  VerticalDivider  DividerInk  DividerCenter
 + field/       TextField  TextFieldUiModel/Variant/Keyboard/Event/Error
 + gallery/     GalleryRegistry  GalleryEntry  GalleryFamily
@@ -167,7 +165,6 @@ component/
 +              SheetActionRow(+UiModel)  SheetFooterEmphasis  SheetModel  SheetSession
 + sidebar/     Sidebar  SidebarUiModel  SidebarSectionUiModel  SidebarRowUiModel/Variant  SidebarEvent
 + state/       EmptyState(+UiModel, +Variant, +Event)
-+              SkeletonMask (Modifier.skeletonMask)
 +              · ErrorState
 + chart/       ChartTone  RankedBars(+UiModel, +BarUiModel)
 +              ProportionChart(+UiModel, +Variant, +ChartSliceUiModel)
@@ -241,9 +238,11 @@ Room DB.
 - **Convention plugins** in `build-logic/` keep module build files uniform. Apply the smallest set:
   - `softcover.android.room` — `:core:database` only.
   - `softcover.android.apollo` — `:core:network` only.
-  - `softcover.kmp.library` / `softcover.kmp.compose` — the base for every `:core:*` / `:feature:*` /
-    `:orchestration` library module (KMP base with SDK/JDK, the shared coroutines/Koin runtime and the
-    JUnit5/Kotest/MockK/Turbine test stack; and Compose UI wiring AndroidX Compose into `androidMain`).
+  - `rhaydus.kmp.library` (foundation) — the base for every `:core:*` / `:feature:*` /
+    `:orchestration` library module: KMP targets, SDK/JDK, the shared coroutines/Koin runtime and the
+    JUnit5/Kotest/MockK/Turbine test stack.
+  - `rhaydus.kmp.compose` — on top of `rhaydus.kmp.library` for UI modules; it includes the Compose stability
+    gate.
   - `:app` is the lone `com.android.application` and stays Android-only (it owns build-type-conditional
     wiring). Because it is the **only** module with build types — the KMP Android library plugin
     produces a single variant — it is also where **debug-only UI** lives: `src/debug/` holds the
@@ -289,7 +288,7 @@ Room DB.
 - The tier rules and the **api-visibility** rule are **enforced automatically** by the
   `checkModuleGraph` Gradle task (wired into `check`): it derives each module's tier from its path and
   fails the build on any `project(...)` dependency pointing sideways or upward, and on any
-  `api(project(...))` edge into `apiSignOffModules` that is not on the task's explicit allowlist (§10).
+  `api(project(...))` edge into the `dataAreaModules` set that is not on the task's explicit allowlist (§10).
   It also fails on a **wrong-direction** edge inside the UI stack (`core:designsystem` depending on
   `core:{component, uibinding, presentation}`) and on any breach of the component library's own
   dependency ban. Every one of those rules has been verified by deliberately introducing a violation
@@ -311,11 +310,11 @@ Room DB.
   directory on disk, so it also covers the `customDirectory` case (`:feature:settings` has no such
   directory). Verified the same way as the rules above.
 - **No presentation or `:core:component` main source file exceeds 600 lines.** The limit covers every
-  `.kt` file under a `presentation` package in any `*Main` source set, and every main source file in
+  `.kt` file under a `presentation` package in `main` or any `*Main` source set (never tests), and every main source file in
   `:core:component`. An agent cannot read a larger file in one call, so it pages through the file and
   re-reads it. Split a growing screen one section composable per file under `…presentation.screen.section`.
-  Enforced by the `checkPresentationFileSize` Gradle task (wired into `check`), which lists each offender
-  with its line count. There is no baseline and no exemption list.
+  Enforced by the foundation `rhaydus.file-size` gate (`checkFileSize`, wired into `check`), which lists each
+  offender with its line count. There is no baseline and no exemption list.
 
 ### Kotlin Multiplatform
 

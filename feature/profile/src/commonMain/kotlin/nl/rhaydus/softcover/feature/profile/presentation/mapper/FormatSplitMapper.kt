@@ -76,12 +76,15 @@ internal fun formatSplitCaption(
     if (split == null) return STAND_IN_CAPTION
 
     val total = split.total
+
     if (booksRead == 0 || total == 0) {
         return scope.noFinishedBooksSentence(booksRead = booksRead) ?: EMPTY_ALL_TIME
     }
 
     val known = knownCounts(split)
+
     if (known.isEmpty()) return NONE_KNOWN_CAPTION
+
     if (split.unknownCount * 2 >= total) return MOSTLY_UNKNOWN_CAPTION
 
     val ranked = known.sortedByDescending { it.second }
@@ -127,6 +130,7 @@ internal fun formatSplitChart(split: FormatSplit?): ProportionChartUiModel {
     if (split == null) return LOADING_FORMAT_CHART
 
     val total = split.total
+
     val entries = knownCounts(split).map { (format, count) ->
         Triple(
             format.segmentLabel,
@@ -142,6 +146,7 @@ internal fun formatSplitChart(split: FormatSplit?): ProportionChartUiModel {
             )
         },
     )
+
     val percents = wholePercents(
         counts = entries.map { it.second },
         total = total,
@@ -173,6 +178,7 @@ private fun wholePercents(
     val floors = counts.map { it * PERCENT / total }.toMutableList()
     val remainders = counts.map { it * PERCENT % total }
     val missing = PERCENT - floors.sum()
+
     remainders.indices
         .sortedWith(compareByDescending<Int> { remainders[it] }.thenBy { it })
         .take(missing)
@@ -180,6 +186,7 @@ private fun wholePercents(
 
     counts.indices.filter { counts[it] > 0 && floors[it] == 0 }.forEach { index ->
         val largest = floors.indices.maxByOrNull { floors[it] } ?: return@forEach
+
         floors[largest] -= 1
         floors[index] = 1
     }

@@ -21,7 +21,7 @@ internal class ThemeChipsCollector<
     E : UiEvent,
     D : ActionDependencies,
     L : LocalVariables,
-    >(
+>(
     private val themeStore: ShowcaseThemeStore,
 ) : Collector<S, E, D, L> {
     override suspend fun onLaunch(

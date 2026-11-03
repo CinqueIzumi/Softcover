@@ -37,6 +37,7 @@ class BackgroundWidgetRendererTest {
             options: Bundle,
         ) {
             pushes.add(appWidgetId to model.toString())
+
             onPush(
                 appWidgetId,
                 model.toString(),
@@ -85,6 +86,7 @@ class BackgroundWidgetRendererTest {
         fun `pushes every stage in order until settled`() = runTest {
             // ----- Arrange -----
             val host = FakeHost()
+
             val renderer = renderer(host) {
                 flowOf(
                     "a",
@@ -125,6 +127,7 @@ class BackgroundWidgetRendererTest {
         fun `a newer render for the same id cancels the in-flight one`() = runTest {
             // ----- Arrange -----
             val host = FakeHost()
+
             val renderer = renderer(host) { call ->
                 if (call == 0) {
                     flow {
@@ -136,12 +139,14 @@ class BackgroundWidgetRendererTest {
                     flowOf("new!")
                 }
             }
+
             launch {
                 renderer.render(
                     widget,
                     1,
                 )
             }
+
             runCurrent()
 
             // ----- Act -----
@@ -149,6 +154,7 @@ class BackgroundWidgetRendererTest {
                 widget,
                 1,
             )
+
             advanceUntilIdle()
 
             // ----- Assert -----
@@ -159,6 +165,7 @@ class BackgroundWidgetRendererTest {
         fun `renders for different ids do not cancel each other`() = runTest {
             // ----- Arrange -----
             val host = FakeHost()
+
             val renderer = renderer(host) { call ->
                 flow {
                     emit("first$call")
@@ -166,12 +173,14 @@ class BackgroundWidgetRendererTest {
                     emit("last$call!")
                 }
             }
+
             launch {
                 renderer.render(
                     widget,
                     1,
                 )
             }
+
             runCurrent()
 
             // ----- Act -----
@@ -179,6 +188,7 @@ class BackgroundWidgetRendererTest {
                 widget,
                 2,
             )
+
             advanceUntilIdle()
 
             // ----- Assert -----
@@ -194,6 +204,7 @@ class BackgroundWidgetRendererTest {
         fun `keeps the stages pushed so far and returns when nothing settles within 10 seconds`() = runTest {
             // ----- Arrange -----
             val host = FakeHost()
+
             val renderer = renderer(host) {
                 flow {
                     emit("a")
@@ -219,6 +230,7 @@ class BackgroundWidgetRendererTest {
         fun `swallows a push that throws`() = runTest {
             // ----- Arrange -----
             val host = FakeHost(onPush = { _, _ -> error("push failed") })
+
             val renderer = renderer(host) {
                 flowOf(
                     "a",

@@ -134,6 +134,7 @@ class QuoteWidgetModelsTest {
             // ----- Arrange -----
             val quotes = testQuotes(count = 4)
             val flow = models(quotes = quotes)
+
             val expected = rankForDay(
                 quotes = quotes,
                 epochDay = today,
@@ -166,10 +167,12 @@ class QuoteWidgetModelsTest {
         fun `reads QUOTES with the place in the ranking once a quote is cycled to`() = runTest {
             // ----- Arrange -----
             val quotes = testQuotes(count = 4)
+
             val ranking = rankForDay(
                 quotes = quotes,
                 epochDay = today,
             )
+
             val flow = models(
                 quotes = quotes,
                 selection = QuoteSelection(
@@ -190,10 +193,12 @@ class QuoteWidgetModelsTest {
         fun `reads QUOTE OF THE DAY again when the pick is from an earlier day`() = runTest {
             // ----- Arrange -----
             val quotes = testQuotes(count = 4)
+
             val ranking = rankForDay(
                 quotes = quotes,
                 epochDay = today,
             )
+
             val flow = models(
                 quotes = quotes,
                 selection = QuoteSelection(
@@ -217,15 +222,19 @@ class QuoteWidgetModelsTest {
         fun `drops a pick and shows the new quote of the day when the day changes`() = runTest {
             // ----- Arrange -----
             val quotes = testQuotes(count = 4)
+
             val ranking = rankForDay(
                 quotes = quotes,
                 epochDay = today,
             )
+
             val nextRanking = rankForDay(
                 quotes = quotes,
                 epochDay = today + 1,
             )
+
             val epochDays = MutableSharedFlow<Long>()
+
             val flow = models(
                 quotes = quotes,
                 selection = QuoteSelection(
@@ -412,6 +421,7 @@ class QuoteWidgetModelsTest {
                 washPrimary = mockk<Uri>(),
                 washTertiary = mockk<Uri>(),
             )
+
             val flow = models(
                 quotes = testQuotes(count = 2),
                 artworkUris = { resolved },
@@ -426,6 +436,7 @@ class QuoteWidgetModelsTest {
             val second = emissions[1].content.shouldBeInstanceOf<QuoteWidgetUiModel.Content.Shown>()
             first.artwork.shouldBeNull()
             second.artwork shouldBe resolved
+
             second.copy(
                 artwork = null,
                 imagesPending = true,

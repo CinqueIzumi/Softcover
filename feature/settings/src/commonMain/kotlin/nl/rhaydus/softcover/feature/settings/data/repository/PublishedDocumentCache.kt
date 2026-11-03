@@ -30,10 +30,9 @@ internal class PublishedDocumentCache(
     private val localDataSource: PublishedDocumentLocalDataSource,
     private val bundledDataSource: PublishedDocumentBundledDataSource,
 ) {
-    fun observe(key: PublishedDocumentKey): Flow<PublishedDocument> =
-        localDataSource.observeCachedDocument(key = key).map { cached ->
-            cached ?: bundledDataSource.readBundledDocument(key = key)
-        }
+    fun observe(key: PublishedDocumentKey): Flow<PublishedDocument> = localDataSource.observeCachedDocument(key = key).map { cached ->
+        cached ?: bundledDataSource.readBundledDocument(key = key)
+    }
 
     suspend fun refresh(
         key: PublishedDocumentKey,

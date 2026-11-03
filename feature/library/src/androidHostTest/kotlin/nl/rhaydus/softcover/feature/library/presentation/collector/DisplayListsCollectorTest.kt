@@ -75,6 +75,7 @@ class DisplayListsCollectorTest {
             bookId = id,
             pages = pages,
         )
+
         return Book(
             id = id,
             canonicalId = null,
@@ -99,11 +100,13 @@ class DisplayListsCollectorTest {
     @BeforeEach
     fun setUp() {
         stateFlow = MutableStateFlow(LibraryUiState())
+
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+
         dependencies = mockk<LibraryDependencies>(relaxed = true).also { mock ->
             every {
                 mock.defaultDispatcher
@@ -120,10 +123,12 @@ class DisplayListsCollectorTest {
                 listId = 1,
                 listName = "Owned",
             ).id
+
             val edition = buildEdition(
                 id = 1,
                 title = "Edition One",
             )
+
             val collector = DisplayListsCollector()
 
             val job = launch {
@@ -149,14 +154,17 @@ class DisplayListsCollectorTest {
         fun `tabStatsByTab for a book tab reports correct bookCount and totalPages`() = runTest(testDispatcher) {
             // ----- Arrange -----
             val tabId = LibraryTab.Status.of(UserBookStatus.CURRENTLY_READING).id
+
             val book1 = buildBook(
                 id = 1,
                 pages = 200,
             )
+
             val book2 = buildBook(
                 id = 2,
                 pages = 150,
             )
+
             val collector = DisplayListsCollector()
 
             val job = launch {
@@ -183,11 +191,13 @@ class DisplayListsCollectorTest {
                 listId = 5,
                 listName = "Favourites",
             ).id
+
             val edition = buildEdition(
                 id = 1,
                 title = "Ed",
                 pages = 300,
             )
+
             val collector = DisplayListsCollector()
 
             val job = launch {
@@ -215,14 +225,17 @@ class DisplayListsCollectorTest {
         fun `searchQuery filters books in displayBooksByTab`() = runTest(testDispatcher) {
             // ----- Arrange -----
             val tabId = LibraryTab.Status.of(UserBookStatus.CURRENTLY_READING).id
+
             val matching = buildBook(
                 id = 1,
                 title = "Kotlin in Action",
             )
+
             val nonMatching = buildBook(
                 id = 2,
                 title = "Clean Code",
             )
+
             val collector = DisplayListsCollector()
 
             val job = launch {
@@ -247,22 +260,27 @@ class DisplayListsCollectorTest {
         fun `filter facets in filtersByTab narrow displayBooksByTab`() = runTest(testDispatcher) {
             // ----- Arrange -----
             val tabId = LibraryTab.Status.of(UserBookStatus.CURRENTLY_READING).id
+
             val ebookEdition = buildEdition(
                 id = 10,
                 format = "ebook",
             )
+
             val paperEdition = buildEdition(
                 id = 11,
                 format = "paperback",
             )
+
             val ebookBook = buildBook(
                 id = 1,
                 editions = listOf(ebookEdition),
             )
+
             val paperBook = buildBook(
                 id = 2,
                 editions = listOf(paperEdition),
             )
+
             val collector = DisplayListsCollector()
 
             val job = launch {
@@ -287,10 +305,12 @@ class DisplayListsCollectorTest {
         fun `changing an unrelated state field does not retrigger recompute`() = runTest(testDispatcher) {
             // ----- Arrange -----
             val tabId = LibraryTab.Status.of(UserBookStatus.CURRENTLY_READING).id
+
             val book = buildBook(
                 id = 1,
                 title = "Stable Book",
             )
+
             val collector = DisplayListsCollector()
 
             val job = launch {
@@ -318,10 +338,12 @@ class DisplayListsCollectorTest {
         fun `same computed result reuses prior list reference for reference stability`() = runTest(testDispatcher) {
             // ----- Arrange -----
             val tabId = LibraryTab.Status.of(UserBookStatus.CURRENTLY_READING).id
+
             val book = buildBook(
                 id = 1,
                 title = "Stable Book",
             )
+
             val collector = DisplayListsCollector()
 
             val job = launch {
@@ -336,6 +358,7 @@ class DisplayListsCollectorTest {
                 booksByTab = persistentMapOf(tabId to persistentListOf(book)),
                 searchQuery = "",
             )
+
             val refAfterFirst = stateFlow.value.displayBooksByTab[tabId]
 
             // ----- Act -----

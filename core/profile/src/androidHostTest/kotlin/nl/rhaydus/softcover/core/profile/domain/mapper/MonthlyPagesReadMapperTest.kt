@@ -77,6 +77,7 @@ class MonthlyPagesReadMapperTest {
                     pages = 400,
                 ),
             )
+
             val books = listOf(
                 readBook(
                     id = 1,
@@ -95,11 +96,13 @@ class MonthlyPagesReadMapperTest {
 
             // ----- Assert -----
             val months = spanCounts(result)
+
             months[2] shouldBe Triple(
                 2026,
                 3,
                 200,
             )
+
             months[3] shouldBe Triple(
                 2026,
                 4,
@@ -146,6 +149,7 @@ class MonthlyPagesReadMapperTest {
                     pages = 100,
                 ),
             )
+
             val books = listOf(
                 readBook(
                     id = 1,
@@ -164,11 +168,13 @@ class MonthlyPagesReadMapperTest {
 
             // ----- Assert -----
             val months = spanCounts(result)
+
             months[2] shouldBe Triple(
                 2026,
                 3,
                 100,
             )
+
             months[3] shouldBe Triple(
                 2026,
                 4,
@@ -187,6 +193,7 @@ class MonthlyPagesReadMapperTest {
                     pages = 300,
                 ),
             )
+
             val books = listOf(
                 readBook(
                     id = 1,
@@ -256,6 +263,7 @@ class MonthlyPagesReadMapperTest {
                     pages = 90,
                 ),
             )
+
             val books = listOf(
                 readBook(
                     id = 2,
@@ -298,11 +306,13 @@ class MonthlyPagesReadMapperTest {
 
             // ----- Assert -----
             val months = spanCounts(result)
+
             months[2] shouldBe Triple(
                 2026,
                 3,
                 0,
             )
+
             months[3] shouldBe Triple(
                 2026,
                 4,
@@ -317,6 +327,7 @@ class MonthlyPagesReadMapperTest {
         fun `a calendar year spans January to December`() {
             // ----- Arrange -----
             val scope = StatsScope.CalendarYear(2025)
+
             val today = LocalDate(
                 year = 2026,
                 month = 10,
@@ -337,6 +348,7 @@ class MonthlyPagesReadMapperTest {
         fun `a twelve-month window includes the partial first month for thirteen columns`() {
             // ----- Arrange -----
             val scope = StatsScope.Rolling(StatsWindow.LAST_12_MONTHS)
+
             val today = LocalDate(
                 year = 2026,
                 month = 10,
@@ -359,6 +371,7 @@ class MonthlyPagesReadMapperTest {
         fun `a twelve-month window ending on a month's last day spans twelve months`() {
             // ----- Arrange -----
             val scope = StatsScope.Rolling(StatsWindow.LAST_12_MONTHS)
+
             val today = LocalDate(
                 year = 2026,
                 month = 10,
@@ -380,6 +393,7 @@ class MonthlyPagesReadMapperTest {
         fun `thirty days on the first of March spans January to March`() {
             // ----- Arrange -----
             val scope = StatsScope.Rolling(StatsWindow.LAST_30_DAYS)
+
             val today = LocalDate(
                 year = 2026,
                 month = 3,
@@ -445,6 +459,7 @@ class MonthlyPagesReadMapperTest {
                     }
                 },
             )
+
             result shouldBe expected
         }
 
