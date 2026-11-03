@@ -113,6 +113,7 @@ class BookCardModelsCollectorTest {
     private fun BookCardUiModel.coverBadge(): CoverOverlayUiModel? = when (val shape = variant) {
         is BookCardVariant.CoverOnly -> shape.cover.badge
         is BookCardVariant.Column -> shape.cover?.badge
+        is BookCardVariant.Tile -> shape.cover.badge
         is BookCardVariant.Row -> (shape.lead as? BookCardLead.Cover)?.cover?.badge
     }
 

@@ -24,6 +24,15 @@ sealed interface BookCardVariant {
         val bookmark: BookCardTrailing.Bookmark? = null,
     ) : BookCardVariant
 
+    /**
+     * [BookCardContent.eyebrow] of [text] draws above the cover. The tile draws no progress, selection, menu or
+     * bookmark, so [BookCardDecorations.progress] and [BookCardDecorations.selection] are ignored.
+     */
+    data class Tile(
+        val cover: BookCardCover,
+        val text: BookCardContent,
+    ) : BookCardVariant
+
     /** @property lead `null` is a coverless row. */
     data class Row(
         val size: Size,
