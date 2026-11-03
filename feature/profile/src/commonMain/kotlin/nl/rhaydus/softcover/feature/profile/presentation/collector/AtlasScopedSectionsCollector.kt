@@ -36,6 +36,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsChartUiMo
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsEmptyCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsHistogramCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsHistogramHeader
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.readingRecordsUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeOfDayCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeOfDayChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeToFinishUiModel
@@ -48,8 +49,8 @@ import nl.rhaydus.toad.ActionScope
 
 /**
  * The only writer of every section that answers for the selected scope: the opening tiles, who you
- * read, how you score, the format split, pages by month, pages by time of day and the time to finish,
- * with their framing copy and the scope line. For genres it writes only whether any exist and the
+ * read, how you score, the format split, pages by month, pages by time of day, the time to finish and
+ * the reading records, with their framing copy and the scope line. For genres it writes only whether any exist and the
  * empty sentence; `GenreRankingCollector` maps the rest off the stats written here.
  *
  * It stays idle until the history has landed, because the history decides the default scope and
@@ -204,6 +205,11 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
             formatSplitChart = formatSplitChart(stats?.formatSplit),
             hasFormatSplit = hasFormatSplit(stats?.formatSplit),
             timeToFinish = timeToFinishUiModel(
+                timeToFinish = sections.timeToFinish,
+                scope = scope,
+            ),
+            readingRecords = readingRecordsUiModel(
+                stats = stats,
                 timeToFinish = sections.timeToFinish,
                 scope = scope,
             ),

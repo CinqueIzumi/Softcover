@@ -9,12 +9,14 @@ import androidx.compose.ui.Modifier
 import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
+import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.chart.ColumnChart
 import nl.rhaydus.softcover.core.component.chart.ColumnChartUiModel
 import nl.rhaydus.softcover.core.component.chart.ProportionChart
 import nl.rhaydus.softcover.core.component.chart.ProportionChartUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.state.ReadingRecordsUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.state.TimeToFinishUiModel
 
 /**
@@ -22,8 +24,9 @@ import nl.rhaydus.softcover.feature.profile.presentation.state.TimeToFinishUiMod
  * changes, because the month labels are then different; otherwise the bars animate in place. When
  * [hasMonthlyPages] is false the chart is dropped and the header's description says why. Below it the
  * [topAuthorRows] sit under their own subhead, and are dropped when [hasTopAuthors] is false. The
- * [formatSplitChart] follows under its own subhead and animates in place across scopes, and the
- * [timeToFinish] tiles follow it.
+ * [formatSplitChart] follows under its own subhead and animates in place across scopes. The
+ * [readingRecords] tiles follow it, opening book detail through [onRecordEvent], and the [timeToFinish]
+ * tiles close the chapter.
  */
 @Composable
 internal fun SeasonsAndRecordsChapter(
@@ -39,6 +42,8 @@ internal fun SeasonsAndRecordsChapter(
     formatSplitCaption: String,
     formatSplitChart: ProportionChartUiModel,
     hasFormatSplit: Boolean,
+    readingRecords: ReadingRecordsUiModel,
+    onRecordEvent: (BookCardEvent) -> Unit,
     timeToFinish: TimeToFinishUiModel,
     modifier: Modifier = Modifier,
 ) {
@@ -100,6 +105,13 @@ internal fun SeasonsAndRecordsChapter(
                     ProportionChart(model = formatSplitChart)
                 }
             },
+        )
+
+        Spacer(modifier = Modifier.height(Spacing.xl))
+
+        ReadingRecordsSection(
+            model = readingRecords,
+            onEvent = onRecordEvent,
         )
 
         Spacer(modifier = Modifier.height(Spacing.xl))

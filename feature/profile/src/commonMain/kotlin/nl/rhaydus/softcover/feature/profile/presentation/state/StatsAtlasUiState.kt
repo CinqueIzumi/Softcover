@@ -66,6 +66,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsAverageCa
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsAverageUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsEmptyCaption
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.readingRecordsUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeToFinishUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.toRatingsHistogramCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.toRatingsHistogramHeader
@@ -206,6 +207,13 @@ internal data class StatsAtlasUiState(
 
     /** Mapped by `AtlasScopedSectionsCollector`; masked while loading. */
     val timeToFinish: TimeToFinishUiModel = timeToFinishUiModel(
+        timeToFinish = null,
+        scope = StatsScope.AllTime,
+    ),
+
+    /** Mapped by `AtlasScopedSectionsCollector`; masked while loading. */
+    val readingRecords: ReadingRecordsUiModel = readingRecordsUiModel(
+        stats = null,
         timeToFinish = null,
         scope = StatsScope.AllTime,
     ),

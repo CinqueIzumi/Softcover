@@ -22,7 +22,7 @@
 - Beneath the row, a quiet italic line names the dates: "Showing 2026", "Showing 24 September to today"
   (the year is added only when the window starts in an earlier one), "Showing every year".
 - The scope moves the opening tiles, the time-of-day chart, the pages-by-month chart, the authors list, the format
-  split, the genre
+  split, your records, the genre
   ranking, "Who you read" (Hide untagged authors still applies) and "How you score". "Recently loved" and
   the year chart ignore it. Values animate between scopes; labels cross-fade, and reduced motion swaps them in place.
 - A scope with no finished books says so in each section's framing sentence ("No finished books in the last
@@ -100,6 +100,15 @@
   of these books has a known format.". With no finished books the caption gives the scope's sentence, or
   "Finish a few books and the formats you read in show up here." for All time, and the chart is dropped.
   The chart animates in place across scopes rather than cross-fading.
+  Then "Your records" shows two side-by-side tappable `BookCard` tiles: "LONGEST BOOK" (the book's title and
+  "1,296 pages") and "QUICKEST READ" (the title and "272 pages in 2 days", "In 2 days" when the page count is
+  unknown). The quickest read is the shortest start-to-finish span among reads with both dates, the longest
+  book the one with most pages among books finished in the scope. A tap opens book detail with the cover
+  shared; when both records are one book only the longest tile shares it. A lone record keeps the left cell,
+  and the caption says what is missing ("None of these reads has both a start and a finish date.", "None of
+  these books has a known page count."); with neither, it says "None of these books has a page count or both
+  reading dates.", or for a scope with no finished reads, "No finished reads in 2026." ("Finish a few books
+  and your records show up here." for All time). Tiles cross-fade only when a record changes book.
   Last, "Time to finish" shows the median calendar days from start to finish as a two by two grid of compact
   `StatTile`s: all books, then under 250, 250 to 450 and over 450 pages (a band with no reads shows a dash).
   The line above reads "Your typical book took 9 days. Ones over 450 pages took 23.", the second sentence
