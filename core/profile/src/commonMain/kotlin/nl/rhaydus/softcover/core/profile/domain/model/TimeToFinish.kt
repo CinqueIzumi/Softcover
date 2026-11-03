@@ -13,4 +13,5 @@ data class TimeToFinish(
     val medianDays: Int?,
     val bandMedianDays: Map<LengthBand, Int>,
     val excludedReadCount: Int,
+    val quickestRead: QuickestRead? = null,
 )
