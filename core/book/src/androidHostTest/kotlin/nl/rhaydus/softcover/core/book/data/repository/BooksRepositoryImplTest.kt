@@ -8716,6 +8716,113 @@ class BooksRepositoryImplTest {
     }
 
     @Nested
+    inner class WriteCancellation {
+        private fun readingBook(): Book = Book(
+            id = 42,
+            title = "Test Book",
+            editions = emptyList(),
+            defaultEdition = null,
+            rating = 0.0,
+            description = "",
+            releaseYear = 2020,
+            coverUrl = "",
+            authors = emptyList(),
+            usersCount = 0,
+            ratingsCount = 0,
+            bookSeries = null,
+            positionsInSeries = emptyList(),
+            isCompilation = false,
+            userBook = UserBook(
+                id = 7,
+                status = BookStatus.Reading,
+                dateAdded = "2026-01-01",
+                createdAt = null,
+                privacySettingId = 1,
+                reviewHasSpoilers = false,
+                editionId = null,
+                lastReadDate = null,
+                rating = null,
+                referrerUserId = null,
+                reviewedAt = null,
+                updatedAt = null,
+                journals = emptyList(),
+                reads = emptyList(),
+            ),
+        )
+
+        @Test
+        fun `a cancellation while enqueueing propagates without rolling back or calling remote`() = runTest {
+            // ----- Arrange -----
+            val book = readingBook()
+            val snapshot = stubBook(userBookId = 7)
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = book.id)
+            } returns snapshot
+
+            coEvery {
+                offlineSync.enqueueStatusUpdate(
+                    book = any(),
+                    status = any(),
+                )
+            } throws CancellationException("cancelled")
+
+            // ----- Act -----
+            val caught = runCatching { repository.markBookAsPaused(book = book) }
+
+            // ----- Assert -----
+            caught.exceptionOrNull().shouldBeInstanceOf<CancellationException>()
+
+            coVerify(exactly = 0) {
+                booksLocalDataSource.cacheBook(book = snapshot)
+            }
+
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.markBookAsPaused(
+                    book = any(),
+                    editionId = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `a cancellation during the remote write keeps the queued row and neither rolls back nor retries`() = runTest {
+            // ----- Arrange -----
+            val book = readingBook()
+            val snapshot = stubBook(userBookId = 7)
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = book.id)
+            } returns snapshot
+
+            coEvery {
+                booksRemoteDataSource.markBookAsPaused(
+                    book = any(),
+                    editionId = any(),
+                )
+            } throws CancellationException("cancelled")
+
+            // ----- Act -----
+            val caught = runCatching { repository.markBookAsPaused(book = book) }
+
+            // ----- Assert -----
+            caught.exceptionOrNull().shouldBeInstanceOf<CancellationException>()
+
+            coVerify(exactly = 0) {
+                offlineSync.settle(write = any())
+            }
+
+            coVerify(exactly = 0) {
+                booksLocalDataSource.cacheBook(book = snapshot)
+            }
+
+            coVerify(exactly = 0) {
+                offlineSync.retryLater()
+            }
+        }
+    }
+
+    @Nested
     inner class SerializedWrites {
         private lateinit var serializedRepository: BooksRepositoryImpl
 
