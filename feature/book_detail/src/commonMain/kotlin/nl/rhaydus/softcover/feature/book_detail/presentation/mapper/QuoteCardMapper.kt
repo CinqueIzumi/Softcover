@@ -41,7 +41,7 @@ internal fun List<Quote>.toQuotesSection(
 internal fun Quote.toQuoteCardUiModel(
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
     today: LocalDate = currentLocalDate(),
-): QuoteCardUiModel = QuoteCardUiModel(
+): QuoteCardUiModel.Saved = QuoteCardUiModel.Saved(
     key = localId,
     text = text,
     byline = listOfNotNull(

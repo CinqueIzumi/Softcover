@@ -24,6 +24,8 @@ introduce any region.
   pull quote, with a `primary` byline beneath. Surfaces a review or a featured passage.
 - List form (`QuoteCard`, the reader's saved quotes): the editorial `bodyLarge` passage (regular italic) under a
   48sp mark.
+- Book form (`QuoteCard`, the Atlas most-quoted card): the quote over a tappable cover, a title and caption
+  footer; the whole card opens the book.
 - Its empty-state form is `EmptyState`: an italic encouragement headline in the quote's place, no byline.
 
 ### Standfirst

@@ -1293,6 +1293,15 @@ internal fun nl.rhaydus.softcover.core.component.progress.WhenReadRow(model: nl.
     - onEvent: STABLE (function type)
 
 @Composable
+private fun nl.rhaydus.softcover.core.component.quote.BookQuoteCard(model: nl.rhaydus.softcover.core.component.quote.QuoteCardUiModel.Book, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.quote.QuoteCardEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (class with no mutable properties)
+    - onEvent: STABLE (function type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
 public fun nl.rhaydus.softcover.core.component.quote.QuoteCard(model: nl.rhaydus.softcover.core.component.quote.QuoteCardUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.quote.QuoteCardEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
   skippable: true
   restartable: true
@@ -1300,6 +1309,18 @@ public fun nl.rhaydus.softcover.core.component.quote.QuoteCard(model: nl.rhaydus
     - model: STABLE (marked @Stable or @Immutable)
     - onEvent: STABLE (function type)
     - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.quote.QuoteCardBookLoadingPreview(): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.quote.QuoteCardBookPreview(): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
 
 @Composable
 private fun nl.rhaydus.softcover.core.component.quote.QuoteCardLongPreview(): kotlin.Unit
@@ -1376,6 +1397,15 @@ private fun nl.rhaydus.softcover.core.component.quote.QuoteTimeColon(): kotlin.U
   skippable: true
   restartable: true
   params:
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.quote.SavedQuoteCard(model: nl.rhaydus.softcover.core.component.quote.QuoteCardUiModel.Saved, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.quote.QuoteCardEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (class with no mutable properties)
+    - onEvent: STABLE (function type)
+    - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
 public fun nl.rhaydus.softcover.core.component.reorder.reorderLift(isDragging: kotlin.Boolean, outset: androidx.compose.ui.unit.Dp): androidx.compose.ui.Modifier

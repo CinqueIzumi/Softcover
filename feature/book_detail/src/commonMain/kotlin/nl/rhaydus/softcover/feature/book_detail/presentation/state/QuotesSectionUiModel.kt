@@ -13,7 +13,7 @@ import nl.rhaydus.softcover.core.component.quote.QuoteCardUiModel
 @Immutable
 internal data class QuotesSectionUiModel(
     val header: SectionHeaderUiModel,
-    val quotes: ImmutableList<QuoteCardUiModel>,
+    val quotes: ImmutableList<QuoteCardUiModel.Saved>,
     val emptyMessage: String?,
     val addChip: ChipUiModel,
 )

@@ -12,7 +12,8 @@ internal val quoteEntries: ImmutableList<GalleryEntry> = persistentListOf(
         name = "QuoteCard",
         family = GalleryFamily.QUOTE,
         blurb = "One saved quote in the editorial quote pattern: an oversized opening mark behind the " +
-            "italic passage, a byline beneath it, and a menu holding Delete.",
+            "italic passage; a saved quote adds a byline and a Delete menu, a book quote adds a tappable " +
+            "book footer.",
         previews = QuoteCardUiModel,
         content = { model, modifier ->
             QuoteCard(

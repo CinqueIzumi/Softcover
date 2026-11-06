@@ -36,7 +36,7 @@ rules all components follow are in [component-contract.md](component-contract.md
 - **CoverOverlay** — `badge` — pins a `Badge` to a cover's corner, optionally greying the cover.
 - **BookCard** — `bookcard` — the one book or series card: cover-only, column, row or tile.
 - **BookCardRail** — `bookcard` — a pageable card rail.
-- **QuoteCard** — `quote` — one saved quote in the editorial quote pattern, with a Delete menu.
+- **QuoteCard** — `quote` — a quote in the editorial quote pattern: saved with a Delete menu, or over a tappable book footer.
 - **MoodTile** — `mood` — a mood's title and book count on one of four inks.
 
 ## States & feedback
