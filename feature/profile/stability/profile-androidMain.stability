@@ -196,6 +196,24 @@ internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.Ge
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
+internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.InYourWordsChapter(model: nl.rhaydus.softcover.feature.profile.presentation.state.InYourWordsUiModel, jumper: nl.rhaydus.softcover.feature.profile.presentation.screen.section.AtlasChapterJumper, onMostQuotedTapped: kotlin.Function0<kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (class with no mutable properties)
+    - jumper: STABLE (marked @Stable or @Immutable)
+    - onMostQuotedTapped: STABLE (function type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.InYourWordsContent(model: nl.rhaydus.softcover.feature.profile.presentation.state.InYourWordsUiModel, onMostQuotedTapped: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (class with no mutable properties)
+    - onMostQuotedTapped: STABLE (function type)
+
+@Composable
 internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.ProfileAvatar(profileImageUrl: kotlin.String?, isLoading: kotlin.Boolean, modifier: androidx.compose.ui.Modifier): kotlin.Unit
   skippable: true
   restartable: true

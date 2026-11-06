@@ -23,7 +23,7 @@
   (the year is added only when the window starts in an earlier one), "Showing every year".
 - The scope moves the opening tiles, the time-of-day chart, the pages-by-month chart, the authors list, the format
   split, your records, the genre
-  ranking, "Who you read" (Hide untagged authors still applies) and "How you score". "Recently loved" and
+  ranking, "In your words", "Who you read" (Hide untagged authors still applies) and "How you score". "Recently loved" and
   the year chart ignore it. Values animate between scopes; labels cross-fade, and reduced motion swaps them in place.
 - A scope with no finished books says so in each section's framing sentence ("No finished books in the last
   30 days.") instead of drawing an empty chart; the opening tiles show 0 and say nothing was finished. In a
@@ -35,7 +35,7 @@
   `Second`, zero years a `Fifth` stub) and the caption names that year and its count for the Books / Pages
   metric; a rolling window or All time lights the busiest year.
 - Contents rows (two-digit number, title, caption, chevron) scroll the page to their chapter's top. A
-  chapter opens with an eyebrow "02 · Title". Numbers are fixed per chapter (01, 02, 03 and 99), following the
+  chapter opens with an eyebrow "02 · Title". Numbers are fixed per chapter (01, 02, 03, 06 and 99), following the
   design's chapter list rather than position, so row and header always agree; the other chapters land with
   later 3.3.0 issues.
 - A stat the app holds no data source for yet is left out, never a 0.
@@ -127,6 +127,15 @@
   the rows and the buttons. Rows visible at first data, the loading swap and a scope switch do not
   animate in. A scope switch folds the ranking back to five. A scope with no genres says "The genres you read most" over its empty
   sentence, with no rows.
+- Chapter 06, "In your words" (caption "Reviews, quotes and your own tags."), opens with "What you wrote" ("The
+  reviews you left and the lines you kept.") over two side-by-side standard tiles. "Reviews" counts the
+  reviews written in the scope ("3,200 words in all", "None written in 2026", "None written yet"); "Quotes"
+  counts the quotes saved ("saved from 19 books", "None saved in 2026", "None saved yet"). Under them, "Your
+  most-quoted book" ("You saved 11 lines from Title. This one first.") shows a book `QuoteCard` with the
+  earliest quote in the scope and "Author · 11 quotes"; only library books count. Tapping the card opens
+  that book's detail. A scope with neither reviews nor quotes folds the
+  chapter and its contents row away, so the contents headline counts one fewer. It is shown masked while
+  loading.
 - Chapter 99, "Temporary" (removed later), holds the former Profile charts: "The shape of the years" (a
   `ColumnChart` behind a Books / Pages `SegmentedControl`); "Who you read";
   "How you score" (headline from the rating band, never the bare average); "Recently loved" (up to three

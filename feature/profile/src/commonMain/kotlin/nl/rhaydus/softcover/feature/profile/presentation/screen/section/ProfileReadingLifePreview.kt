@@ -5,6 +5,8 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.Gender
+import nl.rhaydus.softcover.core.domain.model.PrivacySetting
+import nl.rhaydus.softcover.core.domain.model.Quote
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
@@ -19,6 +21,7 @@ import nl.rhaydus.softcover.core.profile.domain.model.LengthBand
 import nl.rhaydus.softcover.core.profile.domain.model.LongestBook
 import nl.rhaydus.softcover.core.profile.domain.model.MonthCount
 import nl.rhaydus.softcover.core.profile.domain.model.MonthlyPages
+import nl.rhaydus.softcover.core.profile.domain.model.MostQuotedBook
 import nl.rhaydus.softcover.core.profile.domain.model.QuickestRead
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
@@ -28,7 +31,9 @@ import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
 import nl.rhaydus.softcover.core.profile.domain.model.RecentlyLovedBook
 import nl.rhaydus.softcover.core.profile.domain.model.TimeToFinish
+import nl.rhaydus.softcover.core.profile.domain.model.WrittenStats
 import nl.rhaydus.softcover.core.profile.domain.model.YearCount
+import kotlin.time.Instant
 
 /**
  * A representative [ReadingStats] sample (the redline spec's sample reader, Elena Marchetti) shared by
@@ -80,6 +85,31 @@ internal fun profileTimeToFinishPreview(): TimeToFinish = TimeToFinish(
                 2,
             ),
             pages = 272,
+        ),
+    ),
+)
+
+internal fun profileWrittenStatsPreview(): WrittenStats = WrittenStats(
+    reviewCount = 14,
+    reviewWordCount = 3_200,
+    quoteCount = 62,
+    quotedBookCount = 19,
+    mostQuoted = MostQuotedBook(
+        book = previewRecordBook(
+            id = 103,
+            title = "Piranesi",
+        ),
+        quoteCount = 11,
+        firstQuote = Quote(
+            localId = 1,
+            remoteId = 1,
+            bookId = 103,
+            editionId = null,
+            text = "The beauty of the House is immeasurable; its Kindness infinite.",
+            privacy = PrivacySetting.PUBLIC,
+            actionAt = Instant.fromEpochSeconds(1_700_000_000),
+            position = null,
+            isPending = false,
         ),
     ),
 )

@@ -29,6 +29,7 @@ import nl.rhaydus.softcover.core.domain.model.StatsScope
 import nl.rhaydus.softcover.core.domain.model.StatsWindow
 import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetHideUntaggedAuthorsAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveQuotesSyncedUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadDatesBackfilledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsBackfilledUseCase
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
@@ -47,15 +48,18 @@ import nl.rhaydus.softcover.core.profile.domain.model.ReadDuration
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
 import nl.rhaydus.softcover.core.profile.domain.model.TimeToFinish
+import nl.rhaydus.softcover.core.profile.domain.model.WrittenStats
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveHourlyPagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveMonthlyPagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveTimeToFinishUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveWrittenStatsUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.event.StatsAtlasEvent
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasScopeChips
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicBreakdownUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.statsScopeKey
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.StatsAtlasDependencies
+import nl.rhaydus.softcover.feature.profile.presentation.state.AtlasChapter
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasLocalVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
 import nl.rhaydus.toad.ActionScope
@@ -71,6 +75,10 @@ class AtlasScopedSectionsCollectorTest {
     private lateinit var getHideUntaggedAuthorsAsFlowUseCase: GetHideUntaggedAuthorsAsFlowUseCase
     private lateinit var observeTimeToFinishUseCase: ObserveTimeToFinishUseCase
     private lateinit var observeReadDatesBackfilledUseCase: ObserveReadDatesBackfilledUseCase
+    private lateinit var observeWrittenStatsUseCase: ObserveWrittenStatsUseCase
+    private lateinit var observeQuotesSyncedUseCase: ObserveQuotesSyncedUseCase
+    private lateinit var quotesSyncedFlow: MutableStateFlow<Boolean>
+    private var writtenFor: (StatsRange) -> WrittenStats = { emptyWritten() }
     private lateinit var backfilledFlow: MutableStateFlow<Boolean>
     private lateinit var readDatesBackfilledFlow: MutableStateFlow<Boolean>
     private lateinit var hideFlow: MutableStateFlow<Boolean>
@@ -83,6 +91,10 @@ class AtlasScopedSectionsCollectorTest {
     @BeforeEach
     fun setUp() {
         backfilledFlow = MutableStateFlow(true)
+        quotesSyncedFlow = MutableStateFlow(true)
+        writtenFor = { emptyWritten() }
+        observeWrittenStatsUseCase = mockk()
+        observeQuotesSyncedUseCase = mockk()
         readDatesBackfilledFlow = MutableStateFlow(true)
         hideFlow = MutableStateFlow(false)
         observedRanges.clear()
@@ -134,7 +146,23 @@ class AtlasScopedSectionsCollectorTest {
         every {
             observeReadDatesBackfilledUseCase()
         } returns readDatesBackfilledFlow
+
+        every {
+            observeWrittenStatsUseCase(any())
+        } answers { flowOf(writtenFor(firstArg())) }
+
+        every {
+            observeQuotesSyncedUseCase()
+        } returns quotesSyncedFlow
     }
+
+    private fun emptyWritten(): WrittenStats = WrittenStats(
+        reviewCount = 0,
+        reviewWordCount = 0,
+        quoteCount = 0,
+        quotedBookCount = 0,
+        mostQuoted = null,
+    )
 
     private fun emptyTimeToFinish(): TimeToFinish = TimeToFinish(
         readCount = 0,
@@ -206,6 +234,14 @@ class AtlasScopedSectionsCollectorTest {
         every {
             dependencies.observeReadDatesBackfilledUseCase
         } returns observeReadDatesBackfilledUseCase
+
+        every {
+            dependencies.observeWrittenStatsUseCase
+        } returns observeWrittenStatsUseCase
+
+        every {
+            dependencies.observeQuotesSyncedUseCase
+        } returns observeQuotesSyncedUseCase
 
         return launch {
             AtlasScopedSectionsCollector().onLaunch(
@@ -812,6 +848,113 @@ class AtlasScopedSectionsCollectorTest {
 
             records.cards[BookCardKey.Book(bookId = 1)].shouldNotBeNull().book shouldBe longest
             records.cards[BookCardKey.Book(bookId = 2)].shouldNotBeNull().book shouldBe quickest
+            job.cancel()
+        }
+
+        @Test
+        fun `maps the written stats of the scope into the in your words model`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            writtenFor = {
+                WrittenStats(
+                    reviewCount = 4,
+                    reviewWordCount = 1,
+                    quoteCount = 9,
+                    quotedBookCount = 3,
+                    mostQuoted = null,
+                )
+            }
+
+            // ----- Act -----
+            val job = launchCollector()
+
+            // ----- Assert -----
+            val words = stateFlow.value.inYourWords
+            words.isLoading shouldBe false
+            words.tiles.map { it.stat.shouldNotBeNull().value } shouldBe listOf(4.0, 9.0)
+            job.cancel()
+        }
+
+        @Test
+        fun `keeps in your words loading until the quotes are synced`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            quotesSyncedFlow.value = false
+            writtenFor = { emptyWritten().copy(quoteCount = 2) }
+            val job = launchCollector()
+            val whileLoading = stateFlow.value.inYourWords.isLoading
+
+            // ----- Act -----
+            quotesSyncedFlow.value = true
+
+            // ----- Assert -----
+            whileLoading shouldBe true
+            stateFlow.value.inYourWords.isLoading shouldBe false
+            job.cancel()
+        }
+
+        @Test
+        fun `keeps in your words loading until the reading stats are backfilled`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            backfilledFlow.value = false
+            writtenFor = { emptyWritten().copy(quoteCount = 2) }
+            val job = launchCollector()
+            val whileLoading = stateFlow.value.inYourWords.isLoading
+
+            // ----- Act -----
+            backfilledFlow.value = true
+
+            // ----- Assert -----
+            whileLoading shouldBe true
+            stateFlow.value.inYourWords.isLoading shouldBe false
+            job.cancel()
+        }
+
+        @Test
+        fun `drops the in your words row when the scope has no reviews and no quotes`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            writtenFor = { emptyWritten() }
+
+            // ----- Act -----
+            val job = launchCollector()
+
+            // ----- Assert -----
+            val state = stateFlow.value
+            val expectedChapters = AtlasChapter.entries - AtlasChapter.IN_YOUR_WORDS
+            state.contentsRows.map { it.chapter } shouldBe expectedChapters
+
+            (state.contentsHeader as SectionHeaderUiModel.Section).headlineText shouldBe
+                "${expectedChapters.size} chapters"
+
+            job.cancel()
+        }
+
+        @Test
+        fun `keeps the in your words row when the scope has a review`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            writtenFor = { emptyWritten().copy(reviewCount = 1) }
+
+            // ----- Act -----
+            val job = launchCollector()
+
+            // ----- Assert -----
+            val state = stateFlow.value
+            state.contentsRows.map { it.chapter } shouldBe AtlasChapter.entries.toList()
+
+            (state.contentsHeader as SectionHeaderUiModel.Section).headlineText shouldBe
+                "${AtlasChapter.entries.size} chapters"
+
+            job.cancel()
+        }
+
+        @Test
+        fun `keeps the in your words row when the scope has a quote`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            writtenFor = { emptyWritten().copy(quoteCount = 1) }
+
+            // ----- Act -----
+            val job = launchCollector()
+
+            // ----- Assert -----
+            stateFlow.value.contentsRows.map { it.chapter } shouldBe AtlasChapter.entries.toList()
             job.cancel()
         }
     }

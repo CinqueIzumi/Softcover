@@ -12,6 +12,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnGenreRankingShowLessAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnGenreRankingShowMoreAction
+import nl.rhaydus.softcover.feature.profile.presentation.action.OnMostQuotedBookTappedAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnReadingDayTappedAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnScopeSelectedAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.StatsAtlasAction
@@ -127,6 +128,14 @@ internal fun ColumnScope.StatsAtlasBody(
             },
         )
     }
+
+    InYourWordsChapter(
+        model = state.inYourWords,
+        jumper = jumper,
+        onMostQuotedTapped = {
+            runAction(OnMostQuotedBookTappedAction())
+        },
+    )
 
     Spacer(modifier = Modifier.height(Spacing.section))
 

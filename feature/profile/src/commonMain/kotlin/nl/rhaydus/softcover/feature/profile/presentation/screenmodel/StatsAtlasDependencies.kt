@@ -5,6 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveBooksByIdsUseCase
 import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetHideUntaggedAuthorsAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveQuotesSyncedUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadDatesBackfilledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsBackfilledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetHideUntaggedAuthorsUseCase
@@ -16,6 +17,7 @@ import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingHistoryUse
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveTimeToFinishUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveWrittenStatsUseCase
 import nl.rhaydus.toad.ActionDependencies
 
 internal data class StatsAtlasDependencies(
@@ -29,6 +31,8 @@ internal data class StatsAtlasDependencies(
     val observeReadingStatsBackfilledUseCase: ObserveReadingStatsBackfilledUseCase,
     val observeReadDatesBackfilledUseCase: ObserveReadDatesBackfilledUseCase,
     val observeTimeToFinishUseCase: ObserveTimeToFinishUseCase,
+    val observeWrittenStatsUseCase: ObserveWrittenStatsUseCase,
+    val observeQuotesSyncedUseCase: ObserveQuotesSyncedUseCase,
     val getHideUntaggedAuthorsAsFlowUseCase: GetHideUntaggedAuthorsAsFlowUseCase,
     val setHideUntaggedAuthorsUseCase: SetHideUntaggedAuthorsUseCase,
     val observeBooksByIdsUseCase: ObserveBooksByIdsUseCase,

@@ -6,8 +6,9 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.state.AtlasChapter
 import nl.rhaydus.softcover.feature.profile.presentation.state.AtlasContentsRowUiModel
 
-internal fun atlasContentsHeader(): SectionHeaderUiModel {
-    val count = AtlasChapter.entries.size
+/** [chapters] are the ones the scope shows; the headline counts them. */
+internal fun atlasContentsHeader(chapters: List<AtlasChapter> = AtlasChapter.entries): SectionHeaderUiModel {
+    val count = chapters.size
 
     return SectionHeaderUiModel.Section(
         eyebrow = "In this atlas",
@@ -15,8 +16,10 @@ internal fun atlasContentsHeader(): SectionHeaderUiModel {
     )
 }
 
-internal fun atlasContentsRows(): ImmutableList<AtlasContentsRowUiModel> =
-    AtlasChapter.entries
+internal fun atlasContentsRows(
+    chapters: List<AtlasChapter> = AtlasChapter.entries,
+): ImmutableList<AtlasContentsRowUiModel> =
+    chapters
         .map { chapter ->
             AtlasContentsRowUiModel(
                 chapter = chapter,
@@ -38,6 +41,7 @@ private fun AtlasChapter.number(): String = when (this) {
     AtlasChapter.YEAR_AT_A_GLANCE -> "01"
     AtlasChapter.SEASONS_AND_RECORDS -> "02"
     AtlasChapter.GENRES_AND_HOW_YOU_READ -> "03"
+    AtlasChapter.IN_YOUR_WORDS -> "06"
     AtlasChapter.TEMPORARY -> "99"
 }
 
@@ -45,6 +49,7 @@ private fun AtlasChapter.title(): String = when (this) {
     AtlasChapter.YEAR_AT_A_GLANCE -> "A year at a glance"
     AtlasChapter.SEASONS_AND_RECORDS -> "Seasons and records"
     AtlasChapter.GENRES_AND_HOW_YOU_READ -> "Genres and how you read"
+    AtlasChapter.IN_YOUR_WORDS -> "In your words"
     AtlasChapter.TEMPORARY -> "Temporary"
 }
 
@@ -52,5 +57,6 @@ private fun AtlasChapter.caption(): String = when (this) {
     AtlasChapter.YEAR_AT_A_GLANCE -> "Every day you read, and when."
     AtlasChapter.SEASONS_AND_RECORDS -> "Pages by month, authors and records."
     AtlasChapter.GENRES_AND_HOW_YOU_READ -> "What you reach for, and how it reads."
+    AtlasChapter.IN_YOUR_WORDS -> "Reviews, quotes and your own tags."
     AtlasChapter.TEMPORARY -> "Year by year, authors, ratings and favourites."
 }

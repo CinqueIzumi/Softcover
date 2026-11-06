@@ -13,7 +13,10 @@ import nl.rhaydus.softcover.core.profile.domain.model.HourlyPages
 import nl.rhaydus.softcover.core.profile.domain.model.MonthlyPages
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
 import nl.rhaydus.softcover.core.profile.domain.model.TimeToFinish
+import nl.rhaydus.softcover.core.profile.domain.model.WrittenStats
 import nl.rhaydus.softcover.feature.profile.presentation.event.StatsAtlasEvent
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasContentsHeader
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasContentsRows
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasOpeningUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasScopeLine
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.authorsEmptyCaption
@@ -27,6 +30,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasFormatSplit
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasMonthlyPages
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasTimeOfDayPages
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasTopAuthors
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.inYourWordsUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesMonthSetKey
@@ -43,15 +47,18 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeToFinishUiMo
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.topAuthorRows
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.topAuthorsCaption
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.StatsAtlasDependencies
+import nl.rhaydus.softcover.feature.profile.presentation.state.AtlasChapter
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasLocalVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
 import nl.rhaydus.toad.ActionScope
 
 /**
  * The only writer of every section that answers for the selected scope: the opening tiles, who you
- * read, how you score, the format split, pages by month, pages by time of day, the time to finish and
- * the reading records, with their framing copy and the scope line. For genres it writes only whether any exist and the
- * empty sentence; `GenreRankingCollector` maps the rest off the stats written here.
+ * read, how you score, the format split, pages by month, pages by time of day, the time to finish, the
+ * reading records and what you wrote, with their framing copy, the scope line and the contents list.
+ * An In your words chapter with no reviews or quotes in scope drops out of the contents list. For genres
+ * it writes only whether any exist and the empty sentence; `GenreRankingCollector` maps the rest off
+ * the stats written here.
  *
  * It stays idle until the history has landed, because the history decides the default scope and
  * observing the placeholder one first would flash the wrong numbers. Switching scope re-observes the
@@ -82,25 +89,34 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
         return observeCurrentDateUseCase().flatMapLatest { today ->
             val range = scope.resolve(today)
 
+            val backfilledAndSynced = combine(
+                observeReadingStatsBackfilledUseCase(),
+                observeQuotesSyncedUseCase(),
+            ) { statsBackfilled, quotesSynced -> statsBackfilled && quotesSynced }
+
             combine(
-                observeReadingStatsUseCase(range)
-                    .untilBackfilled(observeReadingStatsBackfilledUseCase()),
-                observeMonthlyPagesReadUseCase(range),
-                observeHourlyPagesReadUseCase(range),
-                getHideUntaggedAuthorsAsFlowUseCase(),
-                observeTimeToFinishUseCase(range)
-                    .untilBackfilled(observeReadDatesBackfilledUseCase()),
-            ) { stats, monthlyPages, hourlyPages, hideUntaggedAuthors, timeToFinish ->
-                ScopedSections(
-                    scope = scope,
-                    today = today,
-                    stats = stats,
-                    monthlyPages = monthlyPages,
-                    hourlyPages = hourlyPages,
-                    hideUntaggedAuthors = hideUntaggedAuthors,
-                    timeToFinish = timeToFinish,
-                )
-            }
+                combine(
+                    observeReadingStatsUseCase(range)
+                        .untilBackfilled(observeReadingStatsBackfilledUseCase()),
+                    observeMonthlyPagesReadUseCase(range),
+                    observeHourlyPagesReadUseCase(range),
+                    getHideUntaggedAuthorsAsFlowUseCase(),
+                    observeTimeToFinishUseCase(range)
+                        .untilBackfilled(observeReadDatesBackfilledUseCase()),
+                ) { stats, monthlyPages, hourlyPages, hideUntaggedAuthors, timeToFinish ->
+                    ScopedSections(
+                        scope = scope,
+                        today = today,
+                        stats = stats,
+                        monthlyPages = monthlyPages,
+                        hourlyPages = hourlyPages,
+                        hideUntaggedAuthors = hideUntaggedAuthors,
+                        timeToFinish = timeToFinish,
+                        written = null,
+                    )
+                },
+                observeWrittenStatsUseCase(range).untilBackfilled(backfilledAndSynced),
+            ) { sections, written -> sections.copy(written = written) }
         }
     }
 
@@ -112,6 +128,15 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
         val hourlyPages = sections.hourlyPages
         val ratings = stats?.ratings
         val booksRead = stats?.booksRead ?: 0
+
+        val inYourWords = inYourWordsUiModel(
+            written = sections.written,
+            scope = scope,
+        )
+
+        val visibleChapters = AtlasChapter.entries.filter {
+            it != AtlasChapter.IN_YOUR_WORDS || inYourWords.hasContent || inYourWords.isLoading
+        }
 
         val demographics = stats?.authorDemographics?.let {
             if (hideUntaggedAuthors) it.excludingUntaggedAuthors() else it
@@ -213,6 +238,9 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
                 timeToFinish = sections.timeToFinish,
                 scope = scope,
             ),
+            inYourWords = inYourWords,
+            contentsHeader = atlasContentsHeader(visibleChapters),
+            contentsRows = atlasContentsRows(visibleChapters),
         )
     }
 
@@ -229,5 +257,6 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
         val hourlyPages: HourlyPages,
         val hideUntaggedAuthors: Boolean,
         val timeToFinish: TimeToFinish?,
+        val written: WrittenStats?,
     )
 }

@@ -53,6 +53,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasFormatSplit
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasMonthlyPages
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasTimeOfDayPages
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasTopAuthors
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.inYourWordsUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.loadingGenreHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.loadingMonthlyPagesChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.loadingMonthlyPagesHeader
@@ -215,6 +216,11 @@ internal data class StatsAtlasUiState(
     val readingRecords: ReadingRecordsUiModel = readingRecordsUiModel(
         stats = null,
         timeToFinish = null,
+        scope = StatsScope.AllTime,
+    ),
+
+    val inYourWords: InYourWordsUiModel = inYourWordsUiModel(
+        written = null,
         scope = StatsScope.AllTime,
     ),
 

@@ -5,6 +5,7 @@ import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveBooksByIdsUseCase
 import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetHideUntaggedAuthorsAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveQuotesSyncedUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadDatesBackfilledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsBackfilledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetHideUntaggedAuthorsUseCase
@@ -16,6 +17,7 @@ import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingHistoryUse
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveTimeToFinishUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveWrittenStatsUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.action.StatsAtlasAction
 import nl.rhaydus.softcover.feature.profile.presentation.collector.StatsAtlasCollector
 import nl.rhaydus.softcover.feature.profile.presentation.event.StatsAtlasEvent
@@ -34,6 +36,8 @@ internal class StatsAtlasScreenModel(
     observeReadingStatsBackfilledUseCase: ObserveReadingStatsBackfilledUseCase,
     observeReadDatesBackfilledUseCase: ObserveReadDatesBackfilledUseCase,
     observeTimeToFinishUseCase: ObserveTimeToFinishUseCase,
+    observeWrittenStatsUseCase: ObserveWrittenStatsUseCase,
+    observeQuotesSyncedUseCase: ObserveQuotesSyncedUseCase,
     getHideUntaggedAuthorsAsFlowUseCase: GetHideUntaggedAuthorsAsFlowUseCase,
     setHideUntaggedAuthorsUseCase: SetHideUntaggedAuthorsUseCase,
     observeBooksByIdsUseCase: ObserveBooksByIdsUseCase,
@@ -62,6 +66,8 @@ internal class StatsAtlasScreenModel(
         observeReadingStatsBackfilledUseCase = observeReadingStatsBackfilledUseCase,
         observeReadDatesBackfilledUseCase = observeReadDatesBackfilledUseCase,
         observeTimeToFinishUseCase = observeTimeToFinishUseCase,
+        observeWrittenStatsUseCase = observeWrittenStatsUseCase,
+        observeQuotesSyncedUseCase = observeQuotesSyncedUseCase,
         getHideUntaggedAuthorsAsFlowUseCase = getHideUntaggedAuthorsAsFlowUseCase,
         setHideUntaggedAuthorsUseCase = setHideUntaggedAuthorsUseCase,
         observeBooksByIdsUseCase = observeBooksByIdsUseCase,
