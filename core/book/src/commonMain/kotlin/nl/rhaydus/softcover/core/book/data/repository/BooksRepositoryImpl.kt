@@ -824,6 +824,7 @@ internal class BooksRepositoryImpl(
                 (snapshot ?: book).withReview(
                     review = review,
                     hasSpoilers = hasSpoilers,
+                    reviewedAt = reviewedAt,
                 )
             },
             enqueue = { optimistic ->
