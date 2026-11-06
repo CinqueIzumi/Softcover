@@ -52,3 +52,11 @@ fun ReviewDocument.canonical(): ReviewDocument = ReviewDocument(
         ReviewParagraph(runs = merged)
     },
 )
+
+/** Paragraph breaks count as word breaks; runs are joined first because they can split mid-word. */
+fun ReviewDocument.wordCount(): Int = paragraphs.sumOf { paragraph ->
+    paragraph.runs
+        .joinToString(separator = "") { it.text }
+        .split(Regex("\\s+"))
+        .count { it.isNotEmpty() }
+}

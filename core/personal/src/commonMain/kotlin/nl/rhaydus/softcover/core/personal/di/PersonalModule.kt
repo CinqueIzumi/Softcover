@@ -102,6 +102,7 @@ val personalModule = module {
             localDataSource = get(),
             remoteDataSource = get(),
             drainer = get(),
+            settingsRepository = get(),
             clock = Clock.System,
         )
     }

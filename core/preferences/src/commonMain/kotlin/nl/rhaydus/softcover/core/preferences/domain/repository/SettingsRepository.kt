@@ -78,6 +78,10 @@ interface SettingsRepository {
 
     suspend fun markReadDatesBackfilled()
 
+    val quotesSynced: Flow<Boolean>
+
+    suspend fun markQuotesSynced()
+
     suspend fun seedEnabledListIds(ids: Set<Int>)
 
     suspend fun resetLibraryVisibilityPreferences()

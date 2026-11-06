@@ -127,6 +127,12 @@ internal class SettingsRepositoryImpl(
         settingsLocalDataSource.markReadDatesBackfilled()
     }
 
+    override val quotesSynced: Flow<Boolean> = settingsLocalDataSource.quotesSynced
+
+    override suspend fun markQuotesSynced() {
+        settingsLocalDataSource.markQuotesSynced()
+    }
+
     override suspend fun seedEnabledListIds(ids: Set<Int>) {
         settingsLocalDataSource.seedEnabledListIds(ids = ids)
     }

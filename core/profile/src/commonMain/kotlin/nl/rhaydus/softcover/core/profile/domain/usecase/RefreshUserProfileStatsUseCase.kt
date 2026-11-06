@@ -5,20 +5,22 @@ import nl.rhaydus.softcover.core.book.domain.usecase.HasSyncedReadBooksThisSessi
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.domain.model.RefreshScope
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshAllQuotesUseCase
 import nl.rhaydus.softcover.core.profile.domain.ProfileRefreshGate
 import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
 
 // Refreshes what the Profile tab and the Stats Atlas are built from: the account's identity (one
-// request, cached in the profile DataStore) and the Read books the aggregates are computed from,
-// which live in Room. Called from the Profile tab and after re-auth, never at startup.
+// request, cached in the profile DataStore), the Read books and every quote, which live in Room.
+// Called from the Profile tab and after re-auth, never at startup.
 class RefreshUserProfileStatsUseCase internal constructor(
     private val profileRepository: ProfileRepository,
     private val statsRefreshGate: ProfileRefreshGate,
     private val refreshLibraryUseCase: RefreshLibraryUseCase,
     private val hasSyncedReadBooksThisSessionUseCase: HasSyncedReadBooksThisSessionUseCase,
+    private val refreshAllQuotesUseCase: RefreshAllQuotesUseCase,
 ) {
     // Skips the whole refresh once this session has already completed it - every other Profile visit
-    // renders from the DataStore cache and Room. runOnce marks only after both halves succeed, so a
+    // renders from the DataStore cache and Room. runOnce marks only after every step succeeds, so a
     // transient failure leaves the gate open and the next visit retries.
     suspend operator fun invoke(): Result<Unit> = runCatchingLogged {
         statsRefreshGate.runOnce {
@@ -31,6 +33,8 @@ class RefreshUserProfileStatsUseCase internal constructor(
             if (hasSyncedReadBooksThisSessionUseCase().not()) {
                 refreshLibraryUseCase(scope = RefreshScope.ByStatuses(setOf(UserBookStatus.READ))).getOrThrow()
             }
+
+            refreshAllQuotesUseCase().getOrThrow()
         }
     }
 }

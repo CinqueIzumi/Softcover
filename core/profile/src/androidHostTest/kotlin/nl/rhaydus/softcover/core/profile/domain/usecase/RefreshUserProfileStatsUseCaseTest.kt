@@ -11,6 +11,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.HasSyncedReadBooksThisSessi
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.domain.model.RefreshScope
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshAllQuotesUseCase
 import nl.rhaydus.softcover.core.profile.domain.ProfileRefreshGate
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileSnapshot
 import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
@@ -27,6 +28,7 @@ class RefreshUserProfileStatsUseCaseTest {
     private lateinit var statsRefreshGate: ProfileRefreshGate
     private lateinit var hasSyncedReadBooksThisSessionUseCase: HasSyncedReadBooksThisSessionUseCase
     private lateinit var refreshLibraryUseCase: RefreshLibraryUseCase
+    private lateinit var refreshAllQuotesUseCase: RefreshAllQuotesUseCase
     private lateinit var useCase: RefreshUserProfileStatsUseCase
 
     @BeforeEach
@@ -35,6 +37,11 @@ class RefreshUserProfileStatsUseCaseTest {
         statsRefreshGate = ProfileRefreshGate()
         hasSyncedReadBooksThisSessionUseCase = mockk()
         refreshLibraryUseCase = mockk()
+        refreshAllQuotesUseCase = mockk()
+
+        coEvery {
+            refreshAllQuotesUseCase()
+        } returns Result.success(Unit)
 
         every {
             hasSyncedReadBooksThisSessionUseCase()
@@ -45,6 +52,7 @@ class RefreshUserProfileStatsUseCaseTest {
             statsRefreshGate = statsRefreshGate,
             refreshLibraryUseCase = refreshLibraryUseCase,
             hasSyncedReadBooksThisSessionUseCase = hasSyncedReadBooksThisSessionUseCase,
+            refreshAllQuotesUseCase = refreshAllQuotesUseCase,
         )
     }
 
@@ -199,6 +207,57 @@ class RefreshUserProfileStatsUseCaseTest {
             firstResult.isFailure shouldBe true
             secondResult.isSuccess shouldBe true
             coVerify(exactly = 2) { refreshLibraryUseCase(scope = readScope) }
+        }
+    }
+
+    @Nested
+    inner class QuotesRefresh {
+        private fun arrangeSuccessfulIdentity() {
+            coEvery {
+                profileRepository.fetchUserProfileSnapshot()
+            } returns snapshot()
+
+            coEvery {
+                profileRepository.cacheUserProfileIdentity(snapshot = any())
+            } returns Unit
+        }
+
+        @Test
+        fun `refreshes the quotes inside the gated run so a second invoke does not repeat it`() = runTest {
+            // ----- Arrange -----
+            arrangeSuccessfulIdentity()
+
+            // ----- Act -----
+            val firstResult = useCase()
+            val secondResult = useCase()
+
+            // ----- Assert -----
+            firstResult.isSuccess shouldBe true
+            secondResult.isSuccess shouldBe true
+            coVerify(exactly = 1) { refreshAllQuotesUseCase() }
+        }
+
+        @Test
+        fun `a failed quote refresh returns the failure and leaves the gate open so the next invoke retries`() = runTest {
+            // ----- Arrange -----
+            val exception = RuntimeException("quotes refresh failed")
+            arrangeSuccessfulIdentity()
+
+            coEvery {
+                refreshAllQuotesUseCase()
+            } returnsMany listOf(
+                Result.failure(exception),
+                Result.success(Unit),
+            )
+
+            // ----- Act -----
+            val firstResult = useCase()
+            val secondResult = useCase()
+
+            // ----- Assert -----
+            firstResult.exceptionOrNull() shouldBe exception
+            secondResult.isSuccess shouldBe true
+            coVerify(exactly = 2) { refreshAllQuotesUseCase() }
         }
     }
 

@@ -14,6 +14,7 @@ kotlin {
             api(project(":core:identity"))
             implementation(project(":core:book"))
             implementation(project(":core:network"))
+            implementation(project(":core:personal"))
 
             implementation(libs.rhaydus.coreCommon)
 

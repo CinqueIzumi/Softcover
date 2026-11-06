@@ -249,4 +249,61 @@ class ReviewDocumentTest {
             ),
         )
     }
+
+    // ----- wordCount -----
+
+    @Nested
+    inner class WordCount {
+        @Test
+        fun `a word split across runs counts once`() {
+            // ----- Arrange -----
+            val doc = document(
+                paragraph(
+                    ReviewRun("won"),
+                    ReviewRun(
+                        "der",
+                        bold = true,
+                    ),
+                    ReviewRun("ful day"),
+                ),
+            )
+
+            // ----- Act & Assert -----
+            doc.wordCount() shouldBe 2
+        }
+
+        @Test
+        fun `a paragraph break separates words`() {
+            // ----- Arrange -----
+            val doc = document(
+                paragraph(ReviewRun("end")),
+                paragraph(ReviewRun("start")),
+            )
+
+            // ----- Act & Assert -----
+            doc.wordCount() shouldBe 2
+        }
+
+        @Test
+        fun `blank, whitespace-only and empty documents have no words`() {
+            // ----- Arrange -----
+            val whitespace = document(
+                paragraph(ReviewRun("  \t\n ")),
+                paragraph(),
+            )
+
+            // ----- Act & Assert -----
+            whitespace.wordCount() shouldBe 0
+            ReviewDocument.EMPTY.wordCount() shouldBe 0
+        }
+
+        @Test
+        fun `repeated and surrounding whitespace is not counted as words`() {
+            // ----- Arrange -----
+            val doc = document(paragraph(ReviewRun("  one   two\nthree  ")))
+
+            // ----- Act & Assert -----
+            doc.wordCount() shouldBe 3
+        }
+    }
 }
