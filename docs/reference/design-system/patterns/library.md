@@ -69,6 +69,8 @@
 - Draft/commit: chips and the in-sheet "Clear all" mutate a `LibraryFilters` draft; the footer "Show N
   titles" previews it live (`libraryPreviewCount`) and fires `OnApplyFiltersAction`; any other dismiss
   discards. "Clear all" is always rendered, dimmed and inert with no active filter.
+- A `LibraryFilterRequests` tag request (from the Stats Atlas) selects the Read shelf, or All when Read is
+  hidden, replaces its filter with that one included tag, drops the draft and clears the search.
 - The main-screen active-filter row stays live (`OnToggleFilterValueAction` / `OnClearFiltersAction`). A
   left-out tag reads "Not romance"; chips from Your tags lead with the tag glyph.
 

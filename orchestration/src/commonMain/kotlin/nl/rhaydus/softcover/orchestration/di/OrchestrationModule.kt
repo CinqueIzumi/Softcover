@@ -120,6 +120,7 @@ internal val orchestrationModule = module {
             reAuthenticateUseCase = get(),
             resetUserDataUseCase = get(),
             externalNavigationRequests = get(),
+            libraryFilterRequests = get(),
         )
     }
 

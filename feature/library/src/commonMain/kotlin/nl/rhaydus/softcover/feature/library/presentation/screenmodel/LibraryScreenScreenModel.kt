@@ -32,6 +32,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryTabOrderAs
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetShelfSwipeEnabledAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibraryGridLayoutUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibrarySortUseCase
+import nl.rhaydus.softcover.core.presentation.navigation.LibraryFilterRequests
 import nl.rhaydus.softcover.core.presentation.removal.UndoableBookRemover
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
@@ -72,6 +73,7 @@ internal class LibraryScreenScreenModel(
     refreshRecommendedFeedUseCase: RefreshRecommendedFeedUseCase,
     hideRecommendedBookUseCase: HideRecommendedBookUseCase,
     restoreRecommendedBookUseCase: RestoreRecommendedBookUseCase,
+    libraryFilterRequests: LibraryFilterRequests,
     appDispatchers: AppDispatchers,
     flows: List<LibraryCollector>,
 ) : ToadScreenModel<LibraryUiState, LibraryEvent, LibraryDependencies, LibraryCollector, LibraryLocalVariables>(
@@ -110,6 +112,7 @@ internal class LibraryScreenScreenModel(
         refreshRecommendedFeedUseCase = refreshRecommendedFeedUseCase,
         hideRecommendedBookUseCase = hideRecommendedBookUseCase,
         restoreRecommendedBookUseCase = restoreRecommendedBookUseCase,
+        libraryFilterRequests = libraryFilterRequests,
         mainDispatcher = appDispatchers.main,
         defaultDispatcher = appDispatchers.default,
         coroutineScope = screenModelScope,

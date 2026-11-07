@@ -31,6 +31,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfiguratio
 import nl.rhaydus.softcover.core.presentation.error.onApiFailure
 import nl.rhaydus.softcover.core.presentation.navigation.ExternalNavigationRequest
 import nl.rhaydus.softcover.core.presentation.navigation.ExternalNavigationRequests
+import nl.rhaydus.softcover.core.presentation.navigation.LibraryFilterRequests
 import nl.rhaydus.softcover.core.presentation.session.SessionAuthenticator
 import nl.rhaydus.softcover.core.presentation.state.ReAuthState
 import nl.rhaydus.softcover.core.presentation.state.SplashState
@@ -48,6 +49,7 @@ internal class MainActivityViewModel(
     private val reAuthenticateUseCase: ReAuthenticateUseCase,
     private val resetUserDataUseCase: ResetUserDataUseCase,
     private val externalNavigationRequests: ExternalNavigationRequests,
+    private val libraryFilterRequests: LibraryFilterRequests,
 ) : ViewModel(), SessionAuthenticator {
     private val _state = MutableStateFlow(SplashState())
     val state = _state.asStateFlow()
@@ -125,7 +127,10 @@ internal class MainActivityViewModel(
     }
 
     override fun setUserAuthenticated(authenticated: Boolean) {
-        if (authenticated.not()) externalNavigationRequests.clear()
+        if (authenticated.not()) {
+            externalNavigationRequests.clear()
+            libraryFilterRequests.clear()
+        }
 
         _state.update { it.copy(authenticated = authenticated) }
     }
@@ -196,6 +201,7 @@ internal class MainActivityViewModel(
     private fun handleCollectedUserId(userId: Int) {
         if (userId == -1) {
             externalNavigationRequests.clear()
+            libraryFilterRequests.clear()
 
             _state.update {
                 it.copy(

@@ -5,6 +5,7 @@ import nl.rhaydus.softcover.core.book.di.bookModule
 import nl.rhaydus.softcover.core.component.state.OfflineCopy
 import nl.rhaydus.softcover.core.component.state.ResourceOfflineCopy
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
+import nl.rhaydus.softcover.core.presentation.navigation.LibraryFilterRequests
 import nl.rhaydus.softcover.core.presentation.removal.UndoableBookRemover
 import nl.rhaydus.softcover.core.presentation.util.TabReselectRegistry
 import org.koin.dsl.module
@@ -25,6 +26,8 @@ val presentationModule = module {
     single { NavPulse() }
 
     single { TabReselectRegistry() }
+
+    single { LibraryFilterRequests() }
 
     factory {
         UndoableBookRemover(
