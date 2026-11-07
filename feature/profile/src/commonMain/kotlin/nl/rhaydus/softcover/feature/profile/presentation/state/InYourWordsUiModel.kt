@@ -1,9 +1,7 @@
 package nl.rhaydus.softcover.feature.profile.presentation.state
 
 import kotlinx.collections.immutable.ImmutableList
-import nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
-import nl.rhaydus.softcover.core.component.quote.QuoteCardUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatTileUiModel
 
 /**
@@ -19,18 +17,4 @@ internal data class InYourWordsUiModel(
     val ownTags: OwnTagsUiModel?,
     val hasContent: Boolean,
     val isLoading: Boolean,
-)
-
-internal data class MostQuotedUiModel(
-    val title: String,
-    val caption: String,
-    val card: QuoteCardUiModel.Book,
-    val bookId: Int,
-)
-
-/** The reader's own tags ranked by finished books in scope; [ranking] rows are tappable. */
-internal data class OwnTagsUiModel(
-    val title: String,
-    val caption: String,
-    val ranking: RankedBarsUiModel,
 )
