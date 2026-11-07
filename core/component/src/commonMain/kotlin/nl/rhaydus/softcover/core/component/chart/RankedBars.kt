@@ -32,12 +32,14 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.modifier.skeletonMask
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.designsystem.theme.Corners
@@ -53,6 +55,7 @@ import kotlin.math.roundToInt
 fun RankedBars(
     model: RankedBarsUiModel,
     modifier: Modifier = Modifier,
+    onEvent: (RankedBarsEvent) -> Unit = {},
 ) {
     val playMotion = playDecorativeMotion()
     val spatialSpec = MaterialTheme.motionScheme.defaultSpatialSpec<IntSize>()
@@ -75,9 +78,11 @@ fun RankedBars(
         }
     }
 
+    val isTappable = model.areRowsTappable && model.isLoading.not()
+
     Column(modifier = modifier) {
         model.rows.forEachIndexed { index, row ->
-            key(if (model.isLoading) index else row.label) {
+            key(row.key) {
                 val isVisible = index < model.visibleCount
 
                 if (playMotion) {
@@ -109,6 +114,8 @@ fun RankedBars(
                             position = index + 1,
                             isLoading = model.isLoading,
                             positionWidth = positionWidth,
+                            isTappable = isTappable,
+                            onClick = { onEvent(RankedBarsEvent.RowClicked(row.key)) },
                         )
                     }
                 } else if (isVisible) {
@@ -117,6 +124,8 @@ fun RankedBars(
                         position = index + 1,
                         isLoading = model.isLoading,
                         positionWidth = positionWidth,
+                        isTappable = isTappable,
+                        onClick = { onEvent(RankedBarsEvent.RowClicked(row.key)) },
                     )
                 }
             }
@@ -130,6 +139,8 @@ private fun RankedBarRow(
     position: Int,
     isLoading: Boolean,
     positionWidth: Dp,
+    isTappable: Boolean,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val shape = Corners.xxs
@@ -142,7 +153,19 @@ private fun RankedBarRow(
     )
 
     Row(
-        modifier = modifier.padding(top = if (position > 1) Spacing.sm else 0.dp),
+        modifier = modifier
+            .padding(top = if (position > 1) Spacing.sm else 0.dp)
+            .then(
+                if (isTappable) {
+                    Modifier.pressScaleClickable(
+                        onClick = onClick,
+                        hoverShape = Corners.xxs,
+                        role = Role.Button,
+                    )
+                } else {
+                    Modifier
+                },
+            ),
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
         SoftcoverText(
@@ -210,7 +233,7 @@ private fun RankedBarRow(
             contentAlignment = Alignment.TopEnd,
         ) {
             FadeThroughText(
-                text = row.share,
+                text = row.value,
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 isLoading = isLoading,

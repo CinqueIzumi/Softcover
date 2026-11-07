@@ -224,7 +224,7 @@ class GenreRankingMapperTest {
 
             // ----- Assert -----
             result.rows.map { it.fill } shouldBe listOf(1f, 0.5f)
-            result.rows.first().share shouldBe "63%"
+            result.rows.first().value shouldBe "63%"
         }
     }
 

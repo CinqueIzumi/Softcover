@@ -68,19 +68,7 @@ internal fun genreRankingUiModel(
     slices: List<GenreSlice>?,
     shownCount: Int,
 ): RankedBarsUiModel {
-    if (slices == null) {
-        return RankedBarsUiModel(
-            rows = List(LOADING_ROW_COUNT) {
-                RankedBarUiModel(
-                    label = "",
-                    share = "",
-                    fill = 0f,
-                )
-            }.toImmutableList(),
-            visibleCount = LOADING_ROW_COUNT,
-            isLoading = true,
-        )
-    }
+    if (slices == null) return RankedBarsUiModel.loading(rowCount = LOADING_ROW_COUNT)
 
     val leadFraction = slices.firstOrNull()?.fraction ?: 0.0
 
@@ -88,8 +76,9 @@ internal fun genreRankingUiModel(
         rows = slices
             .map { slice ->
                 RankedBarUiModel(
+                    key = slice.name,
                     label = slice.name,
-                    share = percentLabel(fraction = slice.fraction.toFloat()),
+                    value = percentLabel(fraction = slice.fraction.toFloat()),
                     fill = if (leadFraction > 0.0) (slice.fraction / leadFraction).toFloat() else 0f,
                 )
             }
