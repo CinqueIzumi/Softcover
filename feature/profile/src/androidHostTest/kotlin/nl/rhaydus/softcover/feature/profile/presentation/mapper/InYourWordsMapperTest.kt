@@ -14,6 +14,7 @@ import nl.rhaydus.softcover.core.domain.model.Quote
 import nl.rhaydus.softcover.core.domain.model.StatsScope
 import nl.rhaydus.softcover.core.domain.model.StatsWindow
 import nl.rhaydus.softcover.core.profile.domain.model.MostQuotedBook
+import nl.rhaydus.softcover.core.profile.domain.model.OwnTagCount
 import nl.rhaydus.softcover.core.profile.domain.model.WrittenStats
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -97,6 +98,7 @@ class InYourWordsMapperTest {
             // ----- Act -----
             val result = inYourWordsUiModel(
                 written = null,
+                ownTags = emptyList(),
                 scope = scope,
             )
 
@@ -114,6 +116,7 @@ class InYourWordsMapperTest {
             // ----- Act -----
             val result = inYourWordsUiModel(
                 written = stats,
+                ownTags = emptyList(),
                 scope = StatsScope.AllTime,
             )
 
@@ -136,6 +139,7 @@ class InYourWordsMapperTest {
             // ----- Act -----
             val result = inYourWordsUiModel(
                 written = stats,
+                ownTags = emptyList(),
                 scope = StatsScope.AllTime,
             )
 
@@ -156,6 +160,7 @@ class InYourWordsMapperTest {
             // ----- Act -----
             val result = inYourWordsUiModel(
                 written = stats,
+                ownTags = emptyList(),
                 scope = StatsScope.AllTime,
             )
 
@@ -174,6 +179,7 @@ class InYourWordsMapperTest {
             // ----- Act -----
             val result = inYourWordsUiModel(
                 written = stats,
+                ownTags = emptyList(),
                 scope = StatsScope.AllTime,
             )
 
@@ -194,6 +200,7 @@ class InYourWordsMapperTest {
             // ----- Act -----
             val result = inYourWordsUiModel(
                 written = stats,
+                ownTags = emptyList(),
                 scope = StatsScope.AllTime,
             )
 
@@ -209,6 +216,7 @@ class InYourWordsMapperTest {
             // ----- Act -----
             val result = inYourWordsUiModel(
                 written = written(),
+                ownTags = emptyList(),
                 scope = scope,
             )
 
@@ -225,6 +233,7 @@ class InYourWordsMapperTest {
             // ----- Act -----
             val result = inYourWordsUiModel(
                 written = written(),
+                ownTags = emptyList(),
                 scope = scope,
             )
 
@@ -241,6 +250,7 @@ class InYourWordsMapperTest {
             // ----- Act -----
             val result = inYourWordsUiModel(
                 written = written(),
+                ownTags = emptyList(),
                 scope = scope,
             )
 
@@ -260,6 +270,7 @@ class InYourWordsMapperTest {
             // ----- Act -----
             val result = inYourWordsUiModel(
                 written = stats,
+                ownTags = emptyList(),
                 scope = StatsScope.AllTime,
             )
 
@@ -275,6 +286,7 @@ class InYourWordsMapperTest {
             // ----- Act -----
             val result = inYourWordsUiModel(
                 written = stats,
+                ownTags = emptyList(),
                 scope = StatsScope.AllTime,
             )
 
@@ -290,6 +302,7 @@ class InYourWordsMapperTest {
             // ----- Act -----
             val result = inYourWordsUiModel(
                 written = stats,
+                ownTags = emptyList(),
                 scope = StatsScope.AllTime,
             )
 
@@ -311,6 +324,7 @@ class InYourWordsMapperTest {
             // ----- Act -----
             val result = inYourWordsUiModel(
                 written = stats,
+                ownTags = emptyList(),
                 scope = StatsScope.AllTime,
             )
 
@@ -329,6 +343,7 @@ class InYourWordsMapperTest {
             // ----- Act -----
             val result = inYourWordsUiModel(
                 written = stats,
+                ownTags = emptyList(),
                 scope = StatsScope.AllTime,
             )
 
@@ -349,6 +364,7 @@ class InYourWordsMapperTest {
             // ----- Act -----
             val result = inYourWordsUiModel(
                 written = stats,
+                ownTags = emptyList(),
                 scope = StatsScope.AllTime,
             )
 
@@ -367,6 +383,7 @@ class InYourWordsMapperTest {
             // ----- Act -----
             val result = inYourWordsUiModel(
                 written = stats,
+                ownTags = emptyList(),
                 scope = StatsScope.AllTime,
             )
 
@@ -390,12 +407,165 @@ class InYourWordsMapperTest {
             // ----- Act -----
             val result = inYourWordsUiModel(
                 written = stats,
+                ownTags = emptyList(),
                 scope = StatsScope.AllTime,
             )
 
             // ----- Assert -----
             val card: QuoteCardUiModel.Book = result.mostQuoted.shouldNotBeNull().card
             card.caption shouldBe "1 quote"
+        }
+    }
+
+    @Nested
+    inner class OwnTags {
+        @Test
+        fun `null own tags yield the masked chapter`() {
+            // ----- Arrange -----
+            val stats = written(reviewCount = 1)
+
+            // ----- Act -----
+            val result = inYourWordsUiModel(
+                written = stats,
+                ownTags = null,
+                scope = StatsScope.AllTime,
+            )
+
+            // ----- Assert -----
+            result.isLoading shouldBe true
+        }
+
+        @Test
+        fun `null written stats with loaded own tags yield the masked chapter`() {
+            // ----- Arrange -----
+            val tags = listOf(
+                OwnTagCount(
+                    name = "cozy",
+                    bookCount = 2,
+                ),
+            )
+
+            // ----- Act -----
+            val result = inYourWordsUiModel(
+                written = null,
+                ownTags = tags,
+                scope = StatsScope.AllTime,
+            )
+
+            // ----- Assert -----
+            result.isLoading shouldBe true
+        }
+
+        @Test
+        fun `empty own tags yield no own tags block`() {
+            // ----- Arrange -----
+            val stats = written(reviewCount = 1)
+
+            // ----- Act -----
+            val result = inYourWordsUiModel(
+                written = stats,
+                ownTags = emptyList(),
+                scope = StatsScope.AllTime,
+            )
+
+            // ----- Assert -----
+            result.ownTags.shouldBeNull()
+        }
+
+        @Test
+        fun `own tags alone make the chapter have content`() {
+            // ----- Arrange -----
+            val tags = listOf(
+                OwnTagCount(
+                    name = "cozy",
+                    bookCount = 2,
+                ),
+            )
+
+            // ----- Act -----
+            val result = inYourWordsUiModel(
+                written = written(),
+                ownTags = tags,
+                scope = StatsScope.AllTime,
+            )
+
+            // ----- Assert -----
+            result.hasContent shouldBe true
+            result.isLoading shouldBe false
+        }
+
+        @Test
+        fun `more than five tags are cut to the top five in order`() {
+            // ----- Arrange -----
+            val tags = listOf("a", "b", "c", "d", "e", "f", "g").mapIndexed { index, name ->
+                OwnTagCount(
+                    name = name,
+                    bookCount = 10 - index,
+                )
+            }
+
+            // ----- Act -----
+            val result = inYourWordsUiModel(
+                written = written(),
+                ownTags = tags,
+                scope = StatsScope.AllTime,
+            )
+
+            // ----- Assert -----
+            val ranking = result.ownTags.shouldNotBeNull().ranking
+            ranking.rows.map { it.key } shouldBe listOf("a", "b", "c", "d", "e")
+            ranking.visibleCount shouldBe 5
+        }
+
+        @Test
+        fun `fill is relative to the lead row`() {
+            // ----- Arrange -----
+            val tags = listOf(
+                OwnTagCount(
+                    name = "cozy",
+                    bookCount = 8,
+                ),
+                OwnTagCount(
+                    name = "slow",
+                    bookCount = 4,
+                ),
+            )
+
+            // ----- Act -----
+            val result = inYourWordsUiModel(
+                written = written(),
+                ownTags = tags,
+                scope = StatsScope.AllTime,
+            )
+
+            // ----- Assert -----
+            result.ownTags.shouldNotBeNull().ranking.rows.map { it.fill } shouldBe listOf(1f, 0.5f)
+        }
+
+        @Test
+        fun `row keys are the tag names`() {
+            // ----- Arrange -----
+            val tags = listOf(
+                OwnTagCount(
+                    name = "cozy",
+                    bookCount = 8,
+                ),
+                OwnTagCount(
+                    name = "slow burn",
+                    bookCount = 4,
+                ),
+            )
+
+            // ----- Act -----
+            val result = inYourWordsUiModel(
+                written = written(),
+                ownTags = tags,
+                scope = StatsScope.AllTime,
+            )
+
+            // ----- Assert -----
+            val ranking = result.ownTags.shouldNotBeNull().ranking
+            ranking.rows.map { it.key } shouldBe listOf("cozy", "slow burn")
         }
     }
 }

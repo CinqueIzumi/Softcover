@@ -22,6 +22,7 @@ import nl.rhaydus.softcover.core.profile.domain.model.LongestBook
 import nl.rhaydus.softcover.core.profile.domain.model.MonthCount
 import nl.rhaydus.softcover.core.profile.domain.model.MonthlyPages
 import nl.rhaydus.softcover.core.profile.domain.model.MostQuotedBook
+import nl.rhaydus.softcover.core.profile.domain.model.OwnTagCount
 import nl.rhaydus.softcover.core.profile.domain.model.QuickestRead
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
@@ -86,6 +87,21 @@ internal fun profileTimeToFinishPreview(): TimeToFinish = TimeToFinish(
             ),
             pages = 272,
         ),
+    ),
+)
+
+internal fun profileOwnTagsPreview(): List<OwnTagCount> = listOf(
+    OwnTagCount(
+        name = "Comfort reads",
+        bookCount = 12,
+    ),
+    OwnTagCount(
+        name = "Re-read",
+        bookCount = 7,
+    ),
+    OwnTagCount(
+        name = "Gifted",
+        bookCount = 4,
     ),
 )
 

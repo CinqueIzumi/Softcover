@@ -275,6 +275,7 @@ Three non-visual seams are **not** app-local — they come from `nl.rhaydus:core
   `softcover://open/...` URI whose wire names are never derived from enum names. `ExternalNavigationRequests`
   holds the one pending request as state; `BottomBarScreen` consumes tab and book requests and `RootScreen`
   Focus Mode. A tab or book request never pops Focus Mode: it applies underneath and shows once Focus Mode
-  is left. Sign-out clears it.
+  is left. Sign-out clears it. A screen pushed over the shell uses the same `OpenTab` request to reach a
+  tab; the Stats Atlas pairs it with a `LibraryFilterRequests` tag request, which Library applies.
 - Replacing all rows for a key (clear then insert) is one `@Transaction` DAO method, never two
   data-source calls.

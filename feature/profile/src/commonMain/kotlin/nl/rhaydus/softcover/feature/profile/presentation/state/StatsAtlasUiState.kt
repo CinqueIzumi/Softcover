@@ -221,6 +221,7 @@ internal data class StatsAtlasUiState(
 
     val inYourWords: InYourWordsUiModel = inYourWordsUiModel(
         written = null,
+        ownTags = null,
         scope = StatsScope.AllTime,
     ),
 

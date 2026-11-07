@@ -13,6 +13,7 @@ import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnGenreRankingShowLessAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnGenreRankingShowMoreAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnMostQuotedBookTappedAction
+import nl.rhaydus.softcover.feature.profile.presentation.action.OnOwnTagTappedAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnReadingDayTappedAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnScopeSelectedAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.StatsAtlasAction
@@ -134,6 +135,9 @@ internal fun ColumnScope.StatsAtlasBody(
         jumper = jumper,
         onMostQuotedTapped = {
             runAction(OnMostQuotedBookTappedAction())
+        },
+        onOwnTagTapped = {
+            runAction(OnOwnTagTappedAction(tagName = it))
         },
     )
 

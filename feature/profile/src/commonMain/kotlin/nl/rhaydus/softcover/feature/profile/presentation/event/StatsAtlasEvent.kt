@@ -8,4 +8,7 @@ internal sealed interface StatsAtlasEvent : UiEvent {
         val bookId: Int,
         val initialCover: BookInitialCover?,
     ) : StatsAtlasEvent
+
+    /** Emitted when an own-tag row is tapped; carries the tag to filter the library by. */
+    data class OpenLibraryForTag(val tagName: String) : StatsAtlasEvent
 }

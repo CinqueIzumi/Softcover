@@ -36,6 +36,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearAtAGlanceHea
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearGrid
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileHourlyPagesPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileMonthlyPagesPreview
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileOwnTagsPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingActivityPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingHistoryPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingStatsPreview
@@ -149,6 +150,7 @@ internal val StatsAtlasPreviewState = StatsAtlasUiState(
     ),
     inYourWords = inYourWordsUiModel(
         written = profileWrittenStatsPreview(),
+        ownTags = profileOwnTagsPreview(),
         scope = StatsScope.AllTime,
     ),
     genreHeader = genreHeader(

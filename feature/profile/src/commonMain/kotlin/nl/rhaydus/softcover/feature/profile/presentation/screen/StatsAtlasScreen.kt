@@ -12,9 +12,15 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import nl.rhaydus.designsystem.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
+import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
+import nl.rhaydus.softcover.core.presentation.navigation.ExternalNavigationRequest
+import nl.rhaydus.softcover.core.presentation.navigation.ExternalNavigationRequests
+import nl.rhaydus.softcover.core.presentation.navigation.LibraryFilterRequests
+import nl.rhaydus.softcover.core.presentation.navigation.LibraryTagFilterRequest
 import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
+import nl.rhaydus.softcover.core.presentation.navigation.TabDestination
 import nl.rhaydus.softcover.core.presentation.prefetch.LocalBookDetailPrefetcher
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberBookDetailPrefetcher
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberPrefetchingBookCardEventHandler
@@ -37,6 +43,10 @@ class StatsAtlasScreen : Screen {
 
         val appNavigator = koinInject<AppNavigator>()
 
+        val libraryFilterRequests = koinInject<LibraryFilterRequests>()
+
+        val externalNavigationRequests = koinInject<ExternalNavigationRequests>()
+
         ObserveAsEvents(flow = screenModel.events) {
             when (it) {
                 is StatsAtlasEvent.OpenBookDetail -> {
@@ -46,6 +56,19 @@ class StatsAtlasScreen : Screen {
                     )
 
                     navigator.push(item = appNavigator.screen(destination))
+                }
+
+                is StatsAtlasEvent.OpenLibraryForTag -> {
+                    libraryFilterRequests.request(
+                        request = LibraryTagFilterRequest(
+                            category = TagCategory.TAG,
+                            name = it.tagName,
+                        ),
+                    )
+
+                    externalNavigationRequests.request(
+                        request = ExternalNavigationRequest.OpenTab(TabDestination.LIBRARY),
+                    )
                 }
             }
         }

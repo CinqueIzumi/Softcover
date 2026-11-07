@@ -1,7 +1,10 @@
 package nl.rhaydus.softcover.feature.profile.presentation.mapper
 
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.common.formatGroupedNumber
+import nl.rhaydus.softcover.core.component.chart.RankedBarUiModel
+import nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
@@ -12,25 +15,34 @@ import nl.rhaydus.softcover.core.component.statistic.StatTileUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatTileVariant
 import nl.rhaydus.softcover.core.domain.model.StatsScope
 import nl.rhaydus.softcover.core.profile.domain.model.MostQuotedBook
+import nl.rhaydus.softcover.core.profile.domain.model.OwnTagCount
 import nl.rhaydus.softcover.core.profile.domain.model.WrittenStats
 import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.state.AtlasChapter
 import nl.rhaydus.softcover.feature.profile.presentation.state.InYourWordsUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.state.MostQuotedUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.state.OwnTagsUiModel
 
 private const val REVIEWS_EYEBROW = "Reviews"
 private const val QUOTES_EYEBROW = "Quotes"
 private const val MOST_QUOTED_TITLE = "Your most-quoted book"
+private const val OWN_TAGS_TITLE = "Your own tags"
+private const val OWN_TAGS_CAPTION = "The tags you put on books you finished. Tap one to see its books."
+private const val OWN_TAGS_SHOWN = 5
 private const val STAND_IN_WORDS_CAPTION = "0,000 words in all"
 private const val STAND_IN_QUOTES_CAPTION = "saved from 00 books"
 private const val STAND_IN_MOST_QUOTED_CAPTION = "You saved 00 lines from Loading title. This one first."
 
-/** A null [written] yields the masked stand-in. */
+/**
+ * A null [written] or [ownTags] yields the masked stand-in: the two are gated separately, and reading
+ * one still loading as empty would fold the chapter briefly.
+ */
 internal fun inYourWordsUiModel(
     written: WrittenStats?,
+    ownTags: List<OwnTagCount>?,
     scope: StatsScope,
 ): InYourWordsUiModel {
-    if (written == null) return loadingInYourWords()
+    if (written == null || ownTags == null) return loadingInYourWords()
 
     val phrase = scope.scopePhrase()
 
@@ -65,7 +77,8 @@ internal fun inYourWordsUiModel(
             ),
         ),
         mostQuoted = written.mostQuoted?.toUiModel(),
-        hasContent = written.reviewCount > 0 || written.quoteCount > 0,
+        ownTags = ownTags.toUiModel(),
+        hasContent = written.reviewCount > 0 || written.quoteCount > 0 || ownTags.isNotEmpty(),
         isLoading = false,
     )
 }
@@ -126,6 +139,39 @@ private fun MostQuotedBook.toUiModel(): MostQuotedUiModel {
     )
 }
 
+private fun List<OwnTagCount>.toUiModel(): OwnTagsUiModel? {
+    if (isEmpty()) return null
+
+    val shown = take(OWN_TAGS_SHOWN)
+
+    val leadCount = shown.first().bookCount
+
+    return OwnTagsUiModel(
+        title = OWN_TAGS_TITLE,
+        caption = OWN_TAGS_CAPTION,
+        ranking = RankedBarsUiModel(
+            rows = shown
+                .map { tag ->
+                    RankedBarUiModel(
+                        key = tag.name,
+                        label = tag.name,
+                        value = formatGroupedNumber(tag.bookCount),
+                        fill = if (leadCount > 0) tag.bookCount.toFloat() / leadCount else 0f,
+                    )
+                }
+                .toImmutableList(),
+            visibleCount = shown.size,
+            areRowsTappable = true,
+        ),
+    )
+}
+
+private fun loadingOwnTags(): OwnTagsUiModel = OwnTagsUiModel(
+    title = OWN_TAGS_TITLE,
+    caption = OWN_TAGS_CAPTION,
+    ranking = RankedBarsUiModel.loading(rowCount = OWN_TAGS_SHOWN),
+)
+
 private fun loadingInYourWords(): InYourWordsUiModel = InYourWordsUiModel(
     header = inYourWordsHeader(),
     tiles = persistentListOf(
@@ -159,6 +205,7 @@ private fun loadingInYourWords(): InYourWordsUiModel = InYourWordsUiModel(
         ),
         bookId = -1,
     ),
+    ownTags = loadingOwnTags(),
     hasContent = true,
     isLoading = true,
 )

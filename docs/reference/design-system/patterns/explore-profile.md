@@ -133,9 +133,12 @@
   counts the quotes saved ("saved from 19 books", "None saved in 2026", "None saved yet"). Under them, "Your
   most-quoted book" ("You saved 11 lines from Title. This one first.") shows a book `QuoteCard` with the
   earliest quote in the scope and "Author · 11 quotes"; only library books count. Tapping the card opens
-  that book's detail. A scope with neither reviews nor quotes folds the
-  chapter and its contents row away, so the contents headline counts one fewer. It is shown masked while
-  loading.
+  that book's detail. Last, "Your own tags" ("The tags you put on books you finished. Tap one to see its
+  books.") ranks up to five of the reader's Tag-category tags as tappable `RankedBars` rows with a book count,
+  each book counted once per tag; it is left out when the scope has none. A tap closes the Atlas and opens
+  Library on the Read shelf (All when Read is hidden) filtered to that tag alone, so the shelf can hold more
+  books than the count. A scope with no reviews, quotes or own tags folds the chapter and its contents row
+  away, so the contents headline counts one fewer. It is shown masked while loading.
 - Chapter 99, "Temporary" (removed later), holds the former Profile charts: "The shape of the years" (a
   `ColumnChart` behind a Books / Pages `SegmentedControl`); "Who you read";
   "How you score" (headline from the rating band, never the bare average); "Recently loved" (up to three

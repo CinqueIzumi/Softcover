@@ -131,6 +131,7 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
 
         val inYourWords = inYourWordsUiModel(
             written = sections.written,
+            ownTags = stats?.ownTags,
             scope = scope,
         )
 

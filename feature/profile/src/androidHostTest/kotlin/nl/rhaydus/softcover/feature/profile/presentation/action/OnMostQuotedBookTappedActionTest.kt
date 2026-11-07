@@ -71,6 +71,7 @@ class OnMostQuotedBookTappedActionTest {
                 },
             ),
         ),
+        ownTags = emptyList(),
         scope = StatsScope.AllTime,
     )
 

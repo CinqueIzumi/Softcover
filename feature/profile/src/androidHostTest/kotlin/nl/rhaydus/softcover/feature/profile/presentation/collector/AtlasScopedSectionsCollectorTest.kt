@@ -41,6 +41,7 @@ import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
 import nl.rhaydus.softcover.core.profile.domain.model.HourlyPages
 import nl.rhaydus.softcover.core.profile.domain.model.LongestBook
 import nl.rhaydus.softcover.core.profile.domain.model.MonthlyPages
+import nl.rhaydus.softcover.core.profile.domain.model.OwnTagCount
 import nl.rhaydus.softcover.core.profile.domain.model.QuickestRead
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
@@ -955,6 +956,32 @@ class AtlasScopedSectionsCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.contentsRows.map { it.chapter } shouldBe AtlasChapter.entries.toList()
+            job.cancel()
+        }
+
+        @Test
+        fun `keeps the in your words chapter when the scope only has own tags`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            writtenFor = { emptyWritten() }
+
+            statsFor = {
+                ReadingStats(
+                    ownTags = listOf(
+                        OwnTagCount(
+                            name = "cozy",
+                            bookCount = 3,
+                        ),
+                    ),
+                )
+            }
+
+            // ----- Act -----
+            val job = launchCollector()
+
+            // ----- Assert -----
+            val state = stateFlow.value
+            state.contentsRows.map { it.chapter } shouldBe AtlasChapter.entries.toList()
+            state.inYourWords.hasContent shouldBe true
             job.cancel()
         }
     }
