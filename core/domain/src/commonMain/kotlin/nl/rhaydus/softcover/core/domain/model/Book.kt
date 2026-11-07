@@ -53,12 +53,8 @@ data class Book(
     val readerEdition: BookEdition?
         get() = editions.firstOrNull { it.id == userBook?.editionId }
 
-    /**
-     * The title of the reader's own edition, else the book's title; never an owned or default edition's,
-     * unlike [currentEdition].
-     */
     val displayTitle: String
-        get() = titleIn(readerEdition)
+        get() = titleIn(currentEdition)
 
     fun titleIn(edition: BookEdition?): String = edition?.title?.takeIf { it.isNotBlank() } ?: title
 

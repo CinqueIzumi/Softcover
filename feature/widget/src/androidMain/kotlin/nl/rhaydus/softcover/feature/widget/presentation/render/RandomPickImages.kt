@@ -57,4 +57,4 @@ internal class RandomPickImages(
     }
 }
 
-private fun RandomPickBook.coverSource(): CoverSource? = book.coverSource(edition = listEdition ?: book.currentEdition)
+private fun RandomPickBook.coverSource(): CoverSource? = book.coverSource(edition = shownEdition)

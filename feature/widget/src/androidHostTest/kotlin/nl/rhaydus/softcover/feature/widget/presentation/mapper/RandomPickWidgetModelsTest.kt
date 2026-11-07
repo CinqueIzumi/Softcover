@@ -7,7 +7,6 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
@@ -38,19 +37,16 @@ class RandomPickWidgetModelsTest {
     private val requestedBookIds = mutableListOf<Int>()
     private val requestedHeights = mutableListOf<Int>()
 
-    private fun book(id: Int): Book = mockk<Book> {
-        every {
-            this@mockk.id
-        } returns id
-
-        every {
-            displayTitle
-        } returns "Title $id"
-
-        every {
-            authorString
-        } returns "Author $id"
-    }
+    private fun book(id: Int): Book = realBook().copy(
+        id = id,
+        title = "Title $id",
+        authors = listOf(
+            Author(
+                id = id,
+                name = "Author $id",
+            ),
+        ),
+    )
 
     private fun edition(
         title: String,
