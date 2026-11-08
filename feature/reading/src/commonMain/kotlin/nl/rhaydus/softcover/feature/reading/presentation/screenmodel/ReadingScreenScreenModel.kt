@@ -22,6 +22,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLastUsedProgressU
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnabledAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObservePlanTodayDismissalsUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLastUsedProgressUnitUseCase
+import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveRecentReadingActivityUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshReadingActivityUseCase
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
@@ -54,6 +55,7 @@ internal class ReadingScreenScreenModel(
     setLastUsedProgressUnitUseCase: SetLastUsedProgressUnitUseCase,
     observeReadingJournalHistoryUseCase: ObserveReadingJournalHistoryUseCase,
     refreshReadingJournalHistoryUseCase: RefreshReadingJournalHistoryUseCase,
+    activeSessionController: ActiveSessionController,
     appDispatchers: AppDispatchers,
     flows: List<ReadingCollector>,
 ) : ToadScreenModel<ReadingScreenUiState, ReadingScreenEvent, ReadingScreenDependencies, ReadingCollector, ReadingLocalVariables>(
@@ -64,6 +66,7 @@ internal class ReadingScreenScreenModel(
     override val dependencies = ReadingScreenDependencies(
         coroutineScope = screenModelScope,
         mainDispatcher = appDispatchers.main,
+        activeSessionController = activeSessionController,
         getCurrentlyReadingBooksUseCase = getCurrentlyReadingBooksUseCase,
         updateBookProgressUseCase = updateBookProgressUseCase,
         markBookAsReadUseCase = markBookAsReadUseCase,

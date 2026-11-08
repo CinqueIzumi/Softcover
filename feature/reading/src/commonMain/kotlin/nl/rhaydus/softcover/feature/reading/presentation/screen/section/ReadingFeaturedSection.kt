@@ -3,25 +3,23 @@ package nl.rhaydus.softcover.feature.reading.presentation.screen.section
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnDismissPlanTodayAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnShowProgressSheetClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.screen.MarkAsReadController
 import nl.rhaydus.softcover.feature.reading.presentation.screen.markAsReadSlide
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
-import org.koin.compose.koinInject
 
 @Composable
 internal fun ReadingFeaturedSection(
     state: ReadingScreenUiState,
     runAction: (ReadingAction) -> Unit,
     onBookClick: (Book) -> Unit,
+    onStartSession: (Book) -> Unit,
     controller: MarkAsReadController,
     modifier: Modifier = Modifier,
 ) {
     val featured = state.featuredBook
-    val sessionController = koinInject<ActiveSessionController>()
 
     FeaturedBookCard(
         book = state.visibleFeaturedBookModel,
@@ -44,7 +42,7 @@ internal fun ReadingFeaturedSection(
             runAction(OnShowProgressSheetClickAction(book = featured))
         },
         onStartSession = {
-            sessionController.start(book = featured)
+            onStartSession(featured)
         },
         modifier = modifier.markAsReadSlide(
             controller,

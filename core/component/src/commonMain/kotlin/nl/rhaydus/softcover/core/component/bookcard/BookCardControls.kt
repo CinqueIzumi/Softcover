@@ -1,5 +1,12 @@
 package nl.rhaydus.softcover.core.component.bookcard
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,13 +18,16 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.modifier.skeletonMask
+import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.designsystem.theme.Corners
 import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.badge.Badge
@@ -32,8 +42,9 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.MonogramCoverIn
 @Composable
 internal fun BookCardTrailingControl(
     trailing: BookCardTrailing,
+    key: BookCardKey,
     isLoading: Boolean,
-    onClick: () -> Unit,
+    onEvent: (BookCardEvent) -> Unit,
 ) {
     Box(
         modifier = Modifier.skeletonMask(
@@ -44,16 +55,49 @@ internal fun BookCardTrailingControl(
         when (trailing) {
             is BookCardTrailing.Badge -> Badge(model = trailing.model)
 
-            is BookCardTrailing.Restore -> RestoreLabel(label = "Restore")
+            is BookCardTrailing.Restore -> IconLabel(
+                icon = SoftcoverIcon.History,
+                label = "Restore",
+            )
 
             is BookCardTrailing.Bookmark -> Toggle(
                 model = trailing.toggle,
-                onEvent = { onClick() },
+                onEvent = { onEvent(BookCardEvent.TrailingClicked(key = key)) },
             )
 
             is BookCardTrailing.SetProgress -> PillButton(
                 model = trailing.pill,
-                onEvent = { onClick() },
+                onEvent = { onEvent(BookCardEvent.TrailingClicked(key = key)) },
+            )
+        }
+    }
+}
+
+@Composable
+internal fun StartSessionLink(
+    visible: Boolean,
+    onClick: () -> Unit,
+) {
+    val playMotion = playDecorativeMotion()
+
+    AnimatedVisibility(
+        visible = visible,
+        enter = if (playMotion) expandVertically() + fadeIn() else EnterTransition.None,
+        exit = if (playMotion) shrinkVertically() + fadeOut() else ExitTransition.None,
+    ) {
+        Box(
+            modifier = Modifier
+                .padding(top = Spacing.xxxs)
+                .minimumInteractiveComponentSize()
+                .pressScaleClickable(
+                    onClick = onClick,
+                    hoverShape = Corners.xs,
+                ),
+            contentAlignment = Alignment.CenterStart,
+        ) {
+            IconLabel(
+                icon = SoftcoverIcon.Play,
+                label = "Start session",
             )
         }
     }
@@ -104,9 +148,12 @@ internal fun BookCardMenuButton(
 }
 
 @Composable
-private fun RestoreLabel(label: String) {
-    val icon = drawableIconResource(
-        icon = SoftcoverIcon.History,
+private fun IconLabel(
+    icon: SoftcoverIcon,
+    label: String,
+) {
+    val painter = drawableIconResource(
+        icon = icon,
         contentDescription = "",
     )
 
@@ -115,7 +162,7 @@ private fun RestoreLabel(label: String) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
-            painter = icon.getIconPainter(),
+            painter = painter.getIconPainter(),
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(18.dp),

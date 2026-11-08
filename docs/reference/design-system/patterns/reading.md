@@ -55,7 +55,9 @@
 - The "also reading" rows under a `SectionHeader` ("N more in motion" eyebrow + headline): each a
   `BookCard` row, flat with a top hairline on every row, a `titleMedium` roman title, progress with
   `NN%`, and a full-width `DeadlineSummaryLine` beneath when a deadline is tracked.
-- A trailing pencil chip (no chevron, `DesktopTooltip`) opens the Update progress sheet.
+- A trailing set-progress pill (no chevron, `DesktopTooltip`) opens the Update progress sheet. While no session
+  runs, a quiet "Start session" link with a play icon sits under the progress bar, never for audiobooks; it
+  expands and collapses in height.
 
 ### Reading on-hold row
 
@@ -63,8 +65,8 @@
   "also reading" rows and above Pick up next. The section is absent when nothing is on hold.
 - Each row is identical to the secondary row (flat, top hairline, `titleMedium` title, progress with `NN%`),
   with no deadline.
-- Trailing: only the pencil chip, which opens the Update progress sheet; logging progress there resumes the
-  book. There is no session chip; sessions start only from the featured card.
+- Trailing: only the set-progress pill, with no "Start session" link. It opens the Update progress sheet, and
+  logging progress there resumes the book.
 - With nothing in Currently Reading, the "Between books" empty state still shows, with the section beneath it.
 
 ### Mark-as-read celebration
