@@ -210,6 +210,7 @@ val bookDetailModule = module {
             offlineCopy = get(),
             appDispatchers = get(),
             getDateStyleAsFlowUseCase = get(),
+            getLibraryTabOrderAsFlowUseCase = get(),
             observeCurrentDateUseCase = get(),
             setEditionAsOwnedUseCase = get(),
             getAllUserListsUseCase = get(),
