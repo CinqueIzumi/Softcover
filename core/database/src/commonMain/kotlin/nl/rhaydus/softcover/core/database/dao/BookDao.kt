@@ -54,7 +54,7 @@ interface BookDao {
             FROM books b
             LEFT JOIN user_books ub ON ub.bookId = b.id
             LEFT JOIN (
-                SELECT userBookId, MAX(updatedAt) AS latestActivity
+                SELECT userBookId, MAX(actionAt) AS latestActivity
                 FROM reading_journals
                 GROUP BY userBookId
             ) rj ON ub.id = rj.userBookId
@@ -118,7 +118,7 @@ interface BookDao {
 
     /**
      * Sorts user_books matching [statusCode] by the most recent
-     * reading_journals.updatedAt whose event is in [events], descending.
+     * reading_journals.actionAt whose event is in [events], descending.
      *
      * Books without any matching journal event fall to the bottom, ordered by
      * ub.id DESC as a stable tiebreaker. This can happen when the server
@@ -134,7 +134,7 @@ interface BookDao {
                     ON ub.bookId = b.id
 
                 LEFT JOIN (
-                    SELECT userBookId, MAX(updatedAt) AS latestEvent
+                    SELECT userBookId, MAX(actionAt) AS latestEvent
                     FROM reading_journals
                     WHERE event IN (:events)
                     GROUP BY userBookId
@@ -191,7 +191,7 @@ interface BookDao {
                     ON ub.id = ubr.userBookId
 
                 LEFT JOIN (
-                    SELECT userBookId, MAX(updatedAt) AS latestReadFinished
+                    SELECT userBookId, MAX(actionAt) AS latestReadFinished
                     FROM reading_journals
                     WHERE event = 'user_book_read_finished'
                     GROUP BY userBookId

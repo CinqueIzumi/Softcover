@@ -14,7 +14,7 @@ query GetReadUserBooksForStats($limit: Int!, $offset: Int!) {
             last_read_date
             user_book_read_finished_journal: reading_journals(
                 where: { event: { _eq: "user_book_read_finished" } }
-                order_by: { updated_at: desc }
+                order_by: { action_at: desc }
                 limit: 1
             ) {
                 ...ReadingJournalFragment

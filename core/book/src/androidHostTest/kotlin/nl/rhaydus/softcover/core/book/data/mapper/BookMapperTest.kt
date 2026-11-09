@@ -1120,7 +1120,7 @@ class BookMapperTest {
             } returns event
 
             every {
-                updated_at
+                action_at
             } returns "2024-01-01"
         }
 
@@ -1451,6 +1451,26 @@ class BookMapperTest {
 
             // ----- Assert -----
             result.userBook.shouldNotBeNull().reads.single().progress shouldBe 0f
+        }
+
+        @Test
+        fun `a missing progress on a finished read maps to one hundred`() {
+            // ----- Arrange -----
+            val fragment = stubUserBookFragment(
+                userBookReads = listOf(
+                    stubRead(
+                        id = 7,
+                        progress = null,
+                        finishedAt = "2026-05-01",
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = fragment.toBook().shouldNotBeNull()
+
+            // ----- Assert -----
+            result.userBook.shouldNotBeNull().reads.single().progress shouldBe 100f
         }
     }
 

@@ -15,7 +15,7 @@ fragment UserBookFragment on user_books {
 
     progress_updated_journal: reading_journals(
         where: { event: { _eq: "progress_updated" } }
-        order_by: { updated_at: desc }
+        order_by: { action_at: desc }
         limit: 1
     ) {
         ...ReadingJournalFragment
@@ -23,7 +23,7 @@ fragment UserBookFragment on user_books {
 
     user_book_read_started_journal: reading_journals(
         where: { event: { _eq: "user_book_read_started" } }
-        order_by: { updated_at: desc }
+        order_by: { action_at: desc }
         limit: 1
     ) {
         ...ReadingJournalFragment
@@ -31,7 +31,7 @@ fragment UserBookFragment on user_books {
 
     user_book_read_finished_journal: reading_journals(
         where: { event: { _eq: "user_book_read_finished" } }
-        order_by: { updated_at: desc }
+        order_by: { action_at: desc }
         limit: 1
     ) {
         ...ReadingJournalFragment
@@ -39,7 +39,7 @@ fragment UserBookFragment on user_books {
 
     status_stopped_journal: reading_journals(
         where: { event: { _eq: "status_stopped" } }
-        order_by: { updated_at: desc }
+        order_by: { action_at: desc }
         limit: 1
     ) {
         ...ReadingJournalFragment

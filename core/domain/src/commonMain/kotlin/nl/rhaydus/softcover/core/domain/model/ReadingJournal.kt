@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.core.domain.model
 
 data class ReadingJournal(
-    val updatedAt: String,
+    val actionAt: String,
     val event: String?,
 )

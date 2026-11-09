@@ -160,11 +160,11 @@ internal fun UserBook.withAppendedJournal(
     event: JournalEventType,
     actionAt: String? = null,
 ): UserBook {
-    val updatedAt = (actionAt?.let { Instant.parse(it) } ?: Clock.System.now())
+    val journalActionAt = (actionAt?.let { Instant.parse(it) } ?: Clock.System.now())
         .toUtcJournalTimestamp()
 
     val entry = ReadingJournal(
-        updatedAt = updatedAt,
+        actionAt = journalActionAt,
         event = event.eventName,
     )
 

@@ -11,6 +11,7 @@ Every book you're reading is now a tap away from a session, not just the one on 
 - Books on the Also reading shelf have a Start session link, so you can time a session for any of them straight from the Reading screen
 - The Verdict sheet keeps your unsaved rating and review when you swipe it, tap outside it or press back
 - The Library footer count springs to its new number when your shelf changes
+- Books imported into Hardcover show the date you finished them instead of the import date, and a finished read no longer shows 0%
 - A change made offline that Hardcover can no longer accept is set aside cleanly instead of being retried forever
 
 ## 3.2.3: Fresh off the press
