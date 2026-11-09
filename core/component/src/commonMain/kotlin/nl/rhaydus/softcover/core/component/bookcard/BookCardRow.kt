@@ -126,14 +126,17 @@ internal fun BookCardRowLayout(
                         titleMaxLines = if (variant.size == BookCardVariant.Row.Size.Compact) 1 else 2,
                         progress = model.decorations.progress,
                         isLoading = isLoading,
+                        startSession = variant.startSession,
+                        onStartSession = { onEvent(BookCardEvent.StartSessionClicked(key = model.key)) },
                         modifier = Modifier.weight(1f),
                     )
 
                     if (trailing != null) {
                         BookCardTrailingControl(
                             trailing = trailing,
+                            key = model.key,
                             isLoading = isLoading,
-                            onClick = { onEvent(BookCardEvent.TrailingClicked(key = model.key)) },
+                            onEvent = onEvent,
                         )
                     }
 

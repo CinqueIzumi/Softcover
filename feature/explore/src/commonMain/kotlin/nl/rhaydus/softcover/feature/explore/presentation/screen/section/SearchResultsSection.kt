@@ -109,6 +109,7 @@ internal fun ColumnScope.SearchResultsSection(
             is BookCardEvent.LongClicked,
             is BookCardEvent.PressStarted,
             is BookCardEvent.MenuClicked,
+            is BookCardEvent.StartSessionClicked,
             is BookCardEvent.ShakeEnded,
             -> Unit
         }

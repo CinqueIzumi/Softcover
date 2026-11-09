@@ -21,8 +21,8 @@ import nl.rhaydus.toad.ActionScope
  * Maps the "Also reading" rows and the empty-state "Pick up next" tiles to book cards.
  *
  * The first book is the featured card and has no row here. Derives from the books, the deadlines, the
- * cover overlays [DeadlineModelsCollector] writes and the failed-save ids, so it re-runs whenever any
- * of them changes.
+ * cover overlays [DeadlineModelsCollector] writes, the failed-save ids and whether a session can start, so
+ * it re-runs whenever any of them changes.
  */
 internal class BookCardModelsCollector : ReadingCollector {
     override suspend fun onLaunch(
@@ -39,6 +39,7 @@ internal class BookCardModelsCollector : ReadingCollector {
                     deadlineCoverOverlays = it.deadlineCoverOverlays,
                     dateStyle = it.dateStyle,
                     failedMutationBookIds = it.failedMutationBookIds,
+                    canStartSession = it.canStartSession,
                 )
             }
             .distinctUntilChanged()
@@ -54,6 +55,7 @@ internal class BookCardModelsCollector : ReadingCollector {
                                     coverBadge = snapshot.deadlineCoverOverlays[book.id],
                                     dateStyle = snapshot.dateStyle,
                                     mutationFailed = book.id in snapshot.failedMutationBookIds,
+                                    canStartSession = snapshot.canStartSession,
                                 ) to book
                             }.toBookCardSet()
                         },

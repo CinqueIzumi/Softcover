@@ -2,6 +2,17 @@
 
 What changed in each release of Softcover, newest first.
 
+## 3.2.4: One more chapter
+
+*2026-11-09*
+
+Every book you're reading is now a tap away from a session, not just the one on top.
+
+- Books on the Also reading shelf have a Start session link, so you can time a session for any of them straight from the Reading screen
+- The Verdict sheet keeps your unsaved rating and review when you swipe it, tap outside it or press back
+- The Library footer count springs to its new number when your shelf changes
+- A change made offline that Hardcover can no longer accept is set aside cleanly instead of being retried forever
+
 ## 3.2.3: Fresh off the press
 
 *2026-10-19*

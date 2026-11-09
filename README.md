@@ -61,8 +61,9 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 - Track listening progress in `HH:MM:SS` or percentage for audiobook editions.
 - Keep an eye on any deadline you've set — the date and the required pace sit alongside the book.
 - Mark books as read in one tap, or **backdate** a progress update or a finish to a chosen past date and time.
-- On finishing a book, a **Verdict** sheet prompts for a rating and review while it's fresh.
+- On finishing a book, a **Verdict** sheet prompts for a rating and review while it's fresh, and holds on to an unsaved draft instead of closing on a stray swipe or tap.
 - Start a distraction-free **focus mode** reading session that times your reading, with pause/resume/stop controls and inline page-progress editing.
+- Start a session for any book on the **Also reading** shelf straight from its row.
 - Resume an ongoing session from anywhere via a persistent session bar, backed by a foreground service.
 
 ### Explore
@@ -134,7 +135,7 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 | [Gradle (KTS)](https://gradle.org/) | 9.5.1 | Build system with version catalog |
 | [KSP](https://github.com/google/ksp) | 2.3.12 | Kotlin Symbol Processing for Room (per-target) |
 | [ktlint](https://pinterest.github.io/ktlint/) | 1.7.1 | Formatting engine driving the foundation ruleset — `ktlintFormat` autofix, `ktlintCheck` gate |
-| [detekt](https://detekt.dev/) | 1.23.8 | Type-resolved static analysis, gated from zero (`styleCheck`) |
+| [detekt](https://detekt.dev/) | 2.0.0-alpha.6 | Type-resolved static analysis, gated from zero (`styleCheck`) |
 | [Dependency Analysis](https://github.com/autonomousapps/dependency-analysis-gradle-plugin) | 3.19.2 | Flags unused and misdeclared module dependencies |
 | [Compose Stability Analyzer](https://github.com/skydoves/compose-stability-analyzer) | 0.9.0 | Per-module Compose stability baselines, gated by `stabilityCheck` |
 | [Kover](https://github.com/Kotlin/kotlinx-kover) | 0.9.8 | Code-coverage reports, aggregated at the root for Codecov |

@@ -45,10 +45,16 @@ internal fun ReadingBooksColumn(
         key = "reading:rest",
     )
 
+    val onStartSession = rememberSessionStarter(
+        books = state.books,
+        runAction = runAction,
+    )
+
     val onCardEvent = rememberReadingCardEventHandler(
         alsoReading = state.visibleAlsoReading,
         runAction = runAction,
         onBookClick = onBookClick,
+        onStartSession = onStartSession,
     )
 
     LazyColumn(
@@ -65,6 +71,7 @@ internal fun ReadingBooksColumn(
                 state = state,
                 runAction = runAction,
                 onBookClick = onBookClick,
+                onStartSession = onStartSession,
                 controller = controller,
             )
         }
