@@ -160,6 +160,7 @@ internal fun BookList(
             is BookCardEvent.PressStarted,
             is BookCardEvent.TrailingClicked,
             is BookCardEvent.MenuClicked,
+            is BookCardEvent.StartSessionClicked,
             is BookCardEvent.ShakeEnded,
             -> Unit
         }

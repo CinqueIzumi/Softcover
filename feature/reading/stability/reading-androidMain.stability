@@ -280,13 +280,14 @@ internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.Re
     - header: STABLE (composable function type)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingFeaturedSection(state: nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction, kotlin.Unit>, onBookClick: kotlin.Function1<nl.rhaydus.softcover.core.domain.model.Book, kotlin.Unit>, controller: nl.rhaydus.softcover.feature.reading.presentation.screen.MarkAsReadController, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingFeaturedSection(state: nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction, kotlin.Unit>, onBookClick: kotlin.Function1<nl.rhaydus.softcover.core.domain.model.Book, kotlin.Unit>, onStartSession: kotlin.Function1<nl.rhaydus.softcover.core.domain.model.Book, kotlin.Unit>, controller: nl.rhaydus.softcover.feature.reading.presentation.screen.MarkAsReadController, modifier: androidx.compose.ui.Modifier): kotlin.Unit
   skippable: false
   restartable: true
   params:
     - state: UNSTABLE (has mutable properties or unstable members)
     - runAction: STABLE (function type)
     - onBookClick: STABLE (function type)
+    - onStartSession: STABLE (function type)
     - controller: STABLE (marked @Stable or @Immutable)
     - modifier: STABLE (marked @Stable or @Immutable)
 
@@ -327,11 +328,20 @@ internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.re
     - onBookClick: STABLE (function type)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.rememberReadingCardEventHandler(alsoReading: nl.rhaydus.softcover.core.component.bookcard.BookCardSet<nl.rhaydus.softcover.core.domain.model.Book>, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction, kotlin.Unit>, onBookClick: kotlin.Function1<nl.rhaydus.softcover.core.domain.model.Book, kotlin.Unit>): kotlin.Function1<nl.rhaydus.softcover.core.component.bookcard.BookCardEvent, kotlin.Unit>
+internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.rememberReadingCardEventHandler(alsoReading: nl.rhaydus.softcover.core.component.bookcard.BookCardSet<nl.rhaydus.softcover.core.domain.model.Book>, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction, kotlin.Unit>, onBookClick: kotlin.Function1<nl.rhaydus.softcover.core.domain.model.Book, kotlin.Unit>, onStartSession: kotlin.Function1<nl.rhaydus.softcover.core.domain.model.Book, kotlin.Unit>): kotlin.Function1<nl.rhaydus.softcover.core.component.bookcard.BookCardEvent, kotlin.Unit>
   skippable: true
   restartable: true
   params:
     - alsoReading: STABLE (marked @Stable or @Immutable)
     - runAction: STABLE (function type)
     - onBookClick: STABLE (function type)
+    - onStartSession: STABLE (function type)
+
+@Composable
+internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.rememberSessionStarter(books: kotlinx.collections.immutable.ImmutableList<nl.rhaydus.softcover.core.domain.model.Book>, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction, kotlin.Unit>): kotlin.Function1<nl.rhaydus.softcover.core.domain.model.Book, kotlin.Unit>
+  skippable: true
+  restartable: true
+  params:
+    - books: STABLE (known stable type)
+    - runAction: STABLE (function type)
 

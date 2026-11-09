@@ -41,66 +41,74 @@ internal fun BookCardTextBlock(
     isLoading: Boolean,
     modifier: Modifier = Modifier,
     progress: BookCardProgress? = null,
+    startSession: Boolean = false,
+    onStartSession: () -> Unit = {},
 ) {
     val typography = MaterialTheme.editorialTypography
     val eyebrow = content.eyebrow
     val byline = content.byline
 
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(Spacing.xxxs),
-    ) {
-        if (eyebrow != null) {
-            val eyebrowColor = when (eyebrow.tone) {
-                BookCardEyebrow.Tone.Accent -> MaterialTheme.colorScheme.primary
-                BookCardEyebrow.Tone.Error -> MaterialTheme.colorScheme.error
+    Column(modifier = modifier) {
+        Column(verticalArrangement = Arrangement.spacedBy(Spacing.xxxs)) {
+            if (eyebrow != null) {
+                val eyebrowColor = when (eyebrow.tone) {
+                    BookCardEyebrow.Tone.Accent -> MaterialTheme.colorScheme.primary
+                    BookCardEyebrow.Tone.Error -> MaterialTheme.colorScheme.error
+                }
+
+                SoftcoverText(
+                    text = eyebrow.text,
+                    isLoading = isLoading,
+                    standIn = eyebrow.text,
+                    style = typography.eyebrowSmall,
+                    color = eyebrowColor,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
             }
 
-            SoftcoverText(
-                text = eyebrow.text,
-                isLoading = isLoading,
-                standIn = eyebrow.text,
-                style = typography.eyebrowSmall,
-                color = eyebrowColor,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
-
-        TitleRow(
-            content = content,
-            titleStyle = titleStyle,
-            minLines = titleMinLines,
-            maxLines = titleMaxLines,
-            isLoading = isLoading,
-        )
-
-        if (byline != null) {
-            SoftcoverText(
-                text = byline,
-                isLoading = isLoading,
-                standIn = byline,
-                style = typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
-
-        content.supportingLines.forEach { line ->
-            SupportingLine(
-                line = line,
+            TitleRow(
+                content = content,
+                titleStyle = titleStyle,
+                minLines = titleMinLines,
+                maxLines = titleMaxLines,
                 isLoading = isLoading,
             )
+
+            if (byline != null) {
+                SoftcoverText(
+                    text = byline,
+                    isLoading = isLoading,
+                    standIn = byline,
+                    style = typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+
+            content.supportingLines.forEach { line ->
+                SupportingLine(
+                    line = line,
+                    isLoading = isLoading,
+                )
+            }
+
+            if (progress != null) {
+                BookCardProgressBar(
+                    progress = progress,
+                    isLoading = isLoading,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = Spacing.xxs),
+                )
+            }
         }
 
-        if (progress != null) {
-            BookCardProgressBar(
-                progress = progress,
-                isLoading = isLoading,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = Spacing.xxs),
+        if (isLoading.not()) {
+            StartSessionLink(
+                visible = startSession,
+                onClick = onStartSession,
             )
         }
     }

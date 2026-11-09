@@ -34,6 +34,7 @@ import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
+import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import org.junit.jupiter.api.Nested
@@ -50,7 +51,10 @@ class ReadingBookCardMapperTest {
         grayscale = false,
     )
 
-    private fun edition(authors: List<Author>): BookEdition = BookEdition(
+    private fun edition(
+        authors: List<Author>,
+        readingFormat: ReadingFormat? = null,
+    ): BookEdition = BookEdition(
         id = 50,
         canonicalId = null,
         bookId = 1,
@@ -65,6 +69,7 @@ class ReadingBookCardMapperTest {
         authors = authors,
         releaseYear = 2020,
         format = "Paperback",
+        readingFormat = readingFormat,
         owned = false,
     )
 
@@ -88,11 +93,17 @@ class ReadingBookCardMapperTest {
             ),
         ),
         userBookRead: UserBookRead? = null,
+        readingFormat: ReadingFormat? = null,
     ): Book = Book(
         id = id,
         title = title,
         editions = emptyList(),
-        defaultEdition = authors?.let { edition(authors = it) },
+        defaultEdition = authors?.let {
+            edition(
+                authors = it,
+                readingFormat = readingFormat,
+            )
+        },
         rating = 0.0,
         description = "",
         releaseYear = 2020,
@@ -114,11 +125,13 @@ class ReadingBookCardMapperTest {
         deadlineProgress: DeadlineProgress? = null,
         coverBadge: CoverOverlayUiModel? = null,
         mutationFailed: Boolean = false,
+        canStartSession: Boolean = false,
     ): BookCardUiModel = book.toAlsoReadingCard(
         deadlineProgress = deadlineProgress,
         coverBadge = coverBadge,
         dateStyle = DateStyle.DAY_MONTH_YEAR,
         mutationFailed = mutationFailed,
+        canStartSession = canStartSession,
     )
 
     private fun BookCardUiModel.row(): BookCardVariant.Row =
@@ -403,6 +416,66 @@ class ReadingBookCardMapperTest {
             val summary = card.row().deadline.shouldNotBeNull()
             summary.text.substringAfter(" • ") shouldBe "10 pages/day"
         }
+
+        @Test
+        fun `offers starting a session when one can start and the edition is not an audiobook`() {
+            // ----- Arrange -----
+            val book = book(readingFormat = ReadingFormat.Physical)
+
+            // ----- Act -----
+            val card = alsoReading(
+                book = book,
+                canStartSession = true,
+            )
+
+            // ----- Assert -----
+            card.row().startSession shouldBe true
+        }
+
+        @Test
+        fun `offers starting a session when the edition has no reading format`() {
+            // ----- Arrange -----
+            val book = book(readingFormat = null)
+
+            // ----- Act -----
+            val card = alsoReading(
+                book = book,
+                canStartSession = true,
+            )
+
+            // ----- Assert -----
+            card.row().startSession shouldBe true
+        }
+
+        @Test
+        fun `hides the start session segment when a session cannot start`() {
+            // ----- Arrange -----
+            val book = book(readingFormat = ReadingFormat.Physical)
+
+            // ----- Act -----
+            val card = alsoReading(
+                book = book,
+                canStartSession = false,
+            )
+
+            // ----- Assert -----
+            card.row().startSession shouldBe false
+        }
+
+        @Test
+        fun `hides the start session segment for an audiobook edition`() {
+            // ----- Arrange -----
+            val book = book(readingFormat = ReadingFormat.Audio)
+
+            // ----- Act -----
+            val card = alsoReading(
+                book = book,
+                canStartSession = true,
+            )
+
+            // ----- Assert -----
+            card.row().startSession shouldBe false
+        }
     }
 
     @Nested
@@ -437,6 +510,18 @@ class ReadingBookCardMapperTest {
             // ----- Assert -----
             progressValue(card = card).fraction shouldBe 0f
             progressValue(card = card).label shouldBe "0%"
+        }
+
+        @Test
+        fun `never offers starting a session`() {
+            // ----- Arrange -----
+            val book = book(readingFormat = ReadingFormat.Physical)
+
+            // ----- Act -----
+            val card = book.toOnHoldCard()
+
+            // ----- Assert -----
+            card.row().startSession shouldBe false
         }
     }
 

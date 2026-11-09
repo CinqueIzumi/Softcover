@@ -92,7 +92,7 @@ internal fun nl.rhaydus.softcover.core.component.bookcard.BookCardSeriesStack(fr
     - isLoading: STABLE (primitive type)
 
 @Composable
-internal fun nl.rhaydus.softcover.core.component.bookcard.BookCardTextBlock(content: nl.rhaydus.softcover.core.component.bookcard.BookCardContent, titleStyle: androidx.compose.ui.text.TextStyle, titleMinLines: kotlin.Int, titleMaxLines: kotlin.Int, isLoading: kotlin.Boolean, modifier: androidx.compose.ui.Modifier, progress: nl.rhaydus.softcover.core.component.bookcard.BookCardProgress?): kotlin.Unit
+internal fun nl.rhaydus.softcover.core.component.bookcard.BookCardTextBlock(content: nl.rhaydus.softcover.core.component.bookcard.BookCardContent, titleStyle: androidx.compose.ui.text.TextStyle, titleMinLines: kotlin.Int, titleMaxLines: kotlin.Int, isLoading: kotlin.Boolean, modifier: androidx.compose.ui.Modifier, progress: nl.rhaydus.softcover.core.component.bookcard.BookCardProgress?, startSession: kotlin.Boolean, onStartSession: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
@@ -103,15 +103,26 @@ internal fun nl.rhaydus.softcover.core.component.bookcard.BookCardTextBlock(cont
     - isLoading: STABLE (primitive type)
     - modifier: STABLE (marked @Stable or @Immutable)
     - progress: STABLE (marked @Stable or @Immutable)
+    - startSession: STABLE (primitive type)
+    - onStartSession: STABLE (function type)
 
 @Composable
-internal fun nl.rhaydus.softcover.core.component.bookcard.BookCardTrailingControl(trailing: nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing, isLoading: kotlin.Boolean, onClick: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+internal fun nl.rhaydus.softcover.core.component.bookcard.BookCardTrailingControl(trailing: nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing, key: nl.rhaydus.softcover.core.component.bookcard.BookCardKey, isLoading: kotlin.Boolean, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.bookcard.BookCardEvent, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - trailing: STABLE (marked @Stable or @Immutable)
+    - key: STABLE (marked @Stable or @Immutable)
     - isLoading: STABLE (primitive type)
-    - onClick: STABLE (function type)
+    - onEvent: STABLE (function type)
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.bookcard.IconLabel(icon: nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon, label: kotlin.String): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - icon: STABLE (class with no mutable properties)
+    - label: STABLE (String is immutable)
 
 @Composable
 private fun nl.rhaydus.softcover.core.component.bookcard.ProgressLabel(label: kotlin.String, isLoading: kotlin.Boolean): kotlin.Unit
@@ -134,13 +145,6 @@ private fun nl.rhaydus.softcover.core.component.bookcard.RatingLabel(label: kotl
     - isLoading: STABLE (primitive type)
 
 @Composable
-private fun nl.rhaydus.softcover.core.component.bookcard.RestoreLabel(label: kotlin.String): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-    - label: STABLE (String is immutable)
-
-@Composable
 private fun nl.rhaydus.softcover.core.component.bookcard.SeriesStackPlate(width: androidx.compose.ui.unit.Dp, shape: androidx.compose.ui.graphics.Shape, offset: androidx.compose.ui.unit.Dp, alpha: kotlin.Float, isLoading: kotlin.Boolean): kotlin.Unit
   skippable: true
   restartable: true
@@ -150,6 +154,14 @@ private fun nl.rhaydus.softcover.core.component.bookcard.SeriesStackPlate(width:
     - offset: STABLE (marked @Stable or @Immutable)
     - alpha: STABLE (primitive type)
     - isLoading: STABLE (primitive type)
+
+@Composable
+internal fun nl.rhaydus.softcover.core.component.bookcard.StartSessionLink(visible: kotlin.Boolean, onClick: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - visible: STABLE (primitive type)
+    - onClick: STABLE (function type)
 
 @Composable
 private fun nl.rhaydus.softcover.core.component.bookcard.SupportingLine(line: kotlinx.collections.immutable.ImmutableList<nl.rhaydus.softcover.core.component.bookcard.BookCardLinePart>, isLoading: kotlin.Boolean): kotlin.Unit

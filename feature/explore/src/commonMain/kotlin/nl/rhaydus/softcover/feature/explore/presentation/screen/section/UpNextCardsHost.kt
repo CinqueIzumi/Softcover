@@ -37,6 +37,7 @@ internal fun UpNextCardsHost(
             is BookCardEvent.LongClicked,
             is BookCardEvent.PressStarted,
             is BookCardEvent.TrailingClicked,
+            is BookCardEvent.StartSessionClicked,
             is BookCardEvent.ShakeEnded,
             -> Unit
         }

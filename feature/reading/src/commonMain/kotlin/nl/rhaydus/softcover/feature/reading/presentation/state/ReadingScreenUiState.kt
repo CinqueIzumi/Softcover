@@ -69,6 +69,10 @@ internal data class ReadingScreenUiState(
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
 
     val failedMutationBookIds: ImmutableSet<Int> = persistentSetOf(),
+
+    /** Whether a start-session control may show: session state has loaded and no session runs. */
+    val canStartSession: Boolean = false,
+
     val dismissedPlanTodayByBook: ImmutableMap<Int, String> = persistentMapOf(),
 
     /** `null` until the want-to-read shelf first loads; empty means it loaded with nothing on it. */

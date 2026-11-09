@@ -405,5 +405,35 @@ class BookCardModelsCollectorTest {
             lead.cover.badge shouldBe overlay
             job.cancel()
         }
+
+        @Test
+        fun `flipping canStartSession re-derives the rows`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val job = launch {
+                BookCardModelsCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            stateFlow.value = stateFlow.value.copy(
+                books = persistentListOf(
+                    book(1),
+                    book(2),
+                ),
+            )
+
+            val before = stateFlow.value.alsoReading.cards.card(2).row().startSession
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(canStartSession = true)
+
+            // ----- Assert -----
+            before shouldBe false
+
+            stateFlow.value.alsoReading.cards.card(2).row().startSession shouldBe true
+
+            job.cancel()
+        }
     }
 }

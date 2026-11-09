@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -18,7 +17,6 @@ import nl.rhaydus.designsystem.theme.Corners
 import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.notification.rememberNotificationPermissionRequester
 import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
 import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
@@ -36,16 +34,7 @@ internal fun FeaturedSessionButton(
     val appNavigator = koinInject<AppNavigator>()
     val active by controller.activeSession.collectAsStateWithLifecycle()
 
-    val currentOnStartSession by rememberUpdatedState(onStartSession)
-
     val isSessionActiveForBook = isLoading.not() && active?.book?.id == bookId
-
-    // The lock-screen surface is a plain notification, so it needs POST_NOTIFICATIONS (Android
-    // 13+). Ask at the natural moment — the first session start — then start regardless of the
-    // outcome, since the in-app peek bar and Focus Mode work without the permission.
-    val sessionPermissionRequester = rememberNotificationPermissionRequester(
-        onResult = { currentOnStartSession() },
-    )
 
     when {
         isSessionActiveForBook -> {
@@ -85,7 +74,7 @@ internal fun FeaturedSessionButton(
                 ),
                 onClick = {
                     if (isLoading.not()) {
-                        sessionPermissionRequester.request()
+                        onStartSession()
                     }
                 },
                 enabled = isLoading.not(),

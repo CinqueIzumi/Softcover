@@ -13,6 +13,8 @@ sealed interface BookCardEvent {
 
     data class TrailingClicked(override val key: BookCardKey) : BookCardEvent
 
+    data class StartSessionClicked(override val key: BookCardKey) : BookCardEvent
+
     data class MenuClicked(override val key: BookCardKey) : BookCardEvent
 
     data class ShakeEnded(override val key: BookCardKey) : BookCardEvent

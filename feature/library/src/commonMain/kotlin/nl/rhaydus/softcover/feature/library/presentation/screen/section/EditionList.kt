@@ -140,6 +140,7 @@ internal fun EditionList(
             is BookCardEvent.LongClicked,
             is BookCardEvent.TrailingClicked,
             is BookCardEvent.MenuClicked,
+            is BookCardEvent.StartSessionClicked,
             is BookCardEvent.ShakeEnded,
             -> Unit
         }
