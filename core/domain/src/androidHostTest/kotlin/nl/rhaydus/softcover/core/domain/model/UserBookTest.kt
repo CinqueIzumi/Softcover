@@ -47,9 +47,9 @@ class UserBookTest {
 
     private fun journal(
         event: JournalEventType,
-        updatedAt: String,
+        actionAt: String,
     ): ReadingJournal = ReadingJournal(
-        updatedAt = updatedAt,
+        actionAt = actionAt,
         event = event.eventName,
     )
 
@@ -438,7 +438,7 @@ class UserBookTest {
     inner class FinishDate {
         private val journalFinished = journal(
             event = JournalEventType.StatusFinished,
-            updatedAt = "2026-03-10T12:00:00.000000",
+            actionAt = "2026-03-10T12:00:00.000000",
         )
 
         @Test
@@ -511,6 +511,61 @@ class UserBookTest {
         }
 
         @Test
+        fun `a midnight offset journal on the finish day does not move the date`() {
+            // ----- Arrange -----
+            val userBook = buildUserBook(
+                journals = listOf(
+                    journal(
+                        event = JournalEventType.StatusFinished,
+                        actionAt = "2025-11-08T00:00:00+00:00",
+                    ),
+                ),
+                lastReadDate = "2025-11-08",
+                reads = listOf(read(
+                    id = 1,
+                    finishedAt = "2025-11-08",
+                ),),
+            )
+
+            // ----- Act -----
+            val result = userBook.finishDate
+
+            // ----- Assert -----
+            result shouldBe LocalDate(
+                2025,
+                11,
+                8,
+            )
+        }
+
+        @Test
+        fun `a reread finished journal beats an older finished read`() {
+            // ----- Arrange -----
+            val userBook = buildUserBook(
+                journals = listOf(
+                    journal(
+                        event = JournalEventType.StatusFinished,
+                        actionAt = "2026-02-14T00:00:00+00:00",
+                    ),
+                ),
+                reads = listOf(read(
+                    id = 1,
+                    finishedAt = "2025-11-08",
+                ),),
+            )
+
+            // ----- Act -----
+            val result = userBook.finishDate
+
+            // ----- Assert -----
+            result shouldBe LocalDate(
+                2026,
+                2,
+                14,
+            )
+        }
+
+        @Test
         fun `all sources missing returns null`() {
             // ----- Arrange -----
             val userBook = buildUserBook(journals = emptyList())
@@ -532,7 +587,7 @@ class UserBookTest {
                 journals = listOf(
                     journal(
                         event = JournalEventType.StatusFinished,
-                        updatedAt = "2026-07-01T22:30:00.000000",
+                        actionAt = "2026-07-01T22:30:00.000000",
                     ),
                 ),
             )
@@ -553,7 +608,7 @@ class UserBookTest {
                 journals = listOf(
                     journal(
                         event = JournalEventType.StatusFinished,
-                        updatedAt = "2026-07-01T05:00:00.000000",
+                        actionAt = "2026-07-01T05:00:00.000000",
                     ),
                 ),
             )
@@ -572,11 +627,11 @@ class UserBookTest {
                 journals = listOf(
                     journal(
                         event = JournalEventType.StatusFinished,
-                        updatedAt = "2026-07-01T10:00:00.123456",
+                        actionAt = "2026-07-01T10:00:00.123456",
                     ),
                     journal(
                         event = JournalEventType.StatusFinished,
-                        updatedAt = "2026-07-03T22:30:00.000000",
+                        actionAt = "2026-07-03T22:30:00.000000",
                     ),
                 ),
             )
@@ -595,7 +650,7 @@ class UserBookTest {
                 journals = listOf(
                     journal(
                         event = JournalEventType.StatusFinished,
-                        updatedAt = "2026-07-01T22:30:00.000000",
+                        actionAt = "2026-07-01T22:30:00.000000",
                     ),
                 ),
                 reads = listOf(
@@ -624,7 +679,7 @@ class UserBookTest {
                 journals = listOf(
                     journal(
                         event = JournalEventType.StatusFinished,
-                        updatedAt = "garbage",
+                        actionAt = "garbage",
                     ),
                 ),
             )
@@ -673,7 +728,7 @@ class UserBookTest {
                 journals = listOf(
                     journal(
                         event = JournalEventType.StatusDidNotFinish,
-                        updatedAt = "2026-07-01T22:30:00.000000",
+                        actionAt = "2026-07-01T22:30:00.000000",
                     ),
                 ),
             )

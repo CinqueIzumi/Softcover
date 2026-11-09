@@ -9,8 +9,12 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.util.TimeZone
 import kotlin.time.Instant
+import kotlinx.datetime.TimeZone as DateTimeZone
 
 class UtcJournalTimeTest {
+    private val saoPaulo = DateTimeZone.of("America/Sao_Paulo")
+    private val lisbon = DateTimeZone.of("Europe/Lisbon")
+
     private lateinit var originalZone: TimeZone
 
     @BeforeEach
@@ -35,7 +39,7 @@ class UtcJournalTimeTest {
             val result = instant.toUtcJournalTimestamp()
 
             // ----- Assert -----
-            result shouldBe "2026-07-01T10:05:00.000000"
+            result shouldBe "2026-07-01T10:05:00.000000+00:00"
         }
 
         @Test
@@ -47,7 +51,7 @@ class UtcJournalTimeTest {
             val result = instant.toUtcJournalTimestamp()
 
             // ----- Assert -----
-            result shouldBe "2026-07-01T10:05:03.000123"
+            result shouldBe "2026-07-01T10:05:03.000123+00:00"
         }
 
         @Test
@@ -60,7 +64,7 @@ class UtcJournalTimeTest {
             val result = instant.toUtcJournalTimestamp()
 
             // ----- Assert -----
-            result shouldBe "2026-07-01T22:30:00.000000"
+            result shouldBe "2026-07-01T22:30:00.000000+00:00"
         }
 
         @Test
@@ -72,7 +76,7 @@ class UtcJournalTimeTest {
             val timestamp = instant.toUtcJournalTimestamp()
 
             // ----- Assert -----
-            Instant.parse("${timestamp}Z") shouldBe instant
+            Instant.parse(timestamp) shouldBe instant
         }
 
         @Test
@@ -125,6 +129,105 @@ class UtcJournalTimeTest {
 
             // ----- Assert -----
             result.shouldNotBeNull().date.toString() shouldBe "2026-07-02"
+        }
+
+        @Test
+        fun `an offset timestamp as action_at is parsed`() {
+            // ----- Arrange -----
+            val value = "2025-11-08T10:00:00+00:00"
+
+            // ----- Act -----
+            val result = utcJournalTimeToLocalDateTime(value)
+
+            // ----- Assert -----
+            result.shouldNotBeNull().toString() shouldBe "2025-11-08T11:00"
+        }
+
+        @Test
+        fun `midnight UTC with an offset keeps its UTC date in a zone behind UTC`() {
+            // ----- Arrange -----
+            val value = "2026-09-03T00:00:00+00:00"
+
+            // ----- Act -----
+            val result = utcJournalTimeToLocalDateTime(
+                value,
+                saoPaulo,
+            )
+
+            // ----- Assert -----
+            result.shouldNotBeNull().toString() shouldBe "2026-09-03T00:00"
+        }
+
+        @Test
+        fun `midnight UTC with a microsecond fraction keeps its UTC date`() {
+            // ----- Arrange -----
+            val value = "2026-09-03T00:00:00.000000+00:00"
+
+            // ----- Act -----
+            val result = utcJournalTimeToLocalDateTime(
+                value,
+                saoPaulo,
+            )
+
+            // ----- Assert -----
+            result.shouldNotBeNull().date.toString() shouldBe "2026-09-03"
+        }
+
+        @Test
+        fun `a naive midnight timestamp keeps its UTC date`() {
+            // ----- Arrange -----
+            val value = "2026-09-03T00:00:00"
+
+            // ----- Act -----
+            val result = utcJournalTimeToLocalDateTime(
+                value,
+                saoPaulo,
+            )
+
+            // ----- Assert -----
+            result.shouldNotBeNull().date.toString() shouldBe "2026-09-03"
+        }
+
+        @Test
+        fun `a non-midnight UTC time still converts to the previous day behind UTC`() {
+            // ----- Arrange -----
+            val value = "2026-09-03T02:00:00+00:00"
+
+            // ----- Act -----
+            val result = utcJournalTimeToLocalDateTime(
+                value,
+                saoPaulo,
+            )
+
+            // ----- Assert -----
+            result.shouldNotBeNull().date.toString() shouldBe "2026-09-02"
+        }
+
+        @Test
+        fun `a local midnight stored as UTC evening converts to that local day`() {
+            // ----- Arrange -----
+            val value = "2026-10-23T23:00:00+00:00"
+
+            // ----- Act -----
+            val result = utcJournalTimeToLocalDateTime(
+                value,
+                lisbon,
+            )
+
+            // ----- Assert -----
+            result.shouldNotBeNull().date.toString() shouldBe "2026-10-24"
+        }
+
+        @Test
+        fun `a non-zero offset is converted to the instant it denotes`() {
+            // ----- Arrange -----
+            val value = "2026-07-01T23:30:00+02:00"
+
+            // ----- Act -----
+            val result = utcJournalTimeToLocalDateTime(value)
+
+            // ----- Assert -----
+            result.shouldNotBeNull().toString() shouldBe "2026-07-01T23:30"
         }
 
         @Test

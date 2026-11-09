@@ -1726,7 +1726,7 @@ class BooksRepositoryImplTest {
         fun `writes an optimistic Reading snapshot with a started journal and returns the remote book`() = runTest {
             // ----- Arrange -----
             val existingJournal = ReadingJournal(
-                updatedAt = "2026-01-01T10:00:00",
+                actionAt = "2026-01-01T10:00:00",
                 event = "some_existing_event",
             )
 
@@ -1790,7 +1790,7 @@ class BooksRepositoryImplTest {
             capturedJournals.size shouldBe 2
             capturedJournals[0] shouldBe existingJournal
             capturedJournals[1].event shouldBe "user_book_read_started"
-            capturedJournals[1].updatedAt.isNotEmpty() shouldBe true
+            capturedJournals[1].actionAt.isNotEmpty() shouldBe true
         }
 
         @Test
@@ -1973,7 +1973,7 @@ class BooksRepositoryImplTest {
     @Nested
     inner class StatusWrites {
         private val existingJournal = ReadingJournal(
-            updatedAt = "2026-01-01T10:00:00",
+            actionAt = "2026-01-01T10:00:00",
             event = "some_existing_event",
         )
 
@@ -4679,7 +4679,7 @@ class BooksRepositoryImplTest {
         fun `appends a progress_updated journal entry to the optimistic local cache write`() = runTest {
             // ----- Arrange -----
             val existingJournal = ReadingJournal(
-                updatedAt = "2026-01-01T10:00:00",
+                actionAt = "2026-01-01T10:00:00",
                 event = "user_book_read_started",
             )
 
@@ -4757,7 +4757,7 @@ class BooksRepositoryImplTest {
             capturedJournals.size shouldBe 2
             capturedJournals[0] shouldBe existingJournal
             capturedJournals[1].event shouldBe "progress_updated"
-            capturedJournals[1].updatedAt.isNotEmpty() shouldBe true
+            capturedJournals[1].actionAt.isNotEmpty() shouldBe true
         }
 
         @Test
@@ -5146,7 +5146,7 @@ class BooksRepositoryImplTest {
         fun `appends a user_book_read_finished journal entry to the optimistic local cache write`() = runTest {
             // ----- Arrange -----
             val existingJournal = ReadingJournal(
-                updatedAt = "2026-01-01T10:00:00",
+                actionAt = "2026-01-01T10:00:00",
                 event = "user_book_read_started",
             )
 
@@ -5220,7 +5220,7 @@ class BooksRepositoryImplTest {
             capturedJournals.size shouldBe 2
             capturedJournals[0] shouldBe existingJournal
             capturedJournals[1].event shouldBe "user_book_read_finished"
-            capturedJournals[1].updatedAt.isNotEmpty() shouldBe true
+            capturedJournals[1].actionAt.isNotEmpty() shouldBe true
             capturedUserBook.status shouldBe BookStatus.Read
         }
 
@@ -6652,7 +6652,7 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `an optimistic journal entry is stamped in naive UTC with microsecond precision`() = runTest {
+        fun `an optimistic journal entry is stamped in UTC with microsecond precision and an explicit offset`() = runTest {
             // ----- Arrange -----
             JavaTimeZone.setDefault(JavaTimeZone.getTimeZone("Pacific/Kiritimati"))
             val before = Clock.System.now()
@@ -6665,9 +6665,9 @@ class BooksRepositoryImplTest {
 
             // ----- Assert -----
             val after = Clock.System.now()
-            val stamped = journals.single().updatedAt
-            stamped.matches(Regex("""\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}""")) shouldBe true
-            val stampedInstant = Instant.parse("${stamped}Z")
+            val stamped = journals.single().actionAt
+            stamped.matches(Regex("""\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}\+00:00""")) shouldBe true
+            val stampedInstant = Instant.parse(stamped)
             (stampedInstant >= before - 1.seconds) shouldBe true
             (stampedInstant <= after + 1.seconds) shouldBe true
         }
@@ -6684,7 +6684,7 @@ class BooksRepositoryImplTest {
             )
 
             // ----- Assert -----
-            journals.single().updatedAt shouldBe "2026-07-21T19:00:00.000000"
+            journals.single().actionAt shouldBe "2026-07-21T19:00:00.000000+00:00"
         }
 
         @Test
@@ -6693,7 +6693,7 @@ class BooksRepositoryImplTest {
             JavaTimeZone.setDefault(JavaTimeZone.getTimeZone("Pacific/Pago_Pago"))
 
             val serverEntry = ReadingJournal(
-                updatedAt = "2026-07-21T20:59:59.999999",
+                actionAt = "2026-07-21T20:59:59.999999+00:00",
                 event = JournalEventType.StatusFinished.eventName,
             )
 
@@ -6704,8 +6704,8 @@ class BooksRepositoryImplTest {
             )
 
             // ----- Assert -----
-            journals.sortedByDescending { it.updatedAt }.first() shouldBe journals.last()
-            journals.last().updatedAt shouldBe "2026-07-21T21:00:00.000000"
+            journals.sortedByDescending { it.actionAt }.first() shouldBe journals.last()
+            journals.last().actionAt shouldBe "2026-07-21T21:00:00.000000+00:00"
         }
 
         @Test
@@ -6714,7 +6714,7 @@ class BooksRepositoryImplTest {
             JavaTimeZone.setDefault(JavaTimeZone.getTimeZone("Pacific/Kiritimati"))
 
             val serverEntry = ReadingJournal(
-                updatedAt = "2026-07-21T21:00:00.500000",
+                actionAt = "2026-07-21T21:00:00.500000+00:00",
                 event = JournalEventType.StatusFinished.eventName,
             )
 
@@ -6725,7 +6725,7 @@ class BooksRepositoryImplTest {
             )
 
             // ----- Assert -----
-            journals.sortedByDescending { it.updatedAt }.first() shouldBe serverEntry
+            journals.sortedByDescending { it.actionAt }.first() shouldBe serverEntry
         }
     }
 

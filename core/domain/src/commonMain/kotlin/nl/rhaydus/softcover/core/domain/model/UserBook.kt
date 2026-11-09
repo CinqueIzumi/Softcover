@@ -53,8 +53,8 @@ data class UserBook(
         get() {
             val journalDate = journals
                 .filter { it.event == JournalEventType.StatusFinished.eventName }
-                .maxByOrNull { it.updatedAt }
-                ?.let { utcJournalTimeToLocalDate(it.updatedAt) }
+                .maxByOrNull { it.actionAt }
+                ?.let { utcJournalTimeToLocalDate(it.actionAt) }
 
             return listOfNotNull(
                 newestFinishedRead()?.finishedAt?.toLocalDateOrNull(),
@@ -64,7 +64,7 @@ data class UserBook(
         }
 
     fun getDnfDateString(style: DateStyle): String? {
-        return getUpdatedDateForEventType(
+        return getActionDateForEventType(
             type = JournalEventType.StatusDidNotFinish,
             style = style,
         )
@@ -78,16 +78,16 @@ data class UserBook(
         return style.formatter.format(date)
     }
 
-    private fun getUpdatedDateForEventType(
+    private fun getActionDateForEventType(
         type: JournalEventType,
         style: DateStyle,
     ): String? {
-        val mostRecentUpdatedDate = journals
-            .sortedByDescending { it.updatedAt }
+        val mostRecentActionDate = journals
+            .sortedByDescending { it.actionAt }
             .firstOrNull { it.event == type.eventName }
-            ?.updatedAt ?: return null
+            ?.actionAt ?: return null
 
-        val date = utcJournalTimeToLocalDate(mostRecentUpdatedDate) ?: return null
+        val date = utcJournalTimeToLocalDate(mostRecentActionDate) ?: return null
 
         return style.formatter.format(date)
     }

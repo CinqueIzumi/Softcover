@@ -7,12 +7,12 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.char
-import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
 import nl.rhaydus.softcover.GetReadUserBooksForStatsQuery
 import nl.rhaydus.softcover.GetReadingActivityDaysQuery
 import nl.rhaydus.softcover.GetUserProfileDataQuery
 import nl.rhaydus.softcover.core.domain.model.Gender
+import nl.rhaydus.softcover.core.domain.util.utcJournalTimeToLocalDate
 import nl.rhaydus.softcover.core.network.helper.fetchAllPages
 import nl.rhaydus.softcover.core.network.helper.safeQuery
 import nl.rhaydus.softcover.core.profile.data.mapper.toAuthorDemographics
@@ -31,7 +31,6 @@ import nl.rhaydus.softcover.core.profile.domain.model.LovedBook
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileSnapshot
 import kotlin.time.Clock
-import kotlin.time.Instant
 
 interface ProfileRemoteDataSource {
     suspend fun getUserProfileSnapshot(): UserProfileSnapshot
@@ -103,10 +102,20 @@ internal class ProfileRemoteDataSourceImpl(
     private fun GetReadUserBooksForStatsQuery.Data.Me.User_book.toStatsBook(): StatsBook {
         val journalFinishDate = user_book_read_finished_journal
             .firstOrNull()
-            ?.updated_at
-            ?.let(::parseDateOrNull)
+            ?.action_at
+            ?.let {
+                utcJournalTimeToLocalDate(
+                    it,
+                    timeZone,
+                )
+            }
 
-        val finishDate = last_read_date?.let(::parseDateOrNull) ?: journalFinishDate
+        val finishDate = last_read_date?.let {
+            utcJournalTimeToLocalDate(
+                value = it,
+                timeZone = timeZone,
+            )
+        } ?: journalFinishDate
 
         return StatsBook(
             rating = rating,
@@ -168,7 +177,10 @@ internal class ProfileRemoteDataSourceImpl(
             val rawCount = data.reading_journals.size
 
             data.reading_journals.forEach { row ->
-                parseDateOrNull(row.action_at)?.let { emit(it) }
+                utcJournalTimeToLocalDate(
+                    row.action_at,
+                    timeZone,
+                )?.let { emit(it) }
             }
 
             offset += rawCount
@@ -178,19 +190,6 @@ internal class ProfileRemoteDataSourceImpl(
             if (rawCount == 0) break
         }
     }
-
-    // The live API serves dates as either a bare date ("2026-05-04") or a full ISO timestamp
-    // ("2026-05-04T06:20:37.939189+00:00"). A bare date is already a calendar day, so it passes
-    // through unchanged; only timestamps carry a time-of-day that needs a zone. Bucket those into
-    // the user's local timezone so a day matches the calendar day the user actually acted on -
-    // counting in UTC can push a late-evening event onto the next UTC day.
-    private fun parseDateOrNull(value: String): LocalDate? = runCatching {
-        if (value.contains('T')) {
-            Instant.parse(value).toLocalDateTime(timeZone).date
-        } else {
-            LocalDate.parse(value)
-        }
-    }.getOrNull()
 
     private companion object {
         // Matches the server's response cap; advancing offset by the page's actual row count
