@@ -33,6 +33,8 @@ import nl.rhaydus.softcover.fragment.UserBookFragment.Status_stopped_journal.Com
 import nl.rhaydus.softcover.fragment.UserBookFragment.User_book_read_finished_journal.Companion.readingJournalFragment as userBookReadFinishedJournalFragment
 import nl.rhaydus.softcover.fragment.UserBookFragment.User_book_read_started_journal.Companion.readingJournalFragment as userBookReadStartedJournalFragment
 
+private const val FINISHED_PROGRESS = 100f
+
 private val WhitespaceRun = Regex("\\s+")
 
 /** Hardcover stores some names with runs of spaces; the app shows them single-spaced. */
@@ -90,7 +92,7 @@ internal fun EditionDetailFragment.toBookEdition(): BookEdition {
 }
 
 internal fun ReadingJournalFragment.toReadingJournal(): ReadingJournal = ReadingJournal(
-    updatedAt = updated_at,
+    actionAt = action_at,
     event = event,
 )
 
@@ -135,7 +137,7 @@ private fun UserBookFragment.toUserBook(): UserBook {
 private fun UserBookReadFragment.toUserBookRead(): UserBookRead = UserBookRead(
     currentPage = progress_pages,
     currentSeconds = progress_seconds,
-    progress = progress?.toFloat() ?: 0f,
+    progress = progress?.toFloat() ?: if (finished_at != null) FINISHED_PROGRESS else 0f,
     id = id,
     startedAt = started_at,
     finishedAt = finished_at,

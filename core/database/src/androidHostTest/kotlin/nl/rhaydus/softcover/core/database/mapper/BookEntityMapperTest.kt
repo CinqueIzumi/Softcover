@@ -264,12 +264,12 @@ class BookEntityMapperTest {
     }
 
     private fun stubReadingJournal(
-        updatedAt: String = "2024-06-01T12:00:00",
+        actionAt: String = "2024-06-01T12:00:00+00:00",
         event: String? = "status:1",
     ): ReadingJournal = mockk {
         every {
-            this@mockk.updatedAt
-        } returns updatedAt
+            this@mockk.actionAt
+        } returns actionAt
 
         every {
             this@mockk.event
@@ -507,11 +507,11 @@ class BookEntityMapperTest {
     private fun stubReadingJournalEntity(
         userBookId: Int = 3,
         event: String = "status:1",
-        updatedAt: String = "2024-06-01T12:00:00",
+        actionAt: String = "2024-06-01T12:00:00+00:00",
     ): ReadingJournalEntity = ReadingJournalEntity(
         userBookId = userBookId,
         event = event,
-        updatedAt = updatedAt,
+        actionAt = actionAt,
     )
 
     private fun stubUserBookWithJournals(
@@ -751,7 +751,7 @@ class BookEntityMapperTest {
         fun `maps updatedAt and non-null event from ReadingJournal to ReadingJournalEntity`() {
             // ----- Arrange -----
             val journal = stubReadingJournal(
-                updatedAt = "2024-06-01T12:00:00",
+                actionAt = "2024-06-01T12:00:00+00:00",
                 event = "status:3",
             )
 
@@ -759,7 +759,7 @@ class BookEntityMapperTest {
             val result = journal.toEntity(userBookId = 3)
 
             // ----- Assert -----
-            result.updatedAt shouldBe "2024-06-01T12:00:00"
+            result.actionAt shouldBe "2024-06-01T12:00:00+00:00"
             result.event shouldBe "status:3"
             result.userBookId shouldBe 3
         }
@@ -1114,7 +1114,7 @@ class BookEntityMapperTest {
         fun `maps all fields and resolves BookStatus from statusCode`() {
             // ----- Arrange -----
             val journalModel = ReadingJournal(
-                updatedAt = "2024-06-01T12:00:00",
+                actionAt = "2024-06-01T12:00:00+00:00",
                 event = "status:3",
             )
 
@@ -1225,10 +1225,10 @@ class BookEntityMapperTest {
     @Nested
     inner class ReadingJournalEntityToModel {
         @Test
-        fun `maps updatedAt and event from ReadingJournalEntity to ReadingJournal`() {
+        fun `maps actionAt and event from ReadingJournalEntity to ReadingJournal`() {
             // ----- Arrange -----
             val entity = stubReadingJournalEntity(
-                updatedAt = "2024-06-01T12:00:00",
+                actionAt = "2024-06-01T12:00:00+00:00",
                 event = "status:3",
             )
 
@@ -1236,7 +1236,7 @@ class BookEntityMapperTest {
             val result = entity.toModel()
 
             // ----- Assert -----
-            result.updatedAt shouldBe "2024-06-01T12:00:00"
+            result.actionAt shouldBe "2024-06-01T12:00:00+00:00"
             result.event shouldBe "status:3"
         }
     }
@@ -1431,7 +1431,7 @@ class BookEntityMapperTest {
             // ----- Arrange -----
             val journalEntity = stubReadingJournalEntity(
                 event = "status:3",
-                updatedAt = "2024-06-01T12:00:00",
+                actionAt = "2024-06-01T12:00:00+00:00",
             )
 
             val withJournals = stubUserBookWithJournals(journals = listOf(journalEntity))

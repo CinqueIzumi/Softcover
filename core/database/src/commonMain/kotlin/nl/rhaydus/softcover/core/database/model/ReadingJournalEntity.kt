@@ -11,5 +11,5 @@ data class ReadingJournalEntity(
     val localId: Long = 0,
     val userBookId: Int,
     val event: String,
-    val updatedAt: String,
+    val actionAt: String,
 )

@@ -63,6 +63,19 @@ class RoomOpenSurvivesUpgradeTest {
         }
     }
 
+    private fun readJournalRows(file: File): List<List<String?>> {
+        var rows: List<List<String?>> = emptyList()
+
+        withConnection(file) { connection ->
+            rows = connection.snapshot(
+                "reading_journals",
+                listOf("userBookId", "event", "updatedAt"),
+            )
+        }
+
+        return rows
+    }
+
     private fun snapshotsOf(
         file: File,
         schema: ExportedSchema,
@@ -213,6 +226,30 @@ class RoomOpenSurvivesUpgradeTest {
                     listOf("id", "userBookId", "currentPage"),
                 ) shouldContainExactly
                     listOf(listOf("1", "1", "1"), listOf("2", "1", "80"))
+            }
+        }
+
+        @Test
+        fun `a reading journal keeps its timestamp under the renamed actionAt column`() {
+            // ----- Arrange -----
+            val file = databaseFile()
+
+            writeOldDatabase(
+                file,
+                schema52,
+            )
+
+            val before = readJournalRows(file)
+
+            // ----- Act -----
+            openThroughProductionBuilder(file)
+
+            // ----- Assert -----
+            withConnection(file) { connection ->
+                connection.snapshot(
+                    "reading_journals",
+                    listOf("userBookId", "event", "actionAt"),
+                ) shouldBe before
             }
         }
 

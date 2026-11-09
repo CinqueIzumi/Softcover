@@ -14,6 +14,7 @@ internal fun rememberReadingCardEventHandler(
     alsoReading: BookCardSet<Book>,
     runAction: (ReadingAction) -> Unit,
     onBookClick: (Book) -> Unit,
+    onStartSession: (Book) -> Unit,
 ): (BookCardEvent) -> Unit = rememberPrefetchingBookCardEventHandler(
     set = alsoReading,
 ) { event, book ->
@@ -23,6 +24,8 @@ internal fun rememberReadingCardEventHandler(
         is BookCardEvent.TrailingClicked -> runAction(OnShowProgressSheetClickAction(book = book))
 
         is BookCardEvent.ShakeEnded -> runAction(OnClearMutationFailureAction(bookId = book.id))
+
+        is BookCardEvent.StartSessionClicked -> onStartSession(book)
 
         is BookCardEvent.LongClicked,
         is BookCardEvent.PressStarted,
@@ -48,6 +51,7 @@ internal fun rememberOnHoldCardEventHandler(
         is BookCardEvent.LongClicked,
         is BookCardEvent.PressStarted,
         is BookCardEvent.MenuClicked,
+        is BookCardEvent.StartSessionClicked,
         -> Unit
     }
 }

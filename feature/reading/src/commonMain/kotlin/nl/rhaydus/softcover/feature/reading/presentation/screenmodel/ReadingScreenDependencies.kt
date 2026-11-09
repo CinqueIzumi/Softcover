@@ -22,6 +22,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLastUsedProgressU
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnabledAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObservePlanTodayDismissalsUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLastUsedProgressUnitUseCase
+import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveRecentReadingActivityUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshReadingActivityUseCase
 import nl.rhaydus.toad.ActionDependencies
@@ -49,6 +50,7 @@ internal data class ReadingScreenDependencies(
     val setLastUsedProgressUnitUseCase: SetLastUsedProgressUnitUseCase,
     val observeReadingJournalHistoryUseCase: ObserveReadingJournalHistoryUseCase,
     val refreshReadingJournalHistoryUseCase: RefreshReadingJournalHistoryUseCase,
+    val activeSessionController: ActiveSessionController,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,
 ) : ActionDependencies()

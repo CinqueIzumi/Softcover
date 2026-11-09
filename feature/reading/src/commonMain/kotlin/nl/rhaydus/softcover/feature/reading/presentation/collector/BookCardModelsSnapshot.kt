@@ -14,4 +14,5 @@ internal data class BookCardModelsSnapshot(
     val deadlineCoverOverlays: Map<Int, CoverOverlayUiModel>,
     val dateStyle: DateStyle,
     val failedMutationBookIds: Set<Int>,
+    val canStartSession: Boolean,
 )

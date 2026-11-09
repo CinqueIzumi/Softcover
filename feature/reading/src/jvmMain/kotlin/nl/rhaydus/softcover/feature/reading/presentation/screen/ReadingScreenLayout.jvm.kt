@@ -40,6 +40,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.screen.section.OnHoldSe
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingFeaturedSection
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingOverlays
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.rememberReadingCardEventHandler
+import nl.rhaydus.softcover.feature.reading.presentation.screen.section.rememberSessionStarter
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 
 private val readingScrollState = ScrollState(initial = 0)
@@ -140,10 +141,16 @@ private fun DesktopReadingContent(
     controller: MarkAsReadController,
     modifier: Modifier = Modifier,
 ) {
+    val onStartSession = rememberSessionStarter(
+        books = state.books,
+        runAction = runAction,
+    )
+
     val onCardEvent = rememberReadingCardEventHandler(
         alsoReading = state.visibleAlsoReading,
         runAction = runAction,
         onBookClick = onBookClick,
+        onStartSession = onStartSession,
     )
 
     val isShowingStandIns = state.visibleAlsoReading.cards.any(BookCardUiModel::isLoading)
@@ -167,6 +174,7 @@ private fun DesktopReadingContent(
                 state = state,
                 runAction = runAction,
                 onBookClick = onBookClick,
+                onStartSession = onStartSession,
                 controller = controller,
             )
 

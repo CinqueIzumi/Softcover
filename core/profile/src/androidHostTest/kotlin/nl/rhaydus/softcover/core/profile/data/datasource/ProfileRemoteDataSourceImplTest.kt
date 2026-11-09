@@ -223,7 +223,7 @@ class ProfileRemoteDataSourceImplTest {
                 GetReadUserBooksForStatsQuery.Data.Me.User_book.User_book_read_finished_journal(
                     __typename = "reading_journals",
                     event = "user_book_read_finished",
-                    updated_at = it,
+                    action_at = it,
                 ),
             )
         }.orEmpty()
@@ -597,7 +597,7 @@ class ProfileRemoteDataSourceImplTest {
         }
 
         @Test
-        fun `falls back to the finished journal's updated_at when last_read_date is null`() = runTest {
+        fun `falls back to the finished journal's action_at when last_read_date is null`() = runTest {
             // ----- Arrange -----
             mockProfileQuery(me())
 
@@ -621,6 +621,62 @@ class ProfileRemoteDataSourceImplTest {
                     count = if (year == 2026) 1 else 0,
                 )
             }
+        }
+
+        @Test
+        fun `a finished journal at midnight UTC keeps its UTC date instead of shifting back a zone`() = runTest {
+            // ----- Arrange -----
+            mockProfileQuery(me())
+
+            coEvery {
+                apolloClient.safeQuery(query = ofType<GetReadUserBooksForStatsQuery>())
+            } returns statsPage(
+                statsUserBook(
+                    lastReadDate = null,
+                    finishedJournalUpdatedAt = "2026-09-01T00:00:00+00:00",
+                    bookPages = 100,
+                ),
+            )
+
+            val saoPauloDataSource = ProfileRemoteDataSourceImpl(
+                apolloClient = apolloClient,
+                clock = fixedClock,
+                timeZone = TimeZone.of("America/Sao_Paulo"),
+            )
+
+            // ----- Act -----
+            val result = saoPauloDataSource.getUserProfileSnapshot()
+
+            // ----- Assert -----
+            result.pagesByMonth.single { it.count > 0 }.month shouldBe 9
+        }
+
+        @Test
+        fun `a finished journal at a non-midnight UTC time converts to the local date`() = runTest {
+            // ----- Arrange -----
+            mockProfileQuery(me())
+
+            coEvery {
+                apolloClient.safeQuery(query = ofType<GetReadUserBooksForStatsQuery>())
+            } returns statsPage(
+                statsUserBook(
+                    lastReadDate = null,
+                    finishedJournalUpdatedAt = "2026-09-01T02:00:00+00:00",
+                    bookPages = 100,
+                ),
+            )
+
+            val saoPauloDataSource = ProfileRemoteDataSourceImpl(
+                apolloClient = apolloClient,
+                clock = fixedClock,
+                timeZone = TimeZone.of("America/Sao_Paulo"),
+            )
+
+            // ----- Act -----
+            val result = saoPauloDataSource.getUserProfileSnapshot()
+
+            // ----- Assert -----
+            result.pagesByMonth.single { it.count > 0 }.month shouldBe 8
         }
 
         @Test
@@ -1101,6 +1157,43 @@ class ProfileRemoteDataSourceImplTest {
                     ),
                 )
             }
+        }
+
+        @Test
+        fun `keeps the UTC date for midnight UTC and converts other times in the local zone`() = runTest {
+            // ----- Arrange -----
+            val saoPauloDataSource = ProfileRemoteDataSourceImpl(
+                apolloClient = apolloClient,
+                clock = fixedClock,
+                timeZone = TimeZone.of("America/Sao_Paulo"),
+            )
+
+            coEvery {
+                apolloClient.safeQuery(query = any<GetReadingActivityDaysQuery>())
+            } returnsMany listOf(
+                readingActivityPage(
+                    "2026-09-03T00:00:00+00:00",
+                    "2026-09-03T02:00:00+00:00",
+                ),
+                readingActivityPage(),
+            )
+
+            // ----- Act -----
+            val result = saoPauloDataSource.streamReadingDaysDescending(userId = 42).toList()
+
+            // ----- Assert -----
+            result shouldBe listOf(
+                LocalDate(
+                    2026,
+                    9,
+                    3,
+                ),
+                LocalDate(
+                    2026,
+                    9,
+                    2,
+                ),
+            )
         }
 
         @Test

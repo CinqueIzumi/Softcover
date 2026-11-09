@@ -30,6 +30,7 @@ internal fun Book.toAlsoReadingCard(
     coverBadge: CoverOverlayUiModel?,
     dateStyle: DateStyle,
     mutationFailed: Boolean,
+    canStartSession: Boolean,
 ): BookCardUiModel {
     val progress = currentRead?.progress ?: 0f
 
@@ -71,6 +72,7 @@ internal fun Book.toAlsoReadingCard(
             ),
             contentHorizontalInset = Spacing.gutter,
             contentVerticalInset = Spacing.md,
+            startSession = canStartSession && currentEdition?.isAudiobook != true,
         ),
         decorations = BookCardDecorations(
             progress = BookCardProgress.Value(
@@ -88,6 +90,7 @@ internal fun Book.toOnHoldCard(): BookCardUiModel = toAlsoReadingCard(
     coverBadge = null,
     dateStyle = DateStyle.DAY_MONTH_YEAR,
     mutationFailed = false,
+    canStartSession = false,
 )
 
 /** A "Pick up next" tile: cover and title only, no progress. */

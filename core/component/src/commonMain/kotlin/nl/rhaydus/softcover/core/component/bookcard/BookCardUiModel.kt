@@ -218,6 +218,29 @@ data class BookCardUiModel(
                     shakeOnError = true,
                 ),
             ),
+            "Row Standard, long title, deadline, SetProgress with start" to BookCardUiModel(
+                key = BookCardKey.Book(bookId = 70),
+                variant = BookCardVariant.Row(
+                    size = BookCardVariant.Row.Size.Standard,
+                    lead = BookCardLead.Cover(cover = bookCover(title = "The Long Way to a Small, Angry Planet")),
+                    text = BookCardContent(
+                        title = "The Long Way to a Small, Angry Planet",
+                        byline = "By Becky Chambers",
+                    ),
+                    trailing = BookCardTrailing.SetProgress.labelled(),
+                    startSession = true,
+                    deadline = DeadlineSummaryUiModel(
+                        text = "28 Aug • 18 pages/day",
+                    ),
+                ),
+                decorations = BookCardDecorations(
+                    progress = BookCardProgress.Value(
+                        fraction = 0.3f,
+                        label = "30%",
+                    ),
+                    shakeOnError = true,
+                ),
+            ),
             "Row Large, cover badge, Badge" to BookCardUiModel(
                 key = BookCardKey.Book(bookId = 8),
                 variant = BookCardVariant.Row(

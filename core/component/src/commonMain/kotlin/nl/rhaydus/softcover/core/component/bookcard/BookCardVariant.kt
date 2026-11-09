@@ -21,7 +21,11 @@ sealed interface BookCardVariant {
         val hasMenu: Boolean = false,
     ) : BookCardVariant
 
-    /** @property lead `null` is a coverless row. */
+    /**
+     * @property lead `null` is a coverless row.
+     * @property startSession Shows a "Start session" link under the progress bar that emits
+     * [BookCardEvent.StartSessionClicked]; toggling it animates the row's height.
+     */
     data class Row(
         val size: Size,
         val lead: BookCardLead?,
@@ -30,6 +34,7 @@ sealed interface BookCardVariant {
         val deadline: DeadlineSummaryUiModel? = null,
         val contentHorizontalInset: Dp = 0.dp,
         val contentVerticalInset: Dp = Spacing.sm,
+        val startSession: Boolean = false,
     ) : BookCardVariant {
         /** Sets the lead's width (40, 56 or 74dp) and the title's type and line count. */
         enum class Size {

@@ -129,8 +129,8 @@ class LibraryStatsTest {
         )
     }
 
-    private fun buildFinishedJournal(updatedAt: String) = ReadingJournal(
-        updatedAt = updatedAt,
+    private fun buildFinishedJournal(actionAt: String) = ReadingJournal(
+        actionAt = actionAt,
         event = JournalEventType.StatusFinished.eventName,
     )
     // endregion
@@ -244,11 +244,11 @@ class LibraryStatsTest {
         }
 
         @Test
-        fun `returns null for malformed updatedAt date`() {
+        fun `returns null for malformed actionAt date`() {
             // ----- Arrange -----
             val journals = listOf(
                 ReadingJournal(
-                    updatedAt = "not-a-date",
+                    actionAt = "not-a-date",
                     event = JournalEventType.StatusFinished.eventName,
                 ),
             )

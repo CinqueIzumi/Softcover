@@ -34,7 +34,7 @@ rules all components follow are in [component-contract.md](component-contract.md
 
 - **Cover** — `cover` — the only book-cover renderer; falls back to a coverless title jacket, never blank.
 - **CoverOverlay** — `badge` — pins a `Badge` to a cover's corner, optionally greying the cover.
-- **BookCard** — `bookcard` — the one book or series card: cover-only, column or row.
+- **BookCard** — `bookcard` — the one book or series card: cover-only, column or row, with a trailing badge, restore label, bookmark or progress pill; a row can show a "Start session" link under its progress bar.
 - **QuoteCard** — `quote` — one saved quote in the editorial quote pattern, with a Delete menu.
 - **MoodTile** — `mood` — a mood's title and book count on one of four inks.
 
