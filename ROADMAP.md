@@ -13,6 +13,16 @@ A few honest caveats:
 
 ---
 
+## 3.2.4: One more chapter
+
+You can now start a reading session for any book you're reading, not just the one on top.
+
+- Books on the Also reading shelf have a Start session link on the Reading screen.
+- The Verdict sheet keeps an unsaved rating and review when you close it by accident.
+- The Library footer count animates to its new number when your shelf changes.
+- Books imported into Hardcover show the date you finished them instead of the import date, and finished reads no longer show 0%.
+- An offline change that Hardcover rejects is set aside instead of being retried forever.
+
 ## 3.3.0: The reading record
 
 Everything you might want to record about a book, and every statistic that comes out of it. What you keep private never leaves your device.
