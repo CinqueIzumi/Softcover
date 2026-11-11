@@ -7,7 +7,7 @@ import io.mockk.coVerifyOrder
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.book.domain.usecase.HasSyncedReadBooksThisSessionUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.HasSyncedStatusesThisSessionUseCase
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.domain.model.RefreshScope
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
@@ -26,7 +26,7 @@ class RefreshUserProfileStatsUseCaseTest {
     // check-fetch-mark logic is what lets the GateBehavior tests below observe it actually
     // skipping or retrying the network fetch across successive useCase() calls.
     private lateinit var statsRefreshGate: ProfileRefreshGate
-    private lateinit var hasSyncedReadBooksThisSessionUseCase: HasSyncedReadBooksThisSessionUseCase
+    private lateinit var hasSyncedStatusesThisSessionUseCase: HasSyncedStatusesThisSessionUseCase
     private lateinit var refreshLibraryUseCase: RefreshLibraryUseCase
     private lateinit var refreshAllQuotesUseCase: RefreshAllQuotesUseCase
     private lateinit var useCase: RefreshUserProfileStatsUseCase
@@ -35,7 +35,7 @@ class RefreshUserProfileStatsUseCaseTest {
     fun setUp() {
         profileRepository = mockk()
         statsRefreshGate = ProfileRefreshGate()
-        hasSyncedReadBooksThisSessionUseCase = mockk()
+        hasSyncedStatusesThisSessionUseCase = mockk()
         refreshLibraryUseCase = mockk()
         refreshAllQuotesUseCase = mockk()
 
@@ -44,17 +44,22 @@ class RefreshUserProfileStatsUseCaseTest {
         } returns Result.success(Unit)
 
         every {
-            hasSyncedReadBooksThisSessionUseCase()
+            hasSyncedStatusesThisSessionUseCase(statuses = profileStatuses)
         } returns true
 
         useCase = RefreshUserProfileStatsUseCase(
             profileRepository = profileRepository,
             statsRefreshGate = statsRefreshGate,
             refreshLibraryUseCase = refreshLibraryUseCase,
-            hasSyncedReadBooksThisSessionUseCase = hasSyncedReadBooksThisSessionUseCase,
+            hasSyncedStatusesThisSessionUseCase = hasSyncedStatusesThisSessionUseCase,
             refreshAllQuotesUseCase = refreshAllQuotesUseCase,
         )
     }
+
+    private val profileStatuses = setOf(
+        UserBookStatus.READ,
+        UserBookStatus.DID_NOT_FINISH,
+    )
 
     private fun snapshot(): UserProfileSnapshot = UserProfileSnapshot(
         profileImageUrl = "https://example.com/avatar.png",
@@ -107,7 +112,7 @@ class RefreshUserProfileStatsUseCaseTest {
 
     @Nested
     inner class ReadBooksRefresh {
-        private val readScope = RefreshScope.ByStatuses(setOf(UserBookStatus.READ))
+        private val profileScope = RefreshScope.ByStatuses(profileStatuses)
 
         private fun arrangeSuccessfulIdentity() {
             coEvery {
@@ -120,16 +125,16 @@ class RefreshUserProfileStatsUseCaseTest {
         }
 
         @Test
-        fun `refreshes the Read books after caching the identity when this session has not synced them`() = runTest {
+        fun `refreshes the Read and Did not finish books after caching the identity when this session has not synced them`() = runTest {
             // ----- Arrange -----
             arrangeSuccessfulIdentity()
 
             every {
-                hasSyncedReadBooksThisSessionUseCase()
+                hasSyncedStatusesThisSessionUseCase(statuses = profileStatuses)
             } returns false
 
             coEvery {
-                refreshLibraryUseCase(scope = readScope)
+                refreshLibraryUseCase(scope = profileScope)
             } returns Result.success(Unit)
 
             // ----- Act -----
@@ -140,17 +145,17 @@ class RefreshUserProfileStatsUseCaseTest {
 
             coVerifyOrder {
                 profileRepository.cacheUserProfileIdentity(snapshot = any())
-                refreshLibraryUseCase(scope = readScope)
+                refreshLibraryUseCase(scope = profileScope)
             }
         }
 
         @Test
-        fun `skips the Read books refresh when this session has already synced them`() = runTest {
+        fun `skips the Read and Did not finish books refresh when this session has already synced them`() = runTest {
             // ----- Arrange -----
             arrangeSuccessfulIdentity()
 
             every {
-                hasSyncedReadBooksThisSessionUseCase()
+                hasSyncedStatusesThisSessionUseCase(statuses = profileStatuses)
             } returns true
 
             // ----- Act -----
@@ -162,17 +167,17 @@ class RefreshUserProfileStatsUseCaseTest {
         }
 
         @Test
-        fun `returns the failure when the Read books refresh fails`() = runTest {
+        fun `returns the failure when the Read and Did not finish books refresh fails`() = runTest {
             // ----- Arrange -----
             val exception = RuntimeException("library refresh failed")
             arrangeSuccessfulIdentity()
 
             every {
-                hasSyncedReadBooksThisSessionUseCase()
+                hasSyncedStatusesThisSessionUseCase(statuses = profileStatuses)
             } returns false
 
             coEvery {
-                refreshLibraryUseCase(scope = readScope)
+                refreshLibraryUseCase(scope = profileScope)
             } returns Result.failure(exception)
 
             // ----- Act -----
@@ -189,11 +194,11 @@ class RefreshUserProfileStatsUseCaseTest {
             arrangeSuccessfulIdentity()
 
             every {
-                hasSyncedReadBooksThisSessionUseCase()
+                hasSyncedStatusesThisSessionUseCase(statuses = profileStatuses)
             } returns false
 
             coEvery {
-                refreshLibraryUseCase(scope = readScope)
+                refreshLibraryUseCase(scope = profileScope)
             } returnsMany listOf(
                 Result.failure(RuntimeException("library refresh failed")),
                 Result.success(Unit),
@@ -206,7 +211,7 @@ class RefreshUserProfileStatsUseCaseTest {
             // ----- Assert -----
             firstResult.isFailure shouldBe true
             secondResult.isSuccess shouldBe true
-            coVerify(exactly = 2) { refreshLibraryUseCase(scope = readScope) }
+            coVerify(exactly = 2) { refreshLibraryUseCase(scope = profileScope) }
         }
     }
 

@@ -75,6 +75,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.topAuthorRows
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.topAuthorsCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearHistoryCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearHistoryChartUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.yourReadingListUiModel
 import nl.rhaydus.toad.UiState
 
 internal data class StatsAtlasUiState(
@@ -218,6 +219,8 @@ internal data class StatsAtlasUiState(
         timeToFinish = null,
         scope = StatsScope.AllTime,
     ),
+
+    val yourReadingList: YourReadingListUiModel = yourReadingListUiModel(stats = null),
 
     val inYourWords: InYourWordsUiModel = inYourWordsUiModel(
         written = null,

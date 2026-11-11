@@ -34,9 +34,12 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.topAuthorRows
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.topAuthorsCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearAtAGlanceHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearGrid
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.yourReadingListUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileDidNotFinishPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileHourlyPagesPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileMonthlyPagesPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileOwnTagsPreview
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profilePagesReadPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingActivityPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingHistoryPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingStatsPreview
@@ -65,7 +68,10 @@ private val PreviewProfileData = UserProfileData(
 internal val StatsAtlasPreviewState = StatsAtlasUiState(
     isLoading = false,
     userProfileData = PreviewProfileData,
-    opening = atlasOpeningUiModel(PreviewReadingStats),
+    opening = atlasOpeningUiModel(
+        stats = PreviewReadingStats,
+        pagesRead = profilePagesReadPreview(),
+    ),
     readingStats = PreviewReadingStats,
     readingHistory = PreviewReadingHistory,
     scopeChips = atlasScopeChips(
@@ -148,6 +154,7 @@ internal val StatsAtlasPreviewState = StatsAtlasUiState(
         timeToFinish = profileTimeToFinishPreview(),
         scope = StatsScope.AllTime,
     ),
+    yourReadingList = yourReadingListUiModel(profileDidNotFinishPreview()),
     inYourWords = inYourWordsUiModel(
         written = profileWrittenStatsPreview(),
         ownTags = profileOwnTagsPreview(),

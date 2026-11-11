@@ -28,6 +28,7 @@ private const val QUOTES_EYEBROW = "Quotes"
 private const val MOST_QUOTED_TITLE = "Your most-quoted book"
 private const val OWN_TAGS_TITLE = "Your own tags"
 private const val OWN_TAGS_CAPTION = "The tags you put on books you finished. Tap one to see its books."
+private const val EMPTY_LINE = "Reviews you write, quotes you save and your own tags show up here."
 private const val OWN_TAGS_SHOWN = 5
 private const val STAND_IN_WORDS_CAPTION = "0,000 words in all"
 private const val STAND_IN_QUOTES_CAPTION = "saved from 00 books"
@@ -35,7 +36,8 @@ private const val STAND_IN_MOST_QUOTED_CAPTION = "You saved 00 lines from Loadin
 
 /**
  * A null [written] or [ownTags] yields the masked stand-in: the two are gated separately, and reading
- * one still loading as empty would fold the chapter briefly.
+ * one still loading as empty would flash the empty line. With no reviews, quotes or own tags the header
+ * carries [EMPTY_LINE] and the chapter has no tiles.
  */
 internal fun inYourWordsUiModel(
     written: WrittenStats?,
@@ -43,6 +45,16 @@ internal fun inYourWordsUiModel(
     scope: StatsScope,
 ): InYourWordsUiModel {
     if (written == null || ownTags == null) return loadingInYourWords()
+
+    if (written.reviewCount == 0 && written.quoteCount == 0 && ownTags.isEmpty()) {
+        return InYourWordsUiModel(
+            header = inYourWordsHeader(description = EMPTY_LINE),
+            tiles = persistentListOf(),
+            mostQuoted = null,
+            ownTags = null,
+            isLoading = false,
+        )
+    }
 
     val phrase = scope.scopePhrase()
 
@@ -78,15 +90,16 @@ internal fun inYourWordsUiModel(
         ),
         mostQuoted = written.mostQuoted?.toUiModel(),
         ownTags = ownTags.toUiModel(),
-        hasContent = written.reviewCount > 0 || written.quoteCount > 0 || ownTags.isNotEmpty(),
         isLoading = false,
     )
 }
 
-private fun inYourWordsHeader(): SectionHeaderUiModel.Section = SectionHeaderUiModel.Section(
+private fun inYourWordsHeader(
+    description: String = "The reviews you left and the lines you kept.",
+): SectionHeaderUiModel.Section = SectionHeaderUiModel.Section(
     eyebrow = atlasChapterEyebrow(AtlasChapter.IN_YOUR_WORDS),
     headline = "What you wrote",
-    description = "The reviews you left and the lines you kept.",
+    description = description,
 )
 
 private fun plural(
@@ -206,6 +219,5 @@ private fun loadingInYourWords(): InYourWordsUiModel = InYourWordsUiModel(
         bookId = -1,
     ),
     ownTags = loadingOwnTags(),
-    hasContent = true,
     isLoading = true,
 )

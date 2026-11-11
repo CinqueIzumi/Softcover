@@ -9,8 +9,10 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveQuotesSyncedU
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadDatesBackfilledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsBackfilledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetHideUntaggedAuthorsUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveDidNotFinishStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveHourlyPagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveMonthlyPagesReadUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObservePagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingActivityUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingDayUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingHistoryUseCase
@@ -23,6 +25,8 @@ import nl.rhaydus.toad.ActionDependencies
 internal data class StatsAtlasDependencies(
     val observeUserProfileDataUseCase: ObserveUserProfileDataUseCase,
     val observeReadingStatsUseCase: ObserveReadingStatsUseCase,
+    val observePagesReadUseCase: ObservePagesReadUseCase,
+    val observeDidNotFinishStatsUseCase: ObserveDidNotFinishStatsUseCase,
     val observeMonthlyPagesReadUseCase: ObserveMonthlyPagesReadUseCase,
     val observeHourlyPagesReadUseCase: ObserveHourlyPagesReadUseCase,
     val observeReadingActivityUseCase: ObserveReadingActivityUseCase,

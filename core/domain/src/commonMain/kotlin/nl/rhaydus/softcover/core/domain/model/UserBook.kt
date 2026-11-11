@@ -59,31 +59,22 @@ data class UserBook(
             lastReadDate?.toLocalDateOrNull(),
         ).maxOrNull()
 
-    fun getDnfDateString(style: DateStyle): String? {
-        return getUpdatedDateForEventType(
-            type = JournalEventType.StatusDidNotFinish,
-            style = style,
-        )
-    }
+    /**
+     * The local date of the newest Did not finish journal entry, read in the system time zone; null when
+     * the book has none.
+     */
+    val stopDate: LocalDate?
+        get() = journals
+            .filter { it.event == JournalEventType.StatusDidNotFinish.eventName }
+            .maxByOrNull { it.updatedAt }
+            ?.let { utcJournalTimeToLocalDate(it.updatedAt) }
+
+    fun getDnfDateString(style: DateStyle): String? = stopDate?.let { style.formatter.format(it) }
 
     fun getReadDateString(style: DateStyle): String? = finishDate?.let { style.formatter.format(it) }
 
     fun getFallbackDateString(style: DateStyle): String {
         val date = LocalDate.parse(dateAdded)
-
-        return style.formatter.format(date)
-    }
-
-    private fun getUpdatedDateForEventType(
-        type: JournalEventType,
-        style: DateStyle,
-    ): String? {
-        val mostRecentUpdatedDate = journals
-            .sortedByDescending { it.updatedAt }
-            .firstOrNull { it.event == type.eventName }
-            ?.updatedAt ?: return null
-
-        val date = utcJournalTimeToLocalDate(mostRecentUpdatedDate) ?: return null
 
         return style.formatter.format(date)
     }

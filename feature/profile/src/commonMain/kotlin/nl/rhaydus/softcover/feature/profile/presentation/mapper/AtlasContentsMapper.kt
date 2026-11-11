@@ -41,6 +41,7 @@ private fun AtlasChapter.number(): String = when (this) {
     AtlasChapter.YEAR_AT_A_GLANCE -> "01"
     AtlasChapter.SEASONS_AND_RECORDS -> "02"
     AtlasChapter.GENRES_AND_HOW_YOU_READ -> "03"
+    AtlasChapter.YOUR_READING_LIST -> "05"
     AtlasChapter.IN_YOUR_WORDS -> "06"
     AtlasChapter.TEMPORARY -> "99"
 }
@@ -49,6 +50,7 @@ private fun AtlasChapter.title(): String = when (this) {
     AtlasChapter.YEAR_AT_A_GLANCE -> "A year at a glance"
     AtlasChapter.SEASONS_AND_RECORDS -> "Seasons and records"
     AtlasChapter.GENRES_AND_HOW_YOU_READ -> "Genres and how you read"
+    AtlasChapter.YOUR_READING_LIST -> "Your reading list"
     AtlasChapter.IN_YOUR_WORDS -> "In your words"
     AtlasChapter.TEMPORARY -> "Temporary"
 }
@@ -57,6 +59,7 @@ private fun AtlasChapter.caption(): String = when (this) {
     AtlasChapter.YEAR_AT_A_GLANCE -> "Every day you read, and when."
     AtlasChapter.SEASONS_AND_RECORDS -> "Pages by month, authors and records."
     AtlasChapter.GENRES_AND_HOW_YOU_READ -> "What you reach for, and how it reads."
+    AtlasChapter.YOUR_READING_LIST -> "What waits, and what you set aside."
     AtlasChapter.IN_YOUR_WORDS -> "Reviews, quotes and your own tags."
     AtlasChapter.TEMPORARY -> "Year by year, authors, ratings and favourites."
 }

@@ -12,6 +12,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
+import nl.rhaydus.softcover.feature.profile.presentation.state.buildSharePagesRead
 import nl.rhaydus.softcover.feature.profile.presentation.state.buildShareProfile
 import nl.rhaydus.softcover.feature.profile.presentation.state.buildShareReadingHistory
 import nl.rhaydus.softcover.feature.profile.presentation.state.buildShareReadingStats
@@ -44,6 +45,7 @@ class OnShareSheetOpenActionTest {
             // ----- Arrange -----
             stateFlow.value = ProfileUiState(
                 readingStats = buildShareReadingStats(),
+                pagesRead = buildSharePagesRead(),
                 readingHistory = buildShareReadingHistory(),
                 userProfileData = buildShareProfile(),
             )
@@ -65,6 +67,7 @@ class OnShareSheetOpenActionTest {
             // ----- Arrange -----
             stateFlow.value = ProfileUiState(
                 readingStats = buildShareReadingStats(),
+                pagesRead = buildSharePagesRead(),
                 readingHistory = buildShareReadingHistory(),
                 userProfileData = buildShareProfile(),
             )
@@ -86,6 +89,7 @@ class OnShareSheetOpenActionTest {
             // ----- Arrange -----
             stateFlow.value = ProfileUiState(
                 readingStats = buildShareReadingStats(),
+                pagesRead = buildSharePagesRead(),
                 readingHistory = buildShareReadingHistory(),
                 userProfileData = buildShareProfile(),
                 shareCapture = ShareCaptureState(progress = ShareCaptureProgress.Saving),
@@ -108,6 +112,7 @@ class OnShareSheetOpenActionTest {
             // ----- Arrange -----
             stateFlow.value = ProfileUiState(
                 readingStats = buildShareReadingStats(),
+                pagesRead = buildSharePagesRead(),
                 readingHistory = buildShareReadingHistory(),
             )
 

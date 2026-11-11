@@ -1,8 +1,11 @@
 package nl.rhaydus.softcover.feature.profile.presentation.mapper
 
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
 import nl.rhaydus.softcover.core.component.quote.QuoteCardUiModel
@@ -216,7 +219,12 @@ class InYourWordsMapperTest {
             // ----- Act -----
             val result = inYourWordsUiModel(
                 written = written(),
-                ownTags = emptyList(),
+                ownTags = listOf(
+                    OwnTagCount(
+                        name = "cozy",
+                        bookCount = 1,
+                    ),
+                ),
                 scope = scope,
             )
 
@@ -233,7 +241,12 @@ class InYourWordsMapperTest {
             // ----- Act -----
             val result = inYourWordsUiModel(
                 written = written(),
-                ownTags = emptyList(),
+                ownTags = listOf(
+                    OwnTagCount(
+                        name = "cozy",
+                        bookCount = 1,
+                    ),
+                ),
                 scope = scope,
             )
 
@@ -250,7 +263,12 @@ class InYourWordsMapperTest {
             // ----- Act -----
             val result = inYourWordsUiModel(
                 written = written(),
-                ownTags = emptyList(),
+                ownTags = listOf(
+                    OwnTagCount(
+                        name = "cozy",
+                        bookCount = 1,
+                    ),
+                ),
                 scope = scope,
             )
 
@@ -261,25 +279,33 @@ class InYourWordsMapperTest {
     }
 
     @Nested
-    inner class HasContent {
+    inner class EmptyState {
         @Test
-        fun `is false when there are no reviews and no quotes`() {
+        fun `nothing written yields no tiles and a different description than a written chapter`() {
             // ----- Arrange -----
-            val stats = written()
+            val withContent = inYourWordsUiModel(
+                written = written(reviewCount = 1),
+                ownTags = emptyList(),
+                scope = StatsScope.AllTime,
+            )
 
             // ----- Act -----
             val result = inYourWordsUiModel(
-                written = stats,
+                written = written(),
                 ownTags = emptyList(),
                 scope = StatsScope.AllTime,
             )
 
             // ----- Assert -----
-            result.hasContent shouldBe false
+            result.tiles.shouldBeEmpty()
+            result.mostQuoted.shouldBeNull()
+            result.ownTags.shouldBeNull()
+            result.isLoading shouldBe false
+            result.header.description shouldNotBe withContent.header.description
         }
 
         @Test
-        fun `is true with only reviews`() {
+        fun `a review alone yields the tiles`() {
             // ----- Arrange -----
             val stats = written(reviewCount = 1)
 
@@ -291,11 +317,11 @@ class InYourWordsMapperTest {
             )
 
             // ----- Assert -----
-            result.hasContent shouldBe true
+            result.tiles.shouldNotBeEmpty()
         }
 
         @Test
-        fun `is true with only quotes`() {
+        fun `a quote alone yields the tiles`() {
             // ----- Arrange -----
             val stats = written(quoteCount = 1)
 
@@ -307,7 +333,7 @@ class InYourWordsMapperTest {
             )
 
             // ----- Assert -----
-            result.hasContent shouldBe true
+            result.tiles.shouldNotBeEmpty()
         }
     }
 
@@ -473,7 +499,7 @@ class InYourWordsMapperTest {
         }
 
         @Test
-        fun `own tags alone make the chapter have content`() {
+        fun `own tags alone keep the chapter out of the empty state`() {
             // ----- Arrange -----
             val tags = listOf(
                 OwnTagCount(
@@ -490,7 +516,8 @@ class InYourWordsMapperTest {
             )
 
             // ----- Assert -----
-            result.hasContent shouldBe true
+            result.tiles.shouldNotBeEmpty()
+            result.ownTags.shouldNotBeNull()
             result.isLoading shouldBe false
         }
 

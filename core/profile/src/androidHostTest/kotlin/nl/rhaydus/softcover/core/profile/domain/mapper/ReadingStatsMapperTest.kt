@@ -158,87 +158,9 @@ class ReadingStatsMapperTest {
 
             // ----- Assert -----
             stats.booksRead shouldBe 0
-            stats.totalPages shouldBe 0
             stats.genres.slices shouldBe emptyList()
             stats.ratings.totalRatings shouldBe 0
             stats.ratings.average shouldBe 0.0
-        }
-    }
-
-    @Nested
-    inner class Pages {
-        @Test
-        fun `the readers edition pages win over the book pages`() {
-            // ----- Arrange -----
-            val book = readBook(
-                id = 1,
-                finishedAt = "2026-02-01",
-                pages = 200,
-                editions = listOf(
-                    edition(
-                        id = 10,
-                        pages = 300,
-                    ),
-                ),
-                editionId = 10,
-            )
-
-            // ----- Act -----
-            val stats = listOf(book).toStats(StatsRange.Unbounded)
-
-            // ----- Assert -----
-            stats.totalPages shouldBe 300
-        }
-
-        @Test
-        fun `falls back to the book pages when the edition has none or is not the readers`() {
-            // ----- Arrange -----
-            val noEditionPages = readBook(
-                id = 1,
-                finishedAt = "2026-02-01",
-                pages = 200,
-                editions = listOf(
-                    edition(
-                        id = 10,
-                        pages = null,
-                    ),
-                ),
-                editionId = 10,
-            )
-
-            val otherEdition = readBook(
-                id = 2,
-                finishedAt = "2026-02-01",
-                pages = 100,
-                editions = listOf(
-                    edition(
-                        id = 11,
-                        pages = 999,
-                    ),
-                ),
-                editionId = 12,
-            )
-
-            // ----- Act -----
-            val stats = listOf(noEditionPages, otherEdition).toStats(StatsRange.Unbounded)
-
-            // ----- Assert -----
-            stats.totalPages shouldBe 300
-        }
-
-        @Test
-        fun `counts zero pages when neither edition nor book has a count`() {
-            // ----- Arrange -----
-            val book = readBook(
-                id = 1,
-                finishedAt = "2026-02-01",
-            )
-
-            // ----- Act -----
-            val stats = listOf(book).toStats(StatsRange.Unbounded)
-
-            // ----- Assert -----
-            stats.totalPages shouldBe 0
         }
     }
 

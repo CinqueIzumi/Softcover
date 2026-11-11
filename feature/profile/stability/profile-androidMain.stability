@@ -183,6 +183,14 @@ private fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.Dem
     - isLoading: STABLE (primitive type)
 
 @Composable
+private fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.DidNotFinishSection(model: nl.rhaydus.softcover.feature.profile.presentation.state.DidNotFinishUiModel, isLoading: kotlin.Boolean): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (class with no mutable properties)
+    - isLoading: STABLE (primitive type)
+
+@Composable
 internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.GenresChapter(header: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, ranking: nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel, showMore: nl.rhaydus.softcover.core.component.button.PillButtonUiModel?, showLess: nl.rhaydus.softcover.core.component.button.PillButtonUiModel?, onShowMore: kotlin.Function0<kotlin.Unit>, onShowLess: kotlin.Function0<kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
   skippable: true
   restartable: true
@@ -472,6 +480,15 @@ internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.Ye
     - header: STABLE (marked @Stable or @Immutable)
     - metricToggle: STABLE (marked @Stable or @Immutable)
     - onMetricSelected: STABLE (function type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.YourReadingListChapter(model: nl.rhaydus.softcover.feature.profile.presentation.state.YourReadingListUiModel, jumper: nl.rhaydus.softcover.feature.profile.presentation.screen.section.AtlasChapterJumper, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (class with no mutable properties)
+    - jumper: STABLE (marked @Stable or @Immutable)
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable

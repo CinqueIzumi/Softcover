@@ -130,6 +130,11 @@ internal fun ColumnScope.StatsAtlasBody(
         )
     }
 
+    YourReadingListChapter(
+        model = state.yourReadingList,
+        jumper = jumper,
+    )
+
     InYourWordsChapter(
         model = state.inYourWords,
         jumper = jumper,

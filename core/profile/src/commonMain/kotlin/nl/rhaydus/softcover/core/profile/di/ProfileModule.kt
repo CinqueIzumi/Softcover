@@ -12,8 +12,11 @@ import nl.rhaydus.softcover.core.profile.data.datasource.ProfileRemoteDataSource
 import nl.rhaydus.softcover.core.profile.data.repository.ProfileRepositoryImpl
 import nl.rhaydus.softcover.core.profile.domain.ProfileRefreshGate
 import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveDidNotFinishStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveHourlyPagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveMonthlyPagesReadUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObservePageCreditInputsUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObservePagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingActivityUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingDayUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingHistoryUseCase
@@ -67,8 +70,16 @@ val profileModule = module {
             profileRepository = get(),
             statsRefreshGate = get(statsRefreshGateQualifier),
             refreshLibraryUseCase = get(),
-            hasSyncedReadBooksThisSessionUseCase = get(),
+            hasSyncedStatusesThisSessionUseCase = get(),
             refreshAllQuotesUseCase = get(),
+        )
+    }
+
+    factory {
+        ObserveDidNotFinishStatsUseCase(
+            getDidNotFinishUserBooksUseCase = get(),
+            observeUserTagsByBookUseCase = get(),
+            appDispatchers = get(),
         )
     }
 
@@ -105,9 +116,25 @@ val profileModule = module {
     }
 
     factory {
-        ObserveMonthlyPagesReadUseCase(
+        ObservePageCreditInputsUseCase(
             observeProgressUpdatesUseCase = get(),
             getReadUserBooksUseCase = get(),
+            getDidNotFinishUserBooksUseCase = get(),
+        )
+    }
+
+    factory {
+        ObservePagesReadUseCase(
+            observePageCreditInputsUseCase = get(),
+            appDispatchers = get(),
+            clock = get(),
+            timeZone = get(),
+        )
+    }
+
+    factory {
+        ObserveMonthlyPagesReadUseCase(
+            observePageCreditInputsUseCase = get(),
             timeZone = get(),
             appDispatchers = get(),
         )
@@ -115,8 +142,7 @@ val profileModule = module {
 
     factory {
         ObserveReadingActivityUseCase(
-            observeProgressUpdatesUseCase = get(),
-            getReadUserBooksUseCase = get(),
+            observePageCreditInputsUseCase = get(),
             timeZone = get(),
             appDispatchers = get(),
         )
@@ -124,8 +150,7 @@ val profileModule = module {
 
     factory {
         ObserveReadingDayUseCase(
-            observeProgressUpdatesUseCase = get(),
-            getReadUserBooksUseCase = get(),
+            observePageCreditInputsUseCase = get(),
             timeZone = get(),
             appDispatchers = get(),
         )
@@ -133,7 +158,7 @@ val profileModule = module {
 
     factory {
         ObserveReadingHistoryUseCase(
-            getReadUserBooksUseCase = get(),
+            observePageCreditInputsUseCase = get(),
             appDispatchers = get(),
             clock = get(),
             timeZone = get(),

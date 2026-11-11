@@ -12,6 +12,7 @@ import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorRanking
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
+import nl.rhaydus.softcover.core.profile.domain.model.DidNotFinishStats
 import nl.rhaydus.softcover.core.profile.domain.model.FormatSplit
 import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
@@ -23,6 +24,7 @@ import nl.rhaydus.softcover.core.profile.domain.model.MonthCount
 import nl.rhaydus.softcover.core.profile.domain.model.MonthlyPages
 import nl.rhaydus.softcover.core.profile.domain.model.MostQuotedBook
 import nl.rhaydus.softcover.core.profile.domain.model.OwnTagCount
+import nl.rhaydus.softcover.core.profile.domain.model.PagesRead
 import nl.rhaydus.softcover.core.profile.domain.model.QuickestRead
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
@@ -31,6 +33,7 @@ import nl.rhaydus.softcover.core.profile.domain.model.ReadingActivity
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
 import nl.rhaydus.softcover.core.profile.domain.model.RecentlyLovedBook
+import nl.rhaydus.softcover.core.profile.domain.model.StopQuarter
 import nl.rhaydus.softcover.core.profile.domain.model.TimeToFinish
 import nl.rhaydus.softcover.core.profile.domain.model.WrittenStats
 import nl.rhaydus.softcover.core.profile.domain.model.YearCount
@@ -43,7 +46,6 @@ import kotlin.time.Instant
  */
 internal fun profileReadingStatsPreview(): ReadingStats = ReadingStats(
     booksRead = 214,
-    totalPages = 128_406,
     genres = previewGenres(),
     ratings = previewRatings(),
     authorDemographics = previewAuthorDemographics(),
@@ -55,6 +57,44 @@ internal fun profileReadingStatsPreview(): ReadingStats = ReadingStats(
             title = "The Stand",
         ),
         pages = 1_296,
+    ),
+)
+
+internal fun profilePagesReadPreview(): PagesRead = PagesRead(
+    total = 128_406,
+    finishedBookCount = 214,
+    stoppedBookCount = 9,
+    hasInProgressPages = true,
+    pagesPerDay = 34,
+)
+
+internal fun profileDidNotFinishPreview(): DidNotFinishStats = DidNotFinishStats(
+    bookCount = 9,
+    quarterCounts = mapOf(
+        StopQuarter.FIRST to 5,
+        StopQuarter.SECOND to 1,
+        StopQuarter.THIRD to 1,
+        StopQuarter.LAST to 1,
+    ),
+    unknownStopCount = 1,
+    genres = GenreBreakdown(
+        slices = listOf(
+            GenreSlice(
+                name = "Literary fiction",
+                count = 4,
+                fraction = 0.45,
+            ),
+            GenreSlice(
+                name = "Fantasy",
+                count = 3,
+                fraction = 0.33,
+            ),
+            GenreSlice(
+                name = "Science fiction",
+                count = 2,
+                fraction = 0.22,
+            ),
+        ),
     ),
 )
 

@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.profile.presentation.collector
 
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -35,6 +36,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsB
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorRanking
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
+import nl.rhaydus.softcover.core.profile.domain.model.DidNotFinishStats
 import nl.rhaydus.softcover.core.profile.domain.model.FormatSplit
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
@@ -42,6 +44,7 @@ import nl.rhaydus.softcover.core.profile.domain.model.HourlyPages
 import nl.rhaydus.softcover.core.profile.domain.model.LongestBook
 import nl.rhaydus.softcover.core.profile.domain.model.MonthlyPages
 import nl.rhaydus.softcover.core.profile.domain.model.OwnTagCount
+import nl.rhaydus.softcover.core.profile.domain.model.PagesRead
 import nl.rhaydus.softcover.core.profile.domain.model.QuickestRead
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
@@ -50,8 +53,10 @@ import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
 import nl.rhaydus.softcover.core.profile.domain.model.TimeToFinish
 import nl.rhaydus.softcover.core.profile.domain.model.WrittenStats
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveDidNotFinishStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveHourlyPagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveMonthlyPagesReadUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObservePagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveTimeToFinishUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveWrittenStatsUseCase
@@ -78,7 +83,11 @@ class AtlasScopedSectionsCollectorTest {
     private lateinit var observeReadDatesBackfilledUseCase: ObserveReadDatesBackfilledUseCase
     private lateinit var observeWrittenStatsUseCase: ObserveWrittenStatsUseCase
     private lateinit var observeQuotesSyncedUseCase: ObserveQuotesSyncedUseCase
+    private lateinit var observePagesReadUseCase: ObservePagesReadUseCase
+    private lateinit var observeDidNotFinishStatsUseCase: ObserveDidNotFinishStatsUseCase
     private lateinit var quotesSyncedFlow: MutableStateFlow<Boolean>
+    private var pagesReadFor: (StatsRange) -> PagesRead = { emptyPagesRead() }
+    private var didNotFinishFor: (StatsRange) -> DidNotFinishStats = { someDidNotFinish() }
     private var writtenFor: (StatsRange) -> WrittenStats = { emptyWritten() }
     private lateinit var backfilledFlow: MutableStateFlow<Boolean>
     private lateinit var readDatesBackfilledFlow: MutableStateFlow<Boolean>
@@ -94,6 +103,10 @@ class AtlasScopedSectionsCollectorTest {
         backfilledFlow = MutableStateFlow(true)
         quotesSyncedFlow = MutableStateFlow(true)
         writtenFor = { emptyWritten() }
+        pagesReadFor = { emptyPagesRead() }
+        didNotFinishFor = { someDidNotFinish() }
+        observePagesReadUseCase = mockk()
+        observeDidNotFinishStatsUseCase = mockk()
         observeWrittenStatsUseCase = mockk()
         observeQuotesSyncedUseCase = mockk()
         readDatesBackfilledFlow = MutableStateFlow(true)
@@ -155,7 +168,28 @@ class AtlasScopedSectionsCollectorTest {
         every {
             observeQuotesSyncedUseCase()
         } returns quotesSyncedFlow
+
+        every {
+            observePagesReadUseCase(any())
+        } answers { flowOf(pagesReadFor(firstArg())) }
+
+        every {
+            observeDidNotFinishStatsUseCase(any())
+        } answers { flowOf(didNotFinishFor(firstArg())) }
     }
+
+    private fun emptyPagesRead(): PagesRead = PagesRead(
+        total = 0,
+        finishedBookCount = 0,
+        stoppedBookCount = 0,
+        hasInProgressPages = false,
+        pagesPerDay = null,
+    )
+
+    private fun someDidNotFinish(): DidNotFinishStats = DidNotFinishStats(
+        bookCount = 1,
+        unknownStopCount = 1,
+    )
 
     private fun emptyWritten(): WrittenStats = WrittenStats(
         reviewCount = 0,
@@ -243,6 +277,14 @@ class AtlasScopedSectionsCollectorTest {
         every {
             dependencies.observeQuotesSyncedUseCase
         } returns observeQuotesSyncedUseCase
+
+        every {
+            dependencies.observePagesReadUseCase
+        } returns observePagesReadUseCase
+
+        every {
+            dependencies.observeDidNotFinishStatsUseCase
+        } returns observeDidNotFinishStatsUseCase
 
         return launch {
             AtlasScopedSectionsCollector().onLaunch(
@@ -447,10 +489,19 @@ class AtlasScopedSectionsCollectorTest {
             // ----- Arrange -----
             stateFlow.value = stateFor(StatsScope.CalendarYear(2025))
 
+            pagesReadFor = {
+                PagesRead(
+                    total = 1_500,
+                    finishedBookCount = 5,
+                    stoppedBookCount = 0,
+                    hasInProgressPages = false,
+                    pagesPerDay = null,
+                )
+            }
+
             statsFor = {
                 ReadingStats(
                     booksRead = 5,
-                    totalPages = 1_500,
                     genres = GenreBreakdown(
                         slices = listOf(
                             GenreSlice(
@@ -485,7 +536,7 @@ class AtlasScopedSectionsCollectorTest {
             stateFlow.value.genreEmptyCaption shouldBe "No finished books in 2025."
             stateFlow.value.ratingsEmptyCaption shouldBe "No finished books in 2025."
             stateFlow.value.authorsEmptyCaption shouldBe "No finished books in 2025."
-            stateFlow.value.heroCaption() shouldBe "No books finished in 2025."
+            stateFlow.value.heroCaption() shouldBe "No pages read in 2025."
             job.cancel()
         }
 
@@ -910,20 +961,20 @@ class AtlasScopedSectionsCollectorTest {
         }
 
         @Test
-        fun `drops the in your words row when the scope has no reviews and no quotes`() = runTest(UnconfinedTestDispatcher()) {
+        fun `keeps every chapter listed when nothing was written and no book was put down`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             writtenFor = { emptyWritten() }
+            didNotFinishFor = { DidNotFinishStats() }
 
             // ----- Act -----
             val job = launchCollector()
 
             // ----- Assert -----
             val state = stateFlow.value
-            val expectedChapters = AtlasChapter.entries - AtlasChapter.IN_YOUR_WORDS
-            state.contentsRows.map { it.chapter } shouldBe expectedChapters
+            state.contentsRows.map { it.chapter } shouldBe AtlasChapter.entries.toList()
 
             (state.contentsHeader as SectionHeaderUiModel.Section).headlineText shouldBe
-                "${expectedChapters.size} chapters"
+                "${AtlasChapter.entries.size} chapters"
 
             job.cancel()
         }
@@ -981,7 +1032,68 @@ class AtlasScopedSectionsCollectorTest {
             // ----- Assert -----
             val state = stateFlow.value
             state.contentsRows.map { it.chapter } shouldBe AtlasChapter.entries.toList()
-            state.inYourWords.hasContent shouldBe true
+            state.inYourWords.tiles.shouldNotBeEmpty()
+            job.cancel()
+        }
+
+        @Test
+        fun `keeps the pages read and reading list loading until the stats are backfilled`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            backfilledFlow.value = false
+            val job = launchCollector()
+            val heroWhileLoading = stateFlow.value.opening.hero.stat.shouldNotBeNull().isLoading
+            val listWhileLoading = stateFlow.value.yourReadingList.isLoading
+
+            // ----- Act -----
+            backfilledFlow.value = true
+
+            // ----- Assert -----
+            heroWhileLoading shouldBe true
+            listWhileLoading shouldBe true
+            stateFlow.value.opening.hero.stat.shouldNotBeNull().isLoading shouldBe false
+            stateFlow.value.yourReadingList.isLoading shouldBe false
+            job.cancel()
+        }
+
+        @Test
+        fun `writes the books you did not finish of the selected scope into the reading list`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val scopeRange = StatsRange.Bounded(
+                start = LocalDate(
+                    year = 2025,
+                    month = 1,
+                    day = 1,
+                ),
+                endInclusive = LocalDate(
+                    year = 2025,
+                    month = 12,
+                    day = 31,
+                ),
+            )
+
+            val requested = mutableListOf<StatsRange>()
+
+            didNotFinishFor = { range ->
+                requested += range
+
+                if (range == scopeRange) {
+                    DidNotFinishStats(
+                        bookCount = 3,
+                        unknownStopCount = 3,
+                    )
+                } else {
+                    DidNotFinishStats()
+                }
+            }
+
+            stateFlow.value = stateFor(StatsScope.CalendarYear(2025))
+
+            // ----- Act -----
+            val job = launchCollector()
+
+            // ----- Assert -----
+            requested.last() shouldBe scopeRange
+            stateFlow.value.yourReadingList.didNotFinish.shouldNotBeNull()
             job.cancel()
         }
     }

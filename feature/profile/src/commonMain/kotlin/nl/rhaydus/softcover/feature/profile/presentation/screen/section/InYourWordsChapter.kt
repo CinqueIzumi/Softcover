@@ -20,8 +20,8 @@ import nl.rhaydus.softcover.feature.profile.presentation.state.AtlasChapter
 import nl.rhaydus.softcover.feature.profile.presentation.state.InYourWordsUiModel
 
 /**
- * Reviews and quotes in scope, then the most-quoted book and the reader's own tags. The chapter, with the gap above it,
- * folds away its height when [InYourWordsUiModel.hasContent] is false.
+ * Reviews and quotes in scope, then the most-quoted book and the reader's own tags. The chapter always shows
+ * its header; the blocks under it ease in and out as [InYourWordsUiModel.tiles] fills and empties.
  */
 @Composable
 internal fun InYourWordsChapter(
@@ -32,20 +32,29 @@ internal fun InYourWordsChapter(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.animateScopeContentSize()) {
-        if (model.hasContent) {
-            Spacer(modifier = Modifier.height(Spacing.section))
+        Spacer(modifier = Modifier.height(Spacing.section))
 
-            Column(
-                modifier = Modifier.atlasChapter(
-                    jumper,
-                    AtlasChapter.IN_YOUR_WORDS,
-                ),
-            ) {
-                InYourWordsContent(
-                    model = model,
-                    onMostQuotedTapped = onMostQuotedTapped,
-                    onOwnTagTapped = onOwnTagTapped,
-                )
+        Column(
+            modifier = Modifier.atlasChapter(
+                jumper,
+                AtlasChapter.IN_YOUR_WORDS,
+            ),
+        ) {
+            ScopedSectionHeader(header = model.header)
+
+            ScopeCrossfade(
+                target = model,
+                contentKey = { it.tiles.isEmpty() },
+            ) { shown ->
+                if (shown.tiles.isNotEmpty()) {
+                    Column {
+                        InYourWordsContent(
+                            model = shown,
+                            onMostQuotedTapped = onMostQuotedTapped,
+                            onOwnTagTapped = onOwnTagTapped,
+                        )
+                    }
+                }
             }
         }
     }
@@ -57,8 +66,6 @@ private fun InYourWordsContent(
     onMostQuotedTapped: () -> Unit,
     onOwnTagTapped: (String) -> Unit,
 ) {
-    ScopedSectionHeader(header = model.header)
-
     Spacer(modifier = Modifier.height(Spacing.md))
 
     Row(
