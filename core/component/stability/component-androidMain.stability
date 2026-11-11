@@ -512,13 +512,13 @@ private fun nl.rhaydus.softcover.core.component.chart.RankedBarRow(row: nl.rhayd
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
-public fun nl.rhaydus.softcover.core.component.chart.RankedBars(model: nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.chart.RankedBarsEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+public fun nl.rhaydus.softcover.core.component.chart.RankedBars(model: nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel, modifier: androidx.compose.ui.Modifier, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.chart.RankedBarsEvent, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - model: STABLE (marked @Stable or @Immutable)
-    - onEvent: STABLE (function type)
     - modifier: STABLE (marked @Stable or @Immutable)
+    - onEvent: STABLE (function type)
 
 @Composable
 public fun nl.rhaydus.softcover.core.component.chart.RecentDaysGrid(model: nl.rhaydus.softcover.core.component.chart.RecentDaysGridUiModel, modifier: androidx.compose.ui.Modifier): kotlin.Unit
