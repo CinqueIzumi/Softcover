@@ -23,6 +23,7 @@ import nl.rhaydus.softcover.core.book.domain.repository.UserTagsRepository
 import nl.rhaydus.softcover.core.book.domain.sync.OfflineUserBookSync
 import nl.rhaydus.softcover.core.book.domain.usecase.AddBookByIsbnUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.CommitBookRemovalUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.DidNotFinishBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.FetchBookByIdUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
@@ -329,6 +330,10 @@ val bookModule = module {
 
     factory {
         PauseBookUseCase(booksRepository = get())
+    }
+
+    factory {
+        DidNotFinishBookUseCase(booksRepository = get())
     }
 
     factory {

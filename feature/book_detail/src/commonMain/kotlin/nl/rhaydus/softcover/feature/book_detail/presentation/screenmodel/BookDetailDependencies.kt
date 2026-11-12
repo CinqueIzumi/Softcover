@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import nl.rhaydus.softcover.core.book.domain.usecase.DidNotFinishBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.FetchBookByIdUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetEditionsByBookIdUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.LoadSimilarBooksPageUseCase
@@ -58,6 +59,7 @@ internal class BookDetailDependencies(
     val markBookAsReadingUseCase: MarkBookAsReadingUseCase,
     val markBookAsReadUseCase: MarkBookAsReadUseCase,
     val pauseBookUseCase: PauseBookUseCase,
+    val didNotFinishBookUseCase: DidNotFinishBookUseCase,
     val activeSessionController: ActiveSessionController,
     val saveBookVerdictUseCase: SaveBookVerdictUseCase,
     val undoableBookRemover: UndoableBookRemover,

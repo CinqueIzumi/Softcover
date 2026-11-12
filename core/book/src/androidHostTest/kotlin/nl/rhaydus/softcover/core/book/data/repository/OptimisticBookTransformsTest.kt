@@ -9,6 +9,7 @@ import nl.rhaydus.softcover.core.book.baseBook
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.DatePrecision
+import nl.rhaydus.softcover.core.domain.model.JournalEventType
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
@@ -412,6 +413,82 @@ class OptimisticBookTransformsTest {
                 hasSpoilers = false,
                 reviewedAt = "2026-03-04",
             )
+
+            // ----- Assert -----
+            result shouldBe book
+        }
+    }
+
+    @Nested
+    inner class WithMarkedAsDidNotFinish {
+        @Test
+        fun `from Reading sets the status and appends one status_stopped journal`() {
+            // ----- Arrange -----
+            val book = bookWith(BookStatus.Reading)
+            val journalsBefore = book.userBook.shouldNotBeNull().journals
+
+            // ----- Act -----
+            val result = book.withMarkedAsDidNotFinish()
+
+            // ----- Assert -----
+            val userBook = result.userBook.shouldNotBeNull()
+            userBook.status shouldBe BookStatus.DidNotFinish
+            userBook.journals.dropLast(1) shouldBe journalsBefore
+            userBook.journals.last().event shouldBe JournalEventType.StatusDidNotFinish.eventName
+        }
+
+        @Test
+        fun `from Reading and Paused leaves the reads untouched so the unfinished read stays current`() {
+            listOf(BookStatus.Reading, BookStatus.Paused).forEach { status ->
+                // ----- Arrange -----
+                val unfinished = read(
+                    id = 10,
+                    page = 80,
+                    progress = 80f,
+                )
+
+                val finished = read(
+                    id = 5,
+                    progress = 100f,
+                    finishedAt = "2025-01-01",
+                )
+
+                val book = bookWith(
+                    status,
+                    finished,
+                    unfinished,
+                )
+
+                // ----- Act -----
+                val result = book.withMarkedAsDidNotFinish()
+
+                // ----- Assert -----
+                val userBook = result.userBook.shouldNotBeNull()
+                userBook.status shouldBe BookStatus.DidNotFinish
+                userBook.reads shouldBe listOf(finished, unfinished)
+                userBook.currentRead shouldBe unfinished
+            }
+        }
+
+        @Test
+        fun `when already DidNotFinish returns the book unchanged without a second journal`() {
+            // ----- Arrange -----
+            val book = bookWith(BookStatus.DidNotFinish)
+
+            // ----- Act -----
+            val result = book.withMarkedAsDidNotFinish()
+
+            // ----- Assert -----
+            result shouldBe book
+        }
+
+        @Test
+        fun `without a userBook returns the book unchanged`() {
+            // ----- Arrange -----
+            val book = baseBook.copy(userBook = null)
+
+            // ----- Act -----
+            val result = book.withMarkedAsDidNotFinish()
 
             // ----- Assert -----
             result shouldBe book

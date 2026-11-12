@@ -16,7 +16,8 @@ import nl.rhaydus.softcover.core.component.sheet.isClosing
 import nl.rhaydus.softcover.core.component.sheet.isOpen
 import nl.rhaydus.softcover.core.component.sheet.modelOrNull
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.uibinding.session.endSessionPauseSheetScaffold
+import nl.rhaydus.softcover.core.uibinding.session.SessionEndingStatus
+import nl.rhaydus.softcover.core.uibinding.session.endSessionSheetScaffold
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
@@ -84,7 +85,11 @@ class EndSessionPauseSheetCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.endSessionPauseSheet.modelOrNull shouldBe endSessionPauseSheetScaffold(bookTitle = "Dune")
+            stateFlow.value.endSessionPauseSheet.modelOrNull shouldBe endSessionSheetScaffold(
+                bookTitle = "Dune",
+                targetStatus = SessionEndingStatus.Paused,
+            )
+
             job.cancel()
         }
 
@@ -106,7 +111,10 @@ class EndSessionPauseSheetCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.endSessionPauseSheet.modelOrNull shouldBe
-                endSessionPauseSheetScaffold(bookTitle = "this book")
+                endSessionSheetScaffold(
+                    bookTitle = "this book",
+                    targetStatus = SessionEndingStatus.Paused,
+                )
 
             job.cancel()
         }

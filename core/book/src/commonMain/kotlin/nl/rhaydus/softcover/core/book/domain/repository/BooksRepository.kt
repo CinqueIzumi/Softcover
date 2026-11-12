@@ -209,6 +209,11 @@ interface BooksRepository {
         editionId: Int? = null,
     ): Book
 
+    suspend fun markBookAsDidNotFinish(
+        book: Book,
+        editionId: Int? = null,
+    ): Book
+
     suspend fun updateBookRating(
         book: Book,
         rating: Double,

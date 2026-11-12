@@ -655,6 +655,31 @@ internal class BooksRepositoryImpl(
         )
     }
 
+    override suspend fun markBookAsDidNotFinish(
+        book: Book,
+        editionId: Int?,
+    ): Book {
+        val optimistic = book.withMarkedAsDidNotFinish()
+
+        return writeShelfChange(
+            book = book,
+            optimistic = optimistic,
+            kind = PendingUserBookWriteKind.SET_STATUS,
+            enqueue = {
+                offlineSync.enqueueStatusUpdate(
+                    book = optimistic,
+                    status = UserBookStatus.DID_NOT_FINISH,
+                )
+            },
+            remoteWrite = {
+                booksRemoteDataSource.markBookAsDidNotFinish(
+                    book = book,
+                    editionId = editionId,
+                )
+            },
+        )
+    }
+
     /**
      * Writes ahead: the optimistic value and its queue row are durable before anything is sent, inside
      * [OfflineUserBookSync.runSerialized] so a cancelled caller never abandons the write. A book without a

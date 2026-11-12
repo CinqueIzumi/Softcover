@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.common.AppDispatchers
+import nl.rhaydus.softcover.core.book.domain.usecase.DidNotFinishBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.FetchBookByIdUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetEditionsByBookIdUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.LoadSimilarBooksPageUseCase
@@ -73,6 +74,7 @@ internal class BookDetailScreenScreenModel(
     undoableBookRemover: UndoableBookRemover,
     markBookAsReadUseCase: MarkBookAsReadUseCase,
     pauseBookUseCase: PauseBookUseCase,
+    didNotFinishBookUseCase: DidNotFinishBookUseCase,
     activeSessionController: ActiveSessionController,
     saveBookVerdictUseCase: SaveBookVerdictUseCase,
     getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
@@ -133,6 +135,7 @@ internal class BookDetailScreenScreenModel(
         undoableBookRemover = undoableBookRemover,
         markBookAsReadUseCase = markBookAsReadUseCase,
         pauseBookUseCase = pauseBookUseCase,
+        didNotFinishBookUseCase = didNotFinishBookUseCase,
         activeSessionController = activeSessionController,
         saveBookVerdictUseCase = saveBookVerdictUseCase,
         getDateStyleAsFlowUseCase = getDateStyleAsFlowUseCase,
