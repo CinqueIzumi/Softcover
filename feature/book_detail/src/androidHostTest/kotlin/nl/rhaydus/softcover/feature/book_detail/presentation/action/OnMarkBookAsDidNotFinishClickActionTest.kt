@@ -15,7 +15,6 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.usecase.DidNotFinishBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.uibinding.session.SessionEndingStatus
@@ -82,29 +81,6 @@ class OnMarkBookAsDidNotFinishClickActionTest {
         every {
             mock.userBook
         } returns userBook
-    }
-
-    private fun stubEdition(id: Int): BookEdition = mockk<BookEdition>().also { mock ->
-        every {
-            mock.id
-        } returns id
-    }
-
-    private fun stubStateBook(
-        editions: List<BookEdition>,
-        currentEdition: BookEdition?,
-    ): Book = mockk<Book>().also { mock ->
-        every {
-            mock.userBook
-        } returns null
-
-        every {
-            mock.editions
-        } returns editions
-
-        every {
-            mock.currentEdition
-        } returns currentEdition
     }
 
     @Nested

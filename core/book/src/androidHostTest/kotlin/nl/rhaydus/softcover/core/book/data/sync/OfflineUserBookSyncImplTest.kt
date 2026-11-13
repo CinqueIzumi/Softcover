@@ -1950,7 +1950,7 @@ class OfflineUserBookSyncImplTest {
         }
 
         @Test
-        fun `SET_STATUS — a status_stopped the snapshot never saw is not taken for the write while the fetched status is not DidNotFinish`() = runTest {
+        fun `SET_STATUS — an unseen status_stopped is ignored while fetched status is not DidNotFinish`() = runTest {
             // ----- Arrange -----
             val olderFetchedStop = ReadingJournal(
                 updatedAt = "2026-01-02T10:00:00Z",
