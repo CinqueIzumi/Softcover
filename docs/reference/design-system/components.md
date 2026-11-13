@@ -70,7 +70,7 @@ rules all components follow are in [component-contract.md](component-contract.md
 ## Statistics
 
 - **StatNumber** — `statistic` — springs or rolls a number into place, with an optional prefix or suffix.
-- **StatTile** — `statistic` — a labelled stat on a hero, standard or compact tile; null stat is a dash and the compact tile drops its unit.
+- **StatTile** — `statistic` — a labelled stat on a hero, standard or compact tile; null stat is a dash and compact adds a caption, drops its unit.
 - **ColumnChart** — `chart` — vertical columns on one baseline with a per-column readout.
 - **RankedBars** — `chart` — numbered rows, each a name over a bar filled relative to the lead row, with its value; rows can be tappable.
   Rows from `visibleCount` on fold in and out one by one.
