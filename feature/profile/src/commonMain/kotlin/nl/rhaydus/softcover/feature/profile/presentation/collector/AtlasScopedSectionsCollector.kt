@@ -13,6 +13,7 @@ import nl.rhaydus.softcover.core.profile.domain.model.DidNotFinishStats
 import nl.rhaydus.softcover.core.profile.domain.model.HourlyPages
 import nl.rhaydus.softcover.core.profile.domain.model.MonthlyPages
 import nl.rhaydus.softcover.core.profile.domain.model.PagesRead
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingListStats
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
 import nl.rhaydus.softcover.core.profile.domain.model.TimeToFinish
 import nl.rhaydus.softcover.core.profile.domain.model.WrittenStats
@@ -100,7 +101,15 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
             val readingList = combine(
                 observePagesReadUseCase(range).untilBackfilled(statsBackfilled),
                 observeDidNotFinishStatsUseCase(range).untilBackfilled(statsBackfilled),
-            ) { pagesRead, didNotFinish -> pagesRead to didNotFinish }
+                observeReadingListStatsUseCase(range)
+                    .untilBackfilled(observeReadDatesBackfilledUseCase()),
+            ) { pagesRead, didNotFinish, readingListStats ->
+                Triple(
+                    pagesRead,
+                    didNotFinish,
+                    readingListStats,
+                )
+            }
 
             combine(
                 combine(
@@ -123,15 +132,17 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
                         written = null,
                         pagesRead = null,
                         didNotFinish = null,
+                        readingListStats = null,
                     )
                 },
                 observeWrittenStatsUseCase(range).untilBackfilled(backfilledAndSynced),
                 readingList,
-            ) { sections, written, (pagesRead, didNotFinish) ->
+            ) { sections, written, (pagesRead, didNotFinish, readingListStats) ->
                 sections.copy(
                     written = written,
                     pagesRead = pagesRead,
                     didNotFinish = didNotFinish,
+                    readingListStats = readingListStats,
                 )
             }
         }
@@ -152,7 +163,12 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
             scope = scope,
         )
 
-        val yourReadingList = yourReadingListUiModel(sections.didNotFinish)
+        val yourReadingList = yourReadingListUiModel(
+            stats = sections.readingListStats,
+            booksRead = stats?.booksRead,
+            didNotFinish = sections.didNotFinish,
+            scope = scope,
+        )
 
         val demographics = stats?.authorDemographics?.let {
             if (hideUntaggedAuthors) it.excludingUntaggedAuthors() else it
@@ -279,5 +295,6 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
         val written: WrittenStats?,
         val pagesRead: PagesRead?,
         val didNotFinish: DidNotFinishStats?,
+        val readingListStats: ReadingListStats?,
     )
 }

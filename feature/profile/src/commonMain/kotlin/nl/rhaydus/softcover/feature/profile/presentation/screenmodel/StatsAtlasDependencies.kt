@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.profile.presentation.screenmodel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveBooksByIdsUseCase
+import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetHideUntaggedAuthorsAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveQuotesSyncedUseCase
@@ -11,11 +12,13 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsB
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetHideUntaggedAuthorsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveDidNotFinishStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveHourlyPagesReadUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveLongestWaitingUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveMonthlyPagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObservePagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingActivityUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingDayUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingHistoryUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingListStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveTimeToFinishUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
@@ -34,7 +37,10 @@ internal data class StatsAtlasDependencies(
     val observeReadingHistoryUseCase: ObserveReadingHistoryUseCase,
     val observeReadingStatsBackfilledUseCase: ObserveReadingStatsBackfilledUseCase,
     val observeReadDatesBackfilledUseCase: ObserveReadDatesBackfilledUseCase,
+    val refreshLibraryUseCase: RefreshLibraryUseCase,
     val observeTimeToFinishUseCase: ObserveTimeToFinishUseCase,
+    val observeReadingListStatsUseCase: ObserveReadingListStatsUseCase,
+    val observeLongestWaitingUseCase: ObserveLongestWaitingUseCase,
     val observeWrittenStatsUseCase: ObserveWrittenStatsUseCase,
     val observeQuotesSyncedUseCase: ObserveQuotesSyncedUseCase,
     val getHideUntaggedAuthorsAsFlowUseCase: GetHideUntaggedAuthorsAsFlowUseCase,

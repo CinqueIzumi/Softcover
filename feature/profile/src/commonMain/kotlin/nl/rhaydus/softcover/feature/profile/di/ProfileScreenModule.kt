@@ -18,6 +18,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.collector.ReadingSummar
 import nl.rhaydus.softcover.feature.profile.presentation.collector.RecentlyLovedCardsCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.StatsAtlasCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.UserInformationCollector
+import nl.rhaydus.softcover.feature.profile.presentation.collector.WaitingLongestCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.YearGridCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.YearHistoryCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.YearMetricToggleCollector
@@ -71,7 +72,10 @@ val profileScreenModule = module {
             observeReadingHistoryUseCase = get(),
             observeReadingStatsBackfilledUseCase = get(),
             observeReadDatesBackfilledUseCase = get(),
+            refreshLibraryUseCase = get(),
             observeTimeToFinishUseCase = get(),
+            observeReadingListStatsUseCase = get(),
+            observeLongestWaitingUseCase = get(),
             observeWrittenStatsUseCase = get(),
             observeQuotesSyncedUseCase = get(),
             getHideUntaggedAuthorsAsFlowUseCase = get(),
@@ -84,6 +88,7 @@ val profileScreenModule = module {
     factory { AtlasProfileDataCollector() } bind StatsAtlasCollector::class
     factory { AtlasScopeChipsCollector() } bind StatsAtlasCollector::class
     factory { RecentlyLovedCardsCollector() } bind StatsAtlasCollector::class
+    factory { WaitingLongestCollector() } bind StatsAtlasCollector::class
     factory { AtlasScopedSectionsCollector() } bind StatsAtlasCollector::class
     factory { HideUntaggedAuthorsCollector() } bind StatsAtlasCollector::class
     factory { YearMetricToggleCollector() } bind StatsAtlasCollector::class

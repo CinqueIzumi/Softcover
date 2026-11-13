@@ -12,6 +12,8 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import nl.rhaydus.designsystem.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
+import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
+import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
@@ -82,10 +84,14 @@ class StatsAtlasScreen : Screen {
                     state = state,
                     navigator = navigator,
                 ),
-                onRecordEvent = rememberReadingRecordEventHandler(
-                    state = state,
+                onRecordEvent = rememberSurfaceBookEventHandler(
+                    set = state.readingRecords.cards,
                     navigator = navigator,
-                ),
+                ) { it.book to it.surface },
+                onWaitingEvent = rememberSurfaceBookEventHandler(
+                    set = state.waitingLongest.cards,
+                    navigator = navigator,
+                ) { it.book to it.surface },
             )
         }
     }
@@ -103,6 +109,7 @@ internal expect fun StatsAtlasScreenLayout(
     onNavigateUp: () -> Unit,
     onBookCardEvent: (BookCardEvent) -> Unit,
     onRecordEvent: (BookCardEvent) -> Unit,
+    onWaitingEvent: (BookCardEvent) -> Unit,
 )
 
 /**
@@ -132,25 +139,27 @@ private fun rememberRecentlyLovedEventHandler(
 }
 
 /**
- * Opens book detail for a tapped record card with the cover's shared-element transition, and warms the
- * detail on finger-down.
+ * Opens book detail for a tapped card of [set] with the cover's shared-element transition, and warms the
+ * detail on finger-down. [surfaceOf] reads an entry's book and the surface its transition keys are scoped by.
  */
 @Composable
-private fun rememberReadingRecordEventHandler(
-    state: StatsAtlasUiState,
+private fun <E : Any> rememberSurfaceBookEventHandler(
+    set: BookCardSet<E>,
     navigator: Navigator,
+    surfaceOf: (E) -> Pair<Book, String>,
 ): (BookCardEvent) -> Unit {
     val appNavigator = koinInject<AppNavigator>()
     val currentNavigator by rememberUpdatedState(navigator)
+    val currentSurfaceOf by rememberUpdatedState(surfaceOf)
 
-    return rememberPrefetchingBookCardEventHandler(
-        set = state.readingRecords.cards,
-    ) { event, entry ->
+    return rememberPrefetchingBookCardEventHandler(set = set) { event, entry ->
         if (event is BookCardEvent.Clicked) {
+            val (book, surface) = currentSurfaceOf(entry)
+
             val destination = ScreenDestination.BookDetail(
-                id = entry.book.id,
-                initialCover = BookInitialCover.fromBook(entry.book),
-                transitionSurface = entry.surface,
+                id = book.id,
+                initialCover = BookInitialCover.fromBook(book),
+                transitionSurface = surface,
             )
 
             currentNavigator.push(item = appNavigator.screen(destination))

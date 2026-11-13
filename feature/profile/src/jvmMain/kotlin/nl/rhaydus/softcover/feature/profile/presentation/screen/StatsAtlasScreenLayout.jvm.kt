@@ -33,6 +33,7 @@ internal actual fun StatsAtlasScreenLayout(
     onNavigateUp: () -> Unit,
     onBookCardEvent: (BookCardEvent) -> Unit,
     onRecordEvent: (BookCardEvent) -> Unit,
+    onWaitingEvent: (BookCardEvent) -> Unit,
 ) {
     val scrollState = rememberScrollState()
 
@@ -65,6 +66,7 @@ internal actual fun StatsAtlasScreenLayout(
                 runAction = runAction,
                 onBookCardEvent = onBookCardEvent,
                 onRecordEvent = onRecordEvent,
+                onWaitingEvent = onWaitingEvent,
             )
         }
     }
@@ -85,6 +87,7 @@ private fun StatsAtlasScreenDesktopLightPreview() {
             onNavigateUp = {},
             onBookCardEvent = {},
             onRecordEvent = {},
+            onWaitingEvent = {},
         )
     }
 }
@@ -99,6 +102,7 @@ private fun StatsAtlasScreenDesktopDarkPreview() {
             onNavigateUp = {},
             onBookCardEvent = {},
             onRecordEvent = {},
+            onWaitingEvent = {},
         )
     }
 }

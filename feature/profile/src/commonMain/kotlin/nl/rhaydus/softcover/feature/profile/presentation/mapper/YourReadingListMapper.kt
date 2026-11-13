@@ -11,13 +11,35 @@ import nl.rhaydus.softcover.core.component.chip.ChipTrailing
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.chip.toChipSet
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.statistic.StatNumberFormat
+import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
+import nl.rhaydus.softcover.core.component.statistic.StatTileUiModel
+import nl.rhaydus.softcover.core.component.statistic.StatTileVariant
+import nl.rhaydus.softcover.core.domain.model.StatsScope
 import nl.rhaydus.softcover.core.profile.domain.model.DidNotFinishStats
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingListStats
 import nl.rhaydus.softcover.core.profile.domain.model.StopQuarter
 import nl.rhaydus.softcover.core.uibinding.format.percentLabel
 import nl.rhaydus.softcover.feature.profile.presentation.state.AtlasChapter
 import nl.rhaydus.softcover.feature.profile.presentation.state.DidNotFinishUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.state.VersusCellUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.state.YourReadingListUiModel
+import kotlin.math.roundToInt
 
+private const val STILL_TO_COME = "Still to come"
+private const val SET_ASIDE_EYEBROW = "Set aside"
+private const val ADDED_EYEBROW = "Added"
+private const val ADDED_CAPTION = "to Want to Read"
+private const val READ_EYEBROW = "Read"
+private const val READ_CAPTION = "books finished"
+private const val TIME_ON_LIST_EYEBROW = "Time on the list"
+private const val NO_WAIT_ALL_TIME = "Start a book from your list and the wait shows up here."
+private const val DAYS_PER_WEEK = 7.0
+private const val DAYS_PER_MONTH = 30.44
+private const val DAYS_PER_YEAR = 365.25
+private const val DAYS_BEFORE_WEEKS = 14
+private const val DAYS_BEFORE_MONTHS = 56
+private const val DAYS_BEFORE_YEARS = 730
 private const val STOP_POINT_TITLE = "Where you stopped, by quarter of the book"
 private const val GENRES_TITLE = "Genres"
 private const val GENRES_NOTE = "A book can count in more than one genre."
@@ -30,50 +52,183 @@ private const val MIN_KNOWN_FOR_TREND = 2
 private const val LOADING_COLUMN_FRACTION = 0.5f
 
 /**
- * A null [stats] yields the stand-in chapter; with no book put down the header carries [EMPTY_LINE] and
- * the chapter has no section.
+ * The Still to come parts load until both [stats] and [booksRead] are present, and the Set aside parts
+ * until [didNotFinish] is. With no book put down the set-aside header carries [EMPTY_LINE] and the chapter
+ * has no section under it.
  */
-internal fun yourReadingListUiModel(stats: DidNotFinishStats?): YourReadingListUiModel {
-    if (stats == null) return loadingYourReadingList()
+internal fun yourReadingListUiModel(
+    stats: ReadingListStats?,
+    booksRead: Int?,
+    didNotFinish: DidNotFinishStats?,
+    scope: StatsScope,
+): YourReadingListUiModel {
+    val setAside = setAside(didNotFinish)
+
+    if (stats == null || booksRead == null) {
+        return stillToComeLoading().copy(
+            setAside = setAside.first,
+            didNotFinish = setAside.second,
+        )
+    }
+
+    return YourReadingListUiModel(
+        header = yourReadingListHeader(
+            description = framingSentence(
+                added = stats.addedCount,
+                read = booksRead,
+                scope = scope,
+            ),
+            isLoading = false,
+        ),
+        added = VersusCellUiModel(
+            eyebrow = ADDED_EYEBROW,
+            stat = countStat(stats.addedCount),
+            caption = ADDED_CAPTION,
+            isLead = false,
+        ),
+        read = VersusCellUiModel(
+            eyebrow = READ_EYEBROW,
+            stat = countStat(booksRead),
+            caption = READ_CAPTION,
+            isLead = true,
+        ),
+        timeOnList = timeOnList(
+            stats = stats,
+            scope = scope,
+        ),
+        setAside = setAside.first,
+        didNotFinish = setAside.second,
+    )
+}
+
+private fun countStat(count: Int) = StatNumberUiModel(value = count.toDouble())
+
+private fun framingSentence(
+    added: Int,
+    read: Int,
+    scope: StatsScope,
+): String {
+    val phrase = scope.scopePhrase()?.let { " $it" }.orEmpty()
+
+    return when {
+        added == 0 && read == 0 -> "Books you add to your list and finish$phrase show up here."
+        added == 0 -> "You read ${booksCount(read)}$phrase and added none to your list."
+        read == 0 -> "You added ${booksCount(added)} to your list$phrase."
+        else -> "You added ${booksCount(added)} to your list$phrase and read ${formatGroupedNumber(read)}."
+    }
+}
+
+private fun timeOnList(
+    stats: ReadingListStats,
+    scope: StatsScope,
+): StatTileUiModel {
+    val waitDays = stats.waitDays
+
+    if (waitDays == null) {
+        return StatTileUiModel(
+            eyebrow = TIME_ON_LIST_EYEBROW,
+            stat = null,
+            variant = StatTileVariant.Compact(
+                unit = "days",
+                caption = scope.scopePhrase()?.let { "No book from your list was started $it." }
+                    ?: NO_WAIT_ALL_TIME,
+            ),
+        )
+    }
+
+    val (number, unit) = waitDays.asDuration()
+
+    val books = if (stats.waitedCount == 1) "the one book" else "the ${formatGroupedNumber(stats.waitedCount)} books"
+
+    return StatTileUiModel(
+        eyebrow = TIME_ON_LIST_EYEBROW,
+        stat = StatNumberUiModel(
+            value = number.toDouble(),
+            format = StatNumberFormat.Plain,
+        ),
+        variant = StatTileVariant.Compact(
+            unit = unit,
+            caption = "Typical wait from adding a book to starting it, for $books you started.",
+        ),
+    )
+}
+
+/** The wait in the coarsest unit that keeps the number small, such as 3 and "months". */
+private fun Int.asDuration(): Pair<Int, String> {
+    val (number, one, other) = when {
+        this < DAYS_BEFORE_WEEKS -> Triple(
+            this,
+            "day",
+            "days",
+        )
+        this < DAYS_BEFORE_MONTHS -> Triple(
+            (this / DAYS_PER_WEEK).roundToInt(),
+            "week",
+            "weeks",
+        )
+        this < DAYS_BEFORE_YEARS -> Triple(
+            (this / DAYS_PER_MONTH).roundToInt(),
+            "month",
+            "months",
+        )
+        else -> Triple(
+            (this / DAYS_PER_YEAR).roundToInt(),
+            "year",
+            "years",
+        )
+    }
+
+    return number to if (number == 1) one else other
+}
+
+/** The set-aside header with its section; the section is null when nothing was put down. */
+private fun setAside(stats: DidNotFinishStats?): Pair<SectionHeaderUiModel.Section, DidNotFinishUiModel?> {
+    if (stats == null) return setAsideHeader(
+        headline = "0 books you didn't finish",
+        description = DESCRIPTION,
+        isLoading = true,
+    ) to loadingDidNotFinish()
 
     if (stats.bookCount == 0) {
-        return YourReadingListUiModel(
-            header = yourReadingListHeader(
-                headline = EMPTY_HEADLINE,
-                description = EMPTY_LINE,
-                isLoading = false,
-            ),
-            didNotFinish = null,
+        return setAsideHeader(
+            headline = EMPTY_HEADLINE,
+            description = EMPTY_LINE,
             isLoading = false,
-        )
+        ) to null
     }
 
     val known = stats.bookCount - stats.unknownStopCount
 
-    return YourReadingListUiModel(
-        header = yourReadingListHeader(
-            headline = "${booksCount(stats.bookCount)} you didn't finish",
-            description = DESCRIPTION + stats.dominantQuarterSentence(known),
-            isLoading = false,
-        ),
-        didNotFinish = DidNotFinishUiModel(
-            stopPointTitle = STOP_POINT_TITLE,
-            stopPoint = stats.stopPointChart(),
-            unknownStopCaption = unknownStopCaption(stats.unknownStopCount),
-            genresTitle = GENRES_TITLE,
-            genres = stats.genreChips(),
-            genresNote = GENRES_NOTE,
-        ),
+    return setAsideHeader(
+        headline = "${booksCount(stats.bookCount)} you didn't finish",
+        description = DESCRIPTION + stats.dominantQuarterSentence(known),
         isLoading = false,
+    ) to DidNotFinishUiModel(
+        stopPointTitle = STOP_POINT_TITLE,
+        stopPoint = stats.stopPointChart(),
+        unknownStopCaption = unknownStopCaption(stats.unknownStopCount),
+        genresTitle = GENRES_TITLE,
+        genres = stats.genreChips(),
+        genresNote = GENRES_NOTE,
     )
 }
 
 private fun yourReadingListHeader(
-    headline: String,
     description: String,
     isLoading: Boolean,
 ): SectionHeaderUiModel.Section = SectionHeaderUiModel.Section(
     eyebrow = atlasChapterEyebrow(AtlasChapter.YOUR_READING_LIST),
+    headline = STILL_TO_COME,
+    description = description,
+    isLoading = isLoading,
+)
+
+private fun setAsideHeader(
+    headline: String,
+    description: String,
+    isLoading: Boolean,
+): SectionHeaderUiModel.Section = SectionHeaderUiModel.Section(
+    eyebrow = SET_ASIDE_EYEBROW,
     headline = headline,
     description = description,
     isLoading = isLoading,
@@ -162,31 +317,72 @@ private fun StopQuarter.label(): String = when (this) {
 /** The quarter as it reads in a sentence, such as "first quarter". */
 private fun StopQuarter.phrase(): String = "${label().lowercase()} quarter"
 
-private fun loadingYourReadingList(): YourReadingListUiModel = YourReadingListUiModel(
+private fun stillToComeLoading(): YourReadingListUiModel = YourReadingListUiModel(
     header = yourReadingListHeader(
+        description = "You added 0 books to your list and read 0.",
+        isLoading = true,
+    ),
+    added = loadingCell(
+        eyebrow = ADDED_EYEBROW,
+        caption = ADDED_CAPTION,
+        isLead = false,
+    ),
+    read = loadingCell(
+        eyebrow = READ_EYEBROW,
+        caption = READ_CAPTION,
+        isLead = true,
+    ),
+    timeOnList = StatTileUiModel(
+        eyebrow = TIME_ON_LIST_EYEBROW,
+        stat = StatNumberUiModel(
+            value = 0.0,
+            format = StatNumberFormat.Plain,
+            isLoading = true,
+        ),
+        variant = StatTileVariant.Compact(
+            unit = "months",
+            caption = "Typical wait from adding a book to starting it, for the 0 books you started.",
+        ),
+    ),
+    setAside = setAsideHeader(
         headline = "0 books you didn't finish",
         description = DESCRIPTION,
         isLoading = true,
     ),
-    didNotFinish = DidNotFinishUiModel(
-        stopPointTitle = STOP_POINT_TITLE,
-        stopPoint = ColumnChartUiModel(
-            columns = StopQuarter.entries.map { quarter ->
-                ColumnUiModel(
-                    fraction = LOADING_COLUMN_FRACTION,
-                    tone = ChartTone.Second,
-                    label = quarter.label(),
-                    value = "",
-                    contentDescription = "",
-                )
-            }.toImmutableList(),
-            showsValues = true,
-            isLoading = true,
-        ),
-        unknownStopCaption = null,
-        genresTitle = GENRES_TITLE,
-        genres = null,
-        genresNote = GENRES_NOTE,
+    didNotFinish = null,
+)
+
+private fun loadingCell(
+    eyebrow: String,
+    caption: String,
+    isLead: Boolean,
+) = VersusCellUiModel(
+    eyebrow = eyebrow,
+    stat = StatNumberUiModel(
+        value = 0.0,
+        isLoading = true,
     ),
-    isLoading = true,
+    caption = caption,
+    isLead = isLead,
+)
+
+private fun loadingDidNotFinish(): DidNotFinishUiModel = DidNotFinishUiModel(
+    stopPointTitle = STOP_POINT_TITLE,
+    stopPoint = ColumnChartUiModel(
+        columns = StopQuarter.entries.map { quarter ->
+            ColumnUiModel(
+                fraction = LOADING_COLUMN_FRACTION,
+                tone = ChartTone.Second,
+                label = quarter.label(),
+                value = "",
+                contentDescription = "",
+            )
+        }.toImmutableList(),
+        showsValues = true,
+        isLoading = true,
+    ),
+    unknownStopCaption = null,
+    genresTitle = GENRES_TITLE,
+    genres = null,
+    genresNote = GENRES_NOTE,
 )

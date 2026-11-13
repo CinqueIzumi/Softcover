@@ -170,7 +170,7 @@ internal fun profileWrittenStatsPreview(): WrittenStats = WrittenStats(
     ),
 )
 
-private fun previewRecordBook(
+internal fun previewRecordBook(
     id: Int,
     title: String,
 ): Book = Book(

@@ -50,6 +50,7 @@ import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 import nl.rhaydus.softcover.core.profile.domain.model.ReadDuration
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingListStats
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
 import nl.rhaydus.softcover.core.profile.domain.model.TimeToFinish
 import nl.rhaydus.softcover.core.profile.domain.model.WrittenStats
@@ -57,6 +58,7 @@ import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveDidNotFinishStats
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveHourlyPagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveMonthlyPagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObservePagesReadUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingListStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveTimeToFinishUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveWrittenStatsUseCase
@@ -85,6 +87,7 @@ class AtlasScopedSectionsCollectorTest {
     private lateinit var observeQuotesSyncedUseCase: ObserveQuotesSyncedUseCase
     private lateinit var observePagesReadUseCase: ObservePagesReadUseCase
     private lateinit var observeDidNotFinishStatsUseCase: ObserveDidNotFinishStatsUseCase
+    private lateinit var observeReadingListStatsUseCase: ObserveReadingListStatsUseCase
     private lateinit var quotesSyncedFlow: MutableStateFlow<Boolean>
     private var pagesReadFor: (StatsRange) -> PagesRead = { emptyPagesRead() }
     private var didNotFinishFor: (StatsRange) -> DidNotFinishStats = { someDidNotFinish() }
@@ -107,6 +110,7 @@ class AtlasScopedSectionsCollectorTest {
         didNotFinishFor = { someDidNotFinish() }
         observePagesReadUseCase = mockk()
         observeDidNotFinishStatsUseCase = mockk()
+        observeReadingListStatsUseCase = mockk()
         observeWrittenStatsUseCase = mockk()
         observeQuotesSyncedUseCase = mockk()
         readDatesBackfilledFlow = MutableStateFlow(true)
@@ -176,6 +180,10 @@ class AtlasScopedSectionsCollectorTest {
         every {
             observeDidNotFinishStatsUseCase(any())
         } answers { flowOf(didNotFinishFor(firstArg())) }
+
+        every {
+            observeReadingListStatsUseCase(any())
+        } returns flowOf(ReadingListStats())
     }
 
     private fun emptyPagesRead(): PagesRead = PagesRead(
@@ -285,6 +293,10 @@ class AtlasScopedSectionsCollectorTest {
         every {
             dependencies.observeDidNotFinishStatsUseCase
         } returns observeDidNotFinishStatsUseCase
+
+        every {
+            dependencies.observeReadingListStatsUseCase
+        } returns observeReadingListStatsUseCase
 
         return launch {
             AtlasScopedSectionsCollector().onLaunch(
@@ -1042,7 +1054,7 @@ class AtlasScopedSectionsCollectorTest {
             backfilledFlow.value = false
             val job = launchCollector()
             val heroWhileLoading = stateFlow.value.opening.hero.stat.shouldNotBeNull().isLoading
-            val listWhileLoading = stateFlow.value.yourReadingList.isLoading
+            val listWhileLoading = stateFlow.value.yourReadingList.header.isLoading
 
             // ----- Act -----
             backfilledFlow.value = true
@@ -1051,7 +1063,7 @@ class AtlasScopedSectionsCollectorTest {
             heroWhileLoading shouldBe true
             listWhileLoading shouldBe true
             stateFlow.value.opening.hero.stat.shouldNotBeNull().isLoading shouldBe false
-            stateFlow.value.yourReadingList.isLoading shouldBe false
+            stateFlow.value.yourReadingList.header.isLoading shouldBe false
             job.cancel()
         }
 
@@ -1093,7 +1105,23 @@ class AtlasScopedSectionsCollectorTest {
 
             // ----- Assert -----
             requested.last() shouldBe scopeRange
-            stateFlow.value.yourReadingList.didNotFinish.shouldNotBeNull()
+            stateFlow.value.yourReadingList.setAside.headlineText shouldBe "3 books you didn't finish"
+            job.cancel()
+        }
+
+        @Test
+        fun `keeps the still to come loading until the read dates are backfilled`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            readDatesBackfilledFlow.value = false
+            val job = launchCollector()
+            val whileLoading = stateFlow.value.yourReadingList.header.isLoading
+
+            // ----- Act -----
+            readDatesBackfilledFlow.value = true
+
+            // ----- Assert -----
+            whileLoading shouldBe true
+            stateFlow.value.yourReadingList.header.isLoading shouldBe false
             job.cancel()
         }
     }

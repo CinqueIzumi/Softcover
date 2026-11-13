@@ -32,16 +32,19 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeOfDayChartUi
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeToFinishUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.topAuthorRows
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.topAuthorsCaption
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.waitingLongestUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearAtAGlanceHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearGrid
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.yourReadingListUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileDidNotFinishPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileHourlyPagesPreview
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileLongestWaitingPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileMonthlyPagesPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileOwnTagsPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profilePagesReadPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingActivityPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingHistoryPreview
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingListStatsPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingStatsPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileTimeToFinishPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileWrittenStatsPreview
@@ -154,7 +157,13 @@ internal val StatsAtlasPreviewState = StatsAtlasUiState(
         timeToFinish = profileTimeToFinishPreview(),
         scope = StatsScope.AllTime,
     ),
-    yourReadingList = yourReadingListUiModel(profileDidNotFinishPreview()),
+    yourReadingList = yourReadingListUiModel(
+        stats = profileReadingListStatsPreview(),
+        booksRead = PreviewReadingStats.booksRead,
+        didNotFinish = profileDidNotFinishPreview(),
+        scope = StatsScope.AllTime,
+    ),
+    waitingLongest = waitingLongestUiModel(profileLongestWaitingPreview()),
     inYourWords = inYourWordsUiModel(
         written = profileWrittenStatsPreview(),
         ownTags = profileOwnTagsPreview(),

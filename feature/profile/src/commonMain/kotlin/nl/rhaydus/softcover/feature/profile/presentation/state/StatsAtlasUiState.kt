@@ -73,6 +73,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.toRatingsHistogr
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.toRatingsHistogramHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.topAuthorRows
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.topAuthorsCaption
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.waitingLongestUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearHistoryCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearHistoryChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.yourReadingListUiModel
@@ -220,7 +221,16 @@ internal data class StatsAtlasUiState(
         scope = StatsScope.AllTime,
     ),
 
-    val yourReadingList: YourReadingListUiModel = yourReadingListUiModel(stats = null),
+    /** Mapped by `AtlasScopedSectionsCollector`; masked while loading. */
+    val yourReadingList: YourReadingListUiModel = yourReadingListUiModel(
+        stats = null,
+        booksRead = null,
+        didNotFinish = null,
+        scope = StatsScope.AllTime,
+    ),
+
+    /** Mapped by `WaitingLongestCollector`; scope-free, and stand-in rows until the first emission. */
+    val waitingLongest: WaitingLongestUiModel = waitingLongestUiModel(longest = null),
 
     val inYourWords: InYourWordsUiModel = inYourWordsUiModel(
         written = null,

@@ -14,12 +14,14 @@ import nl.rhaydus.softcover.core.profile.domain.ProfileRefreshGate
 import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveDidNotFinishStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveHourlyPagesReadUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveLongestWaitingUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveMonthlyPagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObservePageCreditInputsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObservePagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingActivityUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingDayUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingHistoryUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingListStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveTimeToFinishUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
@@ -79,6 +81,21 @@ val profileModule = module {
         ObserveDidNotFinishStatsUseCase(
             getDidNotFinishUserBooksUseCase = get(),
             observeUserTagsByBookUseCase = get(),
+            appDispatchers = get(),
+        )
+    }
+
+    factory {
+        ObserveReadingListStatsUseCase(
+            getAllUserBooksUseCase = get(),
+            appDispatchers = get(),
+        )
+    }
+
+    factory {
+        ObserveLongestWaitingUseCase(
+            getAllUserBooksUseCase = get(),
+            getAllUserListsUseCase = get(),
             appDispatchers = get(),
         )
     }

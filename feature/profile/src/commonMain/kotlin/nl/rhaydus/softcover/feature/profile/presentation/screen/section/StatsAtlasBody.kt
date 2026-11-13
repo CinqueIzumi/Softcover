@@ -28,6 +28,7 @@ internal fun ColumnScope.StatsAtlasBody(
     runAction: (StatsAtlasAction) -> Unit,
     onBookCardEvent: (BookCardEvent) -> Unit,
     onRecordEvent: (BookCardEvent) -> Unit,
+    onWaitingEvent: (BookCardEvent) -> Unit,
 ) {
     PageMasthead(model = state.masthead)
 
@@ -132,6 +133,8 @@ internal fun ColumnScope.StatsAtlasBody(
 
     YourReadingListChapter(
         model = state.yourReadingList,
+        waiting = state.waitingLongest,
+        onWaitingEvent = onWaitingEvent,
         jumper = jumper,
     )
 
