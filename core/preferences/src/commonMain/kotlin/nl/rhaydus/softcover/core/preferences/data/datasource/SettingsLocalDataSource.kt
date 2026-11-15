@@ -112,9 +112,9 @@ interface SettingsLocalDataSource {
 
     suspend fun setShelfSwipeEnabled(enabled: Boolean)
 
-    val hideUntaggedAuthors: Flow<Boolean>
+    val hideBooksWithoutDetail: Flow<Boolean>
 
-    suspend fun setHideUntaggedAuthors(enabled: Boolean)
+    suspend fun setHideBooksWithoutDetail(enabled: Boolean)
 
     val uiScale: Flow<UiScale>
 
@@ -383,13 +383,13 @@ internal class SettingsLocalDataSourceImpl(
         }
     }
 
-    override val hideUntaggedAuthors: Flow<Boolean> = appSettingsDataStore.store.data
-        .map { it.hideUntaggedAuthors }
+    override val hideBooksWithoutDetail: Flow<Boolean> = appSettingsDataStore.store.data
+        .map { it.hideBooksWithoutDetail }
         .distinctUntilChanged()
 
-    override suspend fun setHideUntaggedAuthors(enabled: Boolean) {
+    override suspend fun setHideBooksWithoutDetail(enabled: Boolean) {
         appSettingsDataStore.store.updateData { entity ->
-            entity.copy(hideUntaggedAuthors = enabled)
+            entity.copy(hideBooksWithoutDetail = enabled)
         }
     }
 

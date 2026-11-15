@@ -5,19 +5,19 @@ import nl.rhaydus.softcover.feature.profile.presentation.event.StatsAtlasEvent
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.StatsAtlasDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasLocalVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
-import nl.rhaydus.softcover.feature.profile.presentation.state.hideUntaggedAuthorsToggleFor
+import nl.rhaydus.softcover.feature.profile.presentation.state.hideBooksWithoutDetailToggleFor
 import nl.rhaydus.toad.ActionScope
 
-internal class HideUntaggedAuthorsCollector : StatsAtlasCollector {
+internal class HideBooksWithoutDetailCollector : StatsAtlasCollector {
     override suspend fun onLaunch(
         scope: ActionScope<StatsAtlasUiState, StatsAtlasEvent, StatsAtlasLocalVariables>,
         dependencies: StatsAtlasDependencies,
     ) {
-        dependencies.getHideUntaggedAuthorsAsFlowUseCase().collectLatest { hide ->
+        dependencies.getHideBooksWithoutDetailAsFlowUseCase().collectLatest { hide ->
             scope.setState {
                 it.copy(
-                    hideUntaggedAuthors = hide,
-                    hideUntaggedAuthorsToggle = hideUntaggedAuthorsToggleFor(hide = hide),
+                    hideBooksWithoutDetail = hide,
+                    hideBooksWithoutDetailToggle = hideBooksWithoutDetailToggleFor(hide = hide),
                 )
             }
         }

@@ -213,8 +213,8 @@ inline the integers at call sites, and re-confirm with the Hardcover team before
     misgenders real people.
   - **`null` is the unknown case and is distinct from `3`.** A statistic must never merge them or
     relabel unknown as "other". Unknown may be surfaced as its own clearly-distinct segment — rendered
-    muted, in a neutral role, and labelled "Unknown" (as the profile author-representation section
-    does, where it is a share of *all* distinct authors) — but it is never counted as, blended into, or
+    muted, in a neutral role, and labelled "Unknown" (as the profile diversity chapter does,
+    where it is a share of *all* finished books) — but it is never counted as, blended into, or
     renamed to the "other" category, which is a real gender bucket in its own right.
   - The bucket also contains **non-person entities** (publishers, design studios, collective
     pseudonyms). Filter them out before charting, or the "other" share reads inflated.

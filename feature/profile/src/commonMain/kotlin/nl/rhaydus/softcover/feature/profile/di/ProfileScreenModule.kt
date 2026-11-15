@@ -10,7 +10,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.collector.AtlasScopeChi
 import nl.rhaydus.softcover.feature.profile.presentation.collector.AtlasScopedSectionsCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.DayDetailCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.GenreRankingCollector
-import nl.rhaydus.softcover.feature.profile.presentation.collector.HideUntaggedAuthorsCollector
+import nl.rhaydus.softcover.feature.profile.presentation.collector.HideBooksWithoutDetailCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.ProfileCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.ReadingLifeCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.ReadingLifeShareCardCollector
@@ -63,6 +63,7 @@ val profileScreenModule = module {
             initializers = getAll(),
             observeUserProfileDataUseCase = get(),
             observeReadingStatsUseCase = get(),
+            observeDiversityStatsUseCase = get(),
             observePagesReadUseCase = get(),
             observeDidNotFinishStatsUseCase = get(),
             observeMonthlyPagesReadUseCase = get(),
@@ -78,8 +79,8 @@ val profileScreenModule = module {
             observeLongestWaitingUseCase = get(),
             observeWrittenStatsUseCase = get(),
             observeQuotesSyncedUseCase = get(),
-            getHideUntaggedAuthorsAsFlowUseCase = get(),
-            setHideUntaggedAuthorsUseCase = get(),
+            getHideBooksWithoutDetailAsFlowUseCase = get(),
+            setHideBooksWithoutDetailUseCase = get(),
             observeBooksByIdsUseCase = get(),
             observeCurrentDateUseCase = get(),
         )
@@ -90,7 +91,7 @@ val profileScreenModule = module {
     factory { RecentlyLovedCardsCollector() } bind StatsAtlasCollector::class
     factory { WaitingLongestCollector() } bind StatsAtlasCollector::class
     factory { AtlasScopedSectionsCollector() } bind StatsAtlasCollector::class
-    factory { HideUntaggedAuthorsCollector() } bind StatsAtlasCollector::class
+    factory { HideBooksWithoutDetailCollector() } bind StatsAtlasCollector::class
     factory { YearMetricToggleCollector() } bind StatsAtlasCollector::class
     factory { YearHistoryCollector() } bind StatsAtlasCollector::class
     factory { GenreRankingCollector() } bind StatsAtlasCollector::class

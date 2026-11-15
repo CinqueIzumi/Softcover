@@ -20,7 +20,6 @@ import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatTileUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.domain.model.StatsScope
-import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
@@ -40,13 +39,10 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasContentsHea
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasContentsRows
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasOpeningUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasScopeChips
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.authorsEmptyCaption
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.authorsScopeCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.currentStreakTile
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicBreakdownUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.diversityChapterUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.formatSplitCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.formatSplitChart
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.genderBreakdownUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreEmptyCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasFormatSplit
@@ -85,23 +81,19 @@ internal data class StatsAtlasUiState(
     val readingHistory: ReadingHistory? = null,
     val isLoading: Boolean = true,
 
-    /** Built by `AtlasScopeChipsCollector`; the chip keyed [selectedScopeKey] is the selected one. */
     val scopeChips: ChipSet<StatsScope> = atlasScopeChips(
         yearsRead = emptyList(),
         selectedKey = ALL_TIME_SCOPE_KEY,
     ),
     val selectedScopeKey: String = ALL_TIME_SCOPE_KEY,
 
-    /** Mapped by `AtlasScopedSectionsCollector` together with the sections it describes. */
     val scopeLine: String = ALL_TIME_SCOPE_LINE,
     val recentlyLoved: BookCardSet<RecentlyLovedEntry> = BookCardSet.standIns(RECENTLY_LOVED_STAND_IN_CARDS),
-    val hideUntaggedAuthors: Boolean = false,
+    val hideBooksWithoutDetail: Boolean = false,
 
-    /** Mapped by `HideUntaggedAuthorsCollector` alongside [hideUntaggedAuthors]. */
-    val hideUntaggedAuthorsToggle: ToggleRowUiModel<String> = hideUntaggedAuthorsToggleFor(hide = false),
+    val hideBooksWithoutDetailToggle: ToggleRowUiModel<String> = hideBooksWithoutDetailToggleFor(hide = false),
     val selectedYearMetric: YearMetric = YearMetric.BOOKS,
 
-    /** Mapped by `YearMetricToggleCollector` off [selectedYearMetric] and whether the reading history has loaded. */
     val yearMetricToggle: SegmentedControlUiModel<YearMetric> = yearMetricToggleFor(
         selected = YearMetric.BOOKS,
         enabled = false,
@@ -116,7 +108,6 @@ internal data class StatsAtlasUiState(
         metric = YearMetric.BOOKS,
     ),
 
-    /** Mapped by `GenreRankingCollector` off [readingStats], [genreRankingShownCount] and [genreEmptyCaption]. */
     val genreHeader: SectionHeaderUiModel.Section = loadingGenreHeader(),
     val genreRanking: RankedBarsUiModel = genreRankingUiModel(
         slices = null,
@@ -126,39 +117,17 @@ internal data class StatsAtlasUiState(
     val genreRankingShowLess: PillButtonUiModel? = null,
     val genreRankingShownCount: Int = COLLAPSED_GENRE_COUNT,
 
-    /** Mapped by `AtlasScopedSectionsCollector` together with the stats it describes. */
     val genreEmptyCaption: String = genreEmptyCaption(booksRead = 0),
 
-    /**
-     * Every author by default, or only the ones tagged for each attribute once [hideUntaggedAuthors]
-     * is on.
-     */
-    val genderBreakdown: DemographicBreakdownUiModel = genderBreakdownUiModel(
-        demographics = null,
-        hideUntaggedAuthors = false,
-    ),
-    val bipocBreakdown: DemographicBreakdownUiModel = demographicBreakdownUiModel(
-        breakdown = null,
-        hideUntaggedAuthors = false,
-    ),
-    val lgbtqBreakdown: DemographicBreakdownUiModel = demographicBreakdownUiModel(
-        breakdown = null,
-        hideUntaggedAuthors = false,
-    ),
-    val authorsScopeCaption: String = authorsScopeCaption(hideUntaggedAuthors = false),
-    val authorsEmptyCaption: String = authorsEmptyCaption(
-        hideUntaggedAuthors = false,
-        booksRead = 0,
+    val diversityChapter: DiversityChapterUiModel = diversityChapterUiModel(
+        stats = null,
+        hideBooksWithoutDetail = false,
     ),
     val ratingsChart: ColumnChartUiModel = ratingsChartUiModel(null),
     val ratingsAverage: StatNumberUiModel = ratingsAverageUiModel(null),
 
     val ratingsEmptyCaption: String = ratingsEmptyCaption(booksRead = 0),
 
-    /**
-     * Mapped by `YearGridCollector`, which keys all of them to the atlas year;
-     * [atlasStreaks] feeds the day sheet.
-     */
     val yearAtAGlanceHeader: SectionHeaderUiModel = loadingYearAtAGlanceHeader(),
     val yearGrid: YearGridUiModel = loadingYearGrid(),
     val currentStreakTile: StatTileUiModel = currentStreakTile(
@@ -174,7 +143,6 @@ internal data class StatsAtlasUiState(
     val atlasStreaks: AtlasStreaks = AtlasStreaks(),
     val selectedReadingDay: LocalDate? = null,
 
-    /** Mapped by `DayDetailCollector` off [selectedReadingDay]; a row's book rides along as the pending intent. */
     val dayDetailSheet: SheetSession<DayDetailUiModel, DayDetailBook> = SheetSession.Closed,
     val timeOfDayTitle: String = TIME_OF_DAY_TITLE,
     val timeOfDayCaption: String = loadingTimeOfDayCaption(),
@@ -182,13 +150,12 @@ internal data class StatsAtlasUiState(
     val timeOfDayFootnote: String = TIME_OF_DAY_FOOTNOTE,
     val hasTimeOfDayPages: Boolean = hasTimeOfDayPages(null),
 
-    /** Mapped by `AtlasScopedSectionsCollector`; [monthlyPagesMonthSetKey] is null while loading. */
+    /** [monthlyPagesMonthSetKey] is null while loading. */
     val monthlyPagesHeader: SectionHeaderUiModel = loadingMonthlyPagesHeader(),
     val monthlyPagesChart: ColumnChartUiModel = loadingMonthlyPagesChartUiModel(),
     val hasMonthlyPages: Boolean = hasMonthlyPages(null),
     val monthlyPagesMonthSetKey: String? = monthlyPagesMonthSetKey(null),
 
-    /** Mapped by `AtlasScopedSectionsCollector`; the rows are masked stand-ins while loading. */
     val topAuthorsTitle: String = TOP_AUTHORS_TITLE,
     val topAuthorsCaption: String = topAuthorsCaption(
         topAuthors = null,
@@ -198,7 +165,6 @@ internal data class StatsAtlasUiState(
     val topAuthorRows: ImmutableList<BookCardUiModel> = topAuthorRows(null),
     val hasTopAuthors: Boolean = hasTopAuthors(null),
 
-    /** Mapped by `AtlasScopedSectionsCollector`; the chart is a masked stand-in while loading. */
     val formatSplitTitle: String = FORMAT_SPLIT_TITLE,
     val formatSplitCaption: String = formatSplitCaption(
         split = null,
@@ -208,20 +174,17 @@ internal data class StatsAtlasUiState(
     val formatSplitChart: ProportionChartUiModel = formatSplitChart(null),
     val hasFormatSplit: Boolean = hasFormatSplit(null),
 
-    /** Mapped by `AtlasScopedSectionsCollector`; masked while loading. */
     val timeToFinish: TimeToFinishUiModel = timeToFinishUiModel(
         timeToFinish = null,
         scope = StatsScope.AllTime,
     ),
 
-    /** Mapped by `AtlasScopedSectionsCollector`; masked while loading. */
     val readingRecords: ReadingRecordsUiModel = readingRecordsUiModel(
         stats = null,
         timeToFinish = null,
         scope = StatsScope.AllTime,
     ),
 
-    /** Mapped by `AtlasScopedSectionsCollector`; masked while loading. */
     val yourReadingList: YourReadingListUiModel = yourReadingListUiModel(
         stats = null,
         booksRead = null,
@@ -229,7 +192,6 @@ internal data class StatsAtlasUiState(
         scope = StatsScope.AllTime,
     ),
 
-    /** Mapped by `WaitingLongestCollector`; scope-free, and stand-in rows until the first emission. */
     val waitingLongest: WaitingLongestUiModel = waitingLongestUiModel(longest = null),
 
     val inYourWords: InYourWordsUiModel = inYourWordsUiModel(
@@ -238,15 +200,10 @@ internal data class StatsAtlasUiState(
         scope = StatsScope.AllTime,
     ),
 
-    /** Mapped by `AtlasScopedSectionsCollector` off [readingStats]. */
     val opening: AtlasOpeningUiModel = atlasOpeningUiModel(null),
     val contentsHeader: SectionHeaderUiModel = atlasContentsHeader(),
     val contentsRows: ImmutableList<AtlasContentsRowUiModel> = atlasContentsRows(),
     val temporaryChapterHeader: SectionHeaderUiModel = atlasChapterHeader(AtlasChapter.TEMPORARY),
-    val authorRepresentationHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
-        eyebrow = "Who you read",
-        headline = "Who you've been reading",
-    ),
     val recentlyLovedHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "Recently loved",
         headline = "Recent favourites",
@@ -265,9 +222,6 @@ internal data class StatsAtlasUiState(
     ),
     val topBar: TopBarUiModel = TopBarUiModel(),
 ) : UiState {
-    private val allAuthorDemographics: AuthorDemographics
-        get() = readingStats?.authorDemographics ?: AuthorDemographics()
-
     /** The scope [selectedScopeKey] stands for; every year until the chip set holds it. */
     val selectedScope: StatsScope
         get() = scopeChips[selectedScopeKey] ?: StatsScope.AllTime
@@ -284,16 +238,4 @@ internal data class StatsAtlasUiState(
      */
     val hasRecentlyLoved: Boolean
         get() = readingHistory?.recentlyLoved.orEmpty().isNotEmpty()
-
-    /**
-     * Whether any of the three breakdowns actually has an untagged bucket to drop. Reads the
-     * *unfiltered* data on purpose: the breakdown models have already zeroed those buckets while the
-     * switch is on, so deriving it from that would make the switch disappear the moment it was used.
-     */
-    val hasUntaggedAuthors: Boolean
-        get() = with(allAuthorDemographics) {
-            unknownGenderCount > 0 ||
-                bipocBreakdown.unknownCount > 0 ||
-                lgbtqBreakdown.unknownCount > 0
-        }
 }

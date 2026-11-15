@@ -12,6 +12,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnGenreRankingShowLessAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnGenreRankingShowMoreAction
+import nl.rhaydus.softcover.feature.profile.presentation.action.OnHideBooksWithoutDetailToggledAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnMostQuotedBookTappedAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnOwnTagTappedAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnReadingDayTappedAction
@@ -148,6 +149,24 @@ internal fun ColumnScope.StatsAtlasBody(
             runAction(OnOwnTagTappedAction(tagName = it))
         },
     )
+
+    Spacer(modifier = Modifier.height(Spacing.section))
+
+    Column(
+        modifier = Modifier.atlasChapter(
+            jumper,
+            AtlasChapter.DIVERSITY_AND_PUBLICATION,
+        ),
+    ) {
+        DiversityChapter(
+            model = state.diversityChapter,
+            hideBooksWithoutDetailToggle = state.hideBooksWithoutDetailToggle,
+            isLoading = state.isReadingLifeLoading,
+            onHideBooksWithoutDetailChange = {
+                runAction(OnHideBooksWithoutDetailToggledAction(newValue = it))
+            },
+        )
+    }
 
     Spacer(modifier = Modifier.height(Spacing.section))
 

@@ -31,9 +31,9 @@
   book without one counts in All time only. Pages read credit logged progress on its day, a Read book's
   remainder on its finish date and a Did not finish book's pages up to its stop point on its stop date. A
   reading day has pages in the on-device history. "Added" is Hardcover's date added, the day a book
-  entered the library.
+  entered the library. Chapter 08 alone also dates a book by a read's start and by logged progress (below).
 - Contents rows (two-digit number, title, caption, chevron) scroll to their chapter's top. A chapter opens
-  with an eyebrow "02 · Title". Numbers follow the design's chapter list (01, 02, 03, 05, 06 and 99), not
+  with an eyebrow "02 · Title". Numbers follow the design's chapter list (01, 02, 03, 05, 06, 08 and 99), not
   position, so row and header always agree.
 - A tapped book opens book detail, prefetched on press; a tapped tag closes the Atlas and opens Library on
   the Read shelf (All when Read is hidden) filtered to that tag.
@@ -43,8 +43,8 @@
 ### Statistics charts
 
 - Monochrome `primary` with `ChartTone` alphas; shape carries the data. Flat bars, never the wavy indicator.
-- `ProportionChart` only for exclusive, exhaustive categories (gender: up to three ranked slices plus
-  `Unknown` last, muted). `RankedBars` for overlapping ones (genres, each a share of books; position,
+- `ProportionChart` only for exclusive, exhaustive categories (gender: up to three ranked known slices,
+  then `Mixed`, then `Unknown` last, muted). `RankedBars` for overlapping ones (genres, each a share of books; position,
   name over a track, share, with each bar filled relative to the lead row, which is always full); the
   description names what the shares count.
 - The format split is a `Keys` `ProportionChart` with a fixed format order and tones (Print `Lead`, Ebook
@@ -57,10 +57,15 @@
   future `Fifth`; ties go to the earliest month; labels on every third column); time of day (eight
   three-hour blocks, every column labelled and valued with its share); and the half-star
   ratings histogram (whole stars `Lead`, halves `Fourth`, labels under whole stars only).
-- "Who you read" BIPOC / LGBTQ+ bars: fixed Yes / No / Unknown, a zero bucket draws nothing, caption
-  "Yes 2 · No 5 · Unknown 23 · of 30 authors". The persisted "Hide untagged authors" `ToggleRow`
-  renormalises over tagged authors ("of N tagged authors"), shows only when an untagged bucket exists,
-  and sits outside the empty branch.
+- Chapter 08 "Diversity and publication": five bars counted in books (gender, authors of colour, LGBTQ+
+  authors, BIPOC characters, LGBTQ+ characters; the character bars are the reader's own How it read
+  answers). Books without a bar's detail are always their own muted bucket, a zero bucket draws nothing,
+  and each caption names its own total ("Yes 2 · No 5 · Unknown 23 · of 30 books"). One persisted "Hide
+  books without this detail" `ToggleRow` drops those buckets everywhere and renormalises per bar ("of N
+  books with this detail"); it shows only when a bucket exists and sits outside the empty branch.
+  The chapter counts every Reading, Paused, Read and Did not finish book the reader read in the scope
+  window, each once: a read finished or started in it, a stop date in it, or progress logged on a day in
+  it. All time counts every book of those statuses.
 
 ### Profile share sheet
 

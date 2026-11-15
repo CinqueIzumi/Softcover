@@ -1,17 +1,12 @@
 package nl.rhaydus.softcover.core.profile.domain.mapper
 
 import kotlinx.datetime.LocalDate
-import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.Gender
 import nl.rhaydus.softcover.core.domain.model.StatsRange
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
-import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorRanking
-import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.FormatSplit
-import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
 import nl.rhaydus.softcover.core.profile.domain.model.LongestBook
 import nl.rhaydus.softcover.core.profile.domain.model.OwnTagCount
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
@@ -38,7 +33,6 @@ internal fun List<Book>.toReadingStats(
         booksRead = inRange.size,
         genres = inRange.toGenreBreakdown(userTagsByBookId),
         ratings = inRange.toRatingsDistribution(),
-        authorDemographics = inRange.toAuthorDemographics(),
         topAuthors = inRange.toTopAuthors(),
         formatSplit = inRange.toFormatSplit(),
         longestBook = inRange.longestBook(),
@@ -138,46 +132,6 @@ private fun List<Book>.toOwnTagCounts(userTagsByBookId: Map<Int, List<UserTag>>)
             .thenBy { it.name },
     )
 
-// Authors are deduped by id across the range, so one who wrote many of the books counts once. A
-// null gender is Gender.Unknown, a bucket of its own pinned last and never folded into Other. No
-// field identifies non-person contributors such as anthology placeholders, so they are counted.
-private fun List<Book>.toAuthorDemographics(): AuthorDemographics {
-    val authors = flatMap { it.authors }.distinctBy { it.id }
-    val totalAuthors = authors.size
-    val genderCounts = authors.groupingBy { it.gender }.eachCount()
-    val unknownGenderCount = genderCounts[Gender.Unknown] ?: 0
-
-    val knownGenderSlices = genderCounts.entries
-        .filter { it.key != Gender.Unknown }
-        .sortedByDescending { it.value }
-        .map { (gender, count) ->
-            GenderSlice(
-                gender = gender,
-                count = count,
-                fraction = count.toDouble() / totalAuthors,
-            )
-        }
-
-    val genderSlices = if (unknownGenderCount > 0) {
-        knownGenderSlices +
-            GenderSlice(
-                gender = Gender.Unknown,
-                count = unknownGenderCount,
-                fraction = unknownGenderCount.toDouble() / totalAuthors,
-            )
-    } else {
-        knownGenderSlices
-    }
-
-    return AuthorDemographics(
-        genderSlices = genderSlices,
-        knownGenderCount = totalAuthors - unknownGenderCount,
-        unknownGenderCount = unknownGenderCount,
-        bipocBreakdown = authors.toDemographicBreakdown { it.isBipoc },
-        lgbtqBreakdown = authors.toDemographicBreakdown { it.isLgbtq },
-    )
-}
-
 private fun List<Book>.toTopAuthors(): List<AuthorRanking> {
     val booksByAuthor = flatMap { book -> book.primaryAuthors.map { it to book } }
         .groupBy { it.first.id }
@@ -207,15 +161,4 @@ private fun List<Book>.toTopAuthors(): List<AuthorRanking> {
                 .thenBy { it.author.name },
         )
         .take(TOP_AUTHOR_COUNT)
-}
-
-// Every author lands in exactly one of yes, no or unknown, so the breakdown totals the author count.
-private fun List<Author>.toDemographicBreakdown(attribute: (Author) -> Boolean?): DemographicBreakdown {
-    val values = map(attribute)
-
-    return DemographicBreakdown(
-        yesCount = values.count { it == true },
-        noCount = values.count { it == false },
-        unknownCount = values.count { it == null },
-    )
 }

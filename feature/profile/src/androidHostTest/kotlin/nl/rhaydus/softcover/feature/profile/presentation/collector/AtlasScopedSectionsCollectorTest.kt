@@ -29,14 +29,17 @@ import nl.rhaydus.softcover.core.domain.model.StatsRange
 import nl.rhaydus.softcover.core.domain.model.StatsScope
 import nl.rhaydus.softcover.core.domain.model.StatsWindow
 import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.GetHideUntaggedAuthorsAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetHideBooksWithoutDetailAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveQuotesSyncedUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadDatesBackfilledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsBackfilledUseCase
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorRanking
+import nl.rhaydus.softcover.core.profile.domain.model.CharacterBreakdown
+import nl.rhaydus.softcover.core.profile.domain.model.CharacterRepresentation
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.DidNotFinishStats
+import nl.rhaydus.softcover.core.profile.domain.model.DiversityStats
 import nl.rhaydus.softcover.core.profile.domain.model.FormatSplit
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
@@ -55,6 +58,7 @@ import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
 import nl.rhaydus.softcover.core.profile.domain.model.TimeToFinish
 import nl.rhaydus.softcover.core.profile.domain.model.WrittenStats
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveDidNotFinishStatsUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveDiversityStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveHourlyPagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveMonthlyPagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObservePagesReadUseCase
@@ -64,7 +68,6 @@ import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveTimeToFinishUseCa
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveWrittenStatsUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.event.StatsAtlasEvent
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasScopeChips
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicBreakdownUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.statsScopeKey
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.StatsAtlasDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.AtlasChapter
@@ -77,10 +80,11 @@ import org.junit.jupiter.api.Test
 
 class AtlasScopedSectionsCollectorTest {
     private lateinit var observeReadingStatsUseCase: ObserveReadingStatsUseCase
+    private lateinit var observeDiversityStatsUseCase: ObserveDiversityStatsUseCase
     private lateinit var observeMonthlyPagesReadUseCase: ObserveMonthlyPagesReadUseCase
     private lateinit var observeHourlyPagesReadUseCase: ObserveHourlyPagesReadUseCase
     private lateinit var observeReadingStatsBackfilledUseCase: ObserveReadingStatsBackfilledUseCase
-    private lateinit var getHideUntaggedAuthorsAsFlowUseCase: GetHideUntaggedAuthorsAsFlowUseCase
+    private lateinit var getHideBooksWithoutDetailAsFlowUseCase: GetHideBooksWithoutDetailAsFlowUseCase
     private lateinit var observeTimeToFinishUseCase: ObserveTimeToFinishUseCase
     private lateinit var observeReadDatesBackfilledUseCase: ObserveReadDatesBackfilledUseCase
     private lateinit var observeWrittenStatsUseCase: ObserveWrittenStatsUseCase
@@ -99,6 +103,7 @@ class AtlasScopedSectionsCollectorTest {
     private lateinit var scope: ActionScope<StatsAtlasUiState, StatsAtlasEvent, StatsAtlasLocalVariables>
     private val observedRanges: MutableList<StatsRange> = mutableListOf()
     private var statsFor: (StatsRange) -> ReadingStats = { ReadingStats() }
+    private var diversityFor: (StatsRange) -> DiversityStats = { DiversityStats() }
     private var timeToFinishFor: (StatsRange) -> TimeToFinish = { emptyTimeToFinish() }
 
     @BeforeEach
@@ -117,14 +122,16 @@ class AtlasScopedSectionsCollectorTest {
         hideFlow = MutableStateFlow(false)
         observedRanges.clear()
         statsFor = { ReadingStats() }
+        diversityFor = { DiversityStats() }
         timeToFinishFor = { emptyTimeToFinish() }
         observeTimeToFinishUseCase = mockk()
         observeReadDatesBackfilledUseCase = mockk()
         observeReadingStatsUseCase = mockk()
+        observeDiversityStatsUseCase = mockk()
         observeMonthlyPagesReadUseCase = mockk()
         observeHourlyPagesReadUseCase = mockk()
         observeReadingStatsBackfilledUseCase = mockk()
-        getHideUntaggedAuthorsAsFlowUseCase = mockk()
+        getHideBooksWithoutDetailAsFlowUseCase = mockk()
         stateFlow = MutableStateFlow(stateFor(StatsScope.AllTime))
 
         scope = ActionScope(
@@ -142,6 +149,12 @@ class AtlasScopedSectionsCollectorTest {
         }
 
         every {
+            observeDiversityStatsUseCase(any())
+        } answers {
+            flowOf(diversityFor(firstArg()))
+        }
+
+        every {
             observeMonthlyPagesReadUseCase(any())
         } returns flowOf(MonthlyPages.AcrossYears(pages = List(12) { 0 }))
 
@@ -154,7 +167,7 @@ class AtlasScopedSectionsCollectorTest {
         } returns backfilledFlow
 
         every {
-            getHideUntaggedAuthorsAsFlowUseCase()
+            getHideBooksWithoutDetailAsFlowUseCase()
         } returns hideFlow
 
         every {
@@ -255,6 +268,10 @@ class AtlasScopedSectionsCollectorTest {
         } returns observeReadingStatsUseCase
 
         every {
+            dependencies.observeDiversityStatsUseCase
+        } returns observeDiversityStatsUseCase
+
+        every {
             dependencies.observeMonthlyPagesReadUseCase
         } returns observeMonthlyPagesReadUseCase
 
@@ -267,8 +284,8 @@ class AtlasScopedSectionsCollectorTest {
         } returns observeReadingStatsBackfilledUseCase
 
         every {
-            dependencies.getHideUntaggedAuthorsAsFlowUseCase
-        } returns getHideUntaggedAuthorsAsFlowUseCase
+            dependencies.getHideBooksWithoutDetailAsFlowUseCase
+        } returns getHideBooksWithoutDetailAsFlowUseCase
 
         every {
             dependencies.observeTimeToFinishUseCase
@@ -547,7 +564,7 @@ class AtlasScopedSectionsCollectorTest {
             // ----- Assert -----
             stateFlow.value.genreEmptyCaption shouldBe "No finished books in 2025."
             stateFlow.value.ratingsEmptyCaption shouldBe "No finished books in 2025."
-            stateFlow.value.authorsEmptyCaption shouldBe "No finished books in 2025."
+            stateFlow.value.diversityChapter.emptyCaption shouldBe "No books read in 2025."
             stateFlow.value.heroCaption() shouldBe "No pages read in 2025."
             job.cancel()
         }
@@ -601,18 +618,25 @@ class AtlasScopedSectionsCollectorTest {
         }
 
         @Test
-        fun `hide untagged authors drops the unknown authors from the scoped demographics`() = runTest(UnconfinedTestDispatcher()) {
+        fun `hide books without detail drops the unknown and not answered buckets`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             hideFlow.value = true
 
-            statsFor = {
-                ReadingStats(
-                    booksRead = 4,
+            diversityFor = {
+                DiversityStats(
+                    booksRead = 12,
                     authorDemographics = AuthorDemographics(
                         bipocBreakdown = DemographicBreakdown(
                             yesCount = 2,
                             noCount = 1,
                             unknownCount = 5,
+                        ),
+                    ),
+                    characterRepresentation = CharacterRepresentation(
+                        bipoc = CharacterBreakdown(
+                            yesCount = 1,
+                            noCount = 1,
+                            notAnsweredCount = 4,
                         ),
                     ),
                 )
@@ -622,31 +646,35 @@ class AtlasScopedSectionsCollectorTest {
             val job = launchCollector()
 
             // ----- Assert -----
-            stateFlow.value.bipocBreakdown shouldBe demographicBreakdownUiModel(
-                breakdown = DemographicBreakdown(
-                    yesCount = 2,
-                    noCount = 1,
-                    unknownCount = 0,
-                ),
-                hideUntaggedAuthors = true,
-            )
+            val chapter = stateFlow.value.diversityChapter
 
+            chapter.authorBipoc.chart.segments.map { it.label } shouldBe listOf("Yes", "No")
+            chapter.characterBipoc.chart.segments.map { it.label } shouldBe listOf("Yes", "No")
             job.cancel()
         }
 
         @Test
-        fun `keeps the unknown authors while hide untagged authors is off`() = runTest(UnconfinedTestDispatcher()) {
+        fun `keeps the unknown and not answered buckets while hide books without detail is off`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val breakdown = DemographicBreakdown(
-                yesCount = 2,
-                noCount = 1,
-                unknownCount = 5,
-            )
+            hideFlow.value = false
 
-            statsFor = {
-                ReadingStats(
-                    booksRead = 4,
-                    authorDemographics = AuthorDemographics(bipocBreakdown = breakdown),
+            diversityFor = {
+                DiversityStats(
+                    booksRead = 12,
+                    authorDemographics = AuthorDemographics(
+                        bipocBreakdown = DemographicBreakdown(
+                            yesCount = 2,
+                            noCount = 1,
+                            unknownCount = 5,
+                        ),
+                    ),
+                    characterRepresentation = CharacterRepresentation(
+                        bipoc = CharacterBreakdown(
+                            yesCount = 1,
+                            noCount = 1,
+                            notAnsweredCount = 4,
+                        ),
+                    ),
                 )
             }
 
@@ -654,11 +682,10 @@ class AtlasScopedSectionsCollectorTest {
             val job = launchCollector()
 
             // ----- Assert -----
-            stateFlow.value.bipocBreakdown shouldBe demographicBreakdownUiModel(
-                breakdown = breakdown,
-                hideUntaggedAuthors = false,
-            )
+            val chapter = stateFlow.value.diversityChapter
 
+            chapter.authorBipoc.chart.segments.map { it.label } shouldBe listOf("Yes", "No", "Unknown")
+            chapter.characterBipoc.chart.segments.map { it.label } shouldBe listOf("Yes", "No", "Not answered")
             job.cancel()
         }
 
@@ -812,6 +839,35 @@ class AtlasScopedSectionsCollectorTest {
             whileLoading shouldBe true
             stateFlow.value.timeToFinish.isLoading shouldBe false
             stateFlow.value.timeToFinish.framing shouldBe "Your typical book took 9 days."
+            job.cancel()
+        }
+
+        @Test
+        fun `keeps the diversity chapter loading until the read dates are backfilled`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            readDatesBackfilledFlow.value = false
+
+            diversityFor = {
+                DiversityStats(
+                    booksRead = 12,
+                    authorDemographics = AuthorDemographics(
+                        bipocBreakdown = DemographicBreakdown(
+                            yesCount = 2,
+                            noCount = 1,
+                        ),
+                    ),
+                )
+            }
+
+            val job = launchCollector()
+            val whileLoading = stateFlow.value.diversityChapter.authorBipoc.chart.isLoading
+
+            // ----- Act -----
+            readDatesBackfilledFlow.value = true
+
+            // ----- Assert -----
+            whileLoading shouldBe true
+            stateFlow.value.diversityChapter.authorBipoc.chart.isLoading shouldBe false
             job.cancel()
         }
 

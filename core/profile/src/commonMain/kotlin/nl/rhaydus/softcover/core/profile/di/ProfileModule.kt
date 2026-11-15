@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.core.profile.di
 
 import kotlinx.datetime.TimeZone
+import nl.rhaydus.softcover.core.corpus.di.corpusModule
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.identity.di.identityModule
 import nl.rhaydus.softcover.core.network.di.apolloModule
@@ -13,6 +14,7 @@ import nl.rhaydus.softcover.core.profile.data.repository.ProfileRepositoryImpl
 import nl.rhaydus.softcover.core.profile.domain.ProfileRefreshGate
 import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveDidNotFinishStatsUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveDiversityStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveHourlyPagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveLongestWaitingUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveMonthlyPagesReadUseCase
@@ -41,6 +43,7 @@ val profileModule = module {
         identityModule,
         apolloModule,
         personalModule,
+        corpusModule,
     )
 
     single<ProfileRemoteDataSource> {
@@ -105,6 +108,19 @@ val profileModule = module {
             getReadUserBooksUseCase = get(),
             observeUserTagsByBookUseCase = get(),
             appDispatchers = get(),
+        )
+    }
+
+    factory {
+        ObserveDiversityStatsUseCase(
+            getCurrentlyReadingUserBooksUseCase = get(),
+            getPausedUserBooksUseCase = get(),
+            getReadUserBooksUseCase = get(),
+            getDidNotFinishUserBooksUseCase = get(),
+            observeProgressUpdatesUseCase = get(),
+            observeAllBookTraitsUseCase = get(),
+            appDispatchers = get(),
+            timeZone = get(),
         )
     }
 

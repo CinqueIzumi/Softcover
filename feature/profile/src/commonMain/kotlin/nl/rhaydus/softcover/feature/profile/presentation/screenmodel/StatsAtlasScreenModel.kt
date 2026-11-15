@@ -5,12 +5,13 @@ import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveBooksByIdsUseCase
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.GetHideUntaggedAuthorsAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetHideBooksWithoutDetailAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveQuotesSyncedUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadDatesBackfilledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsBackfilledUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.SetHideUntaggedAuthorsUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.SetHideBooksWithoutDetailUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveDidNotFinishStatsUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveDiversityStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveHourlyPagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveLongestWaitingUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveMonthlyPagesReadUseCase
@@ -33,6 +34,7 @@ import nl.rhaydus.toad.ToadScreenModel
 internal class StatsAtlasScreenModel(
     observeUserProfileDataUseCase: ObserveUserProfileDataUseCase,
     observeReadingStatsUseCase: ObserveReadingStatsUseCase,
+    observeDiversityStatsUseCase: ObserveDiversityStatsUseCase,
     observePagesReadUseCase: ObservePagesReadUseCase,
     observeDidNotFinishStatsUseCase: ObserveDidNotFinishStatsUseCase,
     observeMonthlyPagesReadUseCase: ObserveMonthlyPagesReadUseCase,
@@ -48,8 +50,8 @@ internal class StatsAtlasScreenModel(
     observeLongestWaitingUseCase: ObserveLongestWaitingUseCase,
     observeWrittenStatsUseCase: ObserveWrittenStatsUseCase,
     observeQuotesSyncedUseCase: ObserveQuotesSyncedUseCase,
-    getHideUntaggedAuthorsAsFlowUseCase: GetHideUntaggedAuthorsAsFlowUseCase,
-    setHideUntaggedAuthorsUseCase: SetHideUntaggedAuthorsUseCase,
+    getHideBooksWithoutDetailAsFlowUseCase: GetHideBooksWithoutDetailAsFlowUseCase,
+    setHideBooksWithoutDetailUseCase: SetHideBooksWithoutDetailUseCase,
     observeBooksByIdsUseCase: ObserveBooksByIdsUseCase,
     observeCurrentDateUseCase: ObserveCurrentDateUseCase,
     dispatchers: AppDispatchers,
@@ -68,6 +70,7 @@ internal class StatsAtlasScreenModel(
     override val dependencies: StatsAtlasDependencies = StatsAtlasDependencies(
         observeUserProfileDataUseCase = observeUserProfileDataUseCase,
         observeReadingStatsUseCase = observeReadingStatsUseCase,
+        observeDiversityStatsUseCase = observeDiversityStatsUseCase,
         observePagesReadUseCase = observePagesReadUseCase,
         observeDidNotFinishStatsUseCase = observeDidNotFinishStatsUseCase,
         observeMonthlyPagesReadUseCase = observeMonthlyPagesReadUseCase,
@@ -83,8 +86,8 @@ internal class StatsAtlasScreenModel(
         observeLongestWaitingUseCase = observeLongestWaitingUseCase,
         observeWrittenStatsUseCase = observeWrittenStatsUseCase,
         observeQuotesSyncedUseCase = observeQuotesSyncedUseCase,
-        getHideUntaggedAuthorsAsFlowUseCase = getHideUntaggedAuthorsAsFlowUseCase,
-        setHideUntaggedAuthorsUseCase = setHideUntaggedAuthorsUseCase,
+        getHideBooksWithoutDetailAsFlowUseCase = getHideBooksWithoutDetailAsFlowUseCase,
+        setHideBooksWithoutDetailUseCase = setHideBooksWithoutDetailUseCase,
         observeBooksByIdsUseCase = observeBooksByIdsUseCase,
         observeCurrentDateUseCase = observeCurrentDateUseCase,
         mainDispatcher = dispatchers.main,

@@ -17,7 +17,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUs
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDesktopWindowStateAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetEnabledListIdsAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetEnabledStatusCodesAsFlowUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.GetHideUntaggedAuthorsAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetHideBooksWithoutDetailAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLastUsedProgressUnitAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryGridLayoutAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibrarySortSettingsAsFlowUseCase
@@ -32,7 +32,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadDatesBack
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsBackfilledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetBecauseYouReadGenreUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetDesktopWindowStateUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.SetHideUntaggedAuthorsUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.SetHideBooksWithoutDetailUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLastUsedProgressUnitUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibraryGridLayoutUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibrarySortUseCase
@@ -115,9 +115,9 @@ val preferencesModule = module {
 
     factory { SetShelfSwipeEnabledUseCase(settingsRepository = get()) }
 
-    factory { GetHideUntaggedAuthorsAsFlowUseCase(settingsRepository = get()) }
+    factory { GetHideBooksWithoutDetailAsFlowUseCase(settingsRepository = get()) }
 
-    factory { SetHideUntaggedAuthorsUseCase(settingsRepository = get()) }
+    factory { SetHideBooksWithoutDetailUseCase(settingsRepository = get()) }
 
     factory { GetUiScaleAsFlowUseCase(settingsRepository = get()) }
 

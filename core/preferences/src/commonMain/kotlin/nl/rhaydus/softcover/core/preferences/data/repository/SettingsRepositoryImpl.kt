@@ -178,10 +178,10 @@ internal class SettingsRepositoryImpl(
         settingsLocalDataSource.setShelfSwipeEnabled(enabled = enabled)
     }
 
-    override val hideUntaggedAuthors: Flow<Boolean> = settingsLocalDataSource.hideUntaggedAuthors
+    override val hideBooksWithoutDetail: Flow<Boolean> = settingsLocalDataSource.hideBooksWithoutDetail
 
-    override suspend fun setHideUntaggedAuthors(enabled: Boolean) {
-        settingsLocalDataSource.setHideUntaggedAuthors(enabled = enabled)
+    override suspend fun setHideBooksWithoutDetail(enabled: Boolean) {
+        settingsLocalDataSource.setHideBooksWithoutDetail(enabled = enabled)
     }
 
     override val uiScale: Flow<UiScale> = settingsLocalDataSource.uiScale

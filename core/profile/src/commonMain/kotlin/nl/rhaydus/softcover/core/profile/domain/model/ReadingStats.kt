@@ -5,7 +5,6 @@ data class ReadingStats(
     val booksRead: Int = 0,
     val genres: GenreBreakdown = GenreBreakdown(),
     val ratings: RatingsDistribution = RatingsDistribution(),
-    val authorDemographics: AuthorDemographics = AuthorDemographics(),
     val topAuthors: List<AuthorRanking> = emptyList(),
     val formatSplit: FormatSplit = FormatSplit(),
     val longestBook: LongestBook? = null,

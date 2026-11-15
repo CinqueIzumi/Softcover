@@ -137,21 +137,13 @@ internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.At
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.AuthorRepresentationSection(genderBreakdown: nl.rhaydus.softcover.feature.profile.presentation.state.DemographicBreakdownUiModel, bipocBreakdown: nl.rhaydus.softcover.feature.profile.presentation.state.DemographicBreakdownUiModel, lgbtqBreakdown: nl.rhaydus.softcover.feature.profile.presentation.state.DemographicBreakdownUiModel, scopeCaption: kotlin.String, emptyCaption: kotlin.String, hideUntaggedAuthorsToggle: nl.rhaydus.softcover.core.component.control.ToggleRowUiModel<kotlin.String>, canHideUntaggedAuthors: kotlin.Boolean, isLoading: kotlin.Boolean, header: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, onHideUntaggedAuthorsChange: kotlin.Function1<kotlin.Boolean, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+private fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.BreakdownBlock(breakdown: nl.rhaydus.softcover.feature.profile.presentation.state.DemographicBreakdownUiModel, isLoading: kotlin.Boolean, standIn: kotlin.String): kotlin.Unit
   skippable: true
   restartable: true
   params:
-    - genderBreakdown: STABLE (marked @Stable or @Immutable)
-    - bipocBreakdown: STABLE (marked @Stable or @Immutable)
-    - lgbtqBreakdown: STABLE (marked @Stable or @Immutable)
-    - scopeCaption: STABLE (String is immutable)
-    - emptyCaption: STABLE (String is immutable)
-    - hideUntaggedAuthorsToggle: STABLE (marked @Stable or @Immutable)
-    - canHideUntaggedAuthors: STABLE (primitive type)
+    - breakdown: STABLE (marked @Stable or @Immutable)
     - isLoading: STABLE (primitive type)
-    - header: STABLE (marked @Stable or @Immutable)
-    - onHideUntaggedAuthorsChange: STABLE (function type)
-    - modifier: STABLE (marked @Stable or @Immutable)
+    - standIn: STABLE (String is immutable)
 
 @Composable
 private fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.DayDetailBody(model: nl.rhaydus.softcover.feature.profile.presentation.state.DayDetailUiModel, onBookCardEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.bookcard.BookCardEvent, kotlin.Unit>): kotlin.Unit
@@ -176,21 +168,30 @@ internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.Da
     - runAction: STABLE (function type)
 
 @Composable
-private fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.DemographicBreakdownBlock(label: kotlin.String, breakdown: nl.rhaydus.softcover.feature.profile.presentation.state.DemographicBreakdownUiModel, isLoading: kotlin.Boolean): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-    - label: STABLE (String is immutable)
-    - breakdown: STABLE (marked @Stable or @Immutable)
-    - isLoading: STABLE (primitive type)
-
-@Composable
 private fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.DidNotFinishSection(model: nl.rhaydus.softcover.feature.profile.presentation.state.DidNotFinishUiModel, isLoading: kotlin.Boolean): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - model: STABLE (class with no mutable properties)
     - isLoading: STABLE (primitive type)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.DiversityBars(model: nl.rhaydus.softcover.feature.profile.presentation.state.DiversityChapterUiModel, isLoading: kotlin.Boolean): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - isLoading: STABLE (primitive type)
+
+@Composable
+internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.DiversityChapter(model: nl.rhaydus.softcover.feature.profile.presentation.state.DiversityChapterUiModel, hideBooksWithoutDetailToggle: nl.rhaydus.softcover.core.component.control.ToggleRowUiModel<kotlin.String>, isLoading: kotlin.Boolean, onHideBooksWithoutDetailChange: kotlin.Function1<kotlin.Boolean, kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - hideBooksWithoutDetailToggle: STABLE (marked @Stable or @Immutable)
+    - isLoading: STABLE (primitive type)
+    - onHideBooksWithoutDetailChange: STABLE (function type)
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.GenresChapter(header: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, ranking: nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel, showMore: nl.rhaydus.softcover.core.component.button.PillButtonUiModel?, showLess: nl.rhaydus.softcover.core.component.button.PillButtonUiModel?, onShowMore: kotlin.Function0<kotlin.Unit>, onShowLess: kotlin.Function0<kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit

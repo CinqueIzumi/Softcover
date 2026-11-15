@@ -3,10 +3,10 @@ package nl.rhaydus.softcover.core.preferences.domain.usecase
 import nl.rhaydus.common.runCatchingLogged
 import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 
-class SetHideUntaggedAuthorsUseCase(
+class SetHideBooksWithoutDetailUseCase(
     private val settingsRepository: SettingsRepository,
 ) {
     suspend operator fun invoke(enabled: Boolean): Result<Unit> = runCatchingLogged {
-        settingsRepository.setHideUntaggedAuthors(enabled = enabled)
+        settingsRepository.setHideBooksWithoutDetail(enabled = enabled)
     }
 }

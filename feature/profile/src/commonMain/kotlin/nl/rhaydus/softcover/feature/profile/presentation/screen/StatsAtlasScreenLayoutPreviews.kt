@@ -9,10 +9,9 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.COLLAPSED_GENRE_
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasOpeningUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasScopeChips
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.currentStreakTile
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicBreakdownUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.diversityChapterUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.formatSplitCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.formatSplitChart
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.genderBreakdownUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreEmptyCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingShowLess
@@ -37,6 +36,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearAtAGlanceHea
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearGrid
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.yourReadingListUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileDidNotFinishPreview
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileDiversityStatsPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileHourlyPagesPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileLongestWaitingPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileMonthlyPagesPreview
@@ -185,16 +185,8 @@ internal val StatsAtlasPreviewState = StatsAtlasUiState(
         slices = PreviewReadingStats.genres.slices,
         shownCount = COLLAPSED_GENRE_COUNT,
     ),
-    genderBreakdown = genderBreakdownUiModel(
-        demographics = PreviewReadingStats.authorDemographics,
-        hideUntaggedAuthors = false,
-    ),
-    bipocBreakdown = demographicBreakdownUiModel(
-        breakdown = PreviewReadingStats.authorDemographics.bipocBreakdown,
-        hideUntaggedAuthors = false,
-    ),
-    lgbtqBreakdown = demographicBreakdownUiModel(
-        breakdown = PreviewReadingStats.authorDemographics.lgbtqBreakdown,
-        hideUntaggedAuthors = false,
+    diversityChapter = diversityChapterUiModel(
+        stats = profileDiversityStatsPreview(),
+        hideBooksWithoutDetail = false,
     ),
 )

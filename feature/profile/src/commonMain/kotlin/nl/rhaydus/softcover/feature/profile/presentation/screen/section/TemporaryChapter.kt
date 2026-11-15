@@ -9,7 +9,6 @@ import androidx.compose.ui.Modifier
 import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.header.SectionHeader
-import nl.rhaydus.softcover.feature.profile.presentation.action.OnHideUntaggedAuthorsToggledAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnYearMetricSelectedAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.StatsAtlasAction
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
@@ -31,22 +30,6 @@ internal fun ColumnScope.TemporaryChapter(
         header = state.yearColumnHistoryHeader,
         metricToggle = state.yearMetricToggle,
         onMetricSelected = { runAction(OnYearMetricSelectedAction(metric = it)) },
-        modifier = Modifier.fillMaxWidth(),
-    )
-
-    Spacer(modifier = Modifier.height(Spacing.section))
-
-    AuthorRepresentationSection(
-        genderBreakdown = state.genderBreakdown,
-        bipocBreakdown = state.bipocBreakdown,
-        lgbtqBreakdown = state.lgbtqBreakdown,
-        scopeCaption = state.authorsScopeCaption,
-        emptyCaption = state.authorsEmptyCaption,
-        hideUntaggedAuthorsToggle = state.hideUntaggedAuthorsToggle,
-        canHideUntaggedAuthors = state.hasUntaggedAuthors,
-        isLoading = state.isReadingLifeLoading,
-        header = state.authorRepresentationHeader,
-        onHideUntaggedAuthorsChange = { runAction(OnHideUntaggedAuthorsToggledAction(newValue = it)) },
         modifier = Modifier.fillMaxWidth(),
     )
 

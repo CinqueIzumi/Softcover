@@ -4,15 +4,18 @@ import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.Gender
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.core.domain.model.Quote
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorRanking
+import nl.rhaydus.softcover.core.profile.domain.model.AuthorshipGender
+import nl.rhaydus.softcover.core.profile.domain.model.CharacterBreakdown
+import nl.rhaydus.softcover.core.profile.domain.model.CharacterRepresentation
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.DidNotFinishStats
+import nl.rhaydus.softcover.core.profile.domain.model.DiversityStats
 import nl.rhaydus.softcover.core.profile.domain.model.FormatSplit
 import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
@@ -48,7 +51,6 @@ internal fun profileReadingStatsPreview(): ReadingStats = ReadingStats(
     booksRead = 214,
     genres = previewGenres(),
     ratings = previewRatings(),
-    authorDemographics = previewAuthorDemographics(),
     topAuthors = previewTopAuthors(),
     formatSplit = previewFormatSplit(),
     longestBook = LongestBook(
@@ -58,6 +60,12 @@ internal fun profileReadingStatsPreview(): ReadingStats = ReadingStats(
         ),
         pages = 1_296,
     ),
+)
+
+internal fun profileDiversityStatsPreview(): DiversityStats = DiversityStats(
+    booksRead = 214,
+    authorDemographics = previewAuthorDemographics(),
+    characterRepresentation = previewCharacterRepresentation(),
 )
 
 internal fun profilePagesReadPreview(): PagesRead = PagesRead(
@@ -413,37 +421,57 @@ private fun previewGenres(): GenreBreakdown = GenreBreakdown(
 private fun previewAuthorDemographics(): AuthorDemographics = AuthorDemographics(
     genderSlices = listOf(
         GenderSlice(
-            gender = Gender.Female,
+            gender = AuthorshipGender.Female,
+            count = 86,
+            fraction = 86.0 / 214,
+        ),
+        GenderSlice(
+            gender = AuthorshipGender.Male,
+            count = 64,
+            fraction = 64.0 / 214,
+        ),
+        GenderSlice(
+            gender = AuthorshipGender.Other,
+            count = 7,
+            fraction = 7.0 / 214,
+        ),
+        GenderSlice(
+            gender = AuthorshipGender.Mixed,
             count = 12,
-            fraction = 0.40,
+            fraction = 12.0 / 214,
         ),
         GenderSlice(
-            gender = Gender.Male,
-            count = 9,
-            fraction = 0.30,
-        ),
-        GenderSlice(
-            gender = Gender.Other,
-            count = 1,
-            fraction = 0.033,
-        ),
-        GenderSlice(
-            gender = Gender.Unknown,
-            count = 8,
-            fraction = 0.267,
+            gender = AuthorshipGender.Unknown,
+            count = 45,
+            fraction = 45.0 / 214,
         ),
     ),
-    knownGenderCount = 22,
-    unknownGenderCount = 8,
+    knownGenderCount = 169,
+    unknownGenderCount = 45,
     bipocBreakdown = DemographicBreakdown(
-        yesCount = 2,
-        noCount = 5,
-        unknownCount = 23,
+        yesCount = 21,
+        noCount = 62,
+        unknownCount = 131,
     ),
     lgbtqBreakdown = DemographicBreakdown(
-        yesCount = 1,
-        noCount = 1,
-        unknownCount = 28,
+        yesCount = 9,
+        noCount = 30,
+        unknownCount = 175,
+    ),
+)
+
+private fun previewCharacterRepresentation(): CharacterRepresentation = CharacterRepresentation(
+    bipoc = CharacterBreakdown(
+        yesCount = 31,
+        complicatedCount = 6,
+        noCount = 120,
+        notAnsweredCount = 57,
+    ),
+    lgbtq = CharacterBreakdown(
+        yesCount = 18,
+        complicatedCount = 3,
+        noCount = 136,
+        notAnsweredCount = 57,
     ),
 )
 

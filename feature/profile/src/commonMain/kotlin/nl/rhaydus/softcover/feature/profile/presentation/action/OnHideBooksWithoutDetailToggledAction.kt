@@ -7,17 +7,12 @@ import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasLocalVa
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
 import nl.rhaydus.toad.ActionScope
 
-/**
- * Persists the switch on the author-representation section. The new value reaches the state through
- * `HideUntaggedAuthorsCollector` observing the preference, so this never writes the state itself - a
- * failed write leaves the switch where it was rather than showing a value that isn't stored.
- */
-internal class OnHideUntaggedAuthorsToggledAction(val newValue: Boolean) : StatsAtlasAction {
+internal class OnHideBooksWithoutDetailToggledAction(val newValue: Boolean) : StatsAtlasAction {
     override suspend fun execute(
         dependencies: StatsAtlasDependencies,
         scope: ActionScope<StatsAtlasUiState, StatsAtlasEvent, StatsAtlasLocalVariables>,
     ) {
-        dependencies.setHideUntaggedAuthorsUseCase(enabled = newValue).onFailure {
+        dependencies.setHideBooksWithoutDetailUseCase(enabled = newValue).onFailure {
             AppLog.e("$it")
         }
     }

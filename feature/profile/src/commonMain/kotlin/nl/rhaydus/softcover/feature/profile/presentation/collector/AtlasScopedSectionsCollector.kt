@@ -10,6 +10,7 @@ import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.domain.model.StatsScope
 import nl.rhaydus.softcover.core.domain.model.resolve
 import nl.rhaydus.softcover.core.profile.domain.model.DidNotFinishStats
+import nl.rhaydus.softcover.core.profile.domain.model.DiversityStats
 import nl.rhaydus.softcover.core.profile.domain.model.HourlyPages
 import nl.rhaydus.softcover.core.profile.domain.model.MonthlyPages
 import nl.rhaydus.softcover.core.profile.domain.model.PagesRead
@@ -22,12 +23,9 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasContentsHea
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasContentsRows
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasOpeningUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasScopeLine
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.authorsEmptyCaption
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.authorsScopeCaption
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicBreakdownUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.diversityChapterUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.formatSplitCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.formatSplitChart
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.genderBreakdownUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreEmptyCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasFormatSplit
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasMonthlyPages
@@ -98,6 +96,11 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
                 observeQuotesSyncedUseCase(),
             ) { statsBackfilled, quotesSynced -> statsBackfilled && quotesSynced }
 
+            val statsAndReadDatesBackfilled = combine(
+                statsBackfilled,
+                observeReadDatesBackfilledUseCase(),
+            ) { statsBackfilled, readDatesBackfilled -> statsBackfilled && readDatesBackfilled }
+
             val readingList = combine(
                 observePagesReadUseCase(range).untilBackfilled(statsBackfilled),
                 observeDidNotFinishStatsUseCase(range).untilBackfilled(statsBackfilled),
@@ -117,17 +120,18 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
                         .untilBackfilled(statsBackfilled),
                     observeMonthlyPagesReadUseCase(range),
                     observeHourlyPagesReadUseCase(range),
-                    getHideUntaggedAuthorsAsFlowUseCase(),
+                    getHideBooksWithoutDetailAsFlowUseCase(),
                     observeTimeToFinishUseCase(range)
                         .untilBackfilled(observeReadDatesBackfilledUseCase()),
-                ) { stats, monthlyPages, hourlyPages, hideUntaggedAuthors, timeToFinish ->
+                ) { stats, monthlyPages, hourlyPages, hideBooksWithoutDetail, timeToFinish ->
                     ScopedSections(
                         scope = scope,
                         today = today,
                         stats = stats,
+                        diversity = null,
                         monthlyPages = monthlyPages,
                         hourlyPages = hourlyPages,
-                        hideUntaggedAuthors = hideUntaggedAuthors,
+                        hideBooksWithoutDetail = hideBooksWithoutDetail,
                         timeToFinish = timeToFinish,
                         written = null,
                         pagesRead = null,
@@ -136,9 +140,12 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
                     )
                 },
                 observeWrittenStatsUseCase(range).untilBackfilled(backfilledAndSynced),
+                observeDiversityStatsUseCase(range)
+                    .untilBackfilled(statsAndReadDatesBackfilled),
                 readingList,
-            ) { sections, written, (pagesRead, didNotFinish, readingListStats) ->
+            ) { sections, written, diversity, (pagesRead, didNotFinish, readingListStats) ->
                 sections.copy(
+                    diversity = diversity,
                     written = written,
                     pagesRead = pagesRead,
                     didNotFinish = didNotFinish,
@@ -150,7 +157,7 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
 
     private fun StatsAtlasUiState.withSections(sections: ScopedSections): StatsAtlasUiState {
         val scope = sections.scope
-        val hideUntaggedAuthors = sections.hideUntaggedAuthors
+        val hideBooksWithoutDetail = sections.hideBooksWithoutDetail
         val stats = sections.stats
         val monthlyPages = sections.monthlyPages
         val hourlyPages = sections.hourlyPages
@@ -170,9 +177,11 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
             scope = scope,
         )
 
-        val demographics = stats?.authorDemographics?.let {
-            if (hideUntaggedAuthors) it.excludingUntaggedAuthors() else it
-        }
+        val diversityChapter = diversityChapterUiModel(
+            stats = sections.diversity,
+            hideBooksWithoutDetail = hideBooksWithoutDetail,
+            scope = scope,
+        )
 
         return copy(
             readingStats = stats,
@@ -187,27 +196,6 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
                 today = sections.today,
             ),
             genreEmptyCaption = genreEmptyCaption(
-                booksRead = booksRead,
-                scope = scope,
-            ),
-            genderBreakdown = genderBreakdownUiModel(
-                demographics = demographics,
-                hideUntaggedAuthors = hideUntaggedAuthors,
-            ),
-            bipocBreakdown = demographicBreakdownUiModel(
-                breakdown = demographics?.bipocBreakdown,
-                hideUntaggedAuthors = hideUntaggedAuthors,
-            ),
-            lgbtqBreakdown = demographicBreakdownUiModel(
-                breakdown = demographics?.lgbtqBreakdown,
-                hideUntaggedAuthors = hideUntaggedAuthors,
-            ),
-            authorsScopeCaption = authorsScopeCaption(
-                hideUntaggedAuthors = hideUntaggedAuthors,
-                scope = scope,
-            ),
-            authorsEmptyCaption = authorsEmptyCaption(
-                hideUntaggedAuthors = hideUntaggedAuthors,
                 booksRead = booksRead,
                 scope = scope,
             ),
@@ -274,6 +262,7 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
             ),
             yourReadingList = yourReadingList,
             inYourWords = inYourWords,
+            diversityChapter = diversityChapter,
             contentsHeader = atlasContentsHeader(),
             contentsRows = atlasContentsRows(),
         )
@@ -288,9 +277,10 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
         val scope: StatsScope,
         val today: LocalDate,
         val stats: ReadingStats?,
+        val diversity: DiversityStats?,
         val monthlyPages: MonthlyPages,
         val hourlyPages: HourlyPages,
-        val hideUntaggedAuthors: Boolean,
+        val hideBooksWithoutDetail: Boolean,
         val timeToFinish: TimeToFinish?,
         val written: WrittenStats?,
         val pagesRead: PagesRead?,

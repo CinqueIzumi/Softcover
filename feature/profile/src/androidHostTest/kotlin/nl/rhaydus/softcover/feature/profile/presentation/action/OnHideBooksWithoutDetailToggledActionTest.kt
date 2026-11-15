@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.preferences.domain.usecase.SetHideUntaggedAuthorsUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.SetHideBooksWithoutDetailUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.event.StatsAtlasEvent
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.StatsAtlasDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasLocalVariables
@@ -20,8 +20,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-class OnHideUntaggedAuthorsToggledActionTest {
-    private lateinit var setHideUntaggedAuthorsUseCase: SetHideUntaggedAuthorsUseCase
+class OnHideBooksWithoutDetailToggledActionTest {
+    private lateinit var setHideBooksWithoutDetailUseCase: SetHideBooksWithoutDetailUseCase
     private lateinit var dependencies: StatsAtlasDependencies
     private lateinit var stateFlow: MutableStateFlow<StatsAtlasUiState>
     private lateinit var eventChannel: Channel<StatsAtlasEvent>
@@ -29,7 +29,7 @@ class OnHideUntaggedAuthorsToggledActionTest {
 
     @BeforeEach
     fun setUp() {
-        setHideUntaggedAuthorsUseCase = mockk()
+        setHideBooksWithoutDetailUseCase = mockk()
         stateFlow = MutableStateFlow(StatsAtlasUiState())
         eventChannel = Channel(Channel.BUFFERED)
 
@@ -45,8 +45,8 @@ class OnHideUntaggedAuthorsToggledActionTest {
 
         return mockk<StatsAtlasDependencies>(relaxed = true).also { mock ->
             every {
-                mock.setHideUntaggedAuthorsUseCase
-            } returns setHideUntaggedAuthorsUseCase
+                mock.setHideBooksWithoutDetailUseCase
+            } returns setHideBooksWithoutDetailUseCase
 
             every {
                 mock.coroutineScope
@@ -65,15 +65,15 @@ class OnHideUntaggedAuthorsToggledActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `invokes setHideUntaggedAuthorsUseCase with the toggled value when turning on`() = runTest {
+        fun `invokes setHideBooksWithoutDetailUseCase with the toggled value when turning on`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
 
             coEvery {
-                setHideUntaggedAuthorsUseCase(enabled = true)
+                setHideBooksWithoutDetailUseCase(enabled = true)
             } returns Result.success(Unit)
 
-            val action = OnHideUntaggedAuthorsToggledAction(newValue = true)
+            val action = OnHideBooksWithoutDetailToggledAction(newValue = true)
 
             // ----- Act -----
             action.execute(
@@ -83,7 +83,7 @@ class OnHideUntaggedAuthorsToggledActionTest {
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                setHideUntaggedAuthorsUseCase(enabled = true)
+                setHideBooksWithoutDetailUseCase(enabled = true)
             }
         }
 
@@ -94,10 +94,10 @@ class OnHideUntaggedAuthorsToggledActionTest {
             val initialState = StatsAtlasUiState()
 
             coEvery {
-                setHideUntaggedAuthorsUseCase(enabled = true)
+                setHideBooksWithoutDetailUseCase(enabled = true)
             } returns Result.failure(RuntimeException("write failed"))
 
-            val action = OnHideUntaggedAuthorsToggledAction(newValue = true)
+            val action = OnHideBooksWithoutDetailToggledAction(newValue = true)
 
             // ----- Act -----
             action.execute(
