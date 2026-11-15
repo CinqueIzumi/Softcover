@@ -1,13 +1,14 @@
 package nl.rhaydus.softcover.feature.widget.presentation.render
 
 import android.content.Context
-import android.net.Uri
+import android.graphics.Bitmap
 import nl.rhaydus.softcover.core.component.cover.CoverSource
 import nl.rhaydus.softcover.core.uibinding.cover.loadCoverBitmap
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickBook
 import nl.rhaydus.softcover.feature.widget.presentation.image.WidgetImageFormat
 import nl.rhaydus.softcover.feature.widget.presentation.image.WidgetImageStore
 import nl.rhaydus.softcover.feature.widget.presentation.model.BookArtworkUiModel
+import nl.rhaydus.softcover.feature.widget.presentation.util.fittingCoverHeightDp
 import kotlin.math.roundToInt
 
 /** Turns a book into the image files the Random pick widget shows, reusing a file whose key already exists. */
@@ -22,15 +23,27 @@ internal class RandomPickImages(
         store = store,
     )
 
-    suspend fun coverUri(
+    /** [requestedDp] lowered when [sizeCount] copies of the cover and backdrop would overflow the update cap. */
+    fun fitCoverHeightDp(
+        requestedDp: Int,
+        sizeCount: Int,
+    ): Int = fittingCoverHeightDp(
+        requestedDp = requestedDp,
+        density = density,
+        sizeCount = sizeCount,
+        fixedBytesPerSize = backdrops.bytesPerSize,
+        coversPerSize = 1,
+    )
+
+    suspend fun coverBitmap(
         pick: RandomPickBook,
         coverHeightDp: Int,
-    ): Uri? {
+    ): Bitmap? {
         val source = pick.coverSource() ?: return null
 
         val coverPx = (coverHeightDp * density).roundToInt()
 
-        return store.uriFor(
+        return store.bitmapFor(
             format = WidgetImageFormat.Photo,
             key = "rp-cover:v2:${source.keyPart()}:$coverPx",
             render = {

@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.widget.presentation.mapper
 
-import android.net.Uri
+import android.graphics.Bitmap
 import app.cash.turbine.test
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
@@ -112,14 +112,14 @@ class RandomPickWidgetModelsTest {
         books = emptyList(),
     )
 
-    private val uri = mockk<Uri>()
+    private val bitmap = mockk<Bitmap>()
 
     private val artwork = BookArtworkUiModel(
         backdrop = null,
-        veil = uri,
-        veilLift = uri,
-        washPrimary = uri,
-        washTertiary = uri,
+        veil = bitmap,
+        veilLift = bitmap,
+        washPrimary = bitmap,
+        washTertiary = bitmap,
     )
 
     private fun models(
@@ -129,7 +129,7 @@ class RandomPickWidgetModelsTest {
         changes: Flow<Unit> = flowOf(Unit),
         settingsChanges: Flow<RandomPickSettingsChange> = emptyFlow(),
         coverHeightDp: Flow<Int> = flowOf(200),
-        coverUri: suspend (RandomPickBook) -> Uri? = { null },
+        coverBitmap: suspend (RandomPickBook) -> Bitmap? = { null },
         artwork: suspend (RandomPickBook) -> BookArtworkUiModel? = { null },
     ): Flow<RandomPickWidgetUiModel> = randomPickWidgetModels(
         isSignedIn = flowOf(isSignedIn),
@@ -139,10 +139,10 @@ class RandomPickWidgetModelsTest {
         changes = changes,
         settingsChanges = settingsChanges,
         resolve = { _, _ -> resolution },
-        coverUri = { pick, heightDp ->
+        coverBitmap = { pick, heightDp ->
             requestedBookIds += pick.book.id
             requestedHeights += heightDp
-            coverUri(pick)
+            coverBitmap(pick)
         },
         coverHeightDp = coverHeightDp,
         artwork = { pick -> artwork(pick) },
@@ -295,7 +295,7 @@ class RandomPickWidgetModelsTest {
                         source = RandomPickSource.WantToRead,
                     ),
                 ),
-                coverUri = { uri },
+                coverBitmap = { bitmap },
                 artwork = { artwork },
             )
 
@@ -309,7 +309,7 @@ class RandomPickWidgetModelsTest {
                 content.title shouldBe "Title 3"
                 content.author shouldBe "Author 3"
                 content.eyebrow shouldBe "WHAT NEXT? · WANT TO READ"
-                content.cover shouldBe RandomPickWidgetUiModel.Cover.Loaded(uri = uri)
+                content.cover shouldBe RandomPickWidgetUiModel.Cover.Loaded(bitmap = bitmap)
                 content.artwork shouldBe artwork
                 awaitComplete()
             }
@@ -327,9 +327,9 @@ class RandomPickWidgetModelsTest {
                         source = RandomPickSource.WantToRead,
                     ),
                 ),
-                coverUri = {
+                coverBitmap = {
                     delay(1.seconds)
-                    uri
+                    bitmap
                 },
                 artwork = { artwork },
             )
@@ -347,7 +347,7 @@ class RandomPickWidgetModelsTest {
                 val second = awaitItem().content
                     .shouldBeInstanceOf<RandomPickWidgetUiModel.Content.Picked>()
 
-                second.cover shouldBe RandomPickWidgetUiModel.Cover.Loaded(uri = uri)
+                second.cover shouldBe RandomPickWidgetUiModel.Cover.Loaded(bitmap = bitmap)
                 second.artwork shouldBe artwork
                 awaitComplete()
             }
@@ -363,7 +363,7 @@ class RandomPickWidgetModelsTest {
                         source = RandomPickSource.WantToRead,
                     ),
                 ),
-                coverUri = {
+                coverBitmap = {
                     delay(1.seconds)
                     null
                 },
@@ -423,7 +423,7 @@ class RandomPickWidgetModelsTest {
                     ),
                 ),
                 coverHeightDp = heights,
-                coverUri = { uri },
+                coverBitmap = { bitmap },
             )
 
             flow.test {
@@ -436,7 +436,7 @@ class RandomPickWidgetModelsTest {
                     .shouldBeInstanceOf<RandomPickWidgetUiModel.Content.Picked>()
 
                 // ----- Assert -----
-                content.cover shouldBe RandomPickWidgetUiModel.Cover.Loaded(uri = uri)
+                content.cover shouldBe RandomPickWidgetUiModel.Cover.Loaded(bitmap = bitmap)
                 requestedHeights shouldContainExactly listOf(200, 320)
                 cancelAndIgnoreRemainingEvents()
             }
@@ -455,9 +455,9 @@ class RandomPickWidgetModelsTest {
                     ),
                 ),
                 coverHeightDp = heights,
-                coverUri = {
+                coverBitmap = {
                     delay(1.seconds)
-                    uri
+                    bitmap
                 },
             )
 
@@ -475,7 +475,7 @@ class RandomPickWidgetModelsTest {
                     .shouldBeInstanceOf<RandomPickWidgetUiModel.Content.Picked>()
 
                 // ----- Assert -----
-                content.cover shouldBe RandomPickWidgetUiModel.Cover.Loaded(uri = uri)
+                content.cover shouldBe RandomPickWidgetUiModel.Cover.Loaded(bitmap = bitmap)
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -695,7 +695,7 @@ class RandomPickWidgetModelsTest {
                     successes = 1,
                     source = RandomPickSource.WantToRead,
                 ),
-                coverUri = { _, _ -> null },
+                coverBitmap = { _, _ -> null },
                 coverHeightDp = flowOf(200),
                 artwork = { null },
             )

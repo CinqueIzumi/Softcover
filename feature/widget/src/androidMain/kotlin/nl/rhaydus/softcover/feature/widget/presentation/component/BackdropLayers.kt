@@ -1,12 +1,12 @@
 package nl.rhaydus.softcover.feature.widget.presentation.component
 
-import android.net.Uri
+import android.graphics.Bitmap
 import androidx.compose.runtime.Composable
 import androidx.glance.ColorFilter
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
 import androidx.glance.Image
-import androidx.glance.appwidget.ImageProvider
+import androidx.glance.ImageProvider
 import androidx.glance.layout.ContentScale
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.unit.ColorProvider
@@ -14,12 +14,12 @@ import nl.rhaydus.softcover.feature.widget.presentation.theme.LocalWidgetExtraCo
 
 /** [backdrop] is `null` while the book has no cover, which swaps the artwork for the two colour washes. */
 @Composable
-internal fun BackdropUris(
-    backdrop: Uri?,
-    veil: Uri,
-    veilLift: Uri,
-    washPrimary: Uri,
-    washTertiary: Uri,
+internal fun BackdropLayers(
+    backdrop: Bitmap?,
+    veil: Bitmap,
+    veilLift: Bitmap,
+    washPrimary: Bitmap,
+    washTertiary: Bitmap,
 ) {
     val extra = LocalWidgetExtraColors.current
 
@@ -31,31 +31,31 @@ internal fun BackdropUris(
             contentScale = ContentScale.Crop,
         )
     } else {
-        UriMask(
+        BitmapMask(
             mask = washPrimary,
             tint = GlanceTheme.colors.primary,
         )
 
-        UriMask(
+        BitmapMask(
             mask = washTertiary,
             tint = GlanceTheme.colors.tertiary,
         )
     }
 
-    UriMask(
+    BitmapMask(
         mask = veil,
         tint = extra.surfaceContainerHigh,
     )
 
-    UriMask(
+    BitmapMask(
         mask = veilLift,
         tint = extra.daySurfaceContainerHigh,
     )
 }
 
 @Composable
-internal fun UriMask(
-    mask: Uri,
+internal fun BitmapMask(
+    mask: Bitmap,
     tint: ColorProvider,
     contentScale: ContentScale = ContentScale.FillBounds,
 ) {
