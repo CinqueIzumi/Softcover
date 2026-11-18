@@ -69,6 +69,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnToggleUser
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.EditionBottomSheetSelector
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.ShareBookBottomSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.TagEditorBottomSheet
+import nl.rhaydus.softcover.feature.book_detail.presentation.component.WhereYouGotItSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.EditionSheetEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareSheetEvent
@@ -323,6 +324,13 @@ internal fun BookDetailOverlays(
                     HowItReadSheetEvent.Dismissed -> runAction(OnDismissHowItReadSheetAction())
                 }
             },
+        )
+    }
+
+    state.whereYouGotItSheet.modelOrNull?.let { whereYouGotItSheet ->
+        WhereYouGotItSheet(
+            model = whereYouGotItSheet,
+            runAction = runAction,
         )
     }
 

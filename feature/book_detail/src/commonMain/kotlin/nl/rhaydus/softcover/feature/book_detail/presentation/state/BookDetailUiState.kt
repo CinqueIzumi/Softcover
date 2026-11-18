@@ -39,6 +39,7 @@ import nl.rhaydus.softcover.core.component.traits.HowItReadSheetUiModel
 import nl.rhaydus.softcover.core.component.transition.BookTransitionKey
 import nl.rhaydus.softcover.core.component.verdict.VerdictBlockUiModel
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetUiModel
+import nl.rhaydus.softcover.core.component.yourcopy.YourCopyPanelUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
@@ -128,6 +129,13 @@ internal data class BookDetailUiState(
     /** What the how-it-read sheet renders, derived from [book] and [howItReadDraft] by `HowItReadSheetCollector`. */
     val howItReadSheet: SheetSession<HowItReadSheetUiModel, Nothing> = SheetSession.Closed,
 
+    /** Null hides the Yours lens "Your copy" section. */
+    val yourCopy: YourCopyPanelUiModel<String>? = null,
+
+    /** Non-null exactly while the where-you-got-it sheet is requested. */
+    val whereYouGotItDraft: WhereYouGotItDraft? = null,
+    val whereYouGotItSheet: SheetSession<WhereYouGotItSheetUiModel, Nothing> = SheetSession.Closed,
+
     /** The local id of the quote awaiting its delete confirm; `null` when none is. */
     val quoteDeleteRequestId: Long? = null,
 
@@ -150,6 +158,7 @@ internal data class BookDetailUiState(
     val tagsLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Tags"),
     val yourTagsLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Your tags"),
     val howItReadLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "How it read"),
+    val yourCopyLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Your copy"),
 
     /** The "Shelve this book" opener; the retry label when the last shelve write for this book failed. */
     val shelveControlHeader: SectionHeaderUiModel = SectionHeaderUiModel.Inline(eyebrow = "Shelve this book"),

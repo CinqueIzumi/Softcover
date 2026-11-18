@@ -20,8 +20,11 @@ import nl.rhaydus.softcover.core.book.domain.usecase.SaveUserTagsUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookReviewUseCase
 import nl.rhaydus.softcover.core.component.state.OfflineCopy
+import nl.rhaydus.softcover.core.corpus.domain.usecase.GetBookCopyUseCase
 import nl.rhaydus.softcover.core.corpus.domain.usecase.GetBookTraitsUseCase
+import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveBookCopyUseCase
 import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveBookTraitsUseCase
+import nl.rhaydus.softcover.core.corpus.domain.usecase.SaveBookCopyUseCase
 import nl.rhaydus.softcover.core.corpus.domain.usecase.SaveBookTraitsUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ClearBookDeadlineUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveBookDeadlineUseCase
@@ -108,6 +111,9 @@ internal class BookDetailScreenScreenModel(
     observeBookTraitsUseCase: ObserveBookTraitsUseCase,
     getBookTraitsUseCase: GetBookTraitsUseCase,
     saveBookTraitsUseCase: SaveBookTraitsUseCase,
+    observeBookCopyUseCase: ObserveBookCopyUseCase,
+    getBookCopyUseCase: GetBookCopyUseCase,
+    saveBookCopyUseCase: SaveBookCopyUseCase,
     offlineCopy: OfflineCopy,
     flows: List<BookDetailCollector>,
     appDispatchers: AppDispatchers,
@@ -169,6 +175,9 @@ internal class BookDetailScreenScreenModel(
         observeBookTraitsUseCase = observeBookTraitsUseCase,
         getBookTraitsUseCase = getBookTraitsUseCase,
         saveBookTraitsUseCase = saveBookTraitsUseCase,
+        observeBookCopyUseCase = observeBookCopyUseCase,
+        getBookCopyUseCase = getBookCopyUseCase,
+        saveBookCopyUseCase = saveBookCopyUseCase,
         offlineCopy = offlineCopy,
     )
 

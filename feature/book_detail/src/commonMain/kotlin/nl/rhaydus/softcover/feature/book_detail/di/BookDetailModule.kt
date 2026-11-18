@@ -72,6 +72,8 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.collector.UserLists
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.UserTagsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.VerdictReviewCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.VerdictSheetCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.WhereYouGotItSheetCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.YourCopySectionCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.YourReadsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailScreenScreenModel
 import org.koin.dsl.bind
@@ -137,6 +139,8 @@ val bookDetailModule = module {
     factory { QuoteDeleteSheetCollector() } bind BookDetailCollector::class
     factory { HowItReadSectionCollector() } bind BookDetailCollector::class
     factory { HowItReadSheetCollector() } bind BookDetailCollector::class
+    factory { YourCopySectionCollector() } bind BookDetailCollector::class
+    factory { WhereYouGotItSheetCollector() } bind BookDetailCollector::class
 
     single<BookReviewsRemoteDataSource> {
         BookReviewsRemoteDataSourceImpl(apolloClient = get())
@@ -241,6 +245,9 @@ val bookDetailModule = module {
             observeBookTraitsUseCase = get(),
             getBookTraitsUseCase = get(),
             saveBookTraitsUseCase = get(),
+            observeBookCopyUseCase = get(),
+            getBookCopyUseCase = get(),
+            saveBookCopyUseCase = get(),
         )
     }
 }

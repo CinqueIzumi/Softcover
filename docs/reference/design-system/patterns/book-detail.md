@@ -48,6 +48,18 @@
 - A character chip cycles off, yes, complicated (dashed), off; the sheet's caption says so. Save with every
   answer cleared deletes the stored answers.
 
+### Your copy
+
+- The last section of the Yours lens, after Your tags, for any book the reader has a copy of (Want to read
+  included): a bar-less `YOUR COPY` label over `YourCopyPanel`. The data is private and stays on the device.
+- One row, "Where you got it", shows the chosen source, or the invitation "Add where you got it" when
+  none is set. Tapping it opens the sheet.
+- The sheet body lives in the feature: a `SheetRowGroup` of eight presets (Library, Bought in a bookshop,
+  Bought online, Bought second-hand, Bought digital, Subscription or audio credit, Borrowed, A gift) plus a
+  "Somewhere else…" input row. Picking a preset clears the typed text; typing unticks the presets.
+- Re-tapping the chosen preset clears it. Save closes the sheet before the write and keeps every other
+  stored copy field; an empty choice clears the source.
+
 ### Your quotes section
 
 - The Yours lens, between How it read and the your-tags section, only for a shelved book: a bar-less
