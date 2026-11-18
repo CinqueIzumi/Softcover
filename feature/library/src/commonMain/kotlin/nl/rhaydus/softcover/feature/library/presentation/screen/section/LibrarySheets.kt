@@ -134,6 +134,8 @@ internal fun LibrarySheets(
                 onEvent = { event ->
                     when (event) {
                         is SheetRowEvent.Selected -> runAction(OnRecommendedHideChosenAction(choice = event.key))
+
+                        is SheetRowEvent.InputChanged -> Unit
                     }
                 },
             )

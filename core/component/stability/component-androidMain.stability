@@ -914,6 +914,17 @@ internal fun nl.rhaydus.softcover.core.component.document.markdownAnnotatedStrin
     - leadingMarker: STABLE (class with no mutable properties)
 
 @Composable
+internal fun nl.rhaydus.softcover.core.component.field.BareTextField(model: nl.rhaydus.softcover.core.component.field.TextFieldUiModel, style: androidx.compose.ui.text.TextStyle, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.field.TextFieldEvent, kotlin.Unit>, focusRequester: androidx.compose.ui.focus.FocusRequester, ink: androidx.compose.ui.graphics.Color): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (marked @Stable or @Immutable)
+    - onEvent: STABLE (function type)
+    - focusRequester: STABLE (marked @Stable or @Immutable)
+    - ink: STABLE (marked @Stable or @Immutable)
+
+@Composable
 internal fun nl.rhaydus.softcover.core.component.field.HeroTextField(model: nl.rhaydus.softcover.core.component.field.TextFieldUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.field.TextFieldEvent, kotlin.Unit>, focusRequester: androidx.compose.ui.focus.FocusRequester): kotlin.Unit
   skippable: true
   restartable: true
@@ -971,6 +982,17 @@ public fun nl.rhaydus.softcover.core.component.field.TextField(model: nl.rhaydus
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
+internal fun nl.rhaydus.softcover.core.component.field.TextFieldBody(model: nl.rhaydus.softcover.core.component.field.TextFieldUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.field.TextFieldEvent, kotlin.Unit>, ink: androidx.compose.ui.graphics.Color, modifier: androidx.compose.ui.Modifier, focusRequester: androidx.compose.ui.focus.FocusRequester): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - onEvent: STABLE (function type)
+    - ink: STABLE (marked @Stable or @Immutable)
+    - modifier: STABLE (marked @Stable or @Immutable)
+    - focusRequester: STABLE (marked @Stable or @Immutable)
+
+@Composable
 private fun nl.rhaydus.softcover.core.component.field.TextFieldErrorLine(message: kotlin.String, centred: kotlin.Boolean): kotlin.Unit
   skippable: true
   restartable: true
@@ -979,7 +1001,7 @@ private fun nl.rhaydus.softcover.core.component.field.TextFieldErrorLine(message
     - centred: STABLE (primitive type)
 
 @Composable
-internal fun nl.rhaydus.softcover.core.component.field.TextFieldInput(model: nl.rhaydus.softcover.core.component.field.TextFieldUiModel, textStyle: androidx.compose.ui.text.TextStyle, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.field.TextFieldEvent, kotlin.Unit>, focusRequester: androidx.compose.ui.focus.FocusRequester, decorationBox: @[Composable] androidx.compose.runtime.internal.ComposableFunction1<@[ParameterName(name = \, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+internal fun nl.rhaydus.softcover.core.component.field.TextFieldInput(model: nl.rhaydus.softcover.core.component.field.TextFieldUiModel, textStyle: androidx.compose.ui.text.TextStyle, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.field.TextFieldEvent, kotlin.Unit>, focusRequester: androidx.compose.ui.focus.FocusRequester, decorationBox: @[Composable] androidx.compose.runtime.internal.ComposableFunction1<@[ParameterName(name = \, modifier: androidx.compose.ui.Modifier, ink: androidx.compose.ui.graphics.Color): kotlin.Unit
   skippable: true
   restartable: true
   params:
@@ -989,6 +1011,7 @@ internal fun nl.rhaydus.softcover.core.component.field.TextFieldInput(model: nl.
     - focusRequester: STABLE (marked @Stable or @Immutable)
     - decorationBox: STABLE (composable function type)
     - modifier: STABLE (marked @Stable or @Immutable)
+    - ink: STABLE (marked @Stable or @Immutable)
 
 @Composable
 internal fun nl.rhaydus.softcover.core.component.field.TextFieldPlaceholder(text: kotlin.String, enabled: kotlin.Boolean, modifier: androidx.compose.ui.Modifier, style: androidx.compose.ui.text.TextStyle): kotlin.Unit
@@ -1758,13 +1781,23 @@ private fun nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailingContent
     - onEvent: STABLE (function type)
 
 @Composable
-internal fun nl.rhaydus.softcover.core.component.sheet.SheetRow(model: nl.rhaydus.softcover.core.component.sheet.SheetRowUiModel<K of nl.rhaydus.softcover.core.component.sheet.SheetRow>, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.sheet.SheetRowEvent<K of nl.rhaydus.softcover.core.component.sheet.SheetRow>, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+internal fun nl.rhaydus.softcover.core.component.sheet.SheetInputRow(model: nl.rhaydus.softcover.core.component.sheet.SheetInputRowUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.field.TextFieldEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - model: STABLE (marked @Stable or @Immutable)
     - onEvent: STABLE (function type)
     - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+internal fun nl.rhaydus.softcover.core.component.sheet.SheetRow(model: nl.rhaydus.softcover.core.component.sheet.SheetRowUiModel<K of nl.rhaydus.softcover.core.component.sheet.SheetRow>, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.sheet.SheetRowEvent<K of nl.rhaydus.softcover.core.component.sheet.SheetRow>, kotlin.Unit>, modifier: androidx.compose.ui.Modifier, face: nl.rhaydus.softcover.core.component.sheet.SheetRowFace): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - onEvent: STABLE (function type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+    - face: STABLE (class with no mutable properties)
 
 @Composable
 public fun nl.rhaydus.softcover.core.component.sheet.SheetRowGroup(model: nl.rhaydus.softcover.core.component.sheet.SheetRowGroupUiModel<K of nl.rhaydus.softcover.core.component.sheet.SheetRowGroup>, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.sheet.SheetRowEvent<K of nl.rhaydus.softcover.core.component.sheet.SheetRowGroup>, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
@@ -1823,6 +1856,12 @@ private fun nl.rhaydus.softcover.core.component.sheet.SheetTop(model: nl.rhaydus
     - model: STABLE (marked @Stable or @Immutable)
     - chrome: STABLE (marked @Stable or @Immutable)
     - onEvent: STABLE (function type)
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.sheet.labelStyle(): androidx.compose.ui.text.TextStyle
+  skippable: true
+  restartable: true
+  params:
 
 @Composable
 internal fun nl.rhaydus.softcover.core.component.sheet.rememberSheetChrome(model: nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel, dismissStarted: androidx.compose.runtime.MutableState<kotlin.Boolean>): nl.rhaydus.softcover.core.component.sheet.SheetChrome
@@ -2330,4 +2369,21 @@ internal fun nl.rhaydus.softcover.core.component.verdict.VerdictSheetBody(model:
   params:
     - model: STABLE (marked @Stable or @Immutable)
     - onEvent: STABLE (function type)
+
+@Composable
+public fun nl.rhaydus.softcover.core.component.yourcopy.YourCopyPanel(model: nl.rhaydus.softcover.core.component.yourcopy.YourCopyPanelUiModel<K of nl.rhaydus.softcover.core.component.yourcopy.YourCopyPanel>, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.yourcopy.YourCopyPanelEvent<K of nl.rhaydus.softcover.core.component.yourcopy.YourCopyPanel>, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - onEvent: STABLE (function type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.yourcopy.YourCopyRow(model: nl.rhaydus.softcover.core.component.yourcopy.YourCopyRowUiModel<K of nl.rhaydus.softcover.core.component.yourcopy.YourCopyRow>, onClick: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - onClick: STABLE (function type)
 

@@ -59,7 +59,7 @@ rules all components follow are in [component-contract.md](component-contract.md
 
 - **AdaptiveModalSheet** — `sheet` — foundation sheet plus the snackbar host and `Corners.xxl` panel.
 - **SheetScaffold** — `sheet` — chrome every modal sheet shares: header, body, footer and close; `SheetSession` holds its lifetime.
-- **SheetRowGroup** — `sheet` — hairline-divided single-choice rows that dismiss the sheet on selection.
+- **SheetRowGroup** — `sheet` — hairline-divided single-choice rows that dismiss the sheet on selection; an optional trailing free-text row.
 - **SheetActionRow** — `sheet` — a plain tappable menu row that acts at once.
 - **LoadingSheet** — `sheet` — full-screen blocking wait.
 - **UpdateProgressBottomSheet** — `progress` — pages, percentage or time reading-progress editor.
@@ -94,6 +94,7 @@ rules all components follow are in [component-contract.md](component-contract.md
 - **VerdictSheet** — `verdict` — the combined rating-and-review editor.
 - **VerdictBlock** — `verdict` — book-page rating and review card that opens the verdict sheet.
 - **HowItReadBlock / HowItReadSheet** — `traits` — the private reading-survey panel and the sheet that edits it.
+- **YourCopyPanel** — `yourcopy` — the book page's private per-copy rows, each a value or an invitation to add one.
 
 ## Modifiers & helpers
 
