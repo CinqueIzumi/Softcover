@@ -222,6 +222,25 @@ interface BookDao {
     @Query("SELECT id FROM book_editions WHERE id IN (:editionIds)")
     suspend fun getExistingEditionIds(editionIds: List<Int>): List<Int>
 
+    @Query("SELECT id FROM book_editions WHERE id IN (:editionIds) AND languageFetched = 0")
+    suspend fun getEditionIdsWithoutFetchedLanguage(editionIds: List<Int>): List<Int>
+
+    @Transaction
+    suspend fun fillEditionLanguages(languagesById: Map<Int, String?>) {
+        languagesById.forEach { (id, language) ->
+            setEditionLanguage(
+                id = id,
+                language = language,
+            )
+        }
+    }
+
+    @Query("UPDATE book_editions SET language = :language, languageFetched = 1 WHERE id = :id")
+    suspend fun setEditionLanguage(
+        id: Int,
+        language: String?,
+    )
+
     @Query("SELECT id, localImagePath, localImageUrl FROM book_editions WHERE id IN (:editionIds)")
     suspend fun getEditionImageRefsByEditionIds(editionIds: List<Int>): List<EditionImageRef>
 

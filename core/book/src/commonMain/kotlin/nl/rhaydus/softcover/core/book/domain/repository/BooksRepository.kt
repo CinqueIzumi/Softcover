@@ -194,6 +194,12 @@ interface BooksRepository {
         forceNetwork: Boolean,
     )
 
+    /**
+     * Fetches and caches the editions among [editionIds] whose language was never fetched.
+     * Editions already marked as fetched cost no request.
+     */
+    suspend fun fillEditionLanguages(editionIds: Set<Int>)
+
     suspend fun markBookAsWantToRead(
         book: Book,
         editionId: Int? = null,

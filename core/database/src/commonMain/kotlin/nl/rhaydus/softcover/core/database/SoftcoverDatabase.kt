@@ -93,7 +93,7 @@ import kotlin.coroutines.CoroutineContext
     views = [
         BookEditionView::class
     ],
-    version = 67,
+    version = 68,
 )
 @ConstructedBy(SoftcoverDatabaseConstructor::class)
 abstract class SoftcoverDatabase : RoomDatabase() {
@@ -1606,6 +1606,37 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_67_68 = object : Migration(67, 68) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL("ALTER TABLE book_editions ADD COLUMN language TEXT")
+                connection.execSQL("ALTER TABLE book_editions ADD COLUMN languageFetched INTEGER NOT NULL DEFAULT 0")
+
+                connection.execSQL("DROP VIEW IF EXISTS book_edition_view")
+
+                connection.execSQL(
+                    """
+                        CREATE VIEW `book_edition_view` AS SELECT
+                                edition.*,
+                                EXISTS(
+                                    SELECT 1
+                                    FROM list_books lb
+                                    JOIN book_lists bl ON bl.id = lb.listId
+                                    WHERE bl.slug = 'owned'
+                                    AND (
+                                        lb.editionId = edition.id
+                                        OR lb.editionId = edition.canonicalId
+                                        OR lb.editionId IN (
+                                            SELECT sub.id FROM book_editions sub
+                                            WHERE sub.canonicalId = edition.id
+                                        )
+                                    )
+                                ) AS isOwned
+                            FROM book_editions edition
+                    """.trimIndent(),
+                )
+            }
+        }
+
         private val MIGRATION_66_67 = object : Migration(66, 67) {
             override fun migrate(connection: SQLiteConnection) {
                 connection.execSQL(
@@ -1719,6 +1750,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             MIGRATION_64_65,
             MIGRATION_65_66,
             MIGRATION_66_67,
+            MIGRATION_67_68,
         )
     }
 }

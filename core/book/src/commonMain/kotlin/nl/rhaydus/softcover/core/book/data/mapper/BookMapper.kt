@@ -76,6 +76,8 @@ internal fun EditionFragment.toBookEdition(
     readingFormat = ReadingFormat.fromId(reading_format_id),
     bookId = book_id,
     owned = false,
+    language = language?.language,
+    isLanguageFetched = true,
 )
 
 internal fun EditionDetailFragment.toBookEdition(): BookEdition {

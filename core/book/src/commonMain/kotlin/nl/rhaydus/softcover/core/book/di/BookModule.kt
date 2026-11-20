@@ -25,6 +25,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.AddBookByIsbnUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.CommitBookRemovalUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.DidNotFinishBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.FetchBookByIdUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.FillEditionLanguagesUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetDidNotFinishUserBooksUseCase
@@ -304,6 +305,10 @@ val bookModule = module {
         FetchBookByIdUseCase(
             booksRepository = get(),
         )
+    }
+
+    factory {
+        FillEditionLanguagesUseCase(booksRepository = get())
     }
 
     factory {

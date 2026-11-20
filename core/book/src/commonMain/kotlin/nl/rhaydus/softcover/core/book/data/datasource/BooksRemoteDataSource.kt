@@ -847,6 +847,8 @@ internal class BooksRemoteDataSourceImpl(
 
     private fun Book.withCanonicalMetadata(canonical: Book): Book = copy(
         id = canonical.id,
+        editions = editions.map { it.copy(bookId = canonical.id) },
+        defaultEdition = defaultEdition?.copy(bookId = canonical.id),
         canonicalId = null,
         title = canonical.title,
         rating = canonical.rating,

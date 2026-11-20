@@ -580,6 +580,24 @@ internal class BooksRepositoryImpl(
         return booksRemoteDataSource.fetchEditionsByIds(ids = ids)
     }
 
+    override suspend fun fillEditionLanguages(editionIds: Set<Int>) {
+        if (editionIds.isEmpty()) return
+
+        val unfetchedIds = booksLocalDataSource.getEditionIdsWithoutFetchedLanguage(ids = editionIds.toList())
+
+        if (unfetchedIds.isEmpty()) return
+
+        val fetchedEditions = booksRemoteDataSource.fetchEditionsByIds(
+            ids = unfetchedIds,
+            forceNetwork = true,
+        )
+
+        val languagesById = unfetchedIds.associateWith<Int, String?> { null } +
+            fetchedEditions.associate { it.id to it.language }
+
+        booksLocalDataSource.fillEditionLanguages(languagesById = languagesById)
+    }
+
     override suspend fun markBookAsWantToRead(
         book: Book,
         editionId: Int?,

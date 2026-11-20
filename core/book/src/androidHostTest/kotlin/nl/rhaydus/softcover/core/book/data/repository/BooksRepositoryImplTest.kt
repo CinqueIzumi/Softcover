@@ -236,6 +236,19 @@ class BooksRepositoryImplTest {
 
     private fun stubBookEdition(): BookEdition = mockk()
 
+    private fun stubEdition(
+        id: Int,
+        language: String?,
+    ): BookEdition = mockk {
+        every {
+            this@mockk.id
+        } returns id
+
+        every {
+            this@mockk.language
+        } returns language
+    }
+
     private fun stagedBook(
         bookId: Int,
         userBookId: Int?,
@@ -1196,6 +1209,142 @@ class BooksRepositoryImplTest {
             // ----- Assert -----
             coVerify(exactly = 0) {
                 booksLocalDataSource.cacheEditions(editions = any())
+            }
+        }
+    }
+
+    @Nested
+    inner class FillEditionLanguages {
+        @Test
+        fun `fetches from the network only the editions whose language is unfetched and writes their languages`() = runTest {
+            // ----- Arrange -----
+            val unfetchedIds = listOf(2, 3)
+
+            coEvery {
+                booksLocalDataSource.getEditionIdsWithoutFetchedLanguage(ids = any())
+            } returns unfetchedIds
+
+            coEvery {
+                booksRemoteDataSource.fetchEditionsByIds(
+                    ids = unfetchedIds,
+                    forceNetwork = true,
+                )
+            } returns listOf(
+                stubEdition(
+                    id = 2,
+                    language = "Dutch",
+                ),
+                stubEdition(
+                    id = 3,
+                    language = "English",
+                ),
+            )
+
+            // ----- Act -----
+            repository.fillEditionLanguages(editionIds = setOf(1, 2, 3))
+
+            // ----- Assert -----
+            coVerify {
+                booksLocalDataSource.fillEditionLanguages(
+                    languagesById = mapOf(2 to "Dutch", 3 to "English"),
+                )
+            }
+        }
+
+        @Test
+        fun `writes a null language for a requested id the response omits`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                booksLocalDataSource.getEditionIdsWithoutFetchedLanguage(ids = any())
+            } returns listOf(2, 3)
+
+            coEvery {
+                booksRemoteDataSource.fetchEditionsByIds(
+                    ids = any(),
+                    forceNetwork = any(),
+                )
+            } returns listOf(
+                stubEdition(
+                    id = 2,
+                    language = "Dutch",
+                ),
+            )
+
+            // ----- Act -----
+            repository.fillEditionLanguages(editionIds = setOf(2, 3))
+
+            // ----- Assert -----
+            coVerify {
+                booksLocalDataSource.fillEditionLanguages(
+                    languagesById = mapOf(2 to "Dutch", 3 to null),
+                )
+            }
+        }
+
+        @Test
+        fun `makes no network call when every edition language is already fetched`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                booksLocalDataSource.getEditionIdsWithoutFetchedLanguage(ids = any())
+            } returns emptyList()
+
+            // ----- Act -----
+            repository.fillEditionLanguages(editionIds = setOf(1, 2))
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.fetchEditionsByIds(
+                    ids = any(),
+                    forceNetwork = any(),
+                )
+            }
+
+            coVerify(exactly = 0) {
+                booksLocalDataSource.fillEditionLanguages(languagesById = any())
+            }
+        }
+
+        @Test
+        fun `does nothing for an empty set`() = runTest {
+            // ----- Arrange -----
+            // (no ids)
+
+            // ----- Act -----
+            repository.fillEditionLanguages(editionIds = emptySet())
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                booksLocalDataSource.getEditionIdsWithoutFetchedLanguage(ids = any())
+            }
+
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.fetchEditionsByIds(
+                    ids = any(),
+                    forceNetwork = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `writes a null language for every requested id when the network returns no editions`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                booksLocalDataSource.getEditionIdsWithoutFetchedLanguage(ids = any())
+            } returns listOf(1)
+
+            coEvery {
+                booksRemoteDataSource.fetchEditionsByIds(
+                    ids = any(),
+                    forceNetwork = any(),
+                )
+            } returns emptyList()
+
+            // ----- Act -----
+            repository.fillEditionLanguages(editionIds = setOf(1))
+
+            // ----- Assert -----
+            coVerify {
+                booksLocalDataSource.fillEditionLanguages(languagesById = mapOf(1 to null))
             }
         }
     }
