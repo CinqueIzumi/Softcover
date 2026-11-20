@@ -38,8 +38,9 @@ internal fun buildListSignature(
     maxListBookUpdatedAt: String?,
 ): String = "${updatedAt.orEmpty()}|$count|${maxListBookUpdatedAt.orEmpty()}"
 
+/** Hardcover's website saves list entries without an edition; those take the book's default cover edition. */
 internal fun ListBookFragment.toListBook(): ListBook? {
-    val editionId = edition_id ?: return null
+    val editionId = edition_id ?: book.default_cover_edition_id ?: return null
 
     return ListBook(
         listBookId = id,

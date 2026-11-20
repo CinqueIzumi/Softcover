@@ -96,9 +96,20 @@ class ListMapperTest {
             listId: Int = 20,
             bookId: Int = 1,
             editionId: Int? = 10,
+            defaultCoverEditionId: Int? = null,
             position: Int? = null,
             createdAt: String? = null,
         ): ListBookFragment = mockk {
+            val bookStub: ListBookFragment.Book = mockk {
+                every {
+                    default_cover_edition_id
+                } returns defaultCoverEditionId
+            }
+
+            every {
+                book
+            } returns bookStub
+
             every {
                 this@mockk.id
             } returns id
@@ -125,15 +136,48 @@ class ListMapperTest {
         }
 
         @Test
-        fun `returns null when edition_id is null`() {
+        fun `returns null when edition_id and the book's default cover edition are both null`() {
             // ----- Arrange -----
-            val fragment = stubListBookFragment(editionId = null)
+            val fragment = stubListBookFragment(
+                editionId = null,
+                defaultCoverEditionId = null,
+            )
 
             // ----- Act -----
             val result = fragment.toListBook()
 
             // ----- Assert -----
             result shouldBe null
+        }
+
+        @Test
+        fun `falls back to the book's default cover edition when edition_id is null`() {
+            // ----- Arrange -----
+            val fragment = stubListBookFragment(
+                editionId = null,
+                defaultCoverEditionId = 77,
+            )
+
+            // ----- Act -----
+            val result = fragment.toListBook().shouldNotBeNull()
+
+            // ----- Assert -----
+            result.editionId shouldBe 77
+        }
+
+        @Test
+        fun `prefers edition_id over the book's default cover edition`() {
+            // ----- Arrange -----
+            val fragment = stubListBookFragment(
+                editionId = 10,
+                defaultCoverEditionId = 77,
+            )
+
+            // ----- Act -----
+            val result = fragment.toListBook().shouldNotBeNull()
+
+            // ----- Assert -----
+            result.editionId shouldBe 10
         }
 
         @Test
