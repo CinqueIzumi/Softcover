@@ -16,7 +16,7 @@ fragment ListFragment on lists {
         }
     }
 
-    list_books {
+    list_books(order_by: {id: asc}) {
         ...ListBookFragment
     }
 }
