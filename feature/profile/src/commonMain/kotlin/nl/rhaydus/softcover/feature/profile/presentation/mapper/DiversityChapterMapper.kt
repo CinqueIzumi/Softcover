@@ -31,6 +31,7 @@ internal fun diversityChapterUiModel(
     stats: DiversityStats?,
     hideBooksWithoutDetail: Boolean,
     scope: StatsScope = StatsScope.AllTime,
+    editionLanguagesPending: Boolean = false,
 ): DiversityChapterUiModel {
     val header = diversityChapterHeader(hideBooksWithoutDetail)
 
@@ -81,7 +82,21 @@ internal fun diversityChapterUiModel(
             scope = scope,
         ),
         canHideBooksWithoutDetail = stats.authorDemographics.hasUnknownBooks() ||
-            stats.characterRepresentation.hasUnansweredBooks(),
+            stats.characterRepresentation.hasUnansweredBooks() ||
+            stats.publication.hasUnknownBooks(),
+        languages = languagesSection(
+            split = stats.publication.languages,
+            hideBooksWithoutDetail = hideBooksWithoutDetail,
+            isFillingLanguages = editionLanguagesPending,
+        ),
+        decades = decadesSection(
+            decades = stats.publication.decades,
+            hideBooksWithoutDetail = hideBooksWithoutDetail,
+        ),
+        acquisition = acquisitionSection(
+            split = stats.publication.acquisition,
+            hideBooksWithoutDetail = hideBooksWithoutDetail,
+        ),
     )
 }
 
@@ -148,9 +163,9 @@ internal fun diversityEmptyCaption(
     }
 
     return if (hideBooksWithoutDetail) {
-        "None of your books carry this detail yet. Turn off Hide books without this detail to see them."
+        "None of your books carry these details yet. Turn off Hide books without this detail to see them."
     } else {
-        "This fills in as your authors get tagged on Hardcover and you answer How it read."
+        "This fills in as your authors get tagged on Hardcover, you answer How it read and you note where you got each book."
     }
 }
 
@@ -245,9 +260,9 @@ private fun diversityChapterHeader(hideBooksWithoutDetail: Boolean): SectionHead
     eyebrow = atlasChapterEyebrow(AtlasChapter.DIVERSITY_AND_PUBLICATION),
     headline = "Whose stories",
     description = if (hideBooksWithoutDetail) {
-        "Every line names its own total."
+        "Who wrote your books, what language they came in, when they came out and where you got them. Every line counts only the books with its detail."
     } else {
-        "Every line names its own total, and how many books it has no detail for."
+        "Who wrote your books, what language they came in, when they came out and where you got them. Every line names its own total."
     },
 )
 
@@ -270,6 +285,10 @@ private fun loadingDiversityChapter(header: SectionHeaderUiModel.Section): Diver
         characterSourceCaption = CHARACTER_SOURCE_CAPTION,
         emptyCaption = "",
         canHideBooksWithoutDetail = false,
+        languages = loadingLanguagesSection(),
+        decades = loadingDecadesSection(),
+        acquisition = loadingAcquisitionSection(),
+        isLoading = true,
     )
 }
 

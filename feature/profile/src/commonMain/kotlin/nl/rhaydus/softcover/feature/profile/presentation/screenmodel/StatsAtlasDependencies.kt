@@ -10,6 +10,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveQuotesSyncedU
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadDatesBackfilledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsBackfilledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetHideBooksWithoutDetailUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.FillReaderEditionLanguagesUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveDidNotFinishStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveDiversityStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveHourlyPagesReadUseCase
@@ -49,6 +50,7 @@ internal data class StatsAtlasDependencies(
     val setHideBooksWithoutDetailUseCase: SetHideBooksWithoutDetailUseCase,
     val observeBooksByIdsUseCase: ObserveBooksByIdsUseCase,
     val observeCurrentDateUseCase: ObserveCurrentDateUseCase,
+    val fillReaderEditionLanguagesUseCase: FillReaderEditionLanguagesUseCase,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,
 ) : ActionDependencies()

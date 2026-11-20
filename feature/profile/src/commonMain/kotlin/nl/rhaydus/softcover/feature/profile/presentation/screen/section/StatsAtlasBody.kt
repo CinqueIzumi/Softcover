@@ -161,7 +161,7 @@ internal fun ColumnScope.StatsAtlasBody(
         DiversityChapter(
             model = state.diversityChapter,
             hideBooksWithoutDetailToggle = state.hideBooksWithoutDetailToggle,
-            isLoading = state.isReadingLifeLoading,
+            isLoading = state.isReadingLifeLoading || state.diversityChapter.isLoading,
             onHideBooksWithoutDetailChange = {
                 runAction(OnHideBooksWithoutDetailToggledAction(newValue = it))
             },

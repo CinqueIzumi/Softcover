@@ -5,4 +5,5 @@ data class DiversityStats(
     val booksRead: Int = 0,
     val authorDemographics: AuthorDemographics = AuthorDemographics(),
     val characterRepresentation: CharacterRepresentation = CharacterRepresentation(),
+    val publication: PublicationStats = PublicationStats(),
 )

@@ -44,10 +44,13 @@ import nl.rhaydus.softcover.core.profile.domain.model.FormatSplit
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
 import nl.rhaydus.softcover.core.profile.domain.model.HourlyPages
+import nl.rhaydus.softcover.core.profile.domain.model.LanguageCount
+import nl.rhaydus.softcover.core.profile.domain.model.LanguageSplit
 import nl.rhaydus.softcover.core.profile.domain.model.LongestBook
 import nl.rhaydus.softcover.core.profile.domain.model.MonthlyPages
 import nl.rhaydus.softcover.core.profile.domain.model.OwnTagCount
 import nl.rhaydus.softcover.core.profile.domain.model.PagesRead
+import nl.rhaydus.softcover.core.profile.domain.model.PublicationStats
 import nl.rhaydus.softcover.core.profile.domain.model.QuickestRead
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
@@ -868,6 +871,38 @@ class AtlasScopedSectionsCollectorTest {
             // ----- Assert -----
             whileLoading shouldBe true
             stateFlow.value.diversityChapter.authorBipoc.chart.isLoading shouldBe false
+            job.cancel()
+        }
+
+        @Test
+        fun `shows the languages section loading while the edition languages are pending`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            diversityFor = {
+                DiversityStats(
+                    booksRead = 4,
+                    publication = PublicationStats(
+                        languages = LanguageSplit(
+                            languages = listOf(
+                                LanguageCount(
+                                    name = "English",
+                                    books = 4,
+                                ),
+                            ),
+                        ),
+                    ),
+                )
+            }
+
+            val job = launchCollector()
+            val whilePending = stateFlow.value.diversityChapter.languages.chart.isLoading
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(editionLanguagesPending = false)
+
+            // ----- Assert -----
+            whilePending shouldBe true
+            stateFlow.value.diversityChapter.languages.chart.isLoading shouldBe false
+            stateFlow.value.diversityChapter.languages.chart.segments.map { it.label } shouldBe listOf("English")
             job.cancel()
         }
 

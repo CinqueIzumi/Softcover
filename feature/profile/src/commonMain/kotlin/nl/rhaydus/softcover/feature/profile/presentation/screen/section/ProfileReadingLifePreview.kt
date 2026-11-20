@@ -3,11 +3,13 @@ package nl.rhaydus.softcover.feature.profile.presentation.screen.section
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
+import nl.rhaydus.softcover.core.domain.model.AcquisitionKind
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.core.domain.model.Quote
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
+import nl.rhaydus.softcover.core.profile.domain.model.AcquisitionSplit
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorRanking
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorshipGender
@@ -21,6 +23,8 @@ import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
 import nl.rhaydus.softcover.core.profile.domain.model.HourlyPages
+import nl.rhaydus.softcover.core.profile.domain.model.LanguageCount
+import nl.rhaydus.softcover.core.profile.domain.model.LanguageSplit
 import nl.rhaydus.softcover.core.profile.domain.model.LengthBand
 import nl.rhaydus.softcover.core.profile.domain.model.LongestBook
 import nl.rhaydus.softcover.core.profile.domain.model.MonthCount
@@ -28,6 +32,8 @@ import nl.rhaydus.softcover.core.profile.domain.model.MonthlyPages
 import nl.rhaydus.softcover.core.profile.domain.model.MostQuotedBook
 import nl.rhaydus.softcover.core.profile.domain.model.OwnTagCount
 import nl.rhaydus.softcover.core.profile.domain.model.PagesRead
+import nl.rhaydus.softcover.core.profile.domain.model.PublicationDecades
+import nl.rhaydus.softcover.core.profile.domain.model.PublicationStats
 import nl.rhaydus.softcover.core.profile.domain.model.QuickestRead
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
@@ -66,6 +72,49 @@ internal fun profileDiversityStatsPreview(): DiversityStats = DiversityStats(
     booksRead = 214,
     authorDemographics = previewAuthorDemographics(),
     characterRepresentation = previewCharacterRepresentation(),
+    publication = previewPublicationStats(),
+)
+
+private fun previewPublicationStats(): PublicationStats = PublicationStats(
+    languages = LanguageSplit(
+        languages = listOf(
+            LanguageCount(
+                name = "English",
+                books = 30,
+            ),
+            LanguageCount(
+                name = "Dutch",
+                books = 6,
+            ),
+            LanguageCount(
+                name = "French",
+                books = 2,
+            ),
+        ),
+    ),
+    decades = PublicationDecades(
+        booksByDecade = mapOf(
+            1870 to 1,
+            1950 to 1,
+            1960 to 3,
+            1980 to 2,
+            2000 to 5,
+            2010 to 10,
+            2020 to 16,
+        ),
+        oldestYear = 1871,
+        booksThisCentury = 31,
+    ),
+    acquisition = AcquisitionSplit(
+        byKind = mapOf(
+            AcquisitionKind.LIBRARY to 9,
+            AcquisitionKind.BOUGHT_IN_SHOP to 8,
+            AcquisitionKind.BOUGHT_DIGITAL to 6,
+            AcquisitionKind.BOUGHT_ONLINE to 3,
+            AcquisitionKind.GIFT to 3,
+            AcquisitionKind.BOUGHT_SECOND_HAND to 2,
+        ),
+    ),
 )
 
 internal fun profilePagesReadPreview(): PagesRead = PagesRead(

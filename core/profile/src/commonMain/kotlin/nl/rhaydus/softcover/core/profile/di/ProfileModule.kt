@@ -13,6 +13,7 @@ import nl.rhaydus.softcover.core.profile.data.datasource.ProfileRemoteDataSource
 import nl.rhaydus.softcover.core.profile.data.repository.ProfileRepositoryImpl
 import nl.rhaydus.softcover.core.profile.domain.ProfileRefreshGate
 import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
+import nl.rhaydus.softcover.core.profile.domain.usecase.FillReaderEditionLanguagesUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveDidNotFinishStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveDiversityStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveHourlyPagesReadUseCase
@@ -112,6 +113,16 @@ val profileModule = module {
     }
 
     factory {
+        FillReaderEditionLanguagesUseCase(
+            getCurrentlyReadingUserBooksUseCase = get(),
+            getPausedUserBooksUseCase = get(),
+            getReadUserBooksUseCase = get(),
+            getDidNotFinishUserBooksUseCase = get(),
+            fillEditionLanguagesUseCase = get(),
+        )
+    }
+
+    factory {
         ObserveDiversityStatsUseCase(
             getCurrentlyReadingUserBooksUseCase = get(),
             getPausedUserBooksUseCase = get(),
@@ -119,6 +130,7 @@ val profileModule = module {
             getDidNotFinishUserBooksUseCase = get(),
             observeProgressUpdatesUseCase = get(),
             observeAllBookTraitsUseCase = get(),
+            observeAllBookCopiesUseCase = get(),
             appDispatchers = get(),
             timeZone = get(),
         )

@@ -57,15 +57,17 @@
   future `Fifth`; ties go to the earliest month; labels on every third column); time of day (eight
   three-hour blocks, every column labelled and valued with its share); and the half-star
   ratings histogram (whole stars `Lead`, halves `Fourth`, labels under whole stars only).
-- Chapter 08 "Diversity and publication": five bars counted in books (gender, authors of colour, LGBTQ+
-  authors, BIPOC characters, LGBTQ+ characters; the character bars are the reader's own How it read
-  answers). Books without a bar's detail are always their own muted bucket, a zero bucket draws nothing,
-  and each caption names its own total ("Yes 2 · No 5 · Unknown 23 · of 30 books"). One persisted "Hide
-  books without this detail" `ToggleRow` drops those buckets everywhere and renormalises per bar ("of N
-  books with this detail"); it shows only when a bucket exists and sits outside the empty branch.
-  The chapter counts every Reading, Paused, Read and Did not finish book the reader read in the scope
-  window, each once: a read finished or started in it, a stop date in it, or progress logged on a day in
-  it. All time counts every book of those statuses.
+- Chapter 08 "Diversity and publication": five author and character bars in books (the character bars
+  are the reader's own How it read answers), then Languages, When they were written and Where you got
+  them, each an `AtlasSubhead` over its chart with its own empty line. Books without the detail are a
+  muted last bucket (a zero bucket draws nothing) and captions name their own total. One persisted "Hide
+  books without this detail" `ToggleRow` drops those buckets everywhere and renormalises; it shows only
+  when one exists, outside the empty branch. Languages: keys `ProportionChart` (top four, "Other
+  languages" `Fifth`, masked while edition languages fill); decades: `ColumnChart` (newest five plus
+  "Older" past six, `Lead` to `Fourth`); acquisition: rows `ProportionChart` (presets by count, then
+  "Somewhere else"). The chapter counts every Reading, Paused, Read and Did not finish book read in the
+  scope window, each once: a read finished or started in it, a stop date in it, or progress logged on a
+  day in it; All time counts every book of those statuses.
 
 ### Profile share sheet
 

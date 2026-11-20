@@ -15,11 +15,18 @@ internal data class DiversityChapterUiModel(
     val characterSourceCaption: String,
     val emptyCaption: String,
     val canHideBooksWithoutDetail: Boolean,
+    val languages: ProportionSectionUiModel,
+    val decades: ColumnSectionUiModel,
+    val acquisition: ProportionSectionUiModel,
+    val isLoading: Boolean = false,
 ) {
     val hasContent: Boolean
         get() = genderBreakdown.hasData ||
             authorBipoc.hasData ||
             authorLgbtq.hasData ||
             characterBipoc.hasData ||
-            characterLgbtq.hasData
+            characterLgbtq.hasData ||
+            languages.hasData ||
+            decades.hasData ||
+            acquisition.hasData
 }

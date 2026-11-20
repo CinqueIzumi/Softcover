@@ -146,6 +146,14 @@ private fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.Bre
     - standIn: STABLE (String is immutable)
 
 @Composable
+private fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.ColumnSection(section: nl.rhaydus.softcover.feature.profile.presentation.state.ColumnSectionUiModel, isLoading: kotlin.Boolean): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - section: STABLE (marked @Stable or @Immutable)
+    - isLoading: STABLE (primitive type)
+
+@Composable
 private fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.DayDetailBody(model: nl.rhaydus.softcover.feature.profile.presentation.state.DayDetailUiModel, onBookCardEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.bookcard.BookCardEvent, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
@@ -269,6 +277,34 @@ internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.Pr
   params:
     - state: UNSTABLE (has mutable properties or unstable members)
     - runAction: STABLE (function type)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.ProportionSection(section: nl.rhaydus.softcover.feature.profile.presentation.state.ProportionSectionUiModel, isLoading: kotlin.Boolean): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - section: STABLE (marked @Stable or @Immutable)
+    - isLoading: STABLE (primitive type)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.PublicationSection(title: kotlin.String, caption: kotlin.String, emptyCaption: kotlin.String, isLoading: kotlin.Boolean, isEmpty: kotlin.Boolean, chart: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - title: STABLE (String is immutable)
+    - caption: STABLE (String is immutable)
+    - emptyCaption: STABLE (String is immutable)
+    - isLoading: STABLE (primitive type)
+    - isEmpty: STABLE (primitive type)
+    - chart: STABLE (composable function type)
+
+@Composable
+internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.PublicationSections(model: nl.rhaydus.softcover.feature.profile.presentation.state.DiversityChapterUiModel, isLoading: kotlin.Boolean): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - isLoading: STABLE (primitive type)
 
 @Composable
 private fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.RatingsAverageRow(average: nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel, averageLabel: kotlin.String, isLoading: kotlin.Boolean): kotlin.Unit

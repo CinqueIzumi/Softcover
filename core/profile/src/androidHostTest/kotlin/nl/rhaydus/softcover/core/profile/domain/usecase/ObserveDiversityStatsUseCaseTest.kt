@@ -17,8 +17,12 @@ import nl.rhaydus.softcover.core.book.domain.usecase.GetDidNotFinishUserBooksUse
 import nl.rhaydus.softcover.core.book.domain.usecase.GetPausedUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetReadUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveProgressUpdatesUseCase
+import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveAllBookCopiesUseCase
 import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveAllBookTraitsUseCase
+import nl.rhaydus.softcover.core.domain.model.AcquisitionKind
+import nl.rhaydus.softcover.core.domain.model.AcquisitionSource
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookCopy
 import nl.rhaydus.softcover.core.domain.model.BookTraits
 import nl.rhaydus.softcover.core.domain.model.CharacterTrait
 import nl.rhaydus.softcover.core.domain.model.StatsRange
@@ -37,6 +41,7 @@ class ObserveDiversityStatsUseCaseTest {
     private lateinit var getDidNotFinishUserBooksUseCase: GetDidNotFinishUserBooksUseCase
     private lateinit var observeProgressUpdatesUseCase: ObserveProgressUpdatesUseCase
     private lateinit var observeAllBookTraitsUseCase: ObserveAllBookTraitsUseCase
+    private lateinit var observeAllBookCopiesUseCase: ObserveAllBookCopiesUseCase
     private lateinit var dispatcher: TestDispatcher
     private lateinit var useCase: ObserveDiversityStatsUseCase
 
@@ -48,6 +53,7 @@ class ObserveDiversityStatsUseCaseTest {
         getDidNotFinishUserBooksUseCase = mockk()
         observeProgressUpdatesUseCase = mockk()
         observeAllBookTraitsUseCase = mockk()
+        observeAllBookCopiesUseCase = mockk()
 
         every {
             getCurrentlyReadingUserBooksUseCase()
@@ -73,6 +79,10 @@ class ObserveDiversityStatsUseCaseTest {
             observeAllBookTraitsUseCase()
         } returns flowOf(emptyMap())
 
+        every {
+            observeAllBookCopiesUseCase()
+        } returns flowOf(emptyMap())
+
         dispatcher = StandardTestDispatcher()
 
         useCase = ObserveDiversityStatsUseCase(
@@ -82,6 +92,7 @@ class ObserveDiversityStatsUseCaseTest {
             getDidNotFinishUserBooksUseCase = getDidNotFinishUserBooksUseCase,
             observeProgressUpdatesUseCase = observeProgressUpdatesUseCase,
             observeAllBookTraitsUseCase = observeAllBookTraitsUseCase,
+            observeAllBookCopiesUseCase = observeAllBookCopiesUseCase,
             appDispatchers = AppDispatchers(
                 main = dispatcher,
                 io = dispatcher,
@@ -154,6 +165,47 @@ class ObserveDiversityStatsUseCaseTest {
                 )
 
                 awaitItem().characterRepresentation.bipoc shouldBe CharacterBreakdown(yesCount = 1)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+        @Test
+        fun `re-emits with the new acquisition counts when the copies change`() = runTest(dispatcher) {
+            // ----- Arrange -----
+            every {
+                getReadUserBooksUseCase()
+            } returns flowOf(
+                listOf(
+                    readBook(
+                        id = 1,
+                        finishedAt = "2026-01-01",
+                    ),
+                ),
+            )
+
+            val copiesFlow = MutableSharedFlow<Map<Int, BookCopy>>(replay = 1)
+            copiesFlow.tryEmit(emptyMap())
+
+            every {
+                observeAllBookCopiesUseCase()
+            } returns copiesFlow
+
+            // ----- Act & Assert -----
+            useCase(StatsRange.Unbounded).test {
+                awaitItem().publication.acquisition.notNoted shouldBe 1
+
+                copiesFlow.emit(
+                    mapOf(
+                        1 to BookCopy(
+                            bookId = 1,
+                            source = AcquisitionSource.Preset(AcquisitionKind.LIBRARY),
+                        ),
+                    ),
+                )
+
+                val acquisition = awaitItem().publication.acquisition
+                acquisition.byKind shouldBe mapOf(AcquisitionKind.LIBRARY to 1)
+                acquisition.notNoted shouldBe 0
                 cancelAndIgnoreRemainingEvents()
             }
         }

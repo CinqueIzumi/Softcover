@@ -71,6 +71,10 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
         scope: ActionScope<StatsAtlasUiState, StatsAtlasEvent, StatsAtlasLocalVariables>,
         dependencies: StatsAtlasDependencies,
     ) {
+        val editionLanguagesPending = scope.state
+            .map { it.editionLanguagesPending }
+            .distinctUntilChanged()
+
         scope.state
             .map { state ->
                 ScopeSnapshot(
@@ -80,12 +84,22 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
             }
             .distinctUntilChanged()
             .flatMapLatest { snapshot ->
-                if (snapshot.isHistoryLoaded) dependencies.observeSections(snapshot.scope) else emptyFlow()
+                if (snapshot.isHistoryLoaded) {
+                    dependencies.observeSections(
+                        scope = snapshot.scope,
+                        editionLanguagesPending = editionLanguagesPending,
+                    )
+                } else {
+                    emptyFlow()
+                }
             }
             .collect { sections -> scope.setState { it.withSections(sections) } }
     }
 
-    private fun StatsAtlasDependencies.observeSections(scope: StatsScope): Flow<ScopedSections> {
+    private fun StatsAtlasDependencies.observeSections(
+        scope: StatsScope,
+        editionLanguagesPending: Flow<Boolean>,
+    ): Flow<ScopedSections> {
         return observeCurrentDateUseCase().flatMapLatest { today ->
             val range = scope.resolve(today)
 
@@ -137,15 +151,18 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
                         pagesRead = null,
                         didNotFinish = null,
                         readingListStats = null,
+                        editionLanguagesPending = true,
                     )
                 },
                 observeWrittenStatsUseCase(range).untilBackfilled(backfilledAndSynced),
                 observeDiversityStatsUseCase(range)
                     .untilBackfilled(statsAndReadDatesBackfilled),
                 readingList,
-            ) { sections, written, diversity, (pagesRead, didNotFinish, readingListStats) ->
+                editionLanguagesPending,
+            ) { sections, written, diversity, (pagesRead, didNotFinish, readingListStats), languagesPending ->
                 sections.copy(
                     diversity = diversity,
+                    editionLanguagesPending = languagesPending,
                     written = written,
                     pagesRead = pagesRead,
                     didNotFinish = didNotFinish,
@@ -181,6 +198,7 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
             stats = sections.diversity,
             hideBooksWithoutDetail = hideBooksWithoutDetail,
             scope = scope,
+            editionLanguagesPending = sections.editionLanguagesPending,
         )
 
         return copy(
@@ -286,5 +304,6 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
         val pagesRead: PagesRead?,
         val didNotFinish: DidNotFinishStats?,
         val readingListStats: ReadingListStats?,
+        val editionLanguagesPending: Boolean,
     )
 }

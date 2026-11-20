@@ -128,6 +128,13 @@ private fun DiversityBars(
         isLoading = isLoading,
         standIn = "From your own How it read answers.",
     )
+
+    Spacer(modifier = Modifier.height(Spacing.xxl))
+
+    PublicationSections(
+        model = model,
+        isLoading = isLoading,
+    )
 }
 
 @Composable

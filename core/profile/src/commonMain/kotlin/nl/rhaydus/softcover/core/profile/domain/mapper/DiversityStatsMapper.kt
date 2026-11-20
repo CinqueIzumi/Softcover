@@ -6,6 +6,7 @@ import kotlinx.datetime.toLocalDateTime
 import nl.rhaydus.softcover.core.book.domain.model.ProgressUpdate
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookCopy
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.BookTraits
 import nl.rhaydus.softcover.core.domain.model.CharacterTrait
@@ -24,6 +25,7 @@ internal fun List<Book>.toDiversityStats(
     range: StatsRange,
     updates: List<ProgressUpdate>,
     traitsByBookId: Map<Int, BookTraits>,
+    copiesByBookId: Map<Int, BookCopy>,
     timeZone: TimeZone,
 ): DiversityStats {
     val updateDaysByBook = updates.groupBy(
@@ -43,6 +45,7 @@ internal fun List<Book>.toDiversityStats(
         booksRead = counted.size,
         authorDemographics = counted.toAuthorDemographics(),
         characterRepresentation = counted.toCharacterRepresentation(traitsByBookId),
+        publication = counted.toPublicationStats(copiesByBookId),
     )
 }
 

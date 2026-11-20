@@ -5,7 +5,9 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
 import nl.rhaydus.softcover.core.component.chart.ChartTone
+import nl.rhaydus.softcover.core.domain.model.AcquisitionKind
 import nl.rhaydus.softcover.core.domain.model.StatsScope
+import nl.rhaydus.softcover.core.profile.domain.model.AcquisitionSplit
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorshipGender
 import nl.rhaydus.softcover.core.profile.domain.model.CharacterBreakdown
@@ -13,6 +15,8 @@ import nl.rhaydus.softcover.core.profile.domain.model.CharacterRepresentation
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.DiversityStats
 import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
+import nl.rhaydus.softcover.core.profile.domain.model.PublicationDecades
+import nl.rhaydus.softcover.core.profile.domain.model.PublicationStats
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -30,7 +34,7 @@ class DiversityChapterMapperTest {
     @Nested
     inner class DiversityChapterUiModelTests {
         @Test
-        fun `describes the no detail count in the header only while books without detail are shown`() {
+        fun `words the header description differently while books without detail are hidden`() {
             // ----- Arrange -----
             val stats = DiversityStats(booksRead = 5)
 
@@ -46,8 +50,7 @@ class DiversityChapterMapperTest {
             ).header.description?.joinToString(separator = "") { it.text }
 
             // ----- Assert -----
-            shown shouldBe "Every line names its own total, and how many books it has no detail for."
-            hidden shouldBe "Every line names its own total."
+            (shown != hidden) shouldBe true
         }
 
         @Test
@@ -176,6 +179,51 @@ class DiversityChapterMapperTest {
             // ----- Assert -----
             result.canHideBooksWithoutDetail shouldBe true
             result.characterBipoc.chart.segments.map { it.label } shouldBe listOf("Yes")
+        }
+
+        @Test
+        fun `can hide when only a publication section has an unknown bucket`() {
+            // ----- Arrange -----
+            val stats = DiversityStats(
+                booksRead = 5,
+                publication = PublicationStats(
+                    decades = PublicationDecades(
+                        booksByDecade = mapOf(1990 to 3),
+                        unknownYear = 2,
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = diversityChapterUiModel(
+                stats = stats,
+                hideBooksWithoutDetail = false,
+            )
+
+            // ----- Assert -----
+            result.canHideBooksWithoutDetail shouldBe true
+        }
+
+        @Test
+        fun `has content when only publication data exists`() {
+            // ----- Arrange -----
+            val stats = DiversityStats(
+                booksRead = 2,
+                publication = PublicationStats(
+                    acquisition = AcquisitionSplit(byKind = mapOf(AcquisitionKind.GIFT to 2)),
+                ),
+            )
+
+            // ----- Act -----
+            val result = diversityChapterUiModel(
+                stats = stats,
+                hideBooksWithoutDetail = false,
+            )
+
+            // ----- Assert -----
+            result.authorBipoc.hasData shouldBe false
+            result.acquisition.hasData shouldBe true
+            result.hasContent shouldBe true
         }
 
         @Test

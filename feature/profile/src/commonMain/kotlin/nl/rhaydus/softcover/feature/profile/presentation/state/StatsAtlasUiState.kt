@@ -90,6 +90,7 @@ internal data class StatsAtlasUiState(
     val scopeLine: String = ALL_TIME_SCOPE_LINE,
     val recentlyLoved: BookCardSet<RecentlyLovedEntry> = BookCardSet.standIns(RECENTLY_LOVED_STAND_IN_CARDS),
     val hideBooksWithoutDetail: Boolean = false,
+    val editionLanguagesPending: Boolean = true,
 
     val hideBooksWithoutDetailToggle: ToggleRowUiModel<String> = hideBooksWithoutDetailToggleFor(hide = false),
     val selectedYearMetric: YearMetric = YearMetric.BOOKS,

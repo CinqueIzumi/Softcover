@@ -11,6 +11,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.GetDidNotFinishUserBooksUse
 import nl.rhaydus.softcover.core.book.domain.usecase.GetPausedUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetReadUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveProgressUpdatesUseCase
+import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveAllBookCopiesUseCase
 import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveAllBookTraitsUseCase
 import nl.rhaydus.softcover.core.domain.model.StatsRange
 import nl.rhaydus.softcover.core.profile.domain.mapper.toDiversityStats
@@ -23,10 +24,10 @@ class ObserveDiversityStatsUseCase internal constructor(
     private val getDidNotFinishUserBooksUseCase: GetDidNotFinishUserBooksUseCase,
     private val observeProgressUpdatesUseCase: ObserveProgressUpdatesUseCase,
     private val observeAllBookTraitsUseCase: ObserveAllBookTraitsUseCase,
+    private val observeAllBookCopiesUseCase: ObserveAllBookCopiesUseCase,
     private val appDispatchers: AppDispatchers,
     private val timeZone: TimeZone,
 ) {
-    /** Re-emits when a book of those statuses, a progress update or a trait answer changes; the aggregation runs off the main thread. */
     operator fun invoke(range: StatsRange): Flow<DiversityStats> = combine(
         combine(
             getCurrentlyReadingUserBooksUseCase(),
@@ -36,11 +37,13 @@ class ObserveDiversityStatsUseCase internal constructor(
         ) { reading, paused, read, didNotFinish -> reading + paused + read + didNotFinish },
         observeProgressUpdatesUseCase(),
         observeAllBookTraitsUseCase(),
-    ) { books, updates, traitsByBookId ->
+        observeAllBookCopiesUseCase(),
+    ) { books, updates, traitsByBookId, copiesByBookId ->
         books.toDiversityStats(
             range = range,
             updates = updates,
             traitsByBookId = traitsByBookId,
+            copiesByBookId = copiesByBookId,
             timeZone = timeZone,
         )
     }

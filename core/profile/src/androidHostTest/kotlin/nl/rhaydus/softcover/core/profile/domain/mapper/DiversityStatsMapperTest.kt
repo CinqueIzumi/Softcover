@@ -4,8 +4,11 @@ import io.kotest.matchers.shouldBe
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import nl.rhaydus.softcover.core.book.domain.model.ProgressUpdate
+import nl.rhaydus.softcover.core.domain.model.AcquisitionKind
+import nl.rhaydus.softcover.core.domain.model.AcquisitionSource
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookCopy
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.BookTraits
 import nl.rhaydus.softcover.core.domain.model.CharacterTrait
@@ -38,10 +41,12 @@ class DiversityStatsMapperTest {
         range: StatsRange,
         updates: List<ProgressUpdate> = emptyList(),
         traitsByBookId: Map<Int, BookTraits> = emptyMap(),
+        copiesByBookId: Map<Int, BookCopy> = emptyMap(),
     ) = toDiversityStats(
         range = range,
         updates = updates,
         traitsByBookId = traitsByBookId,
+        copiesByBookId = copiesByBookId,
         timeZone = TimeZone.UTC,
     )
 
@@ -903,6 +908,48 @@ class DiversityStatsMapperTest {
             // ----- Assert -----
             representation.bipoc shouldBe CharacterBreakdown(yesCount = 1)
             representation.bipoc.total shouldBe 1
+        }
+    }
+
+    @Nested
+    inner class Publication {
+        @Test
+        fun `is built from the deduplicated books read in the range only`() {
+            // ----- Arrange -----
+            val inRange = readBook(
+                id = 1,
+                finishedAt = "2026-03-01",
+            )
+
+            val outOfRange = readBook(
+                id = 2,
+                finishedAt = "2020-03-01",
+            )
+
+            val books = listOf(inRange, inRange, outOfRange)
+
+            val copies = mapOf(
+                1 to BookCopy(
+                    bookId = 1,
+                    source = AcquisitionSource.Preset(AcquisitionKind.LIBRARY),
+                ),
+                2 to BookCopy(
+                    bookId = 2,
+                    source = AcquisitionSource.Other("A friend"),
+                ),
+            )
+
+            // ----- Act -----
+            val stats = books.toStats(
+                range = bounded,
+                copiesByBookId = copies,
+            )
+
+            // ----- Assert -----
+            stats.publication.acquisition.byKind shouldBe mapOf(AcquisitionKind.LIBRARY to 1)
+            stats.publication.acquisition.somewhereElse shouldBe 0
+            stats.publication.acquisition.notNoted shouldBe 0
+            stats.publication.languages.unknown shouldBe 1
         }
     }
 }
