@@ -7,6 +7,7 @@ import nl.rhaydus.softcover.core.component.yourcopy.YourCopyValue
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.AcquisitionSource
 import nl.rhaydus.softcover.core.domain.model.BookCopy
+import nl.rhaydus.softcover.core.uibinding.acquisition.toLabel
 
 internal const val WHERE_YOU_GOT_IT_ROW_KEY = "where-you-got-it"
 

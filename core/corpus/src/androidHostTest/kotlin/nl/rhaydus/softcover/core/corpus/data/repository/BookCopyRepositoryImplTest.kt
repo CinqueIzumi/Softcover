@@ -22,6 +22,8 @@ class BookCopyRepositoryImplTest {
     private class FakeDataSource : BookCopyLocalDataSource {
         val rows = MutableStateFlow<Map<Int, BookCopyEntity>>(emptyMap())
 
+        override fun observeAll(): Flow<List<BookCopyEntity>> = rows.map { it.values.toList() }
+
         override fun observe(bookId: Int): Flow<BookCopyEntity?> = rows.map { it[bookId] }
 
         override suspend fun get(bookId: Int): BookCopyEntity? = rows.value[bookId]
@@ -50,6 +52,64 @@ class BookCopyRepositoryImplTest {
             localDataSource = dataSource,
             clock = FixedClock(millis = 123_456L),
         )
+    }
+
+    @Nested
+    inner class ObserveAll {
+        @Test
+        fun `keys the stored copies by book id`() = runTest {
+            // ----- Arrange -----
+            repository.save(
+                copy = BookCopy(
+                    bookId = 1,
+                    source = AcquisitionSource.Preset(kind = AcquisitionKind.GIFT),
+                ),
+            )
+
+            repository.save(
+                copy = BookCopy(
+                    bookId = 2,
+                    source = AcquisitionSource.Other(text = "Friend"),
+                ),
+            )
+
+            // ----- Act & Assert -----
+            repository.observeAll().test {
+                awaitItem() shouldBe mapOf(
+                    1 to BookCopy(
+                        bookId = 1,
+                        source = AcquisitionSource.Preset(kind = AcquisitionKind.GIFT),
+                    ),
+                    2 to BookCopy(
+                        bookId = 2,
+                        source = AcquisitionSource.Other(text = "Friend"),
+                    ),
+                )
+            }
+        }
+
+        @Test
+        fun `a stored source name nothing maps to reads as no source`() = runTest {
+            // ----- Arrange -----
+            dataSource.upsert(
+                entity = BookCopyEntity(
+                    bookId = 3,
+                    source = "retired_source",
+                    customSource = null,
+                    updatedAt = 1L,
+                ),
+            )
+
+            // ----- Act & Assert -----
+            repository.observeAll().test {
+                awaitItem() shouldBe mapOf(
+                    3 to BookCopy(
+                        bookId = 3,
+                        source = null,
+                    ),
+                )
+            }
+        }
     }
 
     @Nested

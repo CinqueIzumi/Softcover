@@ -14,6 +14,7 @@ import nl.rhaydus.softcover.core.component.sheet.SheetRowGroupUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetRowUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.domain.model.AcquisitionKind
+import nl.rhaydus.softcover.core.uibinding.acquisition.toLabel
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.WhereYouGotItDraft
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.WhereYouGotItSheetUiModel
 

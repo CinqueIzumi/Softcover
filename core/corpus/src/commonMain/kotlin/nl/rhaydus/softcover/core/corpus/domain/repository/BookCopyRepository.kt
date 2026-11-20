@@ -4,6 +4,8 @@ import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.core.domain.model.BookCopy
 
 interface BookCopyRepository {
+    fun observeAll(): Flow<Map<Int, BookCopy>>
+
     /** Emits an empty [BookCopy] while nothing is stored for [bookId]. */
     fun observe(bookId: Int): Flow<BookCopy>
 

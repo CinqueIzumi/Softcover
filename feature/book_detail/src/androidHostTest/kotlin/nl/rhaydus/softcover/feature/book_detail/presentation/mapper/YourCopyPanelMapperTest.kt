@@ -6,6 +6,7 @@ import nl.rhaydus.softcover.core.component.yourcopy.YourCopyValue
 import nl.rhaydus.softcover.core.domain.model.AcquisitionKind
 import nl.rhaydus.softcover.core.domain.model.AcquisitionSource
 import nl.rhaydus.softcover.core.domain.model.BookCopy
+import nl.rhaydus.softcover.core.uibinding.acquisition.toLabel
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 

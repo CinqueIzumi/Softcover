@@ -8,6 +8,9 @@ import nl.rhaydus.softcover.core.database.model.BookCopyEntity
 
 @Dao
 interface BookCopyDao {
+    @Query("SELECT * FROM book_copies")
+    fun observeAll(): Flow<List<BookCopyEntity>>
+
     @Query("SELECT * FROM book_copies WHERE bookId = :bookId")
     fun observe(bookId: Int): Flow<BookCopyEntity?>
 

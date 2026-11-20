@@ -10,6 +10,7 @@ import nl.rhaydus.softcover.core.corpus.domain.repository.BookCopyRepository
 import nl.rhaydus.softcover.core.corpus.domain.repository.BookTraitsRepository
 import nl.rhaydus.softcover.core.corpus.domain.usecase.GetBookCopyUseCase
 import nl.rhaydus.softcover.core.corpus.domain.usecase.GetBookTraitsUseCase
+import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveAllBookCopiesUseCase
 import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveAllBookTraitsUseCase
 import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveBookCopyUseCase
 import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveBookTraitsUseCase
@@ -52,6 +53,7 @@ val corpusModule = module {
     }
 
     factory { ObserveBookCopyUseCase(repository = get()) }
+    factory { ObserveAllBookCopiesUseCase(repository = get()) }
     factory { GetBookCopyUseCase(repository = get()) }
     factory { SaveBookCopyUseCase(repository = get()) }
 }

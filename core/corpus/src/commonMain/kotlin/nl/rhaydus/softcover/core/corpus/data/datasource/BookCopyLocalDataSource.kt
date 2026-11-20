@@ -5,6 +5,8 @@ import nl.rhaydus.softcover.core.database.dao.BookCopyDao
 import nl.rhaydus.softcover.core.database.model.BookCopyEntity
 
 internal interface BookCopyLocalDataSource {
+    fun observeAll(): Flow<List<BookCopyEntity>>
+
     fun observe(bookId: Int): Flow<BookCopyEntity?>
 
     suspend fun get(bookId: Int): BookCopyEntity?
@@ -17,6 +19,8 @@ internal interface BookCopyLocalDataSource {
 internal class BookCopyLocalDataSourceImpl(
     private val dao: BookCopyDao,
 ) : BookCopyLocalDataSource {
+    override fun observeAll(): Flow<List<BookCopyEntity>> = dao.observeAll()
+
     override fun observe(bookId: Int): Flow<BookCopyEntity?> = dao.observe(bookId = bookId)
 
     override suspend fun get(bookId: Int): BookCopyEntity? = dao.get(bookId = bookId)

@@ -14,6 +14,9 @@ internal class BookCopyRepositoryImpl(
     private val localDataSource: BookCopyLocalDataSource,
     private val clock: Clock = Clock.System,
 ) : BookCopyRepository {
+    override fun observeAll(): Flow<Map<Int, BookCopy>> =
+        localDataSource.observeAll().map { entities -> entities.associate { it.bookId to it.toDomain() } }
+
     override fun observe(bookId: Int): Flow<BookCopy> =
         localDataSource.observe(bookId = bookId).map { it?.toDomain() ?: BookCopy(bookId = bookId) }
 
