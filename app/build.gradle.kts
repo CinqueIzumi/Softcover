@@ -24,8 +24,8 @@ android {
         applicationId = "nl.rhaydus.softcover"
         minSdk = 26
         targetSdk = 37
-        versionCode = 42
-        versionName = "3.2.4"
+        versionCode = 43
+        versionName = "3.2.5"
     }
 
     // Release signing is configured only when a keystore is supplied via the environment (CI decodes

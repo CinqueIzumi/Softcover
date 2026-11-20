@@ -2,7 +2,7 @@
 
 What we're building next for [Softcover](https://github.com/CinqueIzumi/Softcover), grouped by the version it's planned to land in. This is the public view of our plan.
 
-**Current release: {{CURRENT_VERSION}}.** Softcover runs on Android, iPhone, iPad and desktop. 3.2.4 lets you start a reading session for any book you're reading, straight from the Also reading shelf, on top of 3.2.0's home-screen widgets, synced quotes and a record of every read-through.
+**Current release: {{CURRENT_VERSION}}.** Softcover runs on Android, iPhone, iPad and desktop. 3.2.5 makes sure your lists hold every book, including ones added on the Hardcover website and lists past a thousand titles, on top of 3.2.4's reading sessions for any book on the Also reading shelf.
 
 A few honest caveats:
 - **These are plans, not promises.** Versions are listed in the order we intend to ship them, but order can shift and some items may move, merge, or change shape.

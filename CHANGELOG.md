@@ -2,6 +2,16 @@
 
 What changed in each release of Softcover, newest first.
 
+## 3.2.5: Every book on the list
+
+*2026-11-20*
+
+Your lists hold every book again, however you add them and however long they grow.
+
+- Books you add to a list on the Hardcover website appear in Softcover, even when you didn't pick an edition
+- Lists of more than 1,000 books come through in full, newest additions included
+- An empty list or shelf can be pulled down to refresh
+
 ## 3.2.4: One more chapter
 
 *2026-11-09*
