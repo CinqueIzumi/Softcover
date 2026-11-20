@@ -278,6 +278,14 @@ internal fun nl.rhaydus.softcover.feature.library.presentation.screen.section.Sc
     - gridState: STABLE (marked @Stable or @Immutable)
 
 @Composable
+internal fun nl.rhaydus.softcover.feature.library.presentation.screen.section.ScrollableEmptyState(model: nl.rhaydus.softcover.core.component.state.EmptyStateUiModel, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
 internal fun nl.rhaydus.softcover.feature.library.presentation.screen.section.SelectionHeader(selectedCount: nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel, pills: nl.rhaydus.softcover.feature.library.presentation.state.LibrarySelectionPills, isMoveMenuExpanded: kotlin.Boolean, onExit: kotlin.Function0<kotlin.Unit>, onMoveMenuExpandedChange: kotlin.Function1<kotlin.Boolean, kotlin.Unit>, onMoveShelf: kotlin.Function1<nl.rhaydus.softcover.core.domain.model.UserBookStatus, kotlin.Unit>, onAddToListClick: kotlin.Function0<kotlin.Unit>, onRemoveClick: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true

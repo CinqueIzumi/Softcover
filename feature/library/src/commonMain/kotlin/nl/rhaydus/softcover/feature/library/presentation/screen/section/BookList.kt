@@ -1,7 +1,5 @@
 package nl.rhaydus.softcover.feature.library.presentation.screen.section
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.itemsIndexed
@@ -19,7 +17,6 @@ import nl.rhaydus.designsystem.component.DesktopContextMenu
 import nl.rhaydus.designsystem.component.DesktopContextMenuItem
 import nl.rhaydus.designsystem.component.rememberLazyItemMutationAnimator
 import nl.rhaydus.designsystem.haptics.LocalHaptics
-import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.modifier.platformModifierClick
 import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
@@ -30,7 +27,6 @@ import nl.rhaydus.softcover.core.component.bookcard.lazyKey
 import nl.rhaydus.softcover.core.component.bookcard.rememberBookCardEntryCoordinator
 import nl.rhaydus.softcover.core.component.haptics.rememberReorderHaptics
 import nl.rhaydus.softcover.core.component.reorder.reorderLift
-import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberPrefetchingBookCardEventHandler
@@ -61,16 +57,7 @@ internal fun BookList(
 
     if (rawBooks != null && rawBooks.isEmpty() && state.isLoading.not()) {
         state.emptyStatesByTab[tab.id]?.let { emptyState ->
-            EmptyState(
-                model = emptyState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(
-                        start = Spacing.gutter,
-                        end = Spacing.gutter,
-                        bottom = rememberBottomBarPadding(),
-                    ),
-            )
+            ScrollableEmptyState(model = emptyState)
         }
 
         return

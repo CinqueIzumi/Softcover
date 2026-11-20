@@ -20,6 +20,7 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.CreateListBookMutation
 import nl.rhaydus.softcover.CreateListMutation
+import nl.rhaydus.softcover.GetListBooksPageQuery
 import nl.rhaydus.softcover.GetUserBookListsQuery
 import nl.rhaydus.softcover.GetUserListSignaturesQuery
 import nl.rhaydus.softcover.MarkEditionAsOwnedMutation
@@ -36,6 +37,7 @@ import nl.rhaydus.softcover.core.lists.data.mapper.toListBook
 import nl.rhaydus.softcover.core.lists.domain.exception.ListNameTakenException
 import nl.rhaydus.softcover.core.network.helper.safeMutation
 import nl.rhaydus.softcover.core.network.helper.safeQuery
+import nl.rhaydus.softcover.fragment.ListBookFragment
 import nl.rhaydus.softcover.fragment.ListFragment
 import nl.rhaydus.softcover.type.ListInput
 import org.junit.jupiter.api.AfterAll
@@ -74,12 +76,16 @@ class ListsRemoteDataSourceImplTest {
     }
 
     companion object {
+        private const val LIST_ID: Int = 7
+
         @JvmStatic
         @BeforeAll
         fun mockStaticsOnce() {
             mockkStatic("nl.rhaydus.softcover.core.network.helper.ApolloExtensionsKt")
             mockkStatic("nl.rhaydus.softcover.core.lists.data.mapper.ListMapperKt")
             mockkObject(GetUserBookListsQuery.Data.Me.List.Companion)
+            mockkObject(GetListBooksPageQuery.Data.List_book.Companion)
+            mockkObject(ListFragment.List_book.Companion)
             mockkObject(RemoveListBookMutation.Data.Delete_list_book.List.Companion)
             mockkObject(CreateListMutation.Data.Insert_list.List.Companion)
             mockkObject(MarkEditionAsOwnedMutation.Data.Edition_owned.List_book.Companion)
@@ -106,6 +112,102 @@ class ListsRemoteDataSourceImplTest {
         every {
             this@mockk.listBookId
         } returns listBookId
+    }
+
+    private fun listBooks(ids: IntRange): List<ListBook> = ids.map { id ->
+        ListBook(
+            listBookId = id,
+            listId = LIST_ID,
+            bookId = id,
+            editionId = id,
+        )
+    }
+
+    private fun stubOversizedListFragment(
+        listFragment: ListFragment,
+        fragmentBooks: List<ListBook>,
+        total: Int,
+        lastRawId: Int = fragmentBooks.size,
+    ) {
+        val aggregateWrapper = mockk<ListFragment.List_books_aggregate>()
+        val aggregate = mockk<ListFragment.List_books_aggregate.Aggregate>()
+        val rawEntry = mockk<ListFragment.List_book>()
+        val rawFragment = mockk<ListBookFragment>()
+
+        every {
+            listFragment.id
+        } returns LIST_ID
+
+        every {
+            listFragment.list_books
+        } returns List(fragmentBooks.size) { rawEntry }
+
+        every {
+            listFragment.list_books_aggregate
+        } returns aggregateWrapper
+
+        every {
+            aggregateWrapper.aggregate
+        } returns aggregate
+
+        every {
+            aggregate.count
+        } returns total
+
+        every {
+            rawFragment.id
+        } returns lastRawId
+
+        with(ListFragment.List_book.Companion) {
+            every {
+                rawEntry.listBookFragment()
+            } returns rawFragment
+        }
+
+        every {
+            listFragment.toBookList()
+        } returns BookList(
+            id = LIST_ID,
+            name = "List",
+            slug = "list",
+            books = fragmentBooks,
+        )
+    }
+
+    private fun stubPage(
+        afterId: Int,
+        lastId: Int,
+        books: List<ListBook?>,
+    ) {
+        val pageData = mockk<GetListBooksPageQuery.Data>()
+        val entry = mockk<GetListBooksPageQuery.Data.List_book>()
+        val fragment = mockk<ListBookFragment>()
+
+        with(GetListBooksPageQuery.Data.List_book.Companion) {
+            every {
+                entry.listBookFragment()
+            } returns fragment
+        }
+
+        every {
+            fragment.id
+        } returns lastId
+
+        if (books.isNotEmpty()) {
+            every {
+                fragment.toListBook()
+            } returnsMany books
+        }
+
+        every {
+            pageData.list_books
+        } returns List(books.size) { entry }
+
+        coEvery {
+            apolloClient.safeQuery(
+                query = match<GetListBooksPageQuery> { it.listId == LIST_ID && it.afterId == afterId },
+            )
+        } returns pageData
     }
 
     // ----- FetchListSignatures -----
@@ -330,6 +432,14 @@ class ListsRemoteDataSourceImplTest {
                 listFragment.toBookList()
             } returns expectedBookList
 
+            every {
+                listFragment.list_books
+            } returns emptyList()
+
+            every {
+                listFragment.list_books_aggregate.aggregate
+            } returns null
+
             // ----- Act -----
             val result = dataSource.fetchUserLists(userId = userId)
 
@@ -380,6 +490,162 @@ class ListsRemoteDataSourceImplTest {
 
             // ----- Assert -----
             result shouldBe emptyList()
+        }
+
+        private fun stubUserLists(
+            fragmentBooks: List<ListBook>,
+            total: Int,
+            lastRawId: Int = fragmentBooks.size,
+        ) {
+            val queryData = mockk<GetUserBookListsQuery.Data>()
+            val meEntry = mockk<GetUserBookListsQuery.Data.Me>()
+            val listEntry = mockk<GetUserBookListsQuery.Data.Me.List>()
+            val listFragment = mockk<ListFragment>()
+
+            coEvery {
+                apolloClient.safeQuery(query = match<GetUserBookListsQuery> { true })
+            } returns queryData
+
+            every {
+                queryData.me
+            } returns listOf(meEntry)
+
+            every {
+                meEntry.lists
+            } returns listOf(listEntry)
+
+            with(GetUserBookListsQuery.Data.Me.List.Companion) {
+                every {
+                    listEntry.listFragment()
+                } returns listFragment
+            }
+
+            stubOversizedListFragment(
+                listFragment = listFragment,
+                fragmentBooks = fragmentBooks,
+                total = total,
+                lastRawId = lastRawId,
+            )
+        }
+
+        @Test
+        fun `makes no page request when the count equals the list books returned`() = runTest {
+            // ----- Arrange -----
+            val firstPage = listBooks(1..3)
+
+            stubUserLists(
+                fragmentBooks = firstPage,
+                total = 3,
+            )
+
+            // ----- Act -----
+            val result = dataSource.fetchUserLists(userId = 1)
+
+            // ----- Assert -----
+            result.single().books shouldBe firstPage
+
+            coVerify(exactly = 0) {
+                apolloClient.safeQuery(query = match<GetListBooksPageQuery> { true })
+            }
+        }
+
+        @Test
+        fun `appends a single short page after the last returned id in order`() = runTest {
+            // ----- Arrange -----
+            val firstPage = listBooks(1..1000)
+            val secondPage = listBooks(1001..1714)
+
+            stubUserLists(
+                fragmentBooks = firstPage,
+                total = 1714,
+            )
+
+            stubPage(
+                afterId = 1000,
+                lastId = 1714,
+                books = secondPage,
+            )
+
+            // ----- Act -----
+            val result = dataSource.fetchUserLists(userId = 1)
+
+            // ----- Assert -----
+            result.single().books shouldBe firstPage + secondPage
+
+            coVerify(exactly = 1) {
+                apolloClient.safeQuery(query = match<GetListBooksPageQuery> { true })
+            }
+        }
+
+        @Test
+        fun `keeps paging from each page's last id until an empty page when the last page is exactly full`() = runTest {
+            // ----- Arrange -----
+            val firstPage = listBooks(1..1000)
+            val secondPage = listBooks(1001..2000)
+
+            stubUserLists(
+                fragmentBooks = firstPage,
+                total = 2000,
+            )
+
+            stubPage(
+                afterId = 1000,
+                lastId = 2000,
+                books = secondPage,
+            )
+
+            stubPage(
+                afterId = 2000,
+                lastId = 0,
+                books = emptyList(),
+            )
+
+            // ----- Act -----
+            val result = dataSource.fetchUserLists(userId = 1)
+
+            // ----- Assert -----
+            result.single().books shouldBe firstPage + secondPage
+
+            coVerify(exactly = 1) {
+                apolloClient.safeQuery(query = match<GetListBooksPageQuery> { it.afterId == 1000 })
+            }
+
+            coVerify(exactly = 1) {
+                apolloClient.safeQuery(query = match<GetListBooksPageQuery> { it.afterId == 2000 })
+            }
+
+            coVerify(exactly = 2) {
+                apolloClient.safeQuery(query = match<GetListBooksPageQuery> { true })
+            }
+        }
+
+        @Test
+        fun `advances past a full page whose rows map to no list book`() = runTest {
+            // ----- Arrange -----
+            val firstPage = listBooks(1..1000)
+
+            stubUserLists(
+                fragmentBooks = firstPage,
+                total = 2001,
+            )
+
+            stubPage(
+                afterId = 1000,
+                lastId = 2000,
+                books = List(1000) { null },
+            )
+
+            stubPage(
+                afterId = 2000,
+                lastId = 2001,
+                books = listBooks(2001..2001),
+            )
+
+            // ----- Act -----
+            val result = dataSource.fetchUserLists(userId = 1)
+
+            // ----- Assert -----
+            result.single().books shouldBe firstPage + listBooks(2001..2001)
         }
     }
 
@@ -440,6 +706,14 @@ class ListsRemoteDataSourceImplTest {
                 listFragment.toBookList()
             } returns expectedBookList
 
+            every {
+                listFragment.list_books
+            } returns emptyList()
+
+            every {
+                listFragment.list_books_aggregate.aggregate
+            } returns null
+
             // ----- Act -----
             val result = dataSource.removeListBook(book = listBook)
 
@@ -472,6 +746,54 @@ class ListsRemoteDataSourceImplTest {
             shouldThrow<Exception> {
                 dataSource.removeListBook(book = listBook)
             }
+        }
+
+        @Test
+        fun `returns the complete list when the returned list holds more than one page of books`() = runTest {
+            // ----- Arrange -----
+            val listBook = stubListBook(listBookId = 22)
+            val firstPage = listBooks(1..1000)
+            val extraBook = listBooks(1001..1001)
+            val mutationData = mockk<RemoveListBookMutation.Data>()
+            val deleteListBook = mockk<RemoveListBookMutation.Data.Delete_list_book>()
+            val listEntry = mockk<RemoveListBookMutation.Data.Delete_list_book.List>()
+            val listFragment = mockk<ListFragment>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<RemoveListBookMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.delete_list_book
+            } returns deleteListBook
+
+            every {
+                deleteListBook.list
+            } returns listEntry
+
+            with(RemoveListBookMutation.Data.Delete_list_book.List.Companion) {
+                every {
+                    listEntry.listFragment()
+                } returns listFragment
+            }
+
+            stubOversizedListFragment(
+                listFragment = listFragment,
+                fragmentBooks = firstPage,
+                total = 1001,
+            )
+
+            stubPage(
+                afterId = 1000,
+                lastId = 1001,
+                books = extraBook,
+            )
+
+            // ----- Act -----
+            val result = dataSource.removeListBook(book = listBook)
+
+            // ----- Assert -----
+            result.books shouldBe firstPage + extraBook
         }
     }
 
@@ -1076,6 +1398,14 @@ class ListsRemoteDataSourceImplTest {
                 listFragment.toBookList()
             } returns expectedBookList
 
+            every {
+                listFragment.list_books
+            } returns emptyList()
+
+            every {
+                listFragment.list_books_aggregate.aggregate
+            } returns null
+
             // ----- Act -----
             val result = dataSource.setListRanked(
                 listId = listId,
@@ -1123,6 +1453,14 @@ class ListsRemoteDataSourceImplTest {
             every {
                 listFragment.toBookList()
             } returns expectedBookList
+
+            every {
+                listFragment.list_books
+            } returns emptyList()
+
+            every {
+                listFragment.list_books_aggregate.aggregate
+            } returns null
 
             // ----- Act -----
             val result = dataSource.setListRanked(
@@ -1192,6 +1530,60 @@ class ListsRemoteDataSourceImplTest {
                     ranked = false,
                 )
             }
+        }
+
+        @Test
+        fun `returns the complete list when the updated list holds more than one page of books`() = runTest {
+            // ----- Arrange -----
+            val firstPage = listBooks(1..1000)
+            val extraBook = listBooks(1001..1001)
+            val mutationData = mockk<UpdateListMutation.Data>()
+            val listResponse = mockk<UpdateListMutation.Data.ListResponse>()
+            val listEntry = mockk<UpdateListMutation.Data.ListResponse.List>()
+            val listFragment = mockk<ListFragment>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateListMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.listResponse
+            } returns listResponse
+
+            every {
+                listResponse.errors
+            } returns null
+
+            every {
+                listResponse.list
+            } returns listEntry
+
+            with(UpdateListMutation.Data.ListResponse.List.Companion) {
+                every {
+                    listEntry.listFragment()
+                } returns listFragment
+            }
+
+            stubOversizedListFragment(
+                listFragment = listFragment,
+                fragmentBooks = firstPage,
+                total = 1001,
+            )
+
+            stubPage(
+                afterId = 1000,
+                lastId = 1001,
+                books = extraBook,
+            )
+
+            // ----- Act -----
+            val result = dataSource.setListRanked(
+                listId = LIST_ID,
+                ranked = true,
+            )
+
+            // ----- Assert -----
+            result.books shouldBe firstPage + extraBook
         }
     }
 }

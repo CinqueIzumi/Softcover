@@ -1,0 +1,5 @@
+query GetListBooksPage($listId: Int!, $afterId: Int!, $limit: Int!) {
+    list_books(where: {list_id: {_eq: $listId}, id: {_gt: $afterId}}, order_by: {id: asc}, limit: $limit) {
+        ...ListBookFragment
+    }
+}

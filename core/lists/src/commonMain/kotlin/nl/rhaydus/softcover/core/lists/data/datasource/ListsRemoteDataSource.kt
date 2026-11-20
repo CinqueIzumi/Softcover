@@ -6,6 +6,7 @@ import kotlinx.coroutines.withContext
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.CreateListBookMutation
 import nl.rhaydus.softcover.CreateListMutation
+import nl.rhaydus.softcover.GetListBooksPageQuery
 import nl.rhaydus.softcover.GetUserBookListsQuery
 import nl.rhaydus.softcover.GetUserListSignaturesQuery
 import nl.rhaydus.softcover.MarkEditionAsOwnedMutation
@@ -24,6 +25,7 @@ import nl.rhaydus.softcover.core.lists.domain.exception.ListNameTakenException
 import nl.rhaydus.softcover.core.lists.domain.model.ListSignature
 import nl.rhaydus.softcover.core.network.helper.safeMutation
 import nl.rhaydus.softcover.core.network.helper.safeQuery
+import nl.rhaydus.softcover.fragment.ListFragment
 import nl.rhaydus.softcover.type.Int_comparison_exp
 import nl.rhaydus.softcover.type.ListBookInput
 import nl.rhaydus.softcover.type.ListInput
@@ -33,9 +35,11 @@ import nl.rhaydus.softcover.type.List_books_updates
 import nl.rhaydus.softcover.type.Lists_bool_exp
 import nl.rhaydus.softcover.CreateListBookMutation.Data.Insert_list_book.List_book.Companion.listBookFragment as createListBookListBookFragment
 import nl.rhaydus.softcover.CreateListMutation.Data.Insert_list.List.Companion.listFragment as createListListFragment
+import nl.rhaydus.softcover.GetListBooksPageQuery.Data.List_book.Companion.listBookFragment as pageListBookFragment
 import nl.rhaydus.softcover.GetUserBookListsQuery.Data.Me.List.Companion.listFragment as userListsListFragment
 import nl.rhaydus.softcover.RemoveListBookMutation.Data.Delete_list_book.List.Companion.listFragment as removeListBookListFragment
 import nl.rhaydus.softcover.UpdateListMutation.Data.ListResponse.List.Companion.listFragment as updateListListFragment
+import nl.rhaydus.softcover.fragment.ListFragment.List_book.Companion.listBookFragment as rawListBookFragment
 
 interface ListsRemoteDataSource {
     /**
@@ -89,6 +93,7 @@ interface ListsRemoteDataSource {
 
 private const val DEFAULT_LIST_VIEW: String = "card"
 private const val NAME_TAKEN_MARKER: String = "already been taken"
+private const val LIST_BOOKS_PAGE_SIZE: Int = 1000
 
 internal class ListsRemoteDataSourceImpl(
     private val apolloClient: ApolloClient,
@@ -96,7 +101,7 @@ internal class ListsRemoteDataSourceImpl(
 ) : ListsRemoteDataSource {
     override suspend fun fetchListSignatures(): List<ListSignature> = withContext(appDispatchers.io) {
         val result = apolloClient.safeQuery(
-            GetUserListSignaturesQuery(),
+            query = GetUserListSignaturesQuery(),
         )
 
         val lists = result.me.firstOrNull()?.lists
@@ -129,15 +134,48 @@ internal class ListsRemoteDataSourceImpl(
         }
 
         val result = apolloClient.safeQuery(
-            GetUserBookListsQuery(where = whereFilter),
+            query = GetUserBookListsQuery(where = whereFilter),
         )
 
         val lists = result.me.firstOrNull()?.lists
             ?: throw Exception("No lists were found")
 
         lists.mapNotNull { list ->
-            list.userListsListFragment()?.toBookList()
+            list.userListsListFragment()?.toCompleteBookList()
         }
+    }
+
+    private suspend fun ListFragment.toCompleteBookList(): BookList {
+        val bookList = toBookList()
+        val total = list_books_aggregate.aggregate?.count ?: 0
+
+        if (total <= list_books.size) return bookList
+
+        var afterId = list_books.lastOrNull()?.rawListBookFragment()?.id
+            ?: throw Exception("List $id is missing its list books")
+
+        val remaining = mutableListOf<ListBook>()
+
+        while (true) {
+            val page = apolloClient
+                .safeQuery(
+                    query = GetListBooksPageQuery(
+                        listId = id,
+                        afterId = afterId,
+                        limit = LIST_BOOKS_PAGE_SIZE,
+                    ),
+                )
+                .list_books
+
+            remaining += page.mapNotNull { it.pageListBookFragment()?.toListBook() }
+
+            if (page.size < LIST_BOOKS_PAGE_SIZE) break
+
+            afterId = page.lastOrNull()?.pageListBookFragment()?.id
+                ?: throw Exception("List $id returned a list books page without ids")
+        }
+
+        return bookList.copy(books = bookList.books + remaining)
     }
 
     override suspend fun createList(
@@ -223,7 +261,7 @@ internal class ListsRemoteDataSourceImpl(
             ?.removeListBookListFragment()
             ?: throw Exception("Did not receive a list fragment")
 
-        return listFragment.toBookList()
+        return listFragment.toCompleteBookList()
     }
 
     override suspend fun updateListBookPositions(
@@ -290,7 +328,7 @@ internal class ListsRemoteDataSourceImpl(
             ?.updateListListFragment()
             ?: throw Exception("Did not receive a list fragment")
 
-        listFragment.toBookList()
+        listFragment.toCompleteBookList()
     }
 }
 
