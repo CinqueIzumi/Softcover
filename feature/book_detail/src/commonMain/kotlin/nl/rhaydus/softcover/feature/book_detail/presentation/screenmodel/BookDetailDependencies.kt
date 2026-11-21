@@ -40,8 +40,10 @@ import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveBookQuotesUseCas
 import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshBookQuotesUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshReadingJournalHistoryUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetCurrenciesUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryTabOrderAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetUsualCurrencyAsFlowUseCase
 import nl.rhaydus.softcover.core.presentation.removal.UndoableBookRemover
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
@@ -100,6 +102,8 @@ internal class BookDetailDependencies(
     val observeBookCopyUseCase: ObserveBookCopyUseCase,
     val getBookCopyUseCase: GetBookCopyUseCase,
     val saveBookCopyUseCase: SaveBookCopyUseCase,
+    val getCurrenciesUseCase: GetCurrenciesUseCase,
+    val getUsualCurrencyAsFlowUseCase: GetUsualCurrencyAsFlowUseCase,
     val offlineCopy: OfflineCopy,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,

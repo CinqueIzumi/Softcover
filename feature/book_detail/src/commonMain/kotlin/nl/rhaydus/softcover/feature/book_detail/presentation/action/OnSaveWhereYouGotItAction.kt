@@ -4,6 +4,7 @@ import nl.rhaydus.common.AppLog
 import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.core.component.haptics.Feedback
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
+import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.toPrice
 import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.toSource
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -12,7 +13,7 @@ import nl.rhaydus.toad.ActionScope
 
 /**
  * Stores the draft over the stored copy, so fields this sheet does not edit survive; an empty draft clears
- * the source. The sheet closes at once, before the write.
+ * the source and an empty amount clears the price. The sheet closes at once, before the write.
  */
 internal class OnSaveWhereYouGotItAction : BookDetailAction {
     override suspend fun execute(
@@ -21,7 +22,10 @@ internal class OnSaveWhereYouGotItAction : BookDetailAction {
     ) {
         val draft = scope.currentState.whereYouGotItDraft ?: return
 
+        if (draft.amountError != null) return
+
         val source = draft.toSource()
+        val price = draft.toPrice(currencies = dependencies.getCurrenciesUseCase())
 
         scope.setState { it.copy(whereYouGotItDraft = null) }
 
@@ -35,7 +39,12 @@ internal class OnSaveWhereYouGotItAction : BookDetailAction {
                 }
                 .getOrNull() ?: return@launch
 
-            dependencies.saveBookCopyUseCase(stored.copy(source = source))
+            dependencies.saveBookCopyUseCase(
+                stored.copy(
+                    source = source,
+                    price = price,
+                ),
+            )
                 .onSuccess {
                     scope.sendEvent(BookDetailEvent.MutationSucceededEvent(feedback = Feedback.Routine))
                 }

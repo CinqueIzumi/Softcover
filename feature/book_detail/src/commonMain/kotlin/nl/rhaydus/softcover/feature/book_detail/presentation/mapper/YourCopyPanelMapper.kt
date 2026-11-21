@@ -7,11 +7,13 @@ import nl.rhaydus.softcover.core.component.yourcopy.YourCopyValue
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.AcquisitionSource
 import nl.rhaydus.softcover.core.domain.model.BookCopy
+import nl.rhaydus.softcover.core.domain.model.Currency
 import nl.rhaydus.softcover.core.uibinding.acquisition.toLabel
+import nl.rhaydus.softcover.core.uibinding.money.toLabel as toPriceLabel
 
 internal const val WHERE_YOU_GOT_IT_ROW_KEY = "where-you-got-it"
 
-internal fun BookCopy.toYourCopyPanel(): YourCopyPanelUiModel<String> = YourCopyPanelUiModel(
+internal fun BookCopy.toYourCopyPanel(currencies: List<Currency>): YourCopyPanelUiModel<String> = YourCopyPanelUiModel(
     rows = persistentListOf(
         YourCopyRowUiModel(
             key = WHERE_YOU_GOT_IT_ROW_KEY,
@@ -23,6 +25,9 @@ internal fun BookCopy.toYourCopyPanel(): YourCopyPanelUiModel<String> = YourCopy
                 is AcquisitionSource.Other -> YourCopyValue.Set(text = stored.text)
 
                 null -> YourCopyValue.Empty(invitation = "Add where you got it")
+            },
+            trailing = price?.let { paid ->
+                currencies.firstOrNull { it.code == paid.currencyCode }?.let { paid.toPriceLabel(currency = it) }
             },
         ),
     ),

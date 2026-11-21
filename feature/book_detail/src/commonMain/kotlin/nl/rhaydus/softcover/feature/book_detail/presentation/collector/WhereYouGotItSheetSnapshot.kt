@@ -6,4 +6,5 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.WhereYouGotIt
 internal data class WhereYouGotItSheetSnapshot(
     val bookTitle: String?,
     val draft: WhereYouGotItDraft?,
+    val usualCurrencyCode: String?,
 )

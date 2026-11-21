@@ -5,6 +5,14 @@
 //   ./gradlew :book_detail:stabilityDump
 
 @Composable
+private fun nl.rhaydus.softcover.feature.book_detail.presentation.component.CurrencySearch(model: nl.rhaydus.softcover.feature.book_detail.presentation.state.WhereYouGotItBodyUiModel.Currency, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction, kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (class with no mutable properties)
+    - runAction: STABLE (function type)
+
+@Composable
 private fun nl.rhaydus.softcover.feature.book_detail.presentation.component.EditionBottomSheetContentPreview(): kotlin.Unit
   skippable: true
   restartable: true

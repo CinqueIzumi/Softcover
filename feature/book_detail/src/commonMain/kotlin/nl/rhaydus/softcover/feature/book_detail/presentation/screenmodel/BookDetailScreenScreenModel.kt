@@ -40,8 +40,10 @@ import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveBookQuotesUseCas
 import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshBookQuotesUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshReadingJournalHistoryUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetCurrenciesUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryTabOrderAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetUsualCurrencyAsFlowUseCase
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.presentation.removal.UndoableBookRemover
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
@@ -114,6 +116,8 @@ internal class BookDetailScreenScreenModel(
     observeBookCopyUseCase: ObserveBookCopyUseCase,
     getBookCopyUseCase: GetBookCopyUseCase,
     saveBookCopyUseCase: SaveBookCopyUseCase,
+    getCurrenciesUseCase: GetCurrenciesUseCase,
+    getUsualCurrencyAsFlowUseCase: GetUsualCurrencyAsFlowUseCase,
     offlineCopy: OfflineCopy,
     flows: List<BookDetailCollector>,
     appDispatchers: AppDispatchers,
@@ -178,6 +182,8 @@ internal class BookDetailScreenScreenModel(
         observeBookCopyUseCase = observeBookCopyUseCase,
         getBookCopyUseCase = getBookCopyUseCase,
         saveBookCopyUseCase = saveBookCopyUseCase,
+        getCurrenciesUseCase = getCurrenciesUseCase,
+        getUsualCurrencyAsFlowUseCase = getUsualCurrencyAsFlowUseCase,
         offlineCopy = offlineCopy,
     )
 

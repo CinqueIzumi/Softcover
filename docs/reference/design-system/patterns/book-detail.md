@@ -53,10 +53,14 @@
 - The last section of the Yours lens, after Your tags, for any book the reader has a copy of (Want to read
   included): a bar-less `YOUR COPY` label over `YourCopyPanel`. The data is private and stays on the device.
 - One row, "Where you got it", shows the chosen source, or the invitation "Add where you got it" when
-  none is set. Tapping it opens the sheet.
+  none is set, with the price trailing, also when no source is set. Tapping it opens the sheet.
 - The sheet body lives in the feature: a `SheetRowGroup` of eight presets (Library, Bought in a bookshop,
   Bought online, Bought second-hand, Bought digital, Subscription or audio credit, Borrowed, A gift) plus a
   "Somewhere else…" input row. Picking a preset clears the typed text; typing unticks the presets.
+- Under the choices a "Price paid" label holds an optional amount field beside a currency `SelectField`,
+  then a caption. The currency starts at the usual currency from Settings. Tapping it swaps the sheet body
+  to a searchable currency list; picking a currency, or back, returns to the choices.
+- Save is disabled while the amount is invalid ("Enter a price like 14.50.").
 - Re-tapping the chosen preset clears it. Save closes the sheet before the write and keeps every other
   stored copy field; an empty choice clears the source.
 

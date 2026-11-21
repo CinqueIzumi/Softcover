@@ -14,8 +14,9 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiS
 import nl.rhaydus.toad.ActionScope
 
 /**
- * Writes [BookDetailUiState.yourCopy] from the reader's stored copy details. The section exists for any
- * book the reader has a copy of, whatever its status, and the copy is not observed while it is hidden.
+ * Writes [BookDetailUiState.yourCopy] from the reader's stored copy details and the currency catalogue.
+ * The section exists for any book the reader has a copy of, whatever its status, and the copy is not
+ * observed while it is hidden.
  */
 internal class YourCopySectionCollector : BookDetailCollector {
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -23,6 +24,8 @@ internal class YourCopySectionCollector : BookDetailCollector {
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
         dependencies: BookDetailDependencies,
     ) {
+        val currencies = dependencies.getCurrenciesUseCase()
+
         scope.state
             .map { it.book?.userBook != null }
             .distinctUntilChanged()
@@ -35,7 +38,7 @@ internal class YourCopySectionCollector : BookDetailCollector {
             }
             .collectLatest { copy ->
                 scope.setState { state ->
-                    state.copy(yourCopy = copy?.toYourCopyPanel())
+                    state.copy(yourCopy = copy?.toYourCopyPanel(currencies = currencies))
                 }
             }
     }

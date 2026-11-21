@@ -248,6 +248,8 @@ val bookDetailModule = module {
             observeBookCopyUseCase = get(),
             getBookCopyUseCase = get(),
             saveBookCopyUseCase = get(),
+            getCurrenciesUseCase = get(),
+            getUsualCurrencyAsFlowUseCase = get(),
         )
     }
 }

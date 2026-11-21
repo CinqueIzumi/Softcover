@@ -10,6 +10,9 @@ import io.mockk.unmockkObject
 import io.mockk.verify
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -18,14 +21,21 @@ import nl.rhaydus.softcover.core.corpus.domain.usecase.GetBookCopyUseCase
 import nl.rhaydus.softcover.core.domain.model.AcquisitionKind
 import nl.rhaydus.softcover.core.domain.model.AcquisitionSource
 import nl.rhaydus.softcover.core.domain.model.BookCopy
+import nl.rhaydus.softcover.core.domain.model.PricePaid
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetCurrenciesUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetUsualCurrencyAsFlowUseCase
+import nl.rhaydus.softcover.feature.book_detail.presentation.EURO
+import nl.rhaydus.softcover.feature.book_detail.presentation.TEST_CURRENCIES
+import nl.rhaydus.softcover.feature.book_detail.presentation.YEN
 import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.buildQuoteBook
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildWhereYouGotItDraft
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.toKey
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
-import nl.rhaydus.softcover.feature.book_detail.presentation.state.WhereYouGotItDraft
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.WhereYouGotItSource
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -34,12 +44,27 @@ import org.junit.jupiter.api.Test
 
 class OnOpenWhereYouGotItSheetActionTest {
     private lateinit var getBookCopyUseCase: GetBookCopyUseCase
+    private lateinit var getCurrenciesUseCase: GetCurrenciesUseCase
+    private lateinit var getUsualCurrencyAsFlowUseCase: GetUsualCurrencyAsFlowUseCase
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
     private lateinit var scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>
 
     @BeforeEach
     fun setUp() {
         getBookCopyUseCase = mockk()
+
+        getCurrenciesUseCase = mockk<GetCurrenciesUseCase>().also {
+            every {
+                it()
+            } returns TEST_CURRENCIES
+        }
+
+        getUsualCurrencyAsFlowUseCase = mockk<GetUsualCurrencyAsFlowUseCase>().also {
+            every {
+                it()
+            } returns flowOf(EURO)
+        }
+
         stateFlow = MutableStateFlow(buildBookDetailUiState(bookId = 42))
 
         scope = ActionScope(
@@ -67,6 +92,14 @@ class OnOpenWhereYouGotItSheetActionTest {
             every {
                 mock.getBookCopyUseCase
             } returns getBookCopyUseCase
+
+            every {
+                mock.getCurrenciesUseCase
+            } returns getCurrenciesUseCase
+
+            every {
+                mock.getUsualCurrencyAsFlowUseCase
+            } returns getUsualCurrencyAsFlowUseCase
 
             every {
                 mock.coroutineScope
@@ -105,7 +138,67 @@ class OnOpenWhereYouGotItSheetActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.whereYouGotItDraft shouldBe WhereYouGotItDraft.Preset(key = AcquisitionKind.GIFT.toKey())
+            stateFlow.value.whereYouGotItDraft shouldBe buildWhereYouGotItDraft(
+                source = WhereYouGotItSource.Preset(key = AcquisitionKind.GIFT.toKey()),
+                currencyCode = EURO.code,
+            )
+        }
+
+        @Test
+        fun `seeds the usual currency and an empty amount when the copy has no price`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = buildBookDetailUiState(bookId = 42).copy(book = buildQuoteBook())
+
+            every {
+                getUsualCurrencyAsFlowUseCase()
+            } returns flowOf(YEN)
+
+            coEvery {
+                getBookCopyUseCase(bookId = 42)
+            } returns Result.success(BookCopy(bookId = 42))
+
+            // ----- Act -----
+            OnOpenWhereYouGotItSheetAction().execute(
+                dependencies = stubDependencies(this),
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.whereYouGotItDraft shouldBe buildWhereYouGotItDraft(currencyCode = YEN.code)
+        }
+
+        @Test
+        fun `seeds the stored price in its own currency even when the usual currency differs`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = buildBookDetailUiState(bookId = 42).copy(book = buildQuoteBook())
+
+            every {
+                getUsualCurrencyAsFlowUseCase()
+            } returns flowOf(YEN)
+
+            coEvery {
+                getBookCopyUseCase(bookId = 42)
+            } returns Result.success(
+                BookCopy(
+                    bookId = 42,
+                    price = PricePaid(
+                        amountThousandths = 14_500,
+                        currencyCode = EURO.code,
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            OnOpenWhereYouGotItSheetAction().execute(
+                dependencies = stubDependencies(this),
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.whereYouGotItDraft shouldBe buildWhereYouGotItDraft(
+                amountText = "14.50",
+                currencyCode = EURO.code,
+            )
         }
 
         @Test
@@ -116,6 +209,60 @@ class OnOpenWhereYouGotItSheetActionTest {
             coEvery {
                 getBookCopyUseCase(bookId = 42)
             } returns Result.failure(RuntimeException("read failed"))
+
+            // ----- Act -----
+            OnOpenWhereYouGotItSheetAction().execute(
+                dependencies = stubDependencies(this),
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.whereYouGotItDraft.shouldBeNull()
+
+            verify(exactly = 1) {
+                SnackBarManager.showSnackbar(title = "Couldn't load where you got it. Try again.")
+            }
+        }
+
+        @Test
+        fun `leaves no draft and shows a message when the usual currency cannot be read`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = buildBookDetailUiState(bookId = 42).copy(book = buildQuoteBook())
+
+            every {
+                getUsualCurrencyAsFlowUseCase()
+            } returns flow { throw RuntimeException("settings failed") }
+
+            coEvery {
+                getBookCopyUseCase(bookId = 42)
+            } returns Result.success(BookCopy(bookId = 42))
+
+            // ----- Act -----
+            OnOpenWhereYouGotItSheetAction().execute(
+                dependencies = stubDependencies(this),
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.whereYouGotItDraft.shouldBeNull()
+
+            verify(exactly = 1) {
+                SnackBarManager.showSnackbar(title = "Couldn't load where you got it. Try again.")
+            }
+        }
+
+        @Test
+        fun `leaves no draft and shows a message when there is no usual currency`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = buildBookDetailUiState(bookId = 42).copy(book = buildQuoteBook())
+
+            every {
+                getUsualCurrencyAsFlowUseCase()
+            } returns emptyFlow()
+
+            coEvery {
+                getBookCopyUseCase(bookId = 42)
+            } returns Result.success(BookCopy(bookId = 42))
 
             // ----- Act -----
             OnOpenWhereYouGotItSheetAction().execute(

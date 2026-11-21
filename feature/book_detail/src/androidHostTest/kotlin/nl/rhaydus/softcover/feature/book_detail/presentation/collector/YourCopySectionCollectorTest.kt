@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 
 import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -14,7 +15,10 @@ import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveBookCopyUseCase
 import nl.rhaydus.softcover.core.domain.model.AcquisitionKind
 import nl.rhaydus.softcover.core.domain.model.AcquisitionSource
 import nl.rhaydus.softcover.core.domain.model.BookCopy
+import nl.rhaydus.softcover.core.domain.model.PricePaid
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetCurrenciesUseCase
 import nl.rhaydus.softcover.feature.book_detail.presentation.TEST_BOOK_ID
+import nl.rhaydus.softcover.feature.book_detail.presentation.TEST_CURRENCIES
 import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.buildQuoteBook
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
@@ -51,10 +55,20 @@ class YourCopySectionCollectorTest {
             eventChannel = Channel(Channel.BUFFERED),
         )
 
+        val getCurrenciesUseCase = mockk<GetCurrenciesUseCase>().also {
+            every {
+                it()
+            } returns TEST_CURRENCIES
+        }
+
         dependencies = mockk<BookDetailDependencies>(relaxed = true).also {
             every {
                 it.observeBookCopyUseCase
             } returns observeBookCopyUseCase
+
+            every {
+                it.getCurrenciesUseCase
+            } returns getCurrenciesUseCase
         }
     }
 
@@ -108,7 +122,7 @@ class YourCopySectionCollectorTest {
             launchCollector()
 
             // ----- Assert -----
-            stateFlow.value.yourCopy shouldBe copy.toYourCopyPanel()
+            stateFlow.value.yourCopy shouldBe copy.toYourCopyPanel(currencies = TEST_CURRENCIES)
         }
 
         @Test
@@ -126,7 +140,7 @@ class YourCopySectionCollectorTest {
             storedCopy.value = updated
 
             // ----- Assert -----
-            stateFlow.value.yourCopy shouldBe updated.toYourCopyPanel()
+            stateFlow.value.yourCopy shouldBe updated.toYourCopyPanel(currencies = TEST_CURRENCIES)
         }
 
         @Test
@@ -140,6 +154,26 @@ class YourCopySectionCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.yourCopy.shouldBeNull()
+        }
+
+        @Test
+        fun `shows the stored price under the catalogue's currency`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            storedCopy.value = BookCopy(
+                bookId = TEST_BOOK_ID,
+                price = PricePaid(
+                    amountThousandths = 14_500,
+                    currencyCode = "EUR",
+                ),
+            )
+
+            stateFlow.value = buildBookDetailUiState().copy(book = buildQuoteBook(shelved = true))
+
+            // ----- Act -----
+            launchCollector()
+
+            // ----- Assert -----
+            stateFlow.value.yourCopy.shouldNotBeNull().rows.single().trailing shouldBe "€14.50"
         }
     }
 }
