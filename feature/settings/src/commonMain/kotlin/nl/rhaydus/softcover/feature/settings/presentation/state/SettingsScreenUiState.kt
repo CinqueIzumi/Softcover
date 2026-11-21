@@ -62,6 +62,11 @@ internal data class SettingsScreenUiState(
         eyebrow = "Personalisation",
         headline = "Look and feel",
     ),
+    val settingsMenuPrivateDataHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
+        eyebrow = "Your private data",
+        headline = "Kept on this phone",
+    ),
+    val currencyGloss: String = "",
     val settingsMenuAboutHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "About",
         headline = "The fine print",

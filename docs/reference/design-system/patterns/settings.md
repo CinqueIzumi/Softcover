@@ -2,12 +2,13 @@
 
 ### Main Settings menu (mobile)
 
-- A `PageMasthead` "Settings" / "Set Softcover up the way you like it.", then three groups, each a
+- A `PageMasthead` "Settings" / "Set Softcover up the way you like it.", then four groups, each a
   `SectionHeader`, `space-md`, a flat `SettingsRowGroup`, and `space-section` before the next.
 - **Account** / "Your account": Your profile ("Your shelves, stats and reading year").
 - **Personalisation** / "Look and feel": Appearance ("Theme, accent and text size"), Library tabs ("Which shelves
   show, and their order"), Widgets ("Your shelves, on your home screen", only where the platform has widgets),
   Hidden suggestions ("Books you've asked us to stop recommending").
+- **Your private data** / "Kept on this phone": Currency, the usual currency as its gloss.
 - **About** / "The fine print": About Softcover ("Credits, source, and how to reach us"), What's new ("What
   changed in each version."), Roadmap ("What's coming next, in the order it's planned").
 - Every row is a `SubPage` row. The groups sit flat on the page background, never on cards.
@@ -29,6 +30,7 @@
 - With `settingsUsesMasterDetail` (desktop), Settings is a category source-list sidebar beside a detail
   pane that swaps inline; Account → Your profile still pushes. Appearance, Library tabs and About render
   in the pane under a `DesktopVerticalScrollbar`, the Library-tabs save bar docked at the pane's foot.
+- The sidebar's "Your private data" section holds Currency, which renders in the pane.
 - Sub-screen bodies are shared composables: mobile wraps them in a pushed `TopBar` page.
 - Desktop Library and Explore never take the book-detail pane (`wideGridTabsUseDetailPane`); Reading
   keeps it on every platform.
@@ -71,6 +73,12 @@
   pickers, with a description ("Scales all text and controls. Try a larger size if the app looks too small
   on your display."), one `SettingsSelectableRow` per `UiScale` (100–200%) and the line "Changes apply
   right away." `UiScale.factor` scales `LocalDensity` at the desktop composition root.
+
+### Currency page
+
+- A `PageMasthead` ("Your private data" / "Currency"), a search field and the currencies as `sheetRowItems`
+  in a lazy column: sheet-style rows, deliberately not `SettingsSelectableRow`. A tap saves the usual
+  currency at once and the page stays open.
 
 ### About screen body
 
