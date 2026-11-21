@@ -129,4 +129,8 @@ interface SettingsRepository {
     val becauseYouReadGenre: Flow<String?>
 
     suspend fun setBecauseYouReadGenre(genre: String?)
+
+    val usualCurrencyCode: Flow<String?>
+
+    suspend fun setUsualCurrencyCode(code: String?)
 }

@@ -201,4 +201,10 @@ internal class SettingsRepositoryImpl(
     override suspend fun setBecauseYouReadGenre(genre: String?) {
         settingsLocalDataSource.setBecauseYouReadGenre(genre = genre)
     }
+
+    override val usualCurrencyCode: Flow<String?> = settingsLocalDataSource.usualCurrencyCode
+
+    override suspend fun setUsualCurrencyCode(code: String?) {
+        settingsLocalDataSource.setUsualCurrencyCode(code = code)
+    }
 }

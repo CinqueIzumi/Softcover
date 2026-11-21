@@ -25,12 +25,12 @@ internal class BookCopyRepositoryImpl(
 
     override suspend fun save(copy: BookCopy) {
         val source = copy.source
-        val isBlankCustom = source is AcquisitionSource.Other && source.text.isBlank()
+        val normalized = if (source is AcquisitionSource.Other && source.text.isBlank()) copy.copy(source = null) else copy
 
-        if (copy.isEmpty || isBlankCustom) {
+        if (normalized.isEmpty) {
             localDataSource.delete(bookId = copy.bookId)
         } else {
-            localDataSource.upsert(entity = copy.toEntity(updatedAt = clock.now().toEpochMilliseconds()))
+            localDataSource.upsert(entity = normalized.toEntity(updatedAt = clock.now().toEpochMilliseconds()))
         }
     }
 }

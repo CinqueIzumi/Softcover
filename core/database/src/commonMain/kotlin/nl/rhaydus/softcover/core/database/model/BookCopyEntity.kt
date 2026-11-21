@@ -15,4 +15,6 @@ data class BookCopyEntity(
     val source: String? = null,
     val customSource: String? = null,
     val updatedAt: Long,
+    val priceThousandths: Long? = null,
+    val priceCurrency: String? = null,
 )

@@ -12,6 +12,7 @@ import nl.rhaydus.softcover.core.database.model.BookCopyEntity
 import nl.rhaydus.softcover.core.domain.model.AcquisitionKind
 import nl.rhaydus.softcover.core.domain.model.AcquisitionSource
 import nl.rhaydus.softcover.core.domain.model.BookCopy
+import nl.rhaydus.softcover.core.domain.model.PricePaid
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -185,6 +186,77 @@ class BookCopyRepositoryImplTest {
             )
 
             repository.get(bookId = 9) shouldBe copy
+        }
+
+        @Test
+        fun `a copy with only a price is stored`() = runTest {
+            // ----- Arrange -----
+            val copy = BookCopy(
+                bookId = 9,
+                price = PricePaid(
+                    amountThousandths = 8_500L,
+                    currencyCode = "GBP",
+                ),
+            )
+
+            // ----- Act -----
+            repository.save(copy = copy)
+
+            // ----- Assert -----
+            dataSource.get(bookId = 9) shouldBe BookCopyEntity(
+                bookId = 9,
+                source = null,
+                customSource = null,
+                updatedAt = 123_456L,
+                priceThousandths = 8_500L,
+                priceCurrency = "GBP",
+            )
+        }
+
+        @Test
+        fun `a blank other source with a price is stored with no source`() = runTest {
+            // ----- Arrange -----
+            val price = PricePaid(
+                amountThousandths = 8_500L,
+                currencyCode = "GBP",
+            )
+
+            // ----- Act -----
+            repository.save(
+                copy = BookCopy(
+                    bookId = 9,
+                    source = AcquisitionSource.Other(text = "   "),
+                    price = price,
+                ),
+            )
+
+            // ----- Assert -----
+            repository.get(bookId = 9) shouldBe BookCopy(
+                bookId = 9,
+                source = null,
+                price = price,
+            )
+        }
+
+        @Test
+        fun `clearing both the source and the price deletes the stored row`() = runTest {
+            // ----- Arrange -----
+            repository.save(
+                copy = BookCopy(
+                    bookId = 9,
+                    source = AcquisitionSource.Preset(kind = AcquisitionKind.BOUGHT_ONLINE),
+                    price = PricePaid(
+                        amountThousandths = 1_000L,
+                        currencyCode = "EUR",
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            repository.save(copy = BookCopy(bookId = 9))
+
+            // ----- Assert -----
+            dataSource.get(bookId = 9).shouldBeNull()
         }
     }
 }

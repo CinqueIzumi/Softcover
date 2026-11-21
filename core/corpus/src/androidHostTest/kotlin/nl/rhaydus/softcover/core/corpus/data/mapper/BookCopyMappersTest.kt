@@ -6,6 +6,7 @@ import nl.rhaydus.softcover.core.database.model.BookCopyEntity
 import nl.rhaydus.softcover.core.domain.model.AcquisitionKind
 import nl.rhaydus.softcover.core.domain.model.AcquisitionSource
 import nl.rhaydus.softcover.core.domain.model.BookCopy
+import nl.rhaydus.softcover.core.domain.model.PricePaid
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -35,6 +36,24 @@ class BookCopyMappersTest {
             val copy = BookCopy(
                 bookId = 7,
                 source = AcquisitionSource.Other(text = "Uncle's attic"),
+            )
+
+            // ----- Act -----
+            val result = copy.toEntity(updatedAt = 5L).toDomain()
+
+            // ----- Assert -----
+            result shouldBe copy
+        }
+
+        @Test
+        fun `a price survives toEntity then toDomain`() {
+            // ----- Arrange -----
+            val copy = BookCopy(
+                bookId = 7,
+                price = PricePaid(
+                    amountThousandths = 12_990L,
+                    currencyCode = "EUR",
+                ),
             )
 
             // ----- Act -----
@@ -111,6 +130,38 @@ class BookCopyMappersTest {
             // ----- Assert -----
             result shouldBe BookCopy(bookId = 7)
         }
+
+        @Test
+        fun `a stored amount without a currency reads as no price`() {
+            // ----- Arrange -----
+            val entity = BookCopyEntity(
+                bookId = 7,
+                updatedAt = 1L,
+                priceThousandths = 5_000L,
+            )
+
+            // ----- Act -----
+            val result = entity.toDomain()
+
+            // ----- Assert -----
+            result.price.shouldBeNull()
+        }
+
+        @Test
+        fun `a stored currency without an amount reads as no price`() {
+            // ----- Arrange -----
+            val entity = BookCopyEntity(
+                bookId = 7,
+                updatedAt = 1L,
+                priceCurrency = "USD",
+            )
+
+            // ----- Act -----
+            val result = entity.toDomain()
+
+            // ----- Assert -----
+            result.price.shouldBeNull()
+        }
     }
 
     @Nested
@@ -150,6 +201,26 @@ class BookCopyMappersTest {
             result shouldBe BookCopyEntity(
                 bookId = 7,
                 source = "bought_second_hand",
+                customSource = null,
+                updatedAt = 9L,
+            )
+        }
+
+        @Test
+        fun `a whitespace-only other source maps to no source`() {
+            // ----- Arrange -----
+            val copy = BookCopy(
+                bookId = 7,
+                source = AcquisitionSource.Other(text = " \t "),
+            )
+
+            // ----- Act -----
+            val result = copy.toEntity(updatedAt = 9L)
+
+            // ----- Assert -----
+            result shouldBe BookCopyEntity(
+                bookId = 7,
+                source = null,
                 customSource = null,
                 updatedAt = 9L,
             )

@@ -93,7 +93,7 @@ import kotlin.coroutines.CoroutineContext
     views = [
         BookEditionView::class
     ],
-    version = 68,
+    version = 69,
 )
 @ConstructedBy(SoftcoverDatabaseConstructor::class)
 abstract class SoftcoverDatabase : RoomDatabase() {
@@ -1606,6 +1606,13 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_68_69 = object : Migration(68, 69) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL("ALTER TABLE book_copies ADD COLUMN priceThousandths INTEGER")
+                connection.execSQL("ALTER TABLE book_copies ADD COLUMN priceCurrency TEXT")
+            }
+        }
+
         private val MIGRATION_67_68 = object : Migration(67, 68) {
             override fun migrate(connection: SQLiteConnection) {
                 connection.execSQL("ALTER TABLE book_editions ADD COLUMN language TEXT")
@@ -1751,6 +1758,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             MIGRATION_65_66,
             MIGRATION_66_67,
             MIGRATION_67_68,
+            MIGRATION_68_69,
         )
     }
 }

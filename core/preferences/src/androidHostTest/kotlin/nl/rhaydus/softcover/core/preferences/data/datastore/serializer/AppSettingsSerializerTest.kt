@@ -117,6 +117,30 @@ class AppSettingsSerializerTest {
             // ----- Assert -----
             result shouldBe AppSettingsEntity()
         }
+
+        @Test
+        fun `settings stored before the usual currency existed decode to no currency`() = runTest {
+            // ----- Arrange -----
+            val json = """{"userId": 3}"""
+
+            // ----- Act -----
+            val result = read(json)
+
+            // ----- Assert -----
+            result.usualCurrencyCode shouldBe null
+        }
+
+        @Test
+        fun `a stored usual currency code decodes`() = runTest {
+            // ----- Arrange -----
+            val json = """{"usualCurrencyCode": "JPY"}"""
+
+            // ----- Act -----
+            val result = read(json)
+
+            // ----- Assert -----
+            result.usualCurrencyCode shouldBe "JPY"
+        }
     }
 
     @Nested
@@ -142,6 +166,7 @@ class AppSettingsSerializerTest {
                 dismissedPlanTodayByBook = mapOf(1 to "2026-01-01"),
                 libraryTabOrder = listOf("read", "reading"),
                 becauseYouReadGenre = "Fantasy",
+                usualCurrencyCode = "CHF",
             )
 
             val buffer = Buffer()

@@ -127,6 +127,10 @@ interface SettingsLocalDataSource {
     val becauseYouReadGenre: Flow<String?>
 
     suspend fun setBecauseYouReadGenre(genre: String?)
+
+    val usualCurrencyCode: Flow<String?>
+
+    suspend fun setUsualCurrencyCode(code: String?)
 }
 
 internal class SettingsLocalDataSourceImpl(
@@ -420,6 +424,16 @@ internal class SettingsLocalDataSourceImpl(
     override suspend fun setBecauseYouReadGenre(genre: String?) {
         appSettingsDataStore.store.updateData { entity ->
             entity.copy(becauseYouReadGenre = genre)
+        }
+    }
+
+    override val usualCurrencyCode: Flow<String?> = appSettingsDataStore.store.data
+        .map { it.usualCurrencyCode }
+        .distinctUntilChanged()
+
+    override suspend fun setUsualCurrencyCode(code: String?) {
+        appSettingsDataStore.store.updateData { entity ->
+            entity.copy(usualCurrencyCode = code)
         }
     }
 }

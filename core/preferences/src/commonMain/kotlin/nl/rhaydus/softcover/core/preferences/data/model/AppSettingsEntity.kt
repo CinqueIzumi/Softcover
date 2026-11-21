@@ -48,4 +48,5 @@ internal data class AppSettingsEntity(
     val uiScale: UiScale = UiScale.DEFAULT,
     // Null means "use the auto-derived most-read genre" - see GetBecauseYouReadBooksUseCase.
     val becauseYouReadGenre: String? = null,
+    val usualCurrencyCode: String? = null,
 )
