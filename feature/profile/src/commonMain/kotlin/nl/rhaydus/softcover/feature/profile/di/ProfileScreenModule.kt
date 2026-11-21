@@ -17,6 +17,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.collector.ReadingLifeCo
 import nl.rhaydus.softcover.feature.profile.presentation.collector.ReadingLifeShareCardCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.ReadingSummaryCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.RecentlyLovedCardsCollector
+import nl.rhaydus.softcover.feature.profile.presentation.collector.SpendingChapterCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.StatsAtlasCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.UserInformationCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.WaitingLongestCollector
@@ -65,6 +66,9 @@ val profileScreenModule = module {
             observeUserProfileDataUseCase = get(),
             observeReadingStatsUseCase = get(),
             observeDiversityStatsUseCase = get(),
+            observeSpendStatsUseCase = get(),
+            getCurrenciesUseCase = get(),
+            getUsualCurrencyAsFlowUseCase = get(),
             observePagesReadUseCase = get(),
             observeDidNotFinishStatsUseCase = get(),
             observeMonthlyPagesReadUseCase = get(),
@@ -93,6 +97,7 @@ val profileScreenModule = module {
     factory { RecentlyLovedCardsCollector() } bind StatsAtlasCollector::class
     factory { WaitingLongestCollector() } bind StatsAtlasCollector::class
     factory { AtlasScopedSectionsCollector() } bind StatsAtlasCollector::class
+    factory { SpendingChapterCollector() } bind StatsAtlasCollector::class
     factory { HideBooksWithoutDetailCollector() } bind StatsAtlasCollector::class
     factory { EditionLanguagesCollector() } bind StatsAtlasCollector::class
     factory { YearMetricToggleCollector() } bind StatsAtlasCollector::class

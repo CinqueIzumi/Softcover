@@ -6,6 +6,7 @@ internal enum class AtlasChapter {
     GENRES_AND_HOW_YOU_READ,
     YOUR_READING_LIST,
     IN_YOUR_WORDS,
+    RECOMMENDERS_AND_SPENDING,
     DIVERSITY_AND_PUBLICATION,
 
     /** Numbered 99, because it goes when the real chapters replace it. */

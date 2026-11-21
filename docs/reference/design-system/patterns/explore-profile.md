@@ -33,7 +33,7 @@
   reading day has pages in the on-device history. "Added" is Hardcover's date added, the day a book
   entered the library. Chapter 08 alone also dates a book by a read's start and by logged progress (below).
 - Contents rows (two-digit number, title, caption, chevron) scroll to their chapter's top. A chapter opens
-  with an eyebrow "02 · Title". Numbers follow the design's chapter list (01, 02, 03, 05, 06, 08 and 99), not
+  with an eyebrow "02 · Title". Numbers follow the design's chapter list (01, 02, 03, 05, 06, 07, 08 and 99), not
   position, so row and header always agree.
 - A tapped book opens book detail, prefetched on press; a tapped tag closes the Atlas and opens Library on
   the Read shelf (All when Read is hidden) filtered to that tag.
@@ -57,6 +57,11 @@
   future `Fifth`; ties go to the earliest month; labels on every third column); time of day (eight
   three-hour blocks, every column labelled and valued with its share); and the half-star
   ratings histogram (whole stars `Lead`, halves `Fourth`, labels under whole stars only).
+- Chapter 07 "Recommenders and spending" carries the spending half: header "What you paid", then a Spent /
+  Typical price (the median) pair in the lead currency, the usual currency when a book in scope is priced in
+  it, else the currency with the most priced books. Nothing is converted. "Where it went, in EUR" is a
+  `ProportionChart` of rows by source; each other currency follows as "In GBP" with a legend only. With no
+  priced book the chapter shows one line.
 - Chapter 08 "Diversity and publication": five author and character bars in books (the character bars
   are the reader's own How it read answers), then Languages, When they were written and Where you got
   them, each an `AtlasSubhead` over its chart with its own empty line. Books without the detail are a

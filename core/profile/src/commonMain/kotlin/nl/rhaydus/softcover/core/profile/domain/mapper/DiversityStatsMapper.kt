@@ -1,13 +1,10 @@
 package nl.rhaydus.softcover.core.profile.domain.mapper
 
-import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import nl.rhaydus.softcover.core.book.domain.model.ProgressUpdate
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookCopy
-import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.BookTraits
 import nl.rhaydus.softcover.core.domain.model.CharacterTrait
 import nl.rhaydus.softcover.core.domain.model.Gender
@@ -28,18 +25,11 @@ internal fun List<Book>.toDiversityStats(
     copiesByBookId: Map<Int, BookCopy>,
     timeZone: TimeZone,
 ): DiversityStats {
-    val updateDaysByBook = updates.groupBy(
-        { it.bookId },
-        { it.at.toLocalDateTime(timeZone).date },
+    val counted = readInRange(
+        range = range,
+        updates = updates,
+        timeZone = timeZone,
     )
-
-    val counted = distinctBy { it.id }
-        .filter {
-            it.wasReadIn(
-                range,
-                updateDaysByBook[it.id].orEmpty(),
-            )
-        }
 
     return DiversityStats(
         booksRead = counted.size,
@@ -48,24 +38,6 @@ internal fun List<Book>.toDiversityStats(
         publication = counted.toPublicationStats(copiesByBookId),
     )
 }
-
-private fun Book.wasReadIn(
-    range: StatsRange,
-    updateDays: List<LocalDate>,
-): Boolean {
-    if (range == StatsRange.Unbounded) return true
-
-    val userBook = userBook ?: return false
-
-    val readDates = userBook.reads.flatMap { listOf(it.startedAt, it.finishedAt) }.mapNotNull { it.toLocalDateOrNull() }
-
-    return userBook.finishDate in range ||
-        (userBook.status == BookStatus.DidNotFinish && userBook.stopDate in range) ||
-        readDates.any { it in range } ||
-        updateDays.any { it in range }
-}
-
-private operator fun StatsRange.contains(date: LocalDate?): Boolean = date != null && date in this
 
 // No field identifies non-person contributors such as anthology placeholders, so they are counted.
 internal fun List<Book>.toAuthorDemographics(): AuthorDemographics {

@@ -29,16 +29,16 @@ class ObserveDiversityStatsUseCase internal constructor(
     private val timeZone: TimeZone,
 ) {
     operator fun invoke(range: StatsRange): Flow<DiversityStats> = combine(
-        combine(
-            getCurrentlyReadingUserBooksUseCase(),
-            getPausedUserBooksUseCase(),
-            getReadUserBooksUseCase(),
-            getDidNotFinishUserBooksUseCase(),
-        ) { reading, paused, read, didNotFinish -> reading + paused + read + didNotFinish },
-        observeProgressUpdatesUseCase(),
+        observeBooksWithProgress(
+            getCurrentlyReadingUserBooksUseCase = getCurrentlyReadingUserBooksUseCase,
+            getPausedUserBooksUseCase = getPausedUserBooksUseCase,
+            getReadUserBooksUseCase = getReadUserBooksUseCase,
+            getDidNotFinishUserBooksUseCase = getDidNotFinishUserBooksUseCase,
+            observeProgressUpdatesUseCase = observeProgressUpdatesUseCase,
+        ),
         observeAllBookTraitsUseCase(),
         observeAllBookCopiesUseCase(),
-    ) { books, updates, traitsByBookId, copiesByBookId ->
+    ) { (books, updates), traitsByBookId, copiesByBookId ->
         books.toDiversityStats(
             range = range,
             updates = updates,

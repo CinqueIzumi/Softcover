@@ -457,6 +457,28 @@ internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.Sh
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
+private fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.SpendBlock(block: nl.rhaydus.softcover.feature.profile.presentation.state.SpendBlockUiModel): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - block: STABLE (marked @Stable or @Immutable)
+
+@Composable
+internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.SpendingChapter(model: nl.rhaydus.softcover.feature.profile.presentation.state.SpendingChapterUiModel, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.SpendingContent(model: nl.rhaydus.softcover.feature.profile.presentation.state.SpendingChapterUiModel): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+
+@Composable
 internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.StatsAtlasBody(state: nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState, jumper: nl.rhaydus.softcover.feature.profile.presentation.screen.section.AtlasChapterJumper, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.profile.presentation.action.StatsAtlasAction, kotlin.Unit>, onBookCardEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.bookcard.BookCardEvent, kotlin.Unit>, onRecordEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.bookcard.BookCardEvent, kotlin.Unit>, onWaitingEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.bookcard.BookCardEvent, kotlin.Unit>): kotlin.Unit
   skippable: false
   restartable: true
@@ -493,7 +515,7 @@ internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.Tr
     - tint: STABLE (marked @Stable or @Immutable)
 
 @Composable
-private fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.VersusCell(model: nl.rhaydus.softcover.feature.profile.presentation.state.VersusCellUiModel, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.VersusCell(model: nl.rhaydus.softcover.feature.profile.presentation.state.VersusCellUiModel, modifier: androidx.compose.ui.Modifier): kotlin.Unit
   skippable: true
   restartable: true
   params:

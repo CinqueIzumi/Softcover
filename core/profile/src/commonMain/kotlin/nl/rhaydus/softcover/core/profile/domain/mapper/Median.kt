@@ -13,3 +13,15 @@ internal fun List<Int>.median(): Int {
         (sorted[middle - 1] + sorted[middle] + 1) / 2
     }
 }
+
+/** An even count averages the middle two, rounded half up. */
+internal fun List<Long>.median(): Long {
+    val sorted = sorted()
+    val middle = sorted.size / 2
+
+    return if (sorted.size % 2 == 1) {
+        sorted[middle]
+    } else {
+        (sorted[middle - 1] + sorted[middle] + 1) / 2
+    }
+}

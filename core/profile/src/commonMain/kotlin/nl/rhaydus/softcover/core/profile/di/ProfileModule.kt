@@ -26,6 +26,7 @@ import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingDayUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingHistoryUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingListStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingStatsUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveSpendStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveTimeToFinishUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveWrittenStatsUseCase
@@ -130,6 +131,19 @@ val profileModule = module {
             getDidNotFinishUserBooksUseCase = get(),
             observeProgressUpdatesUseCase = get(),
             observeAllBookTraitsUseCase = get(),
+            observeAllBookCopiesUseCase = get(),
+            appDispatchers = get(),
+            timeZone = get(),
+        )
+    }
+
+    factory {
+        ObserveSpendStatsUseCase(
+            getCurrentlyReadingUserBooksUseCase = get(),
+            getPausedUserBooksUseCase = get(),
+            getReadUserBooksUseCase = get(),
+            getDidNotFinishUserBooksUseCase = get(),
+            observeProgressUpdatesUseCase = get(),
             observeAllBookCopiesUseCase = get(),
             appDispatchers = get(),
             timeZone = get(),

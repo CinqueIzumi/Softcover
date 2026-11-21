@@ -5,7 +5,9 @@ import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveBooksByIdsUseCase
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetCurrenciesUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetHideBooksWithoutDetailAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetUsualCurrencyAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveQuotesSyncedUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadDatesBackfilledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsBackfilledUseCase
@@ -22,6 +24,7 @@ import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingDayUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingHistoryUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingListStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingStatsUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveSpendStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveTimeToFinishUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveWrittenStatsUseCase
@@ -36,6 +39,9 @@ internal class StatsAtlasScreenModel(
     observeUserProfileDataUseCase: ObserveUserProfileDataUseCase,
     observeReadingStatsUseCase: ObserveReadingStatsUseCase,
     observeDiversityStatsUseCase: ObserveDiversityStatsUseCase,
+    observeSpendStatsUseCase: ObserveSpendStatsUseCase,
+    getCurrenciesUseCase: GetCurrenciesUseCase,
+    getUsualCurrencyAsFlowUseCase: GetUsualCurrencyAsFlowUseCase,
     observePagesReadUseCase: ObservePagesReadUseCase,
     observeDidNotFinishStatsUseCase: ObserveDidNotFinishStatsUseCase,
     observeMonthlyPagesReadUseCase: ObserveMonthlyPagesReadUseCase,
@@ -73,6 +79,9 @@ internal class StatsAtlasScreenModel(
         observeUserProfileDataUseCase = observeUserProfileDataUseCase,
         observeReadingStatsUseCase = observeReadingStatsUseCase,
         observeDiversityStatsUseCase = observeDiversityStatsUseCase,
+        observeSpendStatsUseCase = observeSpendStatsUseCase,
+        getCurrenciesUseCase = getCurrenciesUseCase,
+        getUsualCurrencyAsFlowUseCase = getUsualCurrencyAsFlowUseCase,
         observePagesReadUseCase = observePagesReadUseCase,
         observeDidNotFinishStatsUseCase = observeDidNotFinishStatsUseCase,
         observeMonthlyPagesReadUseCase = observeMonthlyPagesReadUseCase,

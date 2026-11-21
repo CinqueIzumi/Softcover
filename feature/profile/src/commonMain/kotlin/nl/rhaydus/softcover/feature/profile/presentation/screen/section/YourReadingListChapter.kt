@@ -100,7 +100,7 @@ internal fun YourReadingListChapter(
 
 /** One cell of the Added / Read pair under a 2dp rule, `primary` on the lead cell. */
 @Composable
-private fun VersusCell(
+internal fun VersusCell(
     model: VersusCellUiModel,
     modifier: Modifier = Modifier,
 ) {

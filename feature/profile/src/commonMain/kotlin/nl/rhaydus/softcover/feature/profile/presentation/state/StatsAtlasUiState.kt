@@ -64,6 +64,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsAverageUi
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsEmptyCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.readingRecordsUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.spendingChapterUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeToFinishUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.toRatingsHistogramCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.toRatingsHistogramHeader
@@ -199,6 +200,12 @@ internal data class StatsAtlasUiState(
         written = null,
         ownTags = null,
         scope = StatsScope.AllTime,
+    ),
+
+    val spendingChapter: SpendingChapterUiModel = spendingChapterUiModel(
+        stats = null,
+        currencies = emptyList(),
+        usual = null,
     ),
 
     val opening: AtlasOpeningUiModel = atlasOpeningUiModel(null),

@@ -64,6 +64,18 @@ class AtlasContentsMapperTest {
             // ----- Assert -----
             result.associate { it.chapter to it.number } shouldBe all - AtlasChapter.IN_YOUR_WORDS
         }
+
+        @Test
+        fun `lists recommenders and spending as chapter 07`() {
+            // ----- Arrange -----
+            val chapters = AtlasChapter.entries
+
+            // ----- Act -----
+            val result = atlasContentsRows(chapters).single { it.chapter == AtlasChapter.RECOMMENDERS_AND_SPENDING }
+
+            // ----- Assert -----
+            result.number to result.title shouldBe ("07" to "Recommenders and spending")
+        }
     }
 
     @Nested

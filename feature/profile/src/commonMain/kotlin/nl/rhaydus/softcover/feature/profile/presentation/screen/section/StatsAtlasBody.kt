@@ -155,6 +155,17 @@ internal fun ColumnScope.StatsAtlasBody(
     Column(
         modifier = Modifier.atlasChapter(
             jumper,
+            AtlasChapter.RECOMMENDERS_AND_SPENDING,
+        ),
+    ) {
+        SpendingChapter(model = state.spendingChapter)
+    }
+
+    Spacer(modifier = Modifier.height(Spacing.section))
+
+    Column(
+        modifier = Modifier.atlasChapter(
+            jumper,
             AtlasChapter.DIVERSITY_AND_PUBLICATION,
         ),
     ) {
