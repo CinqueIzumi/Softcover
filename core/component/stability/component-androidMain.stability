@@ -973,6 +973,15 @@ internal fun nl.rhaydus.softcover.core.component.field.PillTextField(model: nl.r
     - focusRequester: STABLE (marked @Stable or @Immutable)
 
 @Composable
+public fun nl.rhaydus.softcover.core.component.field.SelectField(model: nl.rhaydus.softcover.core.component.field.SelectFieldUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.field.SelectFieldEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - onEvent: STABLE (function type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
 public fun nl.rhaydus.softcover.core.component.field.TextField(model: nl.rhaydus.softcover.core.component.field.TextFieldUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.field.TextFieldEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
   skippable: true
   restartable: true
@@ -1022,6 +1031,12 @@ internal fun nl.rhaydus.softcover.core.component.field.TextFieldPlaceholder(text
     - enabled: STABLE (primitive type)
     - modifier: STABLE (marked @Stable or @Immutable)
     - style: STABLE (marked @Stable or @Immutable)
+
+@Composable
+internal fun nl.rhaydus.softcover.core.component.field.outlinedFieldColors(): androidx.compose.material3.TextFieldColors
+  skippable: true
+  restartable: true
+  params:
 
 @Composable
 internal fun nl.rhaydus.softcover.core.component.gallery.GallerySheetFrame(scaffold: nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel, modifier: androidx.compose.ui.Modifier, lazyBody: kotlin.Boolean, content: @[Composable] @[ExtensionFunctionType] androidx.compose.runtime.internal.ComposableFunction1<androidx.compose.foundation.layout.ColumnScope, kotlin.Unit>): kotlin.Unit

@@ -9,4 +9,5 @@ data class YourCopyRowUiModel<K>(
     val icon: SoftcoverIcon,
     val label: String,
     val value: YourCopyValue,
+    val trailing: String? = null,
 )

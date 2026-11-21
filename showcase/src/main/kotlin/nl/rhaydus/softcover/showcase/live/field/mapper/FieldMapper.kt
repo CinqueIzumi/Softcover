@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.showcase.live.field.mapper
 
 import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.field.TextFieldError
+import nl.rhaydus.softcover.core.component.field.TextFieldKeyboard
 import nl.rhaydus.softcover.core.component.field.TextFieldPillSize
 import nl.rhaydus.softcover.core.component.field.TextFieldUiModel
 import nl.rhaydus.softcover.core.component.field.TextFieldVariant
@@ -15,6 +16,7 @@ private const val PILL = "pill"
 private const val PILL_COMPACT = "pill-compact"
 private const val TITLE = "title"
 private const val PAGES = "pages"
+private const val PRICE = "price"
 private const val NOTES = "notes"
 private const val HERO = "hero"
 private const val YEAR = "year"
@@ -62,7 +64,20 @@ internal fun fieldLiveState(): FieldLiveUiState = FieldLiveUiState(
                 placeholder = "Pages",
                 variant = TextFieldVariant.Outlined(
                     label = "Pages",
-                    numeric = true,
+                    keyboard = TextFieldKeyboard.Number,
+                ),
+            ),
+        ),
+        section(
+            eyebrow = "Outlined, decimal",
+            description = "Opens the keyboard with a decimal point, for an amount.",
+            field = TextFieldUiModel(
+                key = PRICE,
+                text = "14.50",
+                placeholder = "Amount",
+                variant = TextFieldVariant.Outlined(
+                    label = "Amount",
+                    keyboard = TextFieldKeyboard.Decimal,
                 ),
             ),
         ),

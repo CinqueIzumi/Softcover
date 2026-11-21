@@ -73,14 +73,14 @@ data class TextFieldUiModel(
                 placeholder = "e.g. 9780374710781",
                 variant = TextFieldVariant.Outlined(
                     label = "ISBN",
-                    numeric = true,
+                    keyboard = TextFieldKeyboard.Number,
                 ),
             ),
             "Outlined, no label" to TextFieldUiModel(
                 key = "outlined-unlabelled",
                 text = "",
                 placeholder = "e.g. 9780374710781",
-                variant = TextFieldVariant.Outlined(numeric = true),
+                variant = TextFieldVariant.Outlined(keyboard = TextFieldKeyboard.Number),
             ),
             "Outlined, disabled" to TextFieldUiModel(
                 key = "outlined-disabled",
@@ -88,7 +88,7 @@ data class TextFieldUiModel(
                 placeholder = "e.g. 9780374710781",
                 variant = TextFieldVariant.Outlined(
                     label = "ISBN",
-                    numeric = true,
+                    keyboard = TextFieldKeyboard.Number,
                 ),
                 enabled = false,
             ),
@@ -144,7 +144,7 @@ data class TextFieldUiModel(
                 placeholder = "e.g. 9780374710781",
                 variant = TextFieldVariant.Outlined(
                     label = "ISBN",
-                    numeric = true,
+                    keyboard = TextFieldKeyboard.Number,
                 ),
                 error = TextFieldError(message = "That doesn't look like a valid ISBN."),
             ),

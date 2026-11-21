@@ -48,8 +48,8 @@ internal val sheetEntries: ImmutableList<GalleryEntry> = persistentListOf(
     galleryEntry(
         name = "SheetRow",
         family = GalleryFamily.SHEET,
-        blurb = "One ruled row of a single-choice sheet list: italic label, optional leading icon " +
-            "and count, and a check that marks the selection.",
+        blurb = "One ruled row of a single-choice sheet list: italic label, optional leading icon, " +
+            "short code and count, and a check that marks the selection.",
         previews = SheetRowUiModel,
         content = { model, modifier ->
             SheetRow(

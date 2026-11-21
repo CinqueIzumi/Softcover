@@ -100,5 +100,14 @@ private fun <K> YourCopyRow(
                 )
             }
         }
+
+        if (model.trailing != null) {
+            SoftcoverText(
+                text = model.trailing,
+                style = MaterialTheme.editorialTypography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+            )
+        }
     }
 }

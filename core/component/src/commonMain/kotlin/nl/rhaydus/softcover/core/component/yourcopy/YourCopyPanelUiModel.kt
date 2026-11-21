@@ -35,6 +35,17 @@ data class YourCopyPanelUiModel<K>(
                     ),
                 ),
             ),
+            "Priced" to YourCopyPanelUiModel(
+                rows = persistentListOf(
+                    YourCopyRowUiModel(
+                        key = "acquisition",
+                        icon = SoftcoverIcon.ShoppingBag,
+                        label = "Where you got it",
+                        value = YourCopyValue.Set(text = "Bought in a bookshop"),
+                        trailing = "€14.50",
+                    ),
+                ),
+            ),
             "Two rows" to YourCopyPanelUiModel(
                 rows = persistentListOf(
                     YourCopyRowUiModel(

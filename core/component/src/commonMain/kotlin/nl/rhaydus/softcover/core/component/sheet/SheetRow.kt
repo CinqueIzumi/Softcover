@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -73,6 +74,16 @@ internal fun <K> SheetRow(
                     contentDescription = leadingIcon.contentDescription,
                     tint = ink,
                     modifier = Modifier.size(22.dp),
+                )
+            }
+
+            if (model.leadingText != null) {
+                SoftcoverText(
+                    text = model.leadingText,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = if (model.selected) ink else MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    modifier = Modifier.width(40.dp),
                 )
             }
 

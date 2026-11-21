@@ -20,11 +20,13 @@ import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_date_range
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_delete
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_drag_handle
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_edit
+import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_euro
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_explore
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_filter_list
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_headset
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_history
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_info
+import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_keyboard_arrow_down
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_keyboard_arrow_left
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_keyboard_arrow_right
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_library_books
@@ -79,11 +81,13 @@ enum class SoftcoverIcon(internal val resource: DrawableResource) {
     Delete(Res.drawable.ic_delete),
     DragHandle(Res.drawable.ic_drag_handle),
     Edit(Res.drawable.ic_edit),
+    Euro(Res.drawable.ic_euro),
     Explore(Res.drawable.ic_explore),
     FilterList(Res.drawable.ic_filter_list),
     Headset(Res.drawable.ic_headset),
     History(Res.drawable.ic_history),
     Info(Res.drawable.ic_info),
+    KeyboardArrowDown(Res.drawable.ic_keyboard_arrow_down),
     KeyboardArrowLeft(Res.drawable.ic_keyboard_arrow_left),
     KeyboardArrowRight(Res.drawable.ic_keyboard_arrow_right),
     LibraryBooks(Res.drawable.ic_library_books),

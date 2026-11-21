@@ -16,10 +16,10 @@ sealed interface TextFieldVariant {
         val size: TextFieldPillSize = TextFieldPillSize.Regular,
     ) : TextFieldVariant
 
-    /** A non-null [label] floats above the value. Only this variant can ask for a [numeric] keyboard. */
+    /** A non-null [label] floats above the value. */
     data class Outlined(
         val label: String? = null,
-        val numeric: Boolean = false,
+        val keyboard: TextFieldKeyboard = TextFieldKeyboard.Text,
     ) : TextFieldVariant
 
     /** An outlined box at least four lines tall that grows with its text. Return adds a line, so it never submits. */
