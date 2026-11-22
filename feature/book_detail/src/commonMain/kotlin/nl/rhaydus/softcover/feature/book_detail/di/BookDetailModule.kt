@@ -38,6 +38,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ChooseLis
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.CoverModelsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.CurrentUserCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.DateStyleCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.DidNotFinishReasonSheetCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EditionCardsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EditionSelectionCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EditionSheetCollector
@@ -141,6 +142,7 @@ val bookDetailModule = module {
     factory { HowItReadSheetCollector() } bind BookDetailCollector::class
     factory { YourCopySectionCollector() } bind BookDetailCollector::class
     factory { WhereYouGotItSheetCollector() } bind BookDetailCollector::class
+    factory { DidNotFinishReasonSheetCollector() } bind BookDetailCollector::class
 
     single<BookReviewsRemoteDataSource> {
         BookReviewsRemoteDataSourceImpl(apolloClient = get())
@@ -248,6 +250,9 @@ val bookDetailModule = module {
             observeBookCopyUseCase = get(),
             getBookCopyUseCase = get(),
             saveBookCopyUseCase = get(),
+            observeDidNotFinishReasonsUseCase = get(),
+            getDidNotFinishReasonsUseCase = get(),
+            saveDidNotFinishReasonsUseCase = get(),
             getCurrenciesUseCase = get(),
             getUsualCurrencyAsFlowUseCase = get(),
         )

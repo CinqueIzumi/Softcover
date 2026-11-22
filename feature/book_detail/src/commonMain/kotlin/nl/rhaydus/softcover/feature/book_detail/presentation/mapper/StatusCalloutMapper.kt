@@ -1,17 +1,27 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.mapper
 
+import kotlinx.collections.immutable.toImmutableList
+import nl.rhaydus.softcover.core.component.callout.CalloutActionUiModel
 import nl.rhaydus.softcover.core.component.callout.CalloutUiModel
 import nl.rhaydus.softcover.core.component.callout.CalloutVariant
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.DateStyle
+import nl.rhaydus.softcover.core.domain.model.DidNotFinishReason
+import nl.rhaydus.softcover.core.domain.model.DidNotFinishReasons
+import nl.rhaydus.softcover.core.uibinding.didnotfinish.toLabel
 
 private const val FINISHED_EYEBROW = "Finished"
 private const val DID_NOT_FINISH_EYEBROW = "Did not finish"
 private const val WANT_TO_READ_EYEBROW = "Up next"
+private const val DID_NOT_FINISH_REASON_LABEL = "Why you set it aside"
+private const val DID_NOT_FINISH_REASON_EMPTY = "Add a reason"
 
-internal fun Book.toStatusCallout(dateStyle: DateStyle): CalloutUiModel? {
+internal fun Book.toStatusCallout(
+    dateStyle: DateStyle,
+    reasons: DidNotFinishReasons?,
+): CalloutUiModel? {
     val userBook = userBook ?: return null
 
     return when (status) {
@@ -31,6 +41,7 @@ internal fun Book.toStatusCallout(dateStyle: DateStyle): CalloutUiModel? {
                 null -> "This book has been in your library since ${userBook.getFallbackDateString(style = dateStyle)}."
                 else -> "You put this down on $dnfDate."
             },
+            callToAction = reasons.toReasonDetail(),
         )
 
         BookStatus.WantToRead -> statusCallout(
@@ -50,8 +61,22 @@ private fun statusCallout(
     eyebrow: String,
     icon: SoftcoverIcon,
     body: String,
+    callToAction: CalloutActionUiModel? = null,
 ): CalloutUiModel = CalloutUiModel(
     variant = CalloutVariant.Neutral(icon = icon),
     eyebrow = eyebrow,
     body = body,
+    callToAction = callToAction,
+)
+
+private fun DidNotFinishReasons?.toReasonDetail() = CalloutActionUiModel.Detail(
+    label = DID_NOT_FINISH_REASON_LABEL,
+    lines = listOfNotNull(
+        this?.reasons
+            ?.takeIf { it.isNotEmpty() }
+            ?.sortedBy(DidNotFinishReason::ordinal)
+            ?.joinToString(separator = ", ") { it.toLabel() },
+        this?.ownWords,
+    ).toImmutableList(),
+    emptyText = DID_NOT_FINISH_REASON_EMPTY,
 )

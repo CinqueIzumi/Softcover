@@ -136,6 +136,10 @@ internal data class BookDetailUiState(
     val whereYouGotItDraft: WhereYouGotItDraft? = null,
     val whereYouGotItSheet: SheetSession<WhereYouGotItSheetUiModel, Nothing> = SheetSession.Closed,
 
+    /** Non-null exactly while the did-not-finish reason sheet is requested. */
+    val didNotFinishReasonDraft: DidNotFinishReasonDraft? = null,
+    val didNotFinishReasonSheet: SheetSession<DidNotFinishReasonSheetUiModel, Nothing> = SheetSession.Closed,
+
     /** The local id of the quote awaiting its delete confirm; `null` when none is. */
     val quoteDeleteRequestId: Long? = null,
 

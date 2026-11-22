@@ -64,6 +64,15 @@
 - Re-tapping the chosen preset clears it. Save closes the sheet before the write and keeps every other
   stored copy field; an empty choice clears the source.
 
+### Why you set it aside
+
+- Only while the status is Did not finish, the status callout in the Yours lens carries a "Why you set it
+  aside" detail row: the picked reasons on one line, the reader's own words under it, or "Add a reason".
+- Tapping the row opens `DidNotFinishReasonSheet`, hosted by `DidNotFinishReasonSheetCollector` from
+  `BookDetailUiState.didNotFinishReasonDraft`: five multi-select reason chips and an "In your own words" field.
+- The reasons are private, stay on the device and are wiped on sign-out. Changing the status hides the row
+  and keeps them, so they return if the book goes back to Did not finish.
+
 ### Your quotes section
 
 - The Yours lens, between How it read and the your-tags section, only for a shelved book: a bar-less

@@ -66,6 +66,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnTagEditorC
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnTagSuggestionSelectedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnToggleListMembershipAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnToggleUserTagSpoilerAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.component.DidNotFinishReasonSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.EditionBottomSheetSelector
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.ShareBookBottomSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.TagEditorBottomSheet
@@ -330,6 +331,13 @@ internal fun BookDetailOverlays(
     state.whereYouGotItSheet.modelOrNull?.let { whereYouGotItSheet ->
         WhereYouGotItSheet(
             model = whereYouGotItSheet,
+            runAction = runAction,
+        )
+    }
+
+    state.didNotFinishReasonSheet.modelOrNull?.let { reasonSheet ->
+        DidNotFinishReasonSheet(
+            model = reasonSheet,
             runAction = runAction,
         )
     }

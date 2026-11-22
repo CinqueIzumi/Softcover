@@ -13,6 +13,14 @@ private fun nl.rhaydus.softcover.feature.book_detail.presentation.component.Curr
     - runAction: STABLE (function type)
 
 @Composable
+internal fun nl.rhaydus.softcover.feature.book_detail.presentation.component.DidNotFinishReasonSheet(model: nl.rhaydus.softcover.feature.book_detail.presentation.state.DidNotFinishReasonSheetUiModel, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction, kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - runAction: STABLE (function type)
+
+@Composable
 private fun nl.rhaydus.softcover.feature.book_detail.presentation.component.EditionBottomSheetContentPreview(): kotlin.Unit
   skippable: true
   restartable: true

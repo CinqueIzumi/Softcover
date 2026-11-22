@@ -9,10 +9,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.callout.Callout
+import nl.rhaydus.softcover.core.component.callout.CalloutEvent
 import nl.rhaydus.softcover.core.component.verdict.VerdictBlock
 import nl.rhaydus.softcover.core.component.verdict.VerdictBlockEvent
 import nl.rhaydus.softcover.core.uibinding.verdict.VerdictSheetContext
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnOpenDidNotFinishReasonSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnOpenVerdictSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 
@@ -35,6 +37,13 @@ internal fun YoursLensContent(
             state.statusCallout?.let { callout ->
                 Callout(
                     model = callout,
+                    onEvent = { event ->
+                        when (event) {
+                            CalloutEvent.ActionClicked -> runAction(OnOpenDidNotFinishReasonSheetAction())
+
+                            CalloutEvent.DismissClicked -> Unit
+                        }
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = Spacing.gutter),
