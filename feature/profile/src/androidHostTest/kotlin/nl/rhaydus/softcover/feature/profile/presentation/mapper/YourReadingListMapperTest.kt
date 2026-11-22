@@ -10,12 +10,14 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import nl.rhaydus.softcover.core.component.chart.ChartTone
 import nl.rhaydus.softcover.core.component.chip.ChipTrailing
 import nl.rhaydus.softcover.core.component.statistic.StatTileVariant
+import nl.rhaydus.softcover.core.domain.model.DidNotFinishReason
 import nl.rhaydus.softcover.core.domain.model.StatsScope
 import nl.rhaydus.softcover.core.profile.domain.model.DidNotFinishStats
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingListStats
 import nl.rhaydus.softcover.core.profile.domain.model.StopQuarter
+import nl.rhaydus.softcover.core.uibinding.didnotfinish.toLabel
 import nl.rhaydus.softcover.feature.profile.presentation.state.YourReadingListUiModel
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -490,6 +492,120 @@ class YourReadingListMapperTest {
             // ----- Assert -----
             val chips = result.didNotFinish.shouldNotBeNull().genres.shouldNotBeNull().chips
             chips.map { it.contentDescription } shouldBe listOf("Fantasy, 3 books", "Horror, 1 book")
+        }
+    }
+
+    @Nested
+    inner class Why {
+        private fun whyLabels(
+            reasonCounts: Map<DidNotFinishReason, Int> = emptyMap(),
+            otherReasonCount: Int = 0,
+        ): List<Pair<String, String>>? = setAsideModel(
+            DidNotFinishStats(
+                bookCount = 5,
+                unknownStopCount = 5,
+                reasonCounts = DidNotFinishReason.entries.associateWith { reasonCounts[it] ?: 0 },
+                otherReasonCount = otherReasonCount,
+            ),
+        ).didNotFinish.shouldNotBeNull().why?.rows?.map { it.label to it.count }
+
+        @Test
+        fun `rows run from the most given reason to the least`() {
+            // ----- Arrange -----
+            val counts = mapOf(
+                DidNotFinishReason.NotTheRightTime to 1,
+                DidNotFinishReason.TooSlow to 3,
+                DidNotFinishReason.UnwantedContent to 2,
+            )
+
+            // ----- Act -----
+            val result = whyLabels(reasonCounts = counts)
+
+            // ----- Assert -----
+            result shouldBe listOf(
+                DidNotFinishReason.TooSlow.toLabel() to "3",
+                DidNotFinishReason.UnwantedContent.toLabel() to "2",
+                DidNotFinishReason.NotTheRightTime.toLabel() to "1",
+            )
+        }
+
+        @Test
+        fun `reasons with the same count keep the order of the sheet`() {
+            // ----- Arrange -----
+            val counts = mapOf(
+                DidNotFinishReason.UnwantedContent to 2,
+                DidNotFinishReason.LostInterest to 2,
+                DidNotFinishReason.NotMyKindOfWriting to 2,
+            )
+
+            // ----- Act -----
+            val result = whyLabels(reasonCounts = counts)
+
+            // ----- Assert -----
+            result?.map { it.first } shouldBe listOf(
+                DidNotFinishReason.NotMyKindOfWriting.toLabel(),
+                DidNotFinishReason.LostInterest.toLabel(),
+                DidNotFinishReason.UnwantedContent.toLabel(),
+            )
+        }
+
+        @Test
+        fun `something else comes last even when it is the biggest`() {
+            // ----- Arrange -----
+            val counts = mapOf(DidNotFinishReason.TooSlow to 1)
+
+            // ----- Act -----
+            val result = whyLabels(
+                reasonCounts = counts,
+                otherReasonCount = 4,
+            )
+
+            // ----- Assert -----
+            result shouldBe listOf(
+                DidNotFinishReason.TooSlow.toLabel() to "1",
+                "Something else" to "4",
+            )
+        }
+
+        @Test
+        fun `reasons nobody gave are left out`() {
+            // ----- Arrange -----
+            val counts = mapOf(DidNotFinishReason.LostInterest to 2)
+
+            // ----- Act -----
+            val result = whyLabels(reasonCounts = counts)
+
+            // ----- Assert -----
+            result shouldBe listOf(DidNotFinishReason.LostInterest.toLabel() to "2")
+        }
+
+        @Test
+        fun `no reasons at all leaves no rows and keeps the empty line`() {
+            // ----- Arrange -----
+            val stats = DidNotFinishStats(
+                bookCount = 2,
+                unknownStopCount = 2,
+            )
+
+            // ----- Act -----
+            val result = setAsideModel(stats).didNotFinish.shouldNotBeNull()
+
+            // ----- Assert -----
+            result.why.shouldBeNull()
+            result.whyEmptyLine.shouldNotBeNull()
+        }
+
+        @Test
+        fun `loading has neither rows nor the empty line`() {
+            // ----- Arrange -----
+            val stats: DidNotFinishStats? = null
+
+            // ----- Act -----
+            val result = setAsideModel(stats).didNotFinish.shouldNotBeNull()
+
+            // ----- Assert -----
+            result.why.shouldBeNull()
+            result.whyEmptyLine.shouldBeNull()
         }
     }
 

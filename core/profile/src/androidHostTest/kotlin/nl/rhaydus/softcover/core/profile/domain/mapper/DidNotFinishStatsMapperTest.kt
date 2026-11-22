@@ -3,6 +3,8 @@ package nl.rhaydus.softcover.core.profile.domain.mapper
 import io.kotest.matchers.shouldBe
 import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.DidNotFinishReason
+import nl.rhaydus.softcover.core.domain.model.DidNotFinishReasons
 import nl.rhaydus.softcover.core.domain.model.StatsRange
 import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.TagCategory
@@ -81,6 +83,7 @@ class DidNotFinishStatsMapperTest {
             val result = books.toDidNotFinishStats(
                 range = march,
                 userTagsByBookId = emptyMap(),
+                reasonsByBookId = emptyMap(),
             )
 
             // ----- Assert -----
@@ -105,6 +108,7 @@ class DidNotFinishStatsMapperTest {
             val result = books.toDidNotFinishStats(
                 range = StatsRange.Unbounded,
                 userTagsByBookId = emptyMap(),
+                reasonsByBookId = emptyMap(),
             )
 
             // ----- Assert -----
@@ -133,6 +137,7 @@ class DidNotFinishStatsMapperTest {
             val result = books.toDidNotFinishStats(
                 range = march,
                 userTagsByBookId = emptyMap(),
+                reasonsByBookId = emptyMap(),
             )
 
             // ----- Assert -----
@@ -162,6 +167,7 @@ class DidNotFinishStatsMapperTest {
             val result = books.toDidNotFinishStats(
                 range = march,
                 userTagsByBookId = emptyMap(),
+                reasonsByBookId = emptyMap(),
             )
 
             // ----- Assert -----
@@ -204,6 +210,7 @@ class DidNotFinishStatsMapperTest {
             val result = books.toDidNotFinishStats(
                 range = march,
                 userTagsByBookId = emptyMap(),
+                reasonsByBookId = emptyMap(),
             )
 
             // ----- Assert -----
@@ -242,6 +249,7 @@ class DidNotFinishStatsMapperTest {
             val result = books.toDidNotFinishStats(
                 range = march,
                 userTagsByBookId = emptyMap(),
+                reasonsByBookId = emptyMap(),
             )
 
             // ----- Assert -----
@@ -254,6 +262,122 @@ class DidNotFinishStatsMapperTest {
                     ),
                 ),
             )
+        }
+    }
+
+    @Nested
+    inner class Reasons {
+        @Test
+        fun `a book counts once under each reason it gave`() {
+            // ----- Arrange -----
+            val books = listOf(stopped(id = 1), stopped(id = 2))
+
+            val reasons = mapOf(
+                1 to DidNotFinishReasons(
+                    bookId = 1,
+                    reasons = setOf(DidNotFinishReason.TooSlow, DidNotFinishReason.LostInterest),
+                ),
+                2 to DidNotFinishReasons(
+                    bookId = 2,
+                    reasons = setOf(DidNotFinishReason.TooSlow),
+                ),
+            )
+
+            // ----- Act -----
+            val result = books.toDidNotFinishStats(
+                range = march,
+                userTagsByBookId = emptyMap(),
+                reasonsByBookId = reasons,
+            )
+
+            // ----- Assert -----
+            result.reasonCounts[DidNotFinishReason.TooSlow] shouldBe 2
+            result.reasonCounts[DidNotFinishReason.LostInterest] shouldBe 1
+            result.reasonCounts[DidNotFinishReason.UnwantedContent] shouldBe 0
+            result.otherReasonCount shouldBe 0
+        }
+
+        @Test
+        fun `a book with only its own words counts as something else`() {
+            // ----- Arrange -----
+            val books = listOf(stopped(id = 1), stopped(id = 2))
+
+            val reasons = mapOf(
+                1 to DidNotFinishReasons(
+                    bookId = 1,
+                    ownWords = "The ending was spoiled",
+                ),
+                2 to DidNotFinishReasons(
+                    bookId = 2,
+                    reasons = setOf(DidNotFinishReason.TooSlow),
+                    ownWords = "Too many names",
+                ),
+            )
+
+            // ----- Act -----
+            val result = books.toDidNotFinishStats(
+                range = march,
+                userTagsByBookId = emptyMap(),
+                reasonsByBookId = reasons,
+            )
+
+            // ----- Assert -----
+            result.otherReasonCount shouldBe 1
+            result.reasonCounts[DidNotFinishReason.TooSlow] shouldBe 1
+        }
+
+        @Test
+        fun `a book with no reason is left out of every count`() {
+            // ----- Arrange -----
+            val books = listOf(stopped(id = 1), stopped(id = 2))
+
+            val reasons = mapOf(2 to DidNotFinishReasons(bookId = 2))
+
+            // ----- Act -----
+            val result = books.toDidNotFinishStats(
+                range = march,
+                userTagsByBookId = emptyMap(),
+                reasonsByBookId = reasons,
+            )
+
+            // ----- Assert -----
+            result.bookCount shouldBe 2
+            result.reasonCounts.values.sum() shouldBe 0
+            result.otherReasonCount shouldBe 0
+        }
+
+        @Test
+        fun `reasons of a book stopped outside the range are ignored`() {
+            // ----- Arrange -----
+            val books = listOf(
+                stopped(id = 1),
+                stopped(
+                    id = 2,
+                    stoppedAt = "2026-04-01T12:00:00.000000",
+                ),
+                stopped(
+                    id = 3,
+                    stoppedAt = null,
+                ),
+            )
+
+            val reasons = (1..3).associateWith {
+                DidNotFinishReasons(
+                    bookId = it,
+                    reasons = setOf(DidNotFinishReason.NotTheRightTime),
+                    ownWords = "x",
+                )
+            }
+
+            // ----- Act -----
+            val result = books.toDidNotFinishStats(
+                range = march,
+                userTagsByBookId = emptyMap(),
+                reasonsByBookId = reasons,
+            )
+
+            // ----- Assert -----
+            result.reasonCounts[DidNotFinishReason.NotTheRightTime] shouldBe 1
         }
     }
 }

@@ -51,7 +51,9 @@
   `Second`, Audiobook `Third`, Print and audio `Fourth`), zero formats dropped and `Unknown` muted last.
   Shares are whole percents that sum to 100; a non-zero share never shows 0%.
 - Did not finish genres are count chips (`ChipTrailing.Count`), not bars: a book counts in several genres,
-  so the counts do not sum to the books.
+  so the counts do not sum to the books. The "Why" block between "Where you stopped" and the genres is plain
+  label and count `CountRows` (most given first, "Something else" last), never bars or a share, for the
+  same reason; with no reasons yet it keeps its eyebrow over one empty line.
 - `ColumnChart`: books per year (peak `Lead`, others `Second`, zero a `Fifth` stub); pages per month (the
   peak `Lead` and the only column with a value, the next two `Second`, other non-zero `Third`, zero or
   future `Fifth`; ties go to the earliest month; labels on every third column); time of day (eight

@@ -5,6 +5,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
 import nl.rhaydus.softcover.core.domain.model.AcquisitionKind
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.DidNotFinishReason
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.core.domain.model.Quote
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
@@ -134,6 +135,14 @@ internal fun profileDidNotFinishPreview(): DidNotFinishStats = DidNotFinishStats
         StopQuarter.LAST to 1,
     ),
     unknownStopCount = 1,
+    reasonCounts = DidNotFinishReason.entries.associateWith {
+        when (it) {
+            DidNotFinishReason.NotTheRightTime -> 2
+            DidNotFinishReason.NotMyKindOfWriting -> 1
+            DidNotFinishReason.TooSlow -> 1
+            else -> 0
+        }
+    },
     genres = GenreBreakdown(
         slices = listOf(
             GenreSlice(

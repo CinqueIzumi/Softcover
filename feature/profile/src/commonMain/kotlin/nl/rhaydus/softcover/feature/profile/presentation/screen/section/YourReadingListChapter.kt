@@ -16,6 +16,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.chart.ColumnChart
 import nl.rhaydus.softcover.core.component.chip.ChipFlow
+import nl.rhaydus.softcover.core.component.statistic.CountRows
 import nl.rhaydus.softcover.core.component.statistic.StatNumber
 import nl.rhaydus.softcover.core.component.statistic.StatTile
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
@@ -191,8 +192,36 @@ private fun DidNotFinishSection(
         }
     }
 
+    if (model.stopPoint != null) Spacer(modifier = Modifier.height(Spacing.xl))
+
+    AtlasSubhead(
+        title = model.whyTitle,
+        caption = "",
+        isLoading = isLoading,
+    )
+
+    Spacer(modifier = Modifier.height(Spacing.md))
+
+    ScopeCrossfade(
+        target = model,
+        contentKey = { scoped -> scoped.why?.rows?.map { it.label } ?: scoped.whyEmptyLine },
+    ) { scoped ->
+        val why = scoped.why
+        val emptyLine = scoped.whyEmptyLine
+
+        when {
+            why != null -> CountRows(model = why)
+
+            emptyLine != null -> SoftcoverText(
+                text = emptyLine,
+                style = MaterialTheme.editorialTypography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+
     model.genres?.let { genres ->
-        if (model.stopPoint != null) Spacer(modifier = Modifier.height(Spacing.xl))
+        Spacer(modifier = Modifier.height(Spacing.xl))
 
         AtlasSubhead(
             title = model.genresTitle,

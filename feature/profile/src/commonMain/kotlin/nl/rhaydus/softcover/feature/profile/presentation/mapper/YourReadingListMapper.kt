@@ -11,6 +11,8 @@ import nl.rhaydus.softcover.core.component.chip.ChipTrailing
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.chip.toChipSet
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.statistic.CountRowUiModel
+import nl.rhaydus.softcover.core.component.statistic.CountRowsUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumberFormat
 import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatTileUiModel
@@ -19,6 +21,7 @@ import nl.rhaydus.softcover.core.domain.model.StatsScope
 import nl.rhaydus.softcover.core.profile.domain.model.DidNotFinishStats
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingListStats
 import nl.rhaydus.softcover.core.profile.domain.model.StopQuarter
+import nl.rhaydus.softcover.core.uibinding.didnotfinish.toLabel
 import nl.rhaydus.softcover.core.uibinding.format.percentLabel
 import nl.rhaydus.softcover.feature.profile.presentation.state.AtlasChapter
 import nl.rhaydus.softcover.feature.profile.presentation.state.DidNotFinishUiModel
@@ -41,6 +44,9 @@ private const val DAYS_BEFORE_WEEKS = 14
 private const val DAYS_BEFORE_MONTHS = 56
 private const val DAYS_BEFORE_YEARS = 730
 private const val STOP_POINT_TITLE = "Where you stopped, by quarter of the book"
+private const val WHY_TITLE = "Why"
+private const val WHY_EMPTY_LINE = "Reasons you add on a book's page gather here."
+private const val WHY_OTHER_LABEL = "Something else"
 private const val GENRES_TITLE = "Genres"
 private const val GENRES_NOTE = "A book can count in more than one genre."
 private const val DESCRIPTION = "Putting a book down is part of reading."
@@ -207,6 +213,9 @@ private fun setAside(stats: DidNotFinishStats?): Pair<SectionHeaderUiModel.Secti
         stopPointTitle = STOP_POINT_TITLE,
         stopPoint = stats.stopPointChart(),
         unknownStopCaption = unknownStopCaption(stats.unknownStopCount),
+        whyTitle = WHY_TITLE,
+        why = stats.whyRows(),
+        whyEmptyLine = WHY_EMPTY_LINE,
         genresTitle = GENRES_TITLE,
         genres = stats.genreChips(),
         genresNote = GENRES_NOTE,
@@ -290,6 +299,27 @@ private fun unknownStopCaption(count: Int): String? = when {
     count <= 0 -> null
     count == 1 -> "1 book has no stop point."
     else -> "${formatGroupedNumber(count)} books have no stop point."
+}
+
+private fun DidNotFinishStats.whyRows(): CountRowsUiModel? {
+    val rows = reasonCounts.entries
+        .filter { it.value > 0 }
+        .sortedByDescending { it.value }
+        .map { (reason, count) ->
+            CountRowUiModel(
+                label = reason.toLabel(),
+                count = formatGroupedNumber(count),
+            )
+        } + listOfNotNull(
+        otherReasonCount.takeIf { it > 0 }?.let {
+            CountRowUiModel(
+                label = WHY_OTHER_LABEL,
+                count = formatGroupedNumber(it),
+            )
+        },
+    )
+
+    return if (rows.isEmpty()) null else CountRowsUiModel(rows = rows.toImmutableList())
 }
 
 private fun DidNotFinishStats.genreChips(): ChipSet<Unit>? = genres.slices
@@ -382,6 +412,9 @@ private fun loadingDidNotFinish(): DidNotFinishUiModel = DidNotFinishUiModel(
         isLoading = true,
     ),
     unknownStopCaption = null,
+    whyTitle = WHY_TITLE,
+    why = null,
+    whyEmptyLine = null,
     genresTitle = GENRES_TITLE,
     genres = null,
     genresNote = GENRES_NOTE,

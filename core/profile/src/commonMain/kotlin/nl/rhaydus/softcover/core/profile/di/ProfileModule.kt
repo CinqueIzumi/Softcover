@@ -86,6 +86,7 @@ val profileModule = module {
         ObserveDidNotFinishStatsUseCase(
             getDidNotFinishUserBooksUseCase = get(),
             observeUserTagsByBookUseCase = get(),
+            observeAllDidNotFinishReasonsUseCase = get(),
             appDispatchers = get(),
         )
     }
