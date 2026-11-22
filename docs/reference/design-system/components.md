@@ -60,7 +60,7 @@ rules all components follow are in [component-contract.md](component-contract.md
 
 - **AdaptiveModalSheet** — `sheet` — foundation sheet plus the snackbar host and `Corners.xxl` panel.
 - **SheetScaffold** — `sheet` — chrome every modal sheet shares: header, body, footer and close; `SheetSession` holds its lifetime.
-- **SheetRowGroup** — `sheet` — hairline-divided single-choice rows that dismiss the sheet on selection; an optional trailing free-text row; rows can lead with a short code; `sheetRowItems` lays them into a lazy list.
+- **SheetRowGroup** — `sheet` — hairline-divided single-choice rows that dismiss the sheet on selection; an optional free-text row; rows may lead with a code; `sheetRowItems` lays them into a lazy list.
 - **SheetActionRow** — `sheet` — a plain tappable menu row that acts at once.
 - **LoadingSheet** — `sheet` — full-screen blocking wait.
 - **UpdateProgressBottomSheet** — `progress` — pages, percentage or time reading-progress editor.
@@ -70,12 +70,13 @@ rules all components follow are in [component-contract.md](component-contract.md
 
 ## Statistics
 
-- **StatNumber** — `statistic` — springs or rolls a number into place, with an optional prefix or suffix.
-- **StatTile** — `statistic` — a labelled stat on a hero, standard or compact tile; null stat is a dash and compact adds a caption, drops its unit.
+- **StatNumber** — `statistic` — springs or rolls a number into place, with optional prefix or suffix.
+- **StatTile** — `statistic` — a labelled stat on a hero, standard or compact tile; null is a dash; compact adds a caption, drops its unit.
+- **CountRows** — `statistic` — label-and-count rows, no bar or swatch.
 - **ColumnChart** — `chart` — vertical columns on one baseline with a per-column readout.
-- **RankedBars** — `chart` — numbered rows, each a name over a bar filled relative to the lead row, with its value; rows can be tappable.
+- **RankedBars** — `chart` — numbered rows, each a name over a bar sized to the lead row, with its value; rows can be tappable.
   Rows from `visibleCount` on fold in and out one by one.
-- **ProportionChart** — `chart` — one slim stacked bar of parts of a whole, with its legend as rows or inline keys, or the legend rows alone (`ProportionChartVariant`).
+- **ProportionChart** — `chart` — one slim stacked bar of parts of a whole; legend as rows or inline keys, or rows alone (`ProportionChartVariant`).
 - **YearGrid** — `chart` — a year of day squares, a row per month, tinted by pages read on four steps with a
   "Fewer pages → More" key; tapping a read day emits `YearGridEvent.DayTapped`.
 - **RecentDaysGrid** — `chart` — the last 84 days as 12dp squares, 7 rows by 12 columns filled column by column
@@ -101,7 +102,7 @@ rules all components follow are in [component-contract.md](component-contract.md
 
 - **`pressScaleClickable` / `Selectable` / `Toggleable`** — foundation `modifier` — the one ripple-less interaction modifier.
 - **`navSharedBounds`** — `modifier` — the one way to make a node a navigation shared element.
-- **`ExitingItems`** — `transition` — keeps removed items of a non-lazy container composed, inert, while a caller-supplied exit (default fade) plays.
+- **`ExitingItems`** — `transition` — keeps removed items of non-lazy containers composed and inert while their exit (default fade) plays.
 - **`rememberReorderHaptics`** — `haptics` — lift, per-target tick and drop haptics for drag-to-reorder.
 - **`Haptics.play(Feedback)`** — `haptics` — plays the outcome haptic a `FeedbackEvent` carries.
 
@@ -122,4 +123,4 @@ The app's own usage rules:
 - Pull-to-refresh draws `PullToRefreshDefaults.LoadingIndicator`, the one exception to wavy progress, under a `PullToRefreshEyebrow`.
 - `DesktopTooltip` on every icon-only desktop control; `DesktopContextMenu` mirrors a touch long-press.
 - Haptics go through `LocalHaptics.current`, never `performHapticFeedback`.
-- Press feedback goes through the foundation `pressScaleClickable` family; the bare `pressScale` only drives a shared `interactionSource`.
+- Press feedback goes through foundation's `pressScaleClickable` family; bare `pressScale` only drives a shared `interactionSource`.

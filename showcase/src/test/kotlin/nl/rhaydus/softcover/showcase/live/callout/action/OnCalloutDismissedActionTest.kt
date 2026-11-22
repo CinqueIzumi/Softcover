@@ -59,7 +59,7 @@ class OnCalloutDismissedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.callouts shouldBe listOf(all[0], all[2])
+            stateFlow.value.callouts shouldBe all - all[1]
         }
     }
 }

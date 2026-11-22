@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -26,17 +27,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
+import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.theme.Corners
 import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.header.SectionHeaderEyebrowText
 import nl.rhaydus.softcover.core.component.header.SectionHeaderInlineEyebrow
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
@@ -46,6 +50,8 @@ fun Callout(
     modifier: Modifier = Modifier,
     onEvent: (CalloutEvent) -> Unit = {},
 ) {
+    val motionScheme = MaterialTheme.motionScheme
+
     Surface(
         modifier = modifier,
         color = if (model.variant is CalloutVariant.Highlight) {
@@ -55,26 +61,46 @@ fun Callout(
         },
         shape = Corners.lg,
     ) {
-        Row(
+        Column(
             modifier = Modifier.padding(
                 start = Spacing.lg,
                 top = Spacing.md,
-                end = if (model.dismissible) Spacing.xxs else Spacing.lg,
                 bottom = Spacing.md,
             ),
-            verticalAlignment = Alignment.Top,
         ) {
-            CalloutContent(
-                model = model,
-                onEvent = onEvent,
-                modifier = Modifier.weight(1f),
-            )
-
-            if (model.dismissible) {
-                DismissButton(
-                    contentColor = mutedInk(model.variant),
-                    onClick = { onEvent(CalloutEvent.DismissClicked) },
+            Row(
+                modifier = Modifier.padding(end = if (model.dismissible) Spacing.xxs else Spacing.lg),
+                verticalAlignment = Alignment.Top,
+            ) {
+                CalloutContent(
+                    model = model,
+                    onEvent = onEvent,
+                    modifier = Modifier.weight(1f),
                 )
+
+                if (model.dismissible) {
+                    DismissButton(
+                        contentColor = mutedInk(model.variant),
+                        onClick = { onEvent(CalloutEvent.DismissClicked) },
+                    )
+                }
+            }
+
+            AnimatedContent(
+                targetState = model.callToAction as? CalloutActionUiModel.Detail,
+                transitionSpec = {
+                    fadeIn(animationSpec = motionScheme.defaultEffectsSpec())
+                        .togetherWith(fadeOut(animationSpec = motionScheme.defaultEffectsSpec()))
+                        .using(SizeTransform { _, _ -> motionScheme.defaultSpatialSpec() })
+                },
+                modifier = Modifier.padding(end = Spacing.lg),
+            ) { detail ->
+                if (detail != null) {
+                    CalloutDetailRow(
+                        detail = detail,
+                        onClick = { onEvent(CalloutEvent.ActionClicked) },
+                    )
+                }
             }
         }
     }
@@ -117,7 +143,7 @@ private fun CalloutContent(
         }
 
         AnimatedContent(
-            targetState = model.callToAction,
+            targetState = model.callToAction.takeUnless { it is CalloutActionUiModel.Detail },
             contentKey = { it?.stageKey() },
             transitionSpec = {
                 fadeIn(animationSpec = motionScheme.defaultEffectsSpec())
@@ -156,6 +182,7 @@ private fun CalloutActionUiModel.stageKey(): Any = when (this) {
     is CalloutActionUiModel.Progress -> CalloutActionUiModel.Progress::class
     is CalloutActionUiModel.Button,
     is CalloutActionUiModel.Busy,
+    is CalloutActionUiModel.Detail,
     -> this
 }
 
@@ -260,6 +287,69 @@ private fun CalloutActionContent(
         }
 
         is CalloutActionUiModel.Progress -> CalloutProgressBar(fraction = action.fraction)
+
+        is CalloutActionUiModel.Detail -> Unit
+    }
+}
+
+@Composable
+private fun CalloutDetailRow(
+    detail: CalloutActionUiModel.Detail,
+    onClick: () -> Unit,
+) {
+    val chevron = drawableIconResource(
+        icon = SoftcoverIcon.KeyboardArrowRight,
+        contentDescription = "",
+    )
+
+    Column {
+        Spacer(modifier = Modifier.height(Spacing.sm))
+
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .pressScaleClickable(
+                    onClick = onClick,
+                    role = Role.Button,
+                )
+                .padding(top = Spacing.xs),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                SoftcoverText(
+                    text = detail.label.uppercase(),
+                    style = MaterialTheme.editorialTypography.eyebrowSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+
+                if (detail.lines.isEmpty()) {
+                    SoftcoverText(
+                        text = detail.emptyText,
+                        style = MaterialTheme.editorialTypography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                } else {
+                    detail.lines.forEach { line ->
+                        SoftcoverText(
+                            text = line,
+                            style = MaterialTheme.editorialTypography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.width(Spacing.sm))
+
+            Icon(
+                painter = chevron.getIconPainter(),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(20.dp),
+            )
+        }
     }
 }
 

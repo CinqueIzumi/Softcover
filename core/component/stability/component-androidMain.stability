@@ -383,6 +383,14 @@ private fun nl.rhaydus.softcover.core.component.callout.CalloutContent(model: nl
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
+private fun nl.rhaydus.softcover.core.component.callout.CalloutDetailRow(detail: nl.rhaydus.softcover.core.component.callout.CalloutActionUiModel.Detail, onClick: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - detail: STABLE (class with no mutable properties)
+    - onClick: STABLE (function type)
+
+@Composable
 private fun nl.rhaydus.softcover.core.component.callout.CalloutEyebrow(eyebrow: kotlin.String, variant: nl.rhaydus.softcover.core.component.callout.CalloutVariant): kotlin.Unit
   skippable: true
   restartable: true
@@ -1988,6 +1996,14 @@ private fun nl.rhaydus.softcover.core.component.statistic.CompactTile(model: nl.
   params:
     - model: STABLE (marked @Stable or @Immutable)
     - variant: STABLE (class with no mutable properties)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+public fun nl.rhaydus.softcover.core.component.statistic.CountRows(model: nl.rhaydus.softcover.core.component.statistic.CountRowsUiModel, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable

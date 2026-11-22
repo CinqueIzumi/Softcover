@@ -97,7 +97,8 @@ internal val chromeEntries: ImmutableList<GalleryEntry> = persistentListOf(
         name = "Callout",
         family = GalleryFamily.CALLOUT,
         blurb = "A rounded card that calls out one thing worth acting on or knowing — a status, " +
-            "a scanned-edition prompt, an app update — with an optional action and dismiss.",
+            "a scanned-edition prompt, an app update — with an optional action, a tappable detail row, " +
+            "and dismiss.",
         previews = CalloutUiModel,
         content = { model, modifier ->
             Callout(
