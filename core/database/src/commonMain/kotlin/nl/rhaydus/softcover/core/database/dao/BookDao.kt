@@ -554,6 +554,9 @@ interface BookDao {
     @Query("DELETE FROM book_copies")
     suspend fun deleteAllBookCopies()
 
+    @Query("DELETE FROM did_not_finish_reasons")
+    suspend fun deleteAllDidNotFinishReasons()
+
     @Query("DELETE FROM pending_user_book_writes")
     suspend fun deleteAllPendingUserBookWrites()
 
@@ -919,6 +922,7 @@ interface BookDao {
         deleteAllBookDeadlines()
         deleteAllBookTraits()
         deleteAllBookCopies()
+        deleteAllDidNotFinishReasons()
         deleteAllPendingUserBookWrites()
         deleteAllPendingListWrites()
         deleteAllQuotes()

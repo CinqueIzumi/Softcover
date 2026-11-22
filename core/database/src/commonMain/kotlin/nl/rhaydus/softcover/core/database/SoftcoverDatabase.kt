@@ -12,6 +12,7 @@ import nl.rhaydus.softcover.core.database.dao.BookDao
 import nl.rhaydus.softcover.core.database.dao.BookDeadlineDao
 import nl.rhaydus.softcover.core.database.dao.BookTraitsDao
 import nl.rhaydus.softcover.core.database.dao.BookUserTagDao
+import nl.rhaydus.softcover.core.database.dao.DidNotFinishReasonsDao
 import nl.rhaydus.softcover.core.database.dao.DismissedContinueSeriesDao
 import nl.rhaydus.softcover.core.database.dao.HiddenRecommendationDao
 import nl.rhaydus.softcover.core.database.dao.PendingListWriteDao
@@ -34,6 +35,7 @@ import nl.rhaydus.softcover.core.database.model.BookSeriesEntity
 import nl.rhaydus.softcover.core.database.model.BookTagCrossRef
 import nl.rhaydus.softcover.core.database.model.BookTraitsEntity
 import nl.rhaydus.softcover.core.database.model.BookUserTagEntity
+import nl.rhaydus.softcover.core.database.model.DidNotFinishReasonsEntity
 import nl.rhaydus.softcover.core.database.model.DismissedContinueSeriesBookEntity
 import nl.rhaydus.softcover.core.database.model.DismissedContinueSeriesEntity
 import nl.rhaydus.softcover.core.database.model.EditionAuthorCrossRef
@@ -89,11 +91,12 @@ import kotlin.coroutines.CoroutineContext
         HiddenRecommendationEntity::class,
         BookTraitsEntity::class,
         BookCopyEntity::class,
+        DidNotFinishReasonsEntity::class,
     ],
     views = [
         BookEditionView::class
     ],
-    version = 69,
+    version = 70,
 )
 @ConstructedBy(SoftcoverDatabaseConstructor::class)
 abstract class SoftcoverDatabase : RoomDatabase() {
@@ -112,6 +115,8 @@ abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun bookTraitsDao(): BookTraitsDao
 
     abstract fun bookCopyDao(): BookCopyDao
+
+    abstract fun didNotFinishReasonsDao(): DidNotFinishReasonsDao
 
     abstract fun quoteDao(): QuoteDao
 
@@ -1606,6 +1611,26 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_69_70 = object : Migration(69, 70) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS did_not_finish_reasons (
+                            bookId INTEGER NOT NULL,
+                            notTheRightTime INTEGER NOT NULL,
+                            notMyKindOfWriting INTEGER NOT NULL,
+                            tooSlow INTEGER NOT NULL,
+                            lostInterest INTEGER NOT NULL,
+                            unwantedContent INTEGER NOT NULL,
+                            ownWords TEXT,
+                            updatedAt INTEGER NOT NULL,
+                            PRIMARY KEY(bookId)
+                        )
+                    """.trimIndent(),
+                )
+            }
+        }
+
         private val MIGRATION_68_69 = object : Migration(68, 69) {
             override fun migrate(connection: SQLiteConnection) {
                 connection.execSQL("ALTER TABLE book_copies ADD COLUMN priceThousandths INTEGER")
@@ -1759,6 +1784,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             MIGRATION_66_67,
             MIGRATION_67_68,
             MIGRATION_68_69,
+            MIGRATION_69_70,
         )
     }
 }

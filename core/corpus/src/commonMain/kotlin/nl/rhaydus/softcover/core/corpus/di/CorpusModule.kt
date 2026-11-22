@@ -4,18 +4,26 @@ import nl.rhaydus.softcover.core.corpus.data.datasource.BookCopyLocalDataSource
 import nl.rhaydus.softcover.core.corpus.data.datasource.BookCopyLocalDataSourceImpl
 import nl.rhaydus.softcover.core.corpus.data.datasource.BookTraitsLocalDataSource
 import nl.rhaydus.softcover.core.corpus.data.datasource.BookTraitsLocalDataSourceImpl
+import nl.rhaydus.softcover.core.corpus.data.datasource.DidNotFinishReasonsLocalDataSource
+import nl.rhaydus.softcover.core.corpus.data.datasource.DidNotFinishReasonsLocalDataSourceImpl
 import nl.rhaydus.softcover.core.corpus.data.repository.BookCopyRepositoryImpl
 import nl.rhaydus.softcover.core.corpus.data.repository.BookTraitsRepositoryImpl
+import nl.rhaydus.softcover.core.corpus.data.repository.DidNotFinishReasonsRepositoryImpl
 import nl.rhaydus.softcover.core.corpus.domain.repository.BookCopyRepository
 import nl.rhaydus.softcover.core.corpus.domain.repository.BookTraitsRepository
+import nl.rhaydus.softcover.core.corpus.domain.repository.DidNotFinishReasonsRepository
 import nl.rhaydus.softcover.core.corpus.domain.usecase.GetBookCopyUseCase
 import nl.rhaydus.softcover.core.corpus.domain.usecase.GetBookTraitsUseCase
+import nl.rhaydus.softcover.core.corpus.domain.usecase.GetDidNotFinishReasonsUseCase
 import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveAllBookCopiesUseCase
 import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveAllBookTraitsUseCase
+import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveAllDidNotFinishReasonsUseCase
 import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveBookCopyUseCase
 import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveBookTraitsUseCase
+import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveDidNotFinishReasonsUseCase
 import nl.rhaydus.softcover.core.corpus.domain.usecase.SaveBookCopyUseCase
 import nl.rhaydus.softcover.core.corpus.domain.usecase.SaveBookTraitsUseCase
+import nl.rhaydus.softcover.core.corpus.domain.usecase.SaveDidNotFinishReasonsUseCase
 import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 import nl.rhaydus.softcover.core.database.di.databaseModule
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
@@ -56,4 +64,19 @@ val corpusModule = module {
     factory { ObserveAllBookCopiesUseCase(repository = get()) }
     factory { GetBookCopyUseCase(repository = get()) }
     factory { SaveBookCopyUseCase(repository = get()) }
+
+    single { get<SoftcoverDatabase>().didNotFinishReasonsDao() }
+
+    single<DidNotFinishReasonsLocalDataSource> {
+        DidNotFinishReasonsLocalDataSourceImpl(dao = get())
+    }
+
+    single<DidNotFinishReasonsRepository> {
+        DidNotFinishReasonsRepositoryImpl(localDataSource = get())
+    }
+
+    factory { ObserveDidNotFinishReasonsUseCase(repository = get()) }
+    factory { ObserveAllDidNotFinishReasonsUseCase(repository = get()) }
+    factory { GetDidNotFinishReasonsUseCase(repository = get()) }
+    factory { SaveDidNotFinishReasonsUseCase(repository = get()) }
 }
