@@ -10,11 +10,13 @@ import androidx.sqlite.execSQL
 import nl.rhaydus.softcover.core.database.dao.BookCopyDao
 import nl.rhaydus.softcover.core.database.dao.BookDao
 import nl.rhaydus.softcover.core.database.dao.BookDeadlineDao
+import nl.rhaydus.softcover.core.database.dao.BookMoodsDao
 import nl.rhaydus.softcover.core.database.dao.BookTraitsDao
 import nl.rhaydus.softcover.core.database.dao.BookUserTagDao
 import nl.rhaydus.softcover.core.database.dao.DidNotFinishReasonsDao
 import nl.rhaydus.softcover.core.database.dao.DismissedContinueSeriesDao
 import nl.rhaydus.softcover.core.database.dao.HiddenRecommendationDao
+import nl.rhaydus.softcover.core.database.dao.MoodMomentsDao
 import nl.rhaydus.softcover.core.database.dao.PendingListWriteDao
 import nl.rhaydus.softcover.core.database.dao.PendingQuoteWriteDao
 import nl.rhaydus.softcover.core.database.dao.PendingUserBookWriteDao
@@ -31,6 +33,7 @@ import nl.rhaydus.softcover.core.database.model.BookEditionEntity
 import nl.rhaydus.softcover.core.database.model.BookEditionView
 import nl.rhaydus.softcover.core.database.model.BookEntity
 import nl.rhaydus.softcover.core.database.model.BookListEntity
+import nl.rhaydus.softcover.core.database.model.BookMoodEntity
 import nl.rhaydus.softcover.core.database.model.BookSeriesEntity
 import nl.rhaydus.softcover.core.database.model.BookTagCrossRef
 import nl.rhaydus.softcover.core.database.model.BookTraitsEntity
@@ -41,6 +44,7 @@ import nl.rhaydus.softcover.core.database.model.DismissedContinueSeriesEntity
 import nl.rhaydus.softcover.core.database.model.EditionAuthorCrossRef
 import nl.rhaydus.softcover.core.database.model.HiddenRecommendationEntity
 import nl.rhaydus.softcover.core.database.model.ListBookEntity
+import nl.rhaydus.softcover.core.database.model.MoodMomentEntity
 import nl.rhaydus.softcover.core.database.model.PendingListWriteEntity
 import nl.rhaydus.softcover.core.database.model.PendingQuoteWriteEntity
 import nl.rhaydus.softcover.core.database.model.PendingUserBookWriteEntity
@@ -92,11 +96,13 @@ import kotlin.coroutines.CoroutineContext
         BookTraitsEntity::class,
         BookCopyEntity::class,
         DidNotFinishReasonsEntity::class,
+        BookMoodEntity::class,
+        MoodMomentEntity::class,
     ],
     views = [
         BookEditionView::class
     ],
-    version = 70,
+    version = 71,
 )
 @ConstructedBy(SoftcoverDatabaseConstructor::class)
 abstract class SoftcoverDatabase : RoomDatabase() {
@@ -117,6 +123,10 @@ abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun bookCopyDao(): BookCopyDao
 
     abstract fun didNotFinishReasonsDao(): DidNotFinishReasonsDao
+
+    abstract fun bookMoodsDao(): BookMoodsDao
+
+    abstract fun moodMomentsDao(): MoodMomentsDao
 
     abstract fun quoteDao(): QuoteDao
 
@@ -1611,6 +1621,38 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_70_71 = object : Migration(70, 71) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS book_moods (
+                            bookId INTEGER NOT NULL,
+                            word TEXT NOT NULL,
+                            isOwn INTEGER NOT NULL,
+                            strength INTEGER,
+                            PRIMARY KEY(bookId, isOwn, word)
+                        )
+                    """.trimIndent(),
+                )
+
+                connection.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS mood_moments (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                            bookId INTEGER NOT NULL,
+                            word TEXT NOT NULL,
+                            isOwn INTEGER NOT NULL,
+                            strength INTEGER,
+                            percent INTEGER,
+                            page INTEGER,
+                            seconds INTEGER,
+                            recordedAt INTEGER NOT NULL
+                        )
+                    """.trimIndent(),
+                )
+            }
+        }
+
         private val MIGRATION_69_70 = object : Migration(69, 70) {
             override fun migrate(connection: SQLiteConnection) {
                 connection.execSQL(
@@ -1785,6 +1827,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             MIGRATION_67_68,
             MIGRATION_68_69,
             MIGRATION_69_70,
+            MIGRATION_70_71,
         )
     }
 }

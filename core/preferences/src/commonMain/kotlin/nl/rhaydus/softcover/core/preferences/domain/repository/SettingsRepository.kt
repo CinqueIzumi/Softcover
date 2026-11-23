@@ -133,4 +133,8 @@ interface SettingsRepository {
     val usualCurrencyCode: Flow<String?>
 
     suspend fun setUsualCurrencyCode(code: String?)
+
+    val askForMoodAfterProgress: Flow<Boolean>
+
+    suspend fun setAskForMoodAfterProgress(enabled: Boolean)
 }

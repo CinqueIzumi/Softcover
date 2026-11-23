@@ -131,6 +131,10 @@ interface SettingsLocalDataSource {
     val usualCurrencyCode: Flow<String?>
 
     suspend fun setUsualCurrencyCode(code: String?)
+
+    val askForMoodAfterProgress: Flow<Boolean>
+
+    suspend fun setAskForMoodAfterProgress(enabled: Boolean)
 }
 
 internal class SettingsLocalDataSourceImpl(
@@ -434,6 +438,16 @@ internal class SettingsLocalDataSourceImpl(
     override suspend fun setUsualCurrencyCode(code: String?) {
         appSettingsDataStore.store.updateData { entity ->
             entity.copy(usualCurrencyCode = code)
+        }
+    }
+
+    override val askForMoodAfterProgress: Flow<Boolean> = appSettingsDataStore.store.data
+        .map { it.askForMoodAfterProgress }
+        .distinctUntilChanged()
+
+    override suspend fun setAskForMoodAfterProgress(enabled: Boolean) {
+        appSettingsDataStore.store.updateData { entity ->
+            entity.copy(askForMoodAfterProgress = enabled)
         }
     }
 }

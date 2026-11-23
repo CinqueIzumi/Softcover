@@ -207,4 +207,10 @@ internal class SettingsRepositoryImpl(
     override suspend fun setUsualCurrencyCode(code: String?) {
         settingsLocalDataSource.setUsualCurrencyCode(code = code)
     }
+
+    override val askForMoodAfterProgress: Flow<Boolean> = settingsLocalDataSource.askForMoodAfterProgress
+
+    override suspend fun setAskForMoodAfterProgress(enabled: Boolean) {
+        settingsLocalDataSource.setAskForMoodAfterProgress(enabled = enabled)
+    }
 }

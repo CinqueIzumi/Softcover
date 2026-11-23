@@ -49,4 +49,5 @@ internal data class AppSettingsEntity(
     // Null means "use the auto-derived most-read genre" - see GetBecauseYouReadBooksUseCase.
     val becauseYouReadGenre: String? = null,
     val usualCurrencyCode: String? = null,
+    val askForMoodAfterProgress: Boolean = true,
 )

@@ -12,6 +12,7 @@ import nl.rhaydus.softcover.core.preferences.data.datasource.SettingsRemoteDataS
 import nl.rhaydus.softcover.core.preferences.data.repository.SettingsRepositoryImpl
 import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 import nl.rhaydus.softcover.core.preferences.domain.usecase.DismissPlanTodayUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetAskForMoodAfterProgressAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetBecauseYouReadGenreAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetCurrenciesUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
@@ -110,6 +111,8 @@ val preferencesModule = module {
     factory { SetDesktopWindowStateUseCase(settingsRepository = get()) }
 
     factory { GetReadingStreakEnabledAsFlowUseCase(settingsRepository = get()) }
+
+    factory { GetAskForMoodAfterProgressAsFlowUseCase(settingsRepository = get()) }
 
     factory { SetReadingStreakEnabledUseCase(settingsRepository = get()) }
 
