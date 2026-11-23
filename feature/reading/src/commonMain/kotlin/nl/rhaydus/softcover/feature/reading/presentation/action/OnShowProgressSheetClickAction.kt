@@ -12,6 +12,8 @@ internal data class OnShowProgressSheetClickAction(val book: Book) : ReadingActi
         dependencies: ReadingScreenDependencies,
         scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>,
     ) {
+        scope.setLocalVariables { it.copy(pendingMoodMoment = null) }
+
         scope.setState {
             it.copy(
                 bookToUpdate = book,

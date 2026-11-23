@@ -22,6 +22,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnab
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObservePlanTodayDismissalsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingActivityUseCase
 import nl.rhaydus.softcover.core.progresssheet.presentation.ProgressSheetSlice
+import nl.rhaydus.softcover.core.progresssheet.presentation.mood.MoodMomentSheetSlice
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.collector.ReadingCollector
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
@@ -48,6 +49,7 @@ internal class ReadingScreenScreenModel(
     observeReadingActivityUseCase: ObserveReadingActivityUseCase,
     getReadingStreakEnabledAsFlowUseCase: GetReadingStreakEnabledAsFlowUseCase,
     progressSheetSlice: ProgressSheetSlice,
+    moodMomentSheetSlice: MoodMomentSheetSlice,
     observeReadingJournalHistoryUseCase: ObserveReadingJournalHistoryUseCase,
     refreshReadingJournalHistoryUseCase: RefreshReadingJournalHistoryUseCase,
     appDispatchers: AppDispatchers,
@@ -78,6 +80,7 @@ internal class ReadingScreenScreenModel(
         observeReadingActivityUseCase = observeReadingActivityUseCase,
         getReadingStreakEnabledAsFlowUseCase = getReadingStreakEnabledAsFlowUseCase,
         progressSheetSlice = progressSheetSlice,
+        moodMomentSheetSlice = moodMomentSheetSlice,
         observeReadingJournalHistoryUseCase = observeReadingJournalHistoryUseCase,
         refreshReadingJournalHistoryUseCase = refreshReadingJournalHistoryUseCase,
     )

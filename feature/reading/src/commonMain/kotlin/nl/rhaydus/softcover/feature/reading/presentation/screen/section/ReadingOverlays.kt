@@ -4,6 +4,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.softcover.core.component.feeling.MoodMomentSheet
 import nl.rhaydus.softcover.core.component.haptics.Feedback
 import nl.rhaydus.softcover.core.component.haptics.play
 import nl.rhaydus.softcover.core.component.progress.UpdateProgressBottomSheet
@@ -14,6 +15,7 @@ import nl.rhaydus.softcover.core.component.verdict.VerdictSheetEvent
 import nl.rhaydus.softcover.feature.reading.presentation.action.DismissStreakSheetAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnDismissVerdictPromptAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnEditVerdictDraftAction
+import nl.rhaydus.softcover.feature.reading.presentation.action.OnMoodMomentSheetEventAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnProgressSheetEventAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnSaveVerdictAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
@@ -44,6 +46,13 @@ internal fun ReadingOverlays(
         UpdateProgressBottomSheet(
             model = progressSheet,
             onEvent = { runAction(OnProgressSheetEventAction(event = it)) },
+        )
+    }
+
+    state.moodMomentSheet.session.modelOrNull?.let { momentSheet ->
+        MoodMomentSheet(
+            model = momentSheet,
+            onEvent = { runAction(OnMoodMomentSheetEventAction(event = it)) },
         )
     }
 
