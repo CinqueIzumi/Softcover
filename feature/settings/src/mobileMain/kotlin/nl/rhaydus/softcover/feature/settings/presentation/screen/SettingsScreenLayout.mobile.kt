@@ -32,6 +32,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.action.DocumentPageAct
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.mapper.appUpdateCalloutFor
+import nl.rhaydus.softcover.feature.settings.presentation.screen.section.MoodPromptRow
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.SettingsMenuRow
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.SettingsMenuRowTarget
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.SettingsRowGroup
@@ -201,6 +202,13 @@ internal actual fun SettingsScreenLayout(
                         gloss = state.currencyGloss,
                         icon = SoftcoverIcon.Euro,
                         target = SettingsMenuRowTarget.SubPage(onClick = navigateToCurrency),
+                    )
+                }
+
+                DividedRow {
+                    MoodPromptRow(
+                        state = state,
+                        runAction = settingsRunAction,
                     )
                 }
             }

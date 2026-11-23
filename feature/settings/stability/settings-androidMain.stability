@@ -377,6 +377,14 @@ internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.section.L
     - windowInsets: STABLE (marked @Stable or @Immutable)
 
 @Composable
+internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.section.MoodPromptRow(state: nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction, kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - state: STABLE (class with no mutable properties)
+    - runAction: STABLE (function type)
+
+@Composable
 internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.section.ReorderableRow(entry: nl.rhaydus.softcover.feature.settings.presentation.model.LibraryTabEntry, isDragging: kotlin.Boolean, onToggle: kotlin.Function1<nl.rhaydus.softcover.core.component.control.ToggleEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
   skippable: true
   restartable: true

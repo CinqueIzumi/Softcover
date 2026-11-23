@@ -4,6 +4,7 @@ internal enum class SettingsCategory {
     APPEARANCE,
     LIBRARY_TABS,
     CURRENCY,
+    MOODS,
     ABOUT,
     WHATS_NEW,
     ROADMAP,

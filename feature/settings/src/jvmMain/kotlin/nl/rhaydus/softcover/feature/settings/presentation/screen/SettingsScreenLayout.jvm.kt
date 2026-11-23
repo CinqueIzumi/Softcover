@@ -26,7 +26,9 @@ import nl.rhaydus.softcover.feature.settings.presentation.action.OnSettingsCateg
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.AboutPane
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.LibraryVisibilitySaveBar
+import nl.rhaydus.softcover.feature.settings.presentation.screen.section.MoodPromptRow
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.SettingsCategorySidebar
+import nl.rhaydus.softcover.feature.settings.presentation.screen.section.SettingsRowGroup
 import nl.rhaydus.softcover.feature.settings.presentation.state.CurrencySettingsUiState
 import nl.rhaydus.softcover.feature.settings.presentation.state.DocumentPageUiState
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
@@ -131,6 +133,20 @@ internal actual fun SettingsScreenLayout(
                         .cappedContentWidth()
                         .padding(horizontal = Spacing.gutter),
                 )
+
+                SettingsCategory.MOODS -> DesktopScrollPage(
+                    scrollState = pageScrollState,
+                    masthead = { PageMasthead(model = state.moodsPaneMasthead) },
+                ) {
+                    SettingsRowGroup {
+                        DividedRow {
+                            MoodPromptRow(
+                                state = state,
+                                runAction = settingsRunAction,
+                            )
+                        }
+                    }
+                }
 
                 SettingsCategory.ABOUT -> DesktopScrollPage(
                     scrollState = pageScrollState,

@@ -23,6 +23,7 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.ObserveChangelogUseC
 import nl.rhaydus.softcover.feature.settings.domain.usecase.ObserveRoadmapUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.RefreshChangelogUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.RefreshRoadmapUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.SetAskForMoodAfterProgressUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetBottomBarStyleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetColorPaletteUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDateStyleUseCase
@@ -41,6 +42,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.collector.DocumentPage
 import nl.rhaydus.softcover.feature.settings.presentation.collector.DocumentPageRefreshCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.LibraryTabCountsCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.LibraryVisibilityCollector
+import nl.rhaydus.softcover.feature.settings.presentation.collector.MoodPromptToggleRowCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.PersistedLibraryVisibilityCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.PlacedWidgetsCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.SettingsCollector
@@ -92,6 +94,8 @@ val settingsModule = module {
             getUiScaleAsFlowUseCase = get(),
             setUiScaleUseCase = get(),
             getUsualCurrencyAsFlowUseCase = get(),
+            getAskForMoodAfterProgressAsFlowUseCase = get(),
+            setAskForMoodAfterProgressUseCase = get(),
             observeAppUpdateStateUseCase = get(),
             appVersionProvider = get(),
             homeScreenWidgets = get(),
@@ -110,6 +114,8 @@ val settingsModule = module {
 
     factory { UsualCurrencyGlossCollector() } bind SettingsCollector::class
 
+    factory { MoodPromptToggleRowCollector() } bind SettingsCollector::class
+
     factory { SetBottomBarStyleUseCase(settingsRepository = get()) }
 
     factory { SetThemeModeUseCase(settingsRepository = get()) }
@@ -127,6 +133,8 @@ val settingsModule = module {
     factory { SetLibraryTabOrderUseCase(settingsRepository = get()) }
 
     factory { SetUsualCurrencyUseCase(settingsRepository = get()) }
+
+    factory { SetAskForMoodAfterProgressUseCase(settingsRepository = get()) }
 
     factory { UsualCurrencyCollector() } bind CurrencySettingsCollector::class
 

@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.settings.presentation.screenmodel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import nl.rhaydus.softcover.core.domain.appupdate.ObserveAppUpdateStateUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetAskForMoodAfterProgressAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnabledAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetShelfSwipeEnabledAsFlowUseCase
@@ -12,6 +13,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetUsualCurrencyAsFl
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetReadingStreakEnabledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetShelfSwipeEnabledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetUiScaleUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.SetAskForMoodAfterProgressUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetBottomBarStyleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetColorPaletteUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDateStyleUseCase
@@ -34,6 +36,8 @@ internal data class SettingsScreenDependencies(
     val getUiScaleAsFlowUseCase: GetUiScaleAsFlowUseCase,
     val setUiScaleUseCase: SetUiScaleUseCase,
     val getUsualCurrencyAsFlowUseCase: GetUsualCurrencyAsFlowUseCase,
+    val getAskForMoodAfterProgressAsFlowUseCase: GetAskForMoodAfterProgressAsFlowUseCase,
+    val setAskForMoodAfterProgressUseCase: SetAskForMoodAfterProgressUseCase,
     val observeAppUpdateStateUseCase: ObserveAppUpdateStateUseCase,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,

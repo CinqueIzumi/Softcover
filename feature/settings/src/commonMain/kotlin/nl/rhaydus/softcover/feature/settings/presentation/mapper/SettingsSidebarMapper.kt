@@ -55,6 +55,12 @@ internal fun settingsSidebarFor(selectedCategory: SettingsCategory): SidebarUiMo
                     icon = SoftcoverIcon.Euro,
                     variant = SidebarRowVariant.Destination(selected = selectedCategory == SettingsCategory.CURRENCY),
                 ),
+                SidebarRowUiModel(
+                    key = SettingsSidebarKey.Category(category = SettingsCategory.MOODS),
+                    label = "Moods along the way",
+                    icon = SoftcoverIcon.Mood,
+                    variant = SidebarRowVariant.Destination(selected = selectedCategory == SettingsCategory.MOODS),
+                ),
             ),
         ),
         SidebarSectionUiModel(

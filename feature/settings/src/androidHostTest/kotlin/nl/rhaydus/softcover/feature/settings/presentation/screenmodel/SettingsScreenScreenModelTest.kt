@@ -68,6 +68,8 @@ class SettingsScreenScreenModelTest {
                 getUiScaleAsFlowUseCase = mockk(relaxed = true),
                 setUiScaleUseCase = mockk(relaxed = true),
                 getUsualCurrencyAsFlowUseCase = mockk(relaxed = true),
+                getAskForMoodAfterProgressAsFlowUseCase = mockk(relaxed = true),
+                setAskForMoodAfterProgressUseCase = mockk(relaxed = true),
                 observeAppUpdateStateUseCase = mockk(relaxed = true),
                 appVersionProvider = appVersionProvider,
                 homeScreenWidgets = FakeHomeScreenWidgets(),

@@ -19,6 +19,7 @@ import nl.rhaydus.softcover.core.domain.model.UiScale
 import nl.rhaydus.softcover.feature.settings.presentation.mapper.dateStyleRowsFor
 import nl.rhaydus.softcover.feature.settings.presentation.mapper.displayToggleRowsFor
 import nl.rhaydus.softcover.feature.settings.presentation.mapper.dynamicColorSlotFor
+import nl.rhaydus.softcover.feature.settings.presentation.mapper.moodPromptToggleRowFor
 import nl.rhaydus.softcover.feature.settings.presentation.mapper.paletteChoicesFor
 import nl.rhaydus.softcover.feature.settings.presentation.mapper.settingsSidebarFor
 import nl.rhaydus.softcover.feature.settings.presentation.mapper.spineColourSectionFor
@@ -26,6 +27,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.mapper.themeChoicesFor
 import nl.rhaydus.softcover.feature.settings.presentation.mapper.uiScaleRowsFor
 import nl.rhaydus.softcover.feature.settings.presentation.model.DisplayToggle
 import nl.rhaydus.softcover.feature.settings.presentation.model.DynamicColorSlotUiModel
+import nl.rhaydus.softcover.feature.settings.presentation.model.MoodPromptToggle
 import nl.rhaydus.softcover.feature.settings.presentation.model.SettingsChoiceRowUiModel
 import nl.rhaydus.softcover.feature.settings.presentation.model.SettingsSidebarKey
 import nl.rhaydus.softcover.feature.settings.presentation.model.SpineColourSectionUiModel
@@ -67,6 +69,11 @@ internal data class SettingsScreenUiState(
         headline = "Kept on this phone",
     ),
     val currencyGloss: String = "",
+    val moodPromptToggleRow: ToggleRowUiModel<MoodPromptToggle> = moodPromptToggleRowFor(askForMoodChecked = true),
+    val moodsPaneMasthead: PageMastheadUiModel = PageMastheadUiModel(
+        eyebrow = "Your private data",
+        title = "Moods along the way",
+    ),
     val settingsMenuAboutHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "About",
         headline = "The fine print",

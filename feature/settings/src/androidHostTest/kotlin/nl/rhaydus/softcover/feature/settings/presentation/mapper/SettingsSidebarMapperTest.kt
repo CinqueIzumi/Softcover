@@ -34,9 +34,10 @@ class SettingsSidebarMapperTest {
         }
 
         @Test
-        fun `lists the currency entry alone under the private data section`() {
+        fun `lists currency then moods under the private data section`() {
             // ----- Arrange -----
             val currencyKey = SettingsSidebarKey.Category(category = SettingsCategory.CURRENCY)
+            val moodsKey = SettingsSidebarKey.Category(category = SettingsCategory.MOODS)
 
             // ----- Act -----
             val sidebar = settingsSidebarFor(selectedCategory = SettingsCategory.APPEARANCE)
@@ -44,7 +45,7 @@ class SettingsSidebarMapperTest {
             // ----- Assert -----
             val section = sidebar.sections.single { section -> section.rows.any { it.key == currencyKey } }
             section.label shouldBe SectionHeaderUiModel.Label(eyebrow = "Your private data")
-            section.rows.map { it.key } shouldBe listOf(currencyKey)
+            section.rows.map { it.key } shouldBe listOf(currencyKey, moodsKey)
         }
     }
 }
