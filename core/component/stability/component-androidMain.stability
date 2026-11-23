@@ -922,6 +922,168 @@ internal fun nl.rhaydus.softcover.core.component.document.markdownAnnotatedStrin
     - leadingMarker: STABLE (class with no mutable properties)
 
 @Composable
+internal fun nl.rhaydus.softcover.core.component.feeling.DepartingRows(rows: kotlinx.collections.immutable.ImmutableList<nl.rhaydus.softcover.core.component.feeling.MoodStrengthUiModel>, content: @[Composable] androidx.compose.runtime.internal.ComposableFunction1<nl.rhaydus.softcover.core.component.feeling.MoodStrengthUiModel, kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - rows: STABLE (known stable type)
+    - content: STABLE (composable function type)
+
+@Composable
+internal fun nl.rhaydus.softcover.core.component.feeling.FeelingReveal(visible: kotlin.Boolean, content: @[Composable] @[ExtensionFunctionType] androidx.compose.runtime.internal.ComposableFunction1<androidx.compose.animation.AnimatedVisibilityScope, kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - visible: STABLE (primitive type)
+    - content: STABLE (composable function type)
+
+@Composable
+internal fun nl.rhaydus.softcover.core.component.feeling.FeelingTrack(strength: kotlin.Int?, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - strength: STABLE (class with no mutable properties)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+public fun nl.rhaydus.softcover.core.component.feeling.HowItFeltBlock(model: nl.rhaydus.softcover.core.component.feeling.HowItFeltBlockUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.feeling.HowItFeltBlockEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - onEvent: STABLE (function type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.feeling.HowItFeltLabelAndValue(label: kotlin.String, strength: kotlin.Int?): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - label: STABLE (String is immutable)
+    - strength: STABLE (class with no mutable properties)
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.feeling.HowItFeltMomentRow(moment: nl.rhaydus.softcover.core.component.feeling.HowItFeltMomentUiModel, onClick: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - moment: STABLE (marked @Stable or @Immutable)
+    - onClick: STABLE (function type)
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.feeling.HowItFeltMoodRow(mood: nl.rhaydus.softcover.core.component.feeling.HowItFeltMoodUiModel): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - mood: STABLE (marked @Stable or @Immutable)
+
+@Composable
+public fun nl.rhaydus.softcover.core.component.feeling.HowItFeltSheet(model: nl.rhaydus.softcover.core.component.feeling.HowItFeltSheetUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.feeling.HowItFeltSheetEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - onEvent: STABLE (function type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+internal fun nl.rhaydus.softcover.core.component.feeling.HowItFeltSheetBody(model: nl.rhaydus.softcover.core.component.feeling.HowItFeltSheetUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.feeling.HowItFeltSheetEvent, kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - onEvent: STABLE (function type)
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.feeling.HowItFeltSheetEmptyPreview(): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.feeling.HowItFeltSheetFilledPreview(): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.feeling.HowItFeltSheetPreview(model: nl.rhaydus.softcover.core.component.feeling.HowItFeltSheetUiModel): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+
+@Composable
+internal fun nl.rhaydus.softcover.core.component.feeling.MoodChoices(model: nl.rhaydus.softcover.core.component.feeling.MoodChoicesUiModel, onChipClick: kotlin.Function1<kotlin.String, kotlin.Unit>, onOwnWordEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.field.TextFieldEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - onChipClick: STABLE (function type)
+    - onOwnWordEvent: STABLE (function type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+public fun nl.rhaydus.softcover.core.component.feeling.MoodMomentSheet(model: nl.rhaydus.softcover.core.component.feeling.MoodMomentSheetUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.feeling.MoodMomentSheetEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - onEvent: STABLE (function type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.feeling.MoodMomentSheetAddingPreview(): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+
+@Composable
+internal fun nl.rhaydus.softcover.core.component.feeling.MoodMomentSheetBody(model: nl.rhaydus.softcover.core.component.feeling.MoodMomentSheetUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.feeling.MoodMomentSheetEvent, kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - onEvent: STABLE (function type)
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.feeling.MoodMomentSheetEditingPreview(): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.feeling.MoodMomentSheetPreview(model: nl.rhaydus.softcover.core.component.feeling.MoodMomentSheetUiModel): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+
+@Composable
+public fun nl.rhaydus.softcover.core.component.feeling.MoodRibbon(model: nl.rhaydus.softcover.core.component.feeling.MoodRibbonUiModel, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.feeling.MoodRibbonMark(mark: nl.rhaydus.softcover.core.component.feeling.MoodRibbonMarkUiModel): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - mark: STABLE (marked @Stable or @Immutable)
+
+@Composable
+internal fun nl.rhaydus.softcover.core.component.feeling.MoodStrengthRow(model: nl.rhaydus.softcover.core.component.feeling.MoodStrengthUiModel, onStrengthChange: kotlin.Function1<kotlin.Int, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - onStrengthChange: STABLE (function type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
 internal fun nl.rhaydus.softcover.core.component.field.BareTextField(model: nl.rhaydus.softcover.core.component.field.TextFieldUiModel, style: androidx.compose.ui.text.TextStyle, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.field.TextFieldEvent, kotlin.Unit>, focusRequester: androidx.compose.ui.focus.FocusRequester, ink: androidx.compose.ui.graphics.Color): kotlin.Unit
   skippable: true
   restartable: true

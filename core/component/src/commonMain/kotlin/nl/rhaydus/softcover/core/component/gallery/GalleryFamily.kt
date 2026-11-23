@@ -42,6 +42,7 @@ enum class GalleryFamily(val label: String) {
     TOPBAR(label = "Top bars"),
     VERDICT(label = "Verdict"),
     TRAITS(label = "Traits"),
+    FEELING(label = "Feeling"),
     YOURCOPY(label = "Your copy"),
     QUOTE(label = "Quotes"),
     SHARE(label = "Share cards"),

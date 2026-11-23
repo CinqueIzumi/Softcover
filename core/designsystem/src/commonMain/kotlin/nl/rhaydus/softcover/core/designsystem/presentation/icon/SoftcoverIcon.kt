@@ -31,6 +31,7 @@ import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_keyboard_ar
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_keyboard_arrow_right
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_library_books
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_menu_book
+import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_mood
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_more_vert
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_open_in_new
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_palette
@@ -92,6 +93,7 @@ enum class SoftcoverIcon(internal val resource: DrawableResource) {
     KeyboardArrowRight(Res.drawable.ic_keyboard_arrow_right),
     LibraryBooks(Res.drawable.ic_library_books),
     MenuBook(Res.drawable.ic_menu_book),
+    Mood(Res.drawable.ic_mood),
     MoreVert(Res.drawable.ic_more_vert),
     OpenInNew(Res.drawable.ic_open_in_new),
     Palette(Res.drawable.ic_palette),

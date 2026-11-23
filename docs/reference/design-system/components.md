@@ -74,13 +74,10 @@ rules all components follow are in [component-contract.md](component-contract.md
 - **StatTile** — `statistic` — a labelled stat on a hero, standard or compact tile; null is a dash; compact adds a caption, drops its unit.
 - **CountRows** — `statistic` — label-and-count rows, no bar or swatch.
 - **ColumnChart** — `chart` — vertical columns on one baseline with a per-column readout.
-- **RankedBars** — `chart` — numbered rows, each a name over a bar sized to the lead row, with its value; rows can be tappable.
-  Rows from `visibleCount` on fold in and out one by one.
+- **RankedBars** — `chart` — numbered rows, each a name over a bar sized to the lead row, with its value; rows can be tappable and fold past `visibleCount`.
 - **ProportionChart** — `chart` — one slim stacked bar of parts of a whole; legend as rows or inline keys, or rows alone (`ProportionChartVariant`).
-- **YearGrid** — `chart` — a year of day squares, a row per month, tinted by pages read on four steps with a
-  "Fewer pages → More" key; tapping a read day emits `YearGridEvent.DayTapped`.
-- **RecentDaysGrid** — `chart` — the last 84 days as 12dp squares, 7 rows by 12 columns filled column by column
-  (oldest top-left, today bottom-right), tinted like YearGrid; not interactive, one image node.
+- **YearGrid** — `chart` — a year of day squares, a row per month, tinted by pages read; read days are tappable.
+- **RecentDaysGrid** — `chart` — the last 84 days as squares, a column per week, tinted like YearGrid.
 
 ## Share
 
@@ -96,6 +93,7 @@ rules all components follow are in [component-contract.md](component-contract.md
 - **VerdictSheet** — `verdict` — the combined rating-and-review editor.
 - **VerdictBlock** — `verdict` — book-page rating and review card that opens the verdict sheet.
 - **HowItReadBlock / HowItReadSheet** — `traits` — the private reading-survey panel and the sheet that edits it.
+- **HowItFeltBlock / HowItFeltSheet / MoodMomentSheet / MoodRibbon** — `feeling` — private moods: the block, its editor, one mood at a point, and their dots under the progress bar.
 - **YourCopyPanel** — `yourcopy` — the book page's private per-copy rows: a value or an invitation, with an optional trailing figure.
 
 ## Modifiers & helpers
