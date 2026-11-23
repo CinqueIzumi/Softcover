@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.state
 
 import androidx.compose.runtime.Immutable
+import nl.rhaydus.softcover.core.component.feeling.MoodRibbonUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
 
 /**
@@ -12,4 +13,5 @@ internal data class InProgressUiModel(
     val fraction: Float,
     val summaryStart: String,
     val summaryEnd: String,
+    val ribbon: MoodRibbonUiModel? = null,
 )

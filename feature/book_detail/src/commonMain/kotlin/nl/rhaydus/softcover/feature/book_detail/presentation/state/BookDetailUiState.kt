@@ -24,6 +24,8 @@ import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.control.SegmentedControlUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.deadline.DeadlineRowUiModel
+import nl.rhaydus.softcover.core.component.feeling.HowItFeltBlockUiModel
+import nl.rhaydus.softcover.core.component.feeling.HowItFeltSheetUiModel
 import nl.rhaydus.softcover.core.component.field.TextFieldUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
@@ -52,6 +54,7 @@ import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingPaceForecast
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.progresssheet.presentation.ProgressSheetState
+import nl.rhaydus.softcover.core.progresssheet.presentation.mood.MoodMomentSheetState
 import nl.rhaydus.softcover.core.uibinding.session.SessionEndingStatus
 import nl.rhaydus.softcover.core.uibinding.verdict.VerdictSheetContext
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
@@ -128,6 +131,16 @@ internal data class BookDetailUiState(
 
     /** What the how-it-read sheet renders, derived from [book] and [howItReadDraft] by `HowItReadSheetCollector`. */
     val howItReadSheet: SheetSession<HowItReadSheetUiModel, Nothing> = SheetSession.Closed,
+
+    /** Null hides the Yours lens "How it felt" section. */
+    val howItFelt: HowItFeltBlockUiModel? = null,
+
+    /** Non-null exactly while the how-it-felt sheet is requested. */
+    val howItFeltDraft: HowItFeltDraft? = null,
+
+    val howItFeltSheet: SheetSession<HowItFeltSheetUiModel, Nothing> = SheetSession.Closed,
+
+    val moodMomentSheet: MoodMomentSheetState = MoodMomentSheetState(),
 
     /** Null hides the Yours lens "Your copy" section. */
     val yourCopy: YourCopyPanelUiModel<String>? = null,

@@ -48,6 +48,19 @@
 - A character chip cycles off, yes, complicated (dashed), off; the sheet's caption says so. Save with every
   answer cleared deletes the stored answers.
 
+### How it felt
+
+- The Yours lens, between the verdict and How it read, for a book that is Reading, Paused, Read or Did not
+  finish: `HowItFeltBlock` draws its own `HOW IT FELT` title and Edit link. With nothing recorded it stays
+  visible with an invitation line.
+- Rows show the book's moods with an optional strength, then "Along the way": every moment sorted by position
+  ("62%"). Tapping a moment row opens `MoodMomentSheet` in edit mode (Save, Delete).
+- `HowItFeltSheet`, hosted by `HowItFeltSheetCollector` from `howItFeltDraft`: the nine presets, the own
+  words in use and a dashed "Your own word" chip; one strength row per chosen mood, null until slid.
+- After a plain progress update (never a finish, no change or a failed save, and only with the preference on)
+  `MoodMomentSheetSlice` in `:core:progresssheet` opens "How is it feeling?" for one mood at that position. The
+  same moments draw as a `MoodRibbon` under the progress bar, in lowercase.
+
 ### Your copy
 
 - The last section of the Yours lens, after Your tags, for any book the reader has a copy of (Want to read

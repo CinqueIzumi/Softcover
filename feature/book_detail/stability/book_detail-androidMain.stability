@@ -287,6 +287,15 @@ internal fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.sectio
     - onCoverClick: STABLE (function type)
 
 @Composable
+internal fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.HowItFeltSection(model: nl.rhaydus.softcover.core.component.feeling.HowItFeltBlockUiModel, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - runAction: STABLE (function type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
 internal fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.HowItReadSection(state: nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState, model: nl.rhaydus.softcover.core.component.traits.HowItReadBlockUiModel, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
   skippable: false
   restartable: true

@@ -4,6 +4,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.Composable
 import nl.rhaydus.designsystem.component.RhaydusDatePickerDialog
+import nl.rhaydus.softcover.core.component.feeling.HowItFeltSheet
+import nl.rhaydus.softcover.core.component.feeling.HowItFeltSheetEvent
+import nl.rhaydus.softcover.core.component.feeling.MoodMomentSheet
 import nl.rhaydus.softcover.core.component.lists.ChooseListsBottomSheet
 import nl.rhaydus.softcover.core.component.lists.ChooseListsEvent
 import nl.rhaydus.softcover.core.component.lists.ListMembership
@@ -24,6 +27,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDeleteRevi
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissChooseListsSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissDeadlinePickerAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissEditEditionSheetClickAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissHowItFeltSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissHowItReadSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissQuoteSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissShareSheetAction
@@ -34,9 +38,13 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionSea
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionSelectedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEndSessionClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEndSessionSheetDismissedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnHowItFeltChipClickedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnHowItFeltOwnWordChangedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnHowItFeltStrengthChangedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnHowItReadBalanceChangedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnHowItReadChipClickedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnLookUpEditionByIsbnClickAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMoodMomentSheetEventAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnNewEditionSaveClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressSheetEventAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnQuoteDeleteConfirmedAction
@@ -51,6 +59,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnQuoteWhenR
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnQuoteWhenReadShiftedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRemoveUserTagAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRequestCreateListAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnSaveBookMoodsAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnSaveBookTraitsAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnSaveQuoteAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnSaveVerdictAction
@@ -325,6 +334,41 @@ internal fun BookDetailOverlays(
                     HowItReadSheetEvent.Dismissed -> runAction(OnDismissHowItReadSheetAction())
                 }
             },
+        )
+    }
+
+    state.howItFeltSheet.modelOrNull?.let { howItFeltSheet ->
+        HowItFeltSheet(
+            model = howItFeltSheet,
+            onEvent = { event ->
+                when (event) {
+                    is HowItFeltSheetEvent.ChipClicked -> runAction(OnHowItFeltChipClickedAction(key = event.key))
+
+                    is HowItFeltSheetEvent.OwnWordChanged -> runAction(
+                        OnHowItFeltOwnWordChangedAction(event = event.event),
+                    )
+
+                    is HowItFeltSheetEvent.StrengthChanged -> runAction(
+                        OnHowItFeltStrengthChangedAction(
+                            key = event.key,
+                            strength = event.strength,
+                        ),
+                    )
+
+                    HowItFeltSheetEvent.SaveRequested -> runAction(OnSaveBookMoodsAction())
+
+                    HowItFeltSheetEvent.CancelRequested -> Unit
+
+                    HowItFeltSheetEvent.Dismissed -> runAction(OnDismissHowItFeltSheetAction())
+                }
+            },
+        )
+    }
+
+    state.moodMomentSheet.session.modelOrNull?.let { momentSheet ->
+        MoodMomentSheet(
+            model = momentSheet,
+            onEvent = { runAction(OnMoodMomentSheetEventAction(event = it)) },
         )
     }
 

@@ -18,6 +18,7 @@ kotlin {
             api(libs.kotlinx.datetime)
 
             implementation(project(":core:preferences"))
+            implementation(project(":core:corpus"))
 
             implementation(libs.rhaydus.coreCommon)
         }

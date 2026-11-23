@@ -81,6 +81,19 @@ internal fun YoursLensContent(
             )
         }
 
+        state.howItFelt?.let { howItFelt ->
+            if (hasLeadingBlock) {
+                Spacer(modifier = Modifier.height(Spacing.section))
+            }
+
+            hasLeadingBlock = true
+
+            HowItFeltSection(
+                model = howItFelt,
+                runAction = runAction,
+            )
+        }
+
         state.howItRead?.let { howItRead ->
             if (hasLeadingBlock) {
                 Spacer(modifier = Modifier.height(Spacing.section))

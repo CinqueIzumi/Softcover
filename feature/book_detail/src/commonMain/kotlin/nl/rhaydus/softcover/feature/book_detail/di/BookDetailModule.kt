@@ -44,10 +44,13 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EditionSe
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EditionSheetCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EndSessionSheetCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ExternalLinksCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.HowItFeltSectionCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.HowItFeltSheetCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.HowItReadSectionCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.HowItReadSheetCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.InProgressCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.LensToggleCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.MoodMomentSheetCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.OfflineStateCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ProgressSheetCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.QuoteDeleteSheetCollector
@@ -140,6 +143,9 @@ val bookDetailModule = module {
     factory { QuoteDeleteSheetCollector() } bind BookDetailCollector::class
     factory { HowItReadSectionCollector() } bind BookDetailCollector::class
     factory { HowItReadSheetCollector() } bind BookDetailCollector::class
+    factory { HowItFeltSectionCollector() } bind BookDetailCollector::class
+    factory { HowItFeltSheetCollector() } bind BookDetailCollector::class
+    factory { MoodMomentSheetCollector() } bind BookDetailCollector::class
     factory { YourCopySectionCollector() } bind BookDetailCollector::class
     factory { WhereYouGotItSheetCollector() } bind BookDetailCollector::class
     factory { DidNotFinishReasonSheetCollector() } bind BookDetailCollector::class
@@ -253,6 +259,11 @@ val bookDetailModule = module {
             observeDidNotFinishReasonsUseCase = get(),
             getDidNotFinishReasonsUseCase = get(),
             saveDidNotFinishReasonsUseCase = get(),
+            observeBookMoodsUseCase = get(),
+            saveBookMoodsUseCase = get(),
+            observeMoodMomentsUseCase = get(),
+            observeOwnMoodWordsUseCase = get(),
+            moodMomentSheetSlice = get(),
             getCurrenciesUseCase = get(),
             getUsualCurrencyAsFlowUseCase = get(),
         )

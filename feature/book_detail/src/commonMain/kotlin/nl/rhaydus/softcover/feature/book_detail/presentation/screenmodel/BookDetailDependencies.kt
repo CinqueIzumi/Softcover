@@ -24,9 +24,13 @@ import nl.rhaydus.softcover.core.corpus.domain.usecase.GetBookCopyUseCase
 import nl.rhaydus.softcover.core.corpus.domain.usecase.GetBookTraitsUseCase
 import nl.rhaydus.softcover.core.corpus.domain.usecase.GetDidNotFinishReasonsUseCase
 import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveBookCopyUseCase
+import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveBookMoodsUseCase
 import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveBookTraitsUseCase
 import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveDidNotFinishReasonsUseCase
+import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveMoodMomentsUseCase
+import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveOwnMoodWordsUseCase
 import nl.rhaydus.softcover.core.corpus.domain.usecase.SaveBookCopyUseCase
+import nl.rhaydus.softcover.core.corpus.domain.usecase.SaveBookMoodsUseCase
 import nl.rhaydus.softcover.core.corpus.domain.usecase.SaveBookTraitsUseCase
 import nl.rhaydus.softcover.core.corpus.domain.usecase.SaveDidNotFinishReasonsUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ClearBookDeadlineUseCase
@@ -51,6 +55,7 @@ import nl.rhaydus.softcover.core.presentation.removal.UndoableBookRemover
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.core.progresssheet.presentation.ProgressSheetSlice
+import nl.rhaydus.softcover.core.progresssheet.presentation.mood.MoodMomentSheetSlice
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.ObserveUserTagVocabularyUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.RecordAppliedTagsUseCase
@@ -108,6 +113,11 @@ internal class BookDetailDependencies(
     val observeDidNotFinishReasonsUseCase: ObserveDidNotFinishReasonsUseCase,
     val getDidNotFinishReasonsUseCase: GetDidNotFinishReasonsUseCase,
     val saveDidNotFinishReasonsUseCase: SaveDidNotFinishReasonsUseCase,
+    val observeBookMoodsUseCase: ObserveBookMoodsUseCase,
+    val saveBookMoodsUseCase: SaveBookMoodsUseCase,
+    val observeMoodMomentsUseCase: ObserveMoodMomentsUseCase,
+    val observeOwnMoodWordsUseCase: ObserveOwnMoodWordsUseCase,
+    val moodMomentSheetSlice: MoodMomentSheetSlice,
     val getCurrenciesUseCase: GetCurrenciesUseCase,
     val getUsualCurrencyAsFlowUseCase: GetUsualCurrencyAsFlowUseCase,
     val offlineCopy: OfflineCopy,
