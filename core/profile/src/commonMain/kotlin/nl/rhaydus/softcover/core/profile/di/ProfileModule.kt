@@ -17,6 +17,7 @@ import nl.rhaydus.softcover.core.profile.domain.usecase.FillReaderEditionLanguag
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveDidNotFinishStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveDiversityStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveHourlyPagesReadUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveHowYouReadStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveLongestWaitingUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveMonthlyPagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObservePageCreditInputsUseCase
@@ -133,6 +134,20 @@ val profileModule = module {
             observeProgressUpdatesUseCase = get(),
             observeAllBookTraitsUseCase = get(),
             observeAllBookCopiesUseCase = get(),
+            appDispatchers = get(),
+            timeZone = get(),
+        )
+    }
+
+    factory {
+        ObserveHowYouReadStatsUseCase(
+            getCurrentlyReadingUserBooksUseCase = get(),
+            getPausedUserBooksUseCase = get(),
+            getReadUserBooksUseCase = get(),
+            getDidNotFinishUserBooksUseCase = get(),
+            observeProgressUpdatesUseCase = get(),
+            observeAllBookTraitsUseCase = get(),
+            observeAllBookMoodsUseCase = get(),
             appDispatchers = get(),
             timeZone = get(),
         )
