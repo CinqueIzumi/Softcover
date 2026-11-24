@@ -31,7 +31,8 @@
   book without one counts in All time only. Pages read credit logged progress on its day, a Read book's
   remainder on its finish date and a Did not finish book's pages up to its stop point on its stop date. A
   reading day has pages in the on-device history. "Added" is Hardcover's date added, the day a book
-  entered the library. Chapter 08 alone also dates a book by a read's start and by logged progress (below).
+  entered the library. Chapter 03's How you read and chapter 08 also date a book by a read's start and by
+  logged progress, and count the book base given under chapter 08 (below).
 - Contents rows (two-digit number, title, caption, chevron) scroll to their chapter's top. A chapter opens
   with an eyebrow "02 · Title". Numbers follow the design's chapter list (01, 02, 03, 05, 06, 07, 08 and 99), not
   position, so row and header always agree.
@@ -72,9 +73,16 @@
   when one exists, outside the empty branch. Languages: keys `ProportionChart` (top four, "Other
   languages" `Fifth`, masked while edition languages fill); decades: `ColumnChart` (newest five plus
   "Older" past six, `Lead` to `Fourth`); acquisition: rows `ProportionChart` (presets by count, then
-  "Somewhere else"). The chapter counts every Reading, Paused, Read and Did not finish book read in the
+  "Somewhere else"). The book base: every Reading, Paused, Read and Did not finish book read in the
   scope window, each once: a read finished or started in it, a stop date in it, or progress logged on a
   day in it; All time counts every book of those statuses.
+- Chapter 03 "How you read" and "Moods you reach for" follow chapter 08's book base, counting only books
+  with an answer. The split and Pace are `Keys` `ProportionChart`s in fixed order and tones (a zero part
+  dropped); the split sits under an `AtlasSubhead` whose title is the headline ("Character first", "Plot
+  first", "A mix" on a tie or when the mix is largest). Writing styles are exclusive but shown as counts, so
+  styles and flags are two rows of inert count chips by count, the top one selected, never a chart. Moods
+  are `ScoreBars` of the five most-used moods by mean strength out of 5, "no strength given" as a dash. A
+  sub-block with no answers hides; with none at all one line shows.
 
 ### Profile share sheet
 

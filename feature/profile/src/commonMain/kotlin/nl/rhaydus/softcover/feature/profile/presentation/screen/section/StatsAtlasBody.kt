@@ -130,6 +130,13 @@ internal fun ColumnScope.StatsAtlasBody(
                 runAction(OnGenreRankingShowLessAction())
             },
         )
+
+        Spacer(modifier = Modifier.height(Spacing.xl))
+
+        HowYouReadSection(
+            model = state.howYouRead,
+            isLoading = state.isReadingLifeLoading || state.howYouRead.isLoading,
+        )
     }
 
     YourReadingListChapter(

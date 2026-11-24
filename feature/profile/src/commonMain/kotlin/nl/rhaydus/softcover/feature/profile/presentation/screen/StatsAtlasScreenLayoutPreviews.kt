@@ -20,6 +20,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingUiMo
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasFormatSplit
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasTimeOfDayPages
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasTopAuthors
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.howYouReadUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.inYourWordsUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.longestStreakTile
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesChartUiModel
@@ -38,6 +39,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.yourReadingListU
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileDidNotFinishPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileDiversityStatsPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileHourlyPagesPreview
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileHowYouReadStatsPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileLongestWaitingPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileMonthlyPagesPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileOwnTagsPreview
@@ -188,5 +190,9 @@ internal val StatsAtlasPreviewState = StatsAtlasUiState(
     diversityChapter = diversityChapterUiModel(
         stats = profileDiversityStatsPreview(),
         hideBooksWithoutDetail = false,
+    ),
+    howYouRead = howYouReadUiModel(
+        stats = profileHowYouReadStatsPreview(),
+        scope = StatsScope.AllTime,
     ),
 )

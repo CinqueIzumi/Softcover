@@ -9,12 +9,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.text.FadeThroughText
-import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
- * A section's [title] over its [caption] inside a chapter. The caption fades between scopes, and while
- * [isLoading] it is masked at the length of the [caption] it stands in for. A blank [caption] drops its
+ * A section's [title] over its [caption] inside a chapter. Both fade between scopes, and while [isLoading]
+ * each is masked at the length of the text it stands in for. A blank [caption] drops its
  * line and the gap above it, easing the height.
  */
 @Composable
@@ -25,10 +24,12 @@ internal fun AtlasSubhead(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.animateContentSize()) {
-        SoftcoverText(
+        FadeThroughText(
             text = title,
             style = MaterialTheme.editorialTypography.headlineSmall,
             color = MaterialTheme.colorScheme.onSurface,
+            isLoading = isLoading,
+            standIn = title,
         )
 
         if (caption.isNotBlank()) {

@@ -16,6 +16,7 @@ import nl.rhaydus.softcover.core.profile.domain.usecase.FillReaderEditionLanguag
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveDidNotFinishStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveDiversityStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveHourlyPagesReadUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveHowYouReadStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveLongestWaitingUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveMonthlyPagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObservePagesReadUseCase
@@ -35,6 +36,7 @@ internal data class StatsAtlasDependencies(
     val observeReadingStatsUseCase: ObserveReadingStatsUseCase,
     val observeDiversityStatsUseCase: ObserveDiversityStatsUseCase,
     val observeSpendStatsUseCase: ObserveSpendStatsUseCase,
+    val observeHowYouReadStatsUseCase: ObserveHowYouReadStatsUseCase,
     val getCurrenciesUseCase: GetCurrenciesUseCase,
     val getUsualCurrencyAsFlowUseCase: GetUsualCurrencyAsFlowUseCase,
     val observePagesReadUseCase: ObservePagesReadUseCase,

@@ -137,6 +137,28 @@ internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.At
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
+private fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.BlockCaption(text: kotlin.String, isLoading: kotlin.Boolean): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - text: STABLE (String is immutable)
+    - isLoading: STABLE (primitive type)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.BlockEyebrow(title: kotlin.String): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - title: STABLE (String is immutable)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.BlockGap(isFirst: kotlin.Boolean): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - isFirst: STABLE (primitive type)
+
+@Composable
 private fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.BreakdownBlock(breakdown: nl.rhaydus.softcover.feature.profile.presentation.state.DemographicBreakdownUiModel, isLoading: kotlin.Boolean, standIn: kotlin.String): kotlin.Unit
   skippable: true
   restartable: true
@@ -215,6 +237,23 @@ internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.Ge
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
+private fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.HowYouReadContent(model: nl.rhaydus.softcover.feature.profile.presentation.state.HowYouReadUiModel, isLoading: kotlin.Boolean): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - isLoading: STABLE (primitive type)
+
+@Composable
+internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.HowYouReadSection(model: nl.rhaydus.softcover.feature.profile.presentation.state.HowYouReadUiModel, isLoading: kotlin.Boolean, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - isLoading: STABLE (primitive type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
 internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.InYourWordsChapter(model: nl.rhaydus.softcover.feature.profile.presentation.state.InYourWordsUiModel, jumper: nl.rhaydus.softcover.feature.profile.presentation.screen.section.AtlasChapterJumper, onMostQuotedTapped: kotlin.Function0<kotlin.Unit>, onOwnTagTapped: kotlin.Function1<kotlin.String, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
   skippable: true
   restartable: true
@@ -233,6 +272,22 @@ private fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.InY
     - model: STABLE (class with no mutable properties)
     - onMostQuotedTapped: STABLE (function type)
     - onOwnTagTapped: STABLE (function type)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.MoodsBlock(block: nl.rhaydus.softcover.feature.profile.presentation.state.MoodsBlockUiModel, isLoading: kotlin.Boolean): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - block: STABLE (marked @Stable or @Immutable)
+    - isLoading: STABLE (primitive type)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.PaceBlock(block: nl.rhaydus.softcover.feature.profile.presentation.state.ChartBlockUiModel, isLoading: kotlin.Boolean): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - block: STABLE (marked @Stable or @Immutable)
+    - isLoading: STABLE (primitive type)
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.ProfileAvatar(profileImageUrl: kotlin.String?, isLoading: kotlin.Boolean, modifier: androidx.compose.ui.Modifier): kotlin.Unit
@@ -479,6 +534,14 @@ private fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.Spe
     - model: STABLE (marked @Stable or @Immutable)
 
 @Composable
+private fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.SplitBlock(block: nl.rhaydus.softcover.feature.profile.presentation.state.ChartBlockUiModel, isLoading: kotlin.Boolean): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - block: STABLE (marked @Stable or @Immutable)
+    - isLoading: STABLE (primitive type)
+
+@Composable
 internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.StatsAtlasBody(state: nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState, jumper: nl.rhaydus.softcover.feature.profile.presentation.screen.section.AtlasChapterJumper, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.profile.presentation.action.StatsAtlasAction, kotlin.Unit>, onBookCardEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.bookcard.BookCardEvent, kotlin.Unit>, onRecordEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.bookcard.BookCardEvent, kotlin.Unit>, onWaitingEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.bookcard.BookCardEvent, kotlin.Unit>): kotlin.Unit
   skippable: false
   restartable: true
@@ -530,6 +593,14 @@ private fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.Wai
     - model: STABLE (class with no mutable properties)
     - onEvent: STABLE (function type)
     - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.WritingBlock(block: nl.rhaydus.softcover.feature.profile.presentation.state.WritingBlockUiModel, isLoading: kotlin.Boolean): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - block: STABLE (marked @Stable or @Immutable)
+    - isLoading: STABLE (primitive type)
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.YearAtAGlanceChapter(header: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, title: kotlin.String, caption: kotlin.String, chart: nl.rhaydus.softcover.core.component.chart.ColumnChartUiModel, yearGrid: nl.rhaydus.softcover.core.component.chart.YearGridUiModel, currentStreakTile: nl.rhaydus.softcover.core.component.statistic.StatTileUiModel, longestStreakTile: nl.rhaydus.softcover.core.component.statistic.StatTileUiModel, onDayTapped: kotlin.Function1<kotlinx.datetime.LocalDate, kotlin.Unit>, footnote: kotlin.String, hasTimeOfDayPages: kotlin.Boolean, modifier: androidx.compose.ui.Modifier): kotlin.Unit
