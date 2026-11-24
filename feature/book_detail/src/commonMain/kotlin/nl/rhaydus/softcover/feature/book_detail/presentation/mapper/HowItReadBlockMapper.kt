@@ -5,6 +5,7 @@ import nl.rhaydus.softcover.core.component.traits.HowItReadBlockUiModel
 import nl.rhaydus.softcover.core.component.traits.HowItReadRowUiModel
 import nl.rhaydus.softcover.core.domain.model.BookTraits
 import nl.rhaydus.softcover.core.domain.model.TraitAnswer
+import nl.rhaydus.softcover.core.uibinding.traits.toLabel
 
 private const val MOSTLY_PLOT_FROM = 21
 private const val MIX_FROM = 41

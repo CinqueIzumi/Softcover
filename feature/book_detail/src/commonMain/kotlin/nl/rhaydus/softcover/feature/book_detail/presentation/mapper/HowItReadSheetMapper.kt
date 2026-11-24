@@ -12,6 +12,7 @@ import nl.rhaydus.softcover.core.domain.model.CharacterTrait
 import nl.rhaydus.softcover.core.domain.model.Pace
 import nl.rhaydus.softcover.core.domain.model.WritingFlag
 import nl.rhaydus.softcover.core.domain.model.WritingStyle
+import nl.rhaydus.softcover.core.uibinding.traits.toLabel
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.HowItReadAnswer
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.HowItReadDraft
 

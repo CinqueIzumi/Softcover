@@ -15,13 +15,6 @@ internal fun Pace.toKey(): String = when (this) {
     Pace.VARIABLE -> "pace-variable"
 }
 
-internal fun Pace.toLabel(): String = when (this) {
-    Pace.SLOW -> "Slow"
-    Pace.MODERATE -> "Moderate"
-    Pace.FAST -> "Fast"
-    Pace.VARIABLE -> "Variable"
-}
-
 internal fun String.toPace(): Pace? = Pace.entries.firstOrNull { it.toKey() == this }
 
 internal fun CharacterTrait.toKey(): String = when (this) {
@@ -52,24 +45,12 @@ internal fun WritingStyle.toKey(): String = when (this) {
     WritingStyle.DEMANDING -> "style-demanding"
 }
 
-internal fun WritingStyle.toLabel(): String = when (this) {
-    WritingStyle.SIMPLE -> "Simple"
-    WritingStyle.MODERATE -> "Moderate"
-    WritingStyle.DEMANDING -> "Demanding"
-}
-
 internal fun String.toWritingStyle(): WritingStyle? = WritingStyle.entries.firstOrNull { it.toKey() == this }
 
 internal fun WritingFlag.toKey(): String = when (this) {
     WritingFlag.VIVID -> "flag-vivid"
     WritingFlag.POETIC -> "flag-poetic"
     WritingFlag.UNCONVENTIONAL -> "flag-unconventional"
-}
-
-internal fun WritingFlag.toLabel(): String = when (this) {
-    WritingFlag.VIVID -> "Vivid"
-    WritingFlag.POETIC -> "Poetic"
-    WritingFlag.UNCONVENTIONAL -> "Unconventional"
 }
 
 internal fun String.toWritingFlag(): WritingFlag? = WritingFlag.entries.firstOrNull { it.toKey() == this }
