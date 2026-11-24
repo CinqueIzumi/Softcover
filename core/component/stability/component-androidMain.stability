@@ -556,6 +556,23 @@ private fun nl.rhaydus.softcover.core.component.chart.RowsLegend(retention: nl.r
     - isLoading: STABLE (primitive type)
 
 @Composable
+private fun nl.rhaydus.softcover.core.component.chart.ScoreBarRow(row: nl.rhaydus.softcover.core.component.chart.ScoreBarUiModel, isLoading: kotlin.Boolean, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - row: STABLE (marked @Stable or @Immutable)
+    - isLoading: STABLE (primitive type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+public fun nl.rhaydus.softcover.core.component.chart.ScoreBars(model: nl.rhaydus.softcover.core.component.chart.ScoreBarsUiModel, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
 public fun nl.rhaydus.softcover.core.component.chart.YearGrid(model: nl.rhaydus.softcover.core.component.chart.YearGridUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.chart.YearGridEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
   skippable: true
   restartable: true

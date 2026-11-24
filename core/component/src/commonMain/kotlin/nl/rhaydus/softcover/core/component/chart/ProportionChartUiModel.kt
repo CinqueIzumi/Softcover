@@ -10,7 +10,7 @@ import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 /**
  * One stacked bar of parts of a whole, with its legend beneath as rows or inline keys, or the rows alone.
  *
- * While [isLoading] the bar masks as one block and the legend keeps its rows with masked text and swatches.
+ * While [isLoading] the bar masks as one block and the legend keeps every part with masked text.
  */
 @Immutable
 data class ProportionChartUiModel(

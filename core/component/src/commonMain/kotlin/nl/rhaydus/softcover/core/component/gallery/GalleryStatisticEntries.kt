@@ -10,6 +10,8 @@ import nl.rhaydus.softcover.core.component.chart.RankedBars
 import nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel
 import nl.rhaydus.softcover.core.component.chart.RecentDaysGrid
 import nl.rhaydus.softcover.core.component.chart.RecentDaysGridUiModel
+import nl.rhaydus.softcover.core.component.chart.ScoreBars
+import nl.rhaydus.softcover.core.component.chart.ScoreBarsUiModel
 import nl.rhaydus.softcover.core.component.chart.YearGrid
 import nl.rhaydus.softcover.core.component.chart.YearGridUiModel
 import nl.rhaydus.softcover.core.component.progress.ProgressBar
@@ -41,6 +43,19 @@ internal val statisticEntries: ImmutableList<GalleryEntry> = persistentListOf(
         previews = RankedBarsUiModel,
         content = { model, modifier ->
             RankedBars(
+                model = model,
+                modifier = modifier,
+            )
+        },
+    ),
+    galleryEntry(
+        name = "ScoreBars",
+        family = GalleryFamily.CHART,
+        blurb = "Italic-labelled scores out of five as hairline bars with a tabular value at the end; a missing " +
+            "score shows an empty track and a dash, and while loading the rows keep their layout and mask.",
+        previews = ScoreBarsUiModel,
+        content = { model, modifier ->
+            ScoreBars(
                 model = model,
                 modifier = modifier,
             )

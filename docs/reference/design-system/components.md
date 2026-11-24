@@ -28,7 +28,7 @@ rules all components follow are in [component-contract.md](component-contract.md
 
 ## Chips
 
-- **Chip** — `chip` — the one chip, in ten tones (`TonalDashed` the indeterminate third state) with leading and trailing slots; `Disclosure` flips while expanded; `Count` adds a muted count in the chip's own ink; `Eyebrow` face sets caps.
+- **Chip** — `chip` — the one chip, in ten tones (`TonalDashed` the indeterminate third state), with leading and trailing slots; `Disclosure` flips while expanded; `Count` adds a muted count; `Eyebrow` sets caps.
 - **ChipFlow** — `chip` — wraps a `ChipSet` in one flow row.
 
 ## Covers & cards
@@ -60,7 +60,7 @@ rules all components follow are in [component-contract.md](component-contract.md
 
 - **AdaptiveModalSheet** — `sheet` — foundation sheet plus the snackbar host and `Corners.xxl` panel.
 - **SheetScaffold** — `sheet` — chrome every modal sheet shares: header, body, footer and close; `SheetSession` holds its lifetime.
-- **SheetRowGroup** — `sheet` — hairline-divided single-choice rows that dismiss the sheet on selection; an optional free-text row; rows may lead with a code; `sheetRowItems` lays them into a lazy list.
+- **SheetRowGroup** — `sheet` — hairline-divided single-choice rows that dismiss on selection; an optional free-text row; rows may lead with a code; `sheetRowItems` lays them into a lazy list.
 - **SheetActionRow** — `sheet` — a plain tappable menu row that acts at once.
 - **LoadingSheet** — `sheet` — full-screen blocking wait.
 - **UpdateProgressBottomSheet** — `progress` — pages, percentage or time reading-progress editor.
@@ -71,11 +71,12 @@ rules all components follow are in [component-contract.md](component-contract.md
 ## Statistics
 
 - **StatNumber** — `statistic` — springs or rolls a number into place, with optional prefix or suffix.
-- **StatTile** — `statistic` — a labelled stat on a hero, standard or compact tile; null is a dash; compact adds a caption, drops its unit.
-- **CountRows** — `statistic` — label-and-count rows, no bar or swatch.
+- **StatTile** — `statistic` — a labelled stat on a hero, standard or compact tile; null is a dash; compact adds a caption, no unit.
+- **CountRows** — `statistic` — label-and-count rows, no bar.
 - **ColumnChart** — `chart` — vertical columns on one baseline with a per-column readout.
-- **RankedBars** — `chart` — numbered rows, each a name over a bar sized to the lead row, with its value; rows can be tappable and fold past `visibleCount`.
-- **ProportionChart** — `chart` — one slim stacked bar of parts of a whole; legend as rows or inline keys, or rows alone (`ProportionChartVariant`).
+- **RankedBars** — `chart` — numbered rows, a name over a bar sized to the lead row, with its value; rows can be tappable and fold past `visibleCount`.
+- **ScoreBars** — `chart` — italic label and value over a hairline bar filled to a share.
+- **ProportionChart** — `chart` — one slim stacked bar of parts of a whole; legend as rows, inline keys or rows alone (`ProportionChartVariant`).
 - **YearGrid** — `chart` — a year of day squares, a row per month, tinted by pages read; read days are tappable.
 - **RecentDaysGrid** — `chart` — the last 84 days as squares, a column per week, tinted like YearGrid.
 
@@ -93,14 +94,14 @@ rules all components follow are in [component-contract.md](component-contract.md
 - **VerdictSheet** — `verdict` — the combined rating-and-review editor.
 - **VerdictBlock** — `verdict` — book-page rating and review card that opens the verdict sheet.
 - **HowItReadBlock / HowItReadSheet** — `traits` — the private reading-survey panel and the sheet that edits it.
-- **HowItFeltBlock / HowItFeltSheet / MoodMomentSheet / MoodRibbon** — `feeling` — private moods: the block, its editor, one mood at a point, and their dots under the progress bar.
-- **YourCopyPanel** — `yourcopy` — the book page's private per-copy rows: a value or an invitation, with an optional trailing figure.
+- **HowItFeltBlock / HowItFeltSheet / MoodMomentSheet / MoodRibbon** — `feeling` — private moods: the block, its editor, one mood at a point, and the dots under the progress bar.
+- **YourCopyPanel** — `yourcopy` — the book page's private per-copy rows: a value or an invitation, optionally a figure.
 
 ## Modifiers & helpers
 
 - **`pressScaleClickable` / `Selectable` / `Toggleable`** — foundation `modifier` — the one ripple-less interaction modifier.
 - **`navSharedBounds`** — `modifier` — the one way to make a node a navigation shared element.
-- **`ExitingItems`** — `transition` — keeps removed items of non-lazy containers composed and inert while their exit (default fade) plays.
+- **`ExitingItems`** — `transition` — keeps removed items of non-lazy containers composed and inert while their exit plays.
 - **`rememberReorderHaptics`** — `haptics` — lift, per-target tick and drop haptics for drag-to-reorder.
 - **`Haptics.play(Feedback)`** — `haptics` — plays the outcome haptic a `FeedbackEvent` carries.
 
@@ -118,7 +119,7 @@ The app's own usage rules:
 - `HeroStatNumberField` for any number edited in a hero context, never a bordered field.
 - `EditorialSearchField` for search inside an editorial header; `SearchTopBar` when search is the app bar.
 - `ExpandableFlowRow` for a wrapping chip set that can run long.
-- Pull-to-refresh draws `PullToRefreshDefaults.LoadingIndicator`, the one exception to wavy progress, under a `PullToRefreshEyebrow`.
+- Pull-to-refresh draws `PullToRefreshDefaults.LoadingIndicator`, the one wavy-progress exception, under a `PullToRefreshEyebrow`.
 - `DesktopTooltip` on every icon-only desktop control; `DesktopContextMenu` mirrors a touch long-press.
 - Haptics go through `LocalHaptics.current`, never `performHapticFeedback`.
 - Press feedback goes through foundation's `pressScaleClickable` family; bare `pressScale` only drives a shared `interactionSource`.
