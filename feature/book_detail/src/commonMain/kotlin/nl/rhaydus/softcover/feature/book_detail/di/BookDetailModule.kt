@@ -41,7 +41,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.collector.DateStyle
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EditionCardsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EditionSelectionCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EditionSheetCollector
-import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EndSessionPauseSheetCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EndSessionSheetCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ExternalLinksCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.HowItReadSectionCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.HowItReadSheetCollector
@@ -72,6 +72,8 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.collector.UserLists
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.UserTagsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.VerdictReviewCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.VerdictSheetCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.WhereYouGotItSheetCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.YourCopySectionCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.YourReadsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailScreenScreenModel
 import org.koin.dsl.bind
@@ -129,7 +131,7 @@ val bookDetailModule = module {
     factory { ChooseListsCollector() } bind BookDetailCollector::class
     factory { ShelveControlHeaderCollector() } bind BookDetailCollector::class
     factory { ActiveSessionBookCollector() } bind BookDetailCollector::class
-    factory { EndSessionPauseSheetCollector() } bind BookDetailCollector::class
+    factory { EndSessionSheetCollector() } bind BookDetailCollector::class
     factory { LensToggleCollector() } bind BookDetailCollector::class
     factory { QuotesSectionCollector() } bind BookDetailCollector::class
     factory { QuotesRefreshCollector() } bind BookDetailCollector::class
@@ -137,6 +139,8 @@ val bookDetailModule = module {
     factory { QuoteDeleteSheetCollector() } bind BookDetailCollector::class
     factory { HowItReadSectionCollector() } bind BookDetailCollector::class
     factory { HowItReadSheetCollector() } bind BookDetailCollector::class
+    factory { YourCopySectionCollector() } bind BookDetailCollector::class
+    factory { WhereYouGotItSheetCollector() } bind BookDetailCollector::class
 
     single<BookReviewsRemoteDataSource> {
         BookReviewsRemoteDataSourceImpl(apolloClient = get())
@@ -204,12 +208,14 @@ val bookDetailModule = module {
             undoableBookRemover = get(),
             markBookAsReadUseCase = get(),
             pauseBookUseCase = get(),
+            didNotFinishBookUseCase = get(),
             activeSessionController = get(),
             saveBookVerdictUseCase = get(),
             flows = getAll(),
             offlineCopy = get(),
             appDispatchers = get(),
             getDateStyleAsFlowUseCase = get(),
+            getLibraryTabOrderAsFlowUseCase = get(),
             observeCurrentDateUseCase = get(),
             setEditionAsOwnedUseCase = get(),
             getAllUserListsUseCase = get(),
@@ -239,6 +245,11 @@ val bookDetailModule = module {
             observeBookTraitsUseCase = get(),
             getBookTraitsUseCase = get(),
             saveBookTraitsUseCase = get(),
+            observeBookCopyUseCase = get(),
+            getBookCopyUseCase = get(),
+            saveBookCopyUseCase = get(),
+            getCurrenciesUseCase = get(),
+            getUsualCurrencyAsFlowUseCase = get(),
         )
     }
 }

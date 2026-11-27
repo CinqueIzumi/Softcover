@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.feature.widget.presentation.render
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.net.Uri
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import nl.rhaydus.softcover.core.component.cover.CoverSource
@@ -12,6 +11,7 @@ import nl.rhaydus.softcover.core.uibinding.cover.loadCoverBitmap
 import nl.rhaydus.softcover.core.uibinding.cover.resolveCoverSource
 import nl.rhaydus.softcover.feature.widget.presentation.image.WidgetImageFormat
 import nl.rhaydus.softcover.feature.widget.presentation.image.WidgetImageStore
+import nl.rhaydus.softcover.feature.widget.presentation.util.BYTES_PER_PIXEL
 import kotlin.math.roundToInt
 
 /** Stores the blurred backdrop and the gradient masks behind a book as files, reusing a file whose key already exists. */
@@ -28,19 +28,23 @@ internal class BackdropImages(
 
     private val masks by lazy { renderGradientMasks() }
 
+    /** What the backdrop and the four masks of one size weigh in a widget update. */
+    val bytesPerSize: Long =
+        (backdropWidthPx.toLong() * backdropHeightPx + MASK_COUNT * GRADIENT_WIDTH * GRADIENT_ROWS) * BYTES_PER_PIXEL
+
     /**
      * Hands the five stored images to [build], or returns `null` when a gradient file could not be written,
      * since the backdrop is not worth drawing without them. The backdrop is `null` while [source] is `null`.
      */
     suspend fun <T> artwork(
         source: CoverSource?,
-        build: (backdrop: Uri?, veil: Uri, veilLift: Uri, washPrimary: Uri, washTertiary: Uri) -> T,
+        build: (backdrop: Bitmap?, veil: Bitmap, veilLift: Bitmap, washPrimary: Bitmap, washTertiary: Bitmap) -> T,
     ): T? = coroutineScope {
-        val backdrop = async { backdropUri(source) }
-        val veil = async { maskUri(name = "veil") { masks.veil } }
-        val veilLift = async { maskUri(name = "veilLift") { masks.veilLift } }
-        val washPrimary = async { maskUri(name = "washPrimary") { masks.washPrimary } }
-        val washTertiary = async { maskUri(name = "washTertiary") { masks.washTertiary } }
+        val backdrop = async { backdropBitmap(source) }
+        val veil = async { maskBitmap(name = "veil") { masks.veil } }
+        val veilLift = async { maskBitmap(name = "veilLift") { masks.veilLift } }
+        val washPrimary = async { maskBitmap(name = "washPrimary") { masks.washPrimary } }
+        val washTertiary = async { maskBitmap(name = "washTertiary") { masks.washTertiary } }
 
         build(
             backdrop.await(),
@@ -51,10 +55,10 @@ internal class BackdropImages(
         )
     }
 
-    private suspend fun backdropUri(source: CoverSource?): Uri? {
+    private suspend fun backdropBitmap(source: CoverSource?): Bitmap? {
         if (source == null) return null
 
-        return store.uriFor(
+        return store.bitmapFor(
             format = WidgetImageFormat.Photo,
             key = "backdrop:v$BACKDROP_RENDER_VERSION:${source.keyPart()}:${backdropWidthPx}x$backdropHeightPx",
             render = {
@@ -74,10 +78,10 @@ internal class BackdropImages(
         )
     }
 
-    private suspend fun maskUri(
+    private suspend fun maskBitmap(
         name: String,
         render: () -> Bitmap,
-    ): Uri? = store.uriFor(
+    ): Bitmap? = store.bitmapFor(
         key = "mask:v$MASK_RENDER_VERSION:$name:$GRADIENT_ROWS",
         render = render,
     )
@@ -85,6 +89,8 @@ internal class BackdropImages(
     private companion object {
         /** Bump whenever `GradientMasksRenderer`'s stops change, or stored masks keep the old look. */
         const val MASK_RENDER_VERSION = 1
+
+        const val MASK_COUNT = 4
 
         /** Bump whenever the blur constants or `renderBackdrop` change, or stored backdrops keep the old look. */
         const val BACKDROP_RENDER_VERSION = 3

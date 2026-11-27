@@ -8,6 +8,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnab
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetShelfSwipeEnabledAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetUiScaleAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetUsualCurrencyAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetReadingStreakEnabledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetShelfSwipeEnabledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetUiScaleUseCase
@@ -32,6 +33,7 @@ internal data class SettingsScreenDependencies(
     val setShelfSwipeEnabledUseCase: SetShelfSwipeEnabledUseCase,
     val getUiScaleAsFlowUseCase: GetUiScaleAsFlowUseCase,
     val setUiScaleUseCase: SetUiScaleUseCase,
+    val getUsualCurrencyAsFlowUseCase: GetUsualCurrencyAsFlowUseCase,
     val observeAppUpdateStateUseCase: ObserveAppUpdateStateUseCase,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,

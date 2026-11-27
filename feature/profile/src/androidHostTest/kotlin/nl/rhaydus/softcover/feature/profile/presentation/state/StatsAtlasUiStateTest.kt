@@ -3,8 +3,6 @@ package nl.rhaydus.softcover.feature.profile.presentation.state
 import io.kotest.matchers.shouldBe
 import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.domain.model.StatsScope
-import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
-import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
@@ -16,99 +14,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class StatsAtlasUiStateTest {
-    private fun statsWith(authorDemographics: AuthorDemographics): ReadingStats =
-        ReadingStats(authorDemographics = authorDemographics)
-
-    @Nested
-    inner class HasUntaggedAuthorsProperty {
-        @Test
-        fun `is true when only the bipoc breakdown has unknowns`() {
-            // ----- Arrange -----
-            val demographics = AuthorDemographics(
-                unknownGenderCount = 0,
-                bipocBreakdown = DemographicBreakdown(
-                    yesCount = 4,
-                    noCount = 5,
-                    unknownCount = 1,
-                ),
-                lgbtqBreakdown = DemographicBreakdown(
-                    yesCount = 1,
-                    noCount = 2,
-                    unknownCount = 0,
-                ),
-            )
-
-            val state = StatsAtlasUiState(
-                readingStats = statsWith(demographics),
-                hideUntaggedAuthors = false,
-            )
-
-            // ----- Act -----
-            val result = state.hasUntaggedAuthors
-
-            // ----- Assert -----
-            result shouldBe true
-        }
-
-        @Test
-        fun `is false when nothing is unknown across gender, bipoc and lgbtq`() {
-            // ----- Arrange -----
-            val demographics = AuthorDemographics(
-                unknownGenderCount = 0,
-                bipocBreakdown = DemographicBreakdown(
-                    yesCount = 4,
-                    noCount = 5,
-                    unknownCount = 0,
-                ),
-                lgbtqBreakdown = DemographicBreakdown(
-                    yesCount = 1,
-                    noCount = 2,
-                    unknownCount = 0,
-                ),
-            )
-
-            val state = StatsAtlasUiState(
-                readingStats = statsWith(demographics),
-                hideUntaggedAuthors = false,
-            )
-
-            // ----- Act -----
-            val result = state.hasUntaggedAuthors
-
-            // ----- Assert -----
-            result shouldBe false
-        }
-
-        @Test
-        fun `stays true while hideUntaggedAuthors is on because it reads the unfiltered data`() {
-            // ----- Arrange -----
-            val demographics = AuthorDemographics(
-                unknownGenderCount = 2,
-                bipocBreakdown = DemographicBreakdown(
-                    yesCount = 4,
-                    noCount = 5,
-                    unknownCount = 1,
-                ),
-                lgbtqBreakdown = DemographicBreakdown(
-                    yesCount = 1,
-                    noCount = 2,
-                    unknownCount = 0,
-                ),
-            )
-
-            val state = StatsAtlasUiState(
-                readingStats = statsWith(demographics),
-                hideUntaggedAuthors = true,
-            )
-
-            // ----- Act -----
-            val result = state.hasUntaggedAuthors
-
-            // ----- Assert -----
-            result shouldBe true
-        }
-    }
-
     @Nested
     inner class HasRecentlyLovedProperty {
         private fun historyLoving(recentlyLoved: List<RecentlyLovedBook>): ReadingHistory =

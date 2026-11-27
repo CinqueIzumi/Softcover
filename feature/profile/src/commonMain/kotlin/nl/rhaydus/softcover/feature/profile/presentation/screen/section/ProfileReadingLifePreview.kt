@@ -3,28 +3,50 @@ package nl.rhaydus.softcover.feature.profile.presentation.screen.section
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
-import nl.rhaydus.softcover.core.domain.model.Gender
+import nl.rhaydus.softcover.core.domain.model.AcquisitionKind
+import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.PrivacySetting
+import nl.rhaydus.softcover.core.domain.model.Quote
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
+import nl.rhaydus.softcover.core.profile.domain.model.AcquisitionSplit
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorRanking
+import nl.rhaydus.softcover.core.profile.domain.model.AuthorshipGender
+import nl.rhaydus.softcover.core.profile.domain.model.CharacterBreakdown
+import nl.rhaydus.softcover.core.profile.domain.model.CharacterRepresentation
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
+import nl.rhaydus.softcover.core.profile.domain.model.DidNotFinishStats
+import nl.rhaydus.softcover.core.profile.domain.model.DiversityStats
 import nl.rhaydus.softcover.core.profile.domain.model.FormatSplit
 import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
 import nl.rhaydus.softcover.core.profile.domain.model.HourlyPages
+import nl.rhaydus.softcover.core.profile.domain.model.LanguageCount
+import nl.rhaydus.softcover.core.profile.domain.model.LanguageSplit
 import nl.rhaydus.softcover.core.profile.domain.model.LengthBand
+import nl.rhaydus.softcover.core.profile.domain.model.LongestBook
 import nl.rhaydus.softcover.core.profile.domain.model.MonthCount
 import nl.rhaydus.softcover.core.profile.domain.model.MonthlyPages
+import nl.rhaydus.softcover.core.profile.domain.model.MostQuotedBook
+import nl.rhaydus.softcover.core.profile.domain.model.OwnTagCount
+import nl.rhaydus.softcover.core.profile.domain.model.PagesRead
+import nl.rhaydus.softcover.core.profile.domain.model.PublicationDecades
+import nl.rhaydus.softcover.core.profile.domain.model.PublicationStats
+import nl.rhaydus.softcover.core.profile.domain.model.QuickestRead
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
+import nl.rhaydus.softcover.core.profile.domain.model.ReadDuration
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingActivity
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
 import nl.rhaydus.softcover.core.profile.domain.model.RecentlyLovedBook
+import nl.rhaydus.softcover.core.profile.domain.model.StopQuarter
 import nl.rhaydus.softcover.core.profile.domain.model.TimeToFinish
+import nl.rhaydus.softcover.core.profile.domain.model.WrittenStats
 import nl.rhaydus.softcover.core.profile.domain.model.YearCount
+import kotlin.time.Instant
 
 /**
  * A representative [ReadingStats] sample (the redline spec's sample reader, Elena Marchetti) shared by
@@ -33,12 +55,104 @@ import nl.rhaydus.softcover.core.profile.domain.model.YearCount
  */
 internal fun profileReadingStatsPreview(): ReadingStats = ReadingStats(
     booksRead = 214,
-    totalPages = 128_406,
     genres = previewGenres(),
     ratings = previewRatings(),
-    authorDemographics = previewAuthorDemographics(),
     topAuthors = previewTopAuthors(),
     formatSplit = previewFormatSplit(),
+    longestBook = LongestBook(
+        book = previewRecordBook(
+            id = 101,
+            title = "The Stand",
+        ),
+        pages = 1_296,
+    ),
+)
+
+internal fun profileDiversityStatsPreview(): DiversityStats = DiversityStats(
+    booksRead = 214,
+    authorDemographics = previewAuthorDemographics(),
+    characterRepresentation = previewCharacterRepresentation(),
+    publication = previewPublicationStats(),
+)
+
+private fun previewPublicationStats(): PublicationStats = PublicationStats(
+    languages = LanguageSplit(
+        languages = listOf(
+            LanguageCount(
+                name = "English",
+                books = 30,
+            ),
+            LanguageCount(
+                name = "Dutch",
+                books = 6,
+            ),
+            LanguageCount(
+                name = "French",
+                books = 2,
+            ),
+        ),
+    ),
+    decades = PublicationDecades(
+        booksByDecade = mapOf(
+            1870 to 1,
+            1950 to 1,
+            1960 to 3,
+            1980 to 2,
+            2000 to 5,
+            2010 to 10,
+            2020 to 16,
+        ),
+        oldestYear = 1871,
+        booksThisCentury = 31,
+    ),
+    acquisition = AcquisitionSplit(
+        byKind = mapOf(
+            AcquisitionKind.LIBRARY to 9,
+            AcquisitionKind.BOUGHT_IN_SHOP to 8,
+            AcquisitionKind.BOUGHT_DIGITAL to 6,
+            AcquisitionKind.BOUGHT_ONLINE to 3,
+            AcquisitionKind.GIFT to 3,
+            AcquisitionKind.BOUGHT_SECOND_HAND to 2,
+        ),
+    ),
+)
+
+internal fun profilePagesReadPreview(): PagesRead = PagesRead(
+    total = 128_406,
+    finishedBookCount = 214,
+    stoppedBookCount = 9,
+    hasInProgressPages = true,
+    pagesPerDay = 34,
+)
+
+internal fun profileDidNotFinishPreview(): DidNotFinishStats = DidNotFinishStats(
+    bookCount = 9,
+    quarterCounts = mapOf(
+        StopQuarter.FIRST to 5,
+        StopQuarter.SECOND to 1,
+        StopQuarter.THIRD to 1,
+        StopQuarter.LAST to 1,
+    ),
+    unknownStopCount = 1,
+    genres = GenreBreakdown(
+        slices = listOf(
+            GenreSlice(
+                name = "Literary fiction",
+                count = 4,
+                fraction = 0.45,
+            ),
+            GenreSlice(
+                name = "Fantasy",
+                count = 3,
+                fraction = 0.33,
+            ),
+            GenreSlice(
+                name = "Science fiction",
+                count = 2,
+                fraction = 0.22,
+            ),
+        ),
+    ),
 )
 
 internal fun profileTimeToFinishPreview(): TimeToFinish = TimeToFinish(
@@ -50,6 +164,88 @@ internal fun profileTimeToFinishPreview(): TimeToFinish = TimeToFinish(
         LengthBand.OVER_450 to 23,
     ),
     excludedReadCount = 2,
+    quickestRead = QuickestRead(
+        book = previewRecordBook(
+            id = 102,
+            title = "Of Mice and Men",
+        ),
+        duration = ReadDuration(
+            bookId = 102,
+            readId = 1,
+            startedOn = LocalDate(
+                2025,
+                3,
+                1,
+            ),
+            finishedOn = LocalDate(
+                2025,
+                3,
+                2,
+            ),
+            pages = 272,
+        ),
+    ),
+)
+
+internal fun profileOwnTagsPreview(): List<OwnTagCount> = listOf(
+    OwnTagCount(
+        name = "Comfort reads",
+        bookCount = 12,
+    ),
+    OwnTagCount(
+        name = "Re-read",
+        bookCount = 7,
+    ),
+    OwnTagCount(
+        name = "Gifted",
+        bookCount = 4,
+    ),
+)
+
+internal fun profileWrittenStatsPreview(): WrittenStats = WrittenStats(
+    reviewCount = 14,
+    reviewWordCount = 3_200,
+    quoteCount = 62,
+    quotedBookCount = 19,
+    mostQuoted = MostQuotedBook(
+        book = previewRecordBook(
+            id = 103,
+            title = "Piranesi",
+        ),
+        quoteCount = 11,
+        firstQuote = Quote(
+            localId = 1,
+            remoteId = 1,
+            bookId = 103,
+            editionId = null,
+            text = "The beauty of the House is immeasurable; its Kindness infinite.",
+            privacy = PrivacySetting.PUBLIC,
+            actionAt = Instant.fromEpochSeconds(1_700_000_000),
+            position = null,
+            isPending = false,
+        ),
+    ),
+)
+
+internal fun previewRecordBook(
+    id: Int,
+    title: String,
+): Book = Book(
+    id = id,
+    title = title,
+    editions = emptyList(),
+    defaultEdition = null,
+    rating = 4.2,
+    description = "",
+    releaseYear = 1990,
+    coverUrl = "",
+    authors = emptyList(),
+    usersCount = 0,
+    ratingsCount = 0,
+    bookSeries = null,
+    positionsInSeries = emptyList(),
+    isCompilation = false,
+    userBook = null,
 )
 
 private fun previewFormatSplit(): FormatSplit = FormatSplit(
@@ -274,37 +470,57 @@ private fun previewGenres(): GenreBreakdown = GenreBreakdown(
 private fun previewAuthorDemographics(): AuthorDemographics = AuthorDemographics(
     genderSlices = listOf(
         GenderSlice(
-            gender = Gender.Female,
+            gender = AuthorshipGender.Female,
+            count = 86,
+            fraction = 86.0 / 214,
+        ),
+        GenderSlice(
+            gender = AuthorshipGender.Male,
+            count = 64,
+            fraction = 64.0 / 214,
+        ),
+        GenderSlice(
+            gender = AuthorshipGender.Other,
+            count = 7,
+            fraction = 7.0 / 214,
+        ),
+        GenderSlice(
+            gender = AuthorshipGender.Mixed,
             count = 12,
-            fraction = 0.40,
+            fraction = 12.0 / 214,
         ),
         GenderSlice(
-            gender = Gender.Male,
-            count = 9,
-            fraction = 0.30,
-        ),
-        GenderSlice(
-            gender = Gender.Other,
-            count = 1,
-            fraction = 0.033,
-        ),
-        GenderSlice(
-            gender = Gender.Unknown,
-            count = 8,
-            fraction = 0.267,
+            gender = AuthorshipGender.Unknown,
+            count = 45,
+            fraction = 45.0 / 214,
         ),
     ),
-    knownGenderCount = 22,
-    unknownGenderCount = 8,
+    knownGenderCount = 169,
+    unknownGenderCount = 45,
     bipocBreakdown = DemographicBreakdown(
-        yesCount = 2,
-        noCount = 5,
-        unknownCount = 23,
+        yesCount = 21,
+        noCount = 62,
+        unknownCount = 131,
     ),
     lgbtqBreakdown = DemographicBreakdown(
-        yesCount = 1,
-        noCount = 1,
-        unknownCount = 28,
+        yesCount = 9,
+        noCount = 30,
+        unknownCount = 175,
+    ),
+)
+
+private fun previewCharacterRepresentation(): CharacterRepresentation = CharacterRepresentation(
+    bipoc = CharacterBreakdown(
+        yesCount = 31,
+        complicatedCount = 6,
+        noCount = 120,
+        notAnsweredCount = 57,
+    ),
+    lgbtq = CharacterBreakdown(
+        yesCount = 18,
+        complicatedCount = 3,
+        noCount = 136,
+        notAnsweredCount = 57,
     ),
 )
 

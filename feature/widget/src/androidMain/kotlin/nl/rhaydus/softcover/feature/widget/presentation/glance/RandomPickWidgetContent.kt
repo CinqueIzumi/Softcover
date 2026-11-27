@@ -174,7 +174,7 @@ private fun PickedBook(
     SingleBookWidgetLayout(
         title = content.title,
         author = content.author,
-        cover = (content.cover as? RandomPickWidgetUiModel.Cover.Loaded)?.uri,
+        cover = (content.cover as? RandomPickWidgetUiModel.Cover.Loaded)?.bitmap,
         eyebrowHeightDp = eyebrowDp,
         footHeightDp = footDp,
         artwork = content.artwork,

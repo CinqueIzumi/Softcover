@@ -7,6 +7,10 @@ agents themselves stop with `BRIEF INCOMPLETE` if one slips through.
 A brief is the agent's whole context. Hand it what you already know — exact paths, line numbers, the
 contract — so it does not rediscover it. A loose brief on a large file costs 10× a tight one.
 
+Implementer and test-writer briefs say: "Write no comments or KDoc; delete any comment your change makes
+false." Subagents cannot run the `document-code` skill, so the main conversation runs one `document-code`
+sweep over the diff before the reviewer.
+
 ## `rhaydus-kotlin:implementer`
 
 One agent per vertical slice (state + mapper + render + call sites), so no two agents read the same files.

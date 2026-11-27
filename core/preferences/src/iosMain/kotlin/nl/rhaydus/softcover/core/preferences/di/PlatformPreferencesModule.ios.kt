@@ -2,6 +2,8 @@ package nl.rhaydus.softcover.core.preferences.di
 
 import nl.rhaydus.platform.IosSecureStorage
 import nl.rhaydus.platform.SecureStorage
+import nl.rhaydus.softcover.core.preferences.data.datasource.CurrencyCatalog
+import nl.rhaydus.softcover.core.preferences.data.datasource.IosCurrencyCatalog
 import nl.rhaydus.softcover.core.preferences.data.datastore.AppSettingsDataStore
 import nl.rhaydus.softcover.core.preferences.data.datastore.createAppSettingsDataStore
 import nl.rhaydus.softcover.core.preferences.data.security.IosLegacySecureApiKeyStorage
@@ -15,6 +17,8 @@ import platform.Foundation.NSSearchPathForDirectoriesInDomains
 import platform.Foundation.NSUserDomainMask
 
 actual val platformPreferencesModule: Module = module {
+    single<CurrencyCatalog> { IosCurrencyCatalog() }
+
     single<AppSettingsDataStore> {
         AppSettingsDataStore(
             store = createAppSettingsDataStore(FileSystem.SYSTEM) {

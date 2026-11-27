@@ -5,6 +5,7 @@ import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
+import nl.rhaydus.softcover.core.presentation.model.inLibraryTabOrder
 
 private val defaultStatusOrder: List<UserBookStatus> = listOf(
     UserBookStatus.CURRENTLY_READING,
@@ -57,20 +58,7 @@ internal fun buildLibraryTabEntries(
 
     val reorderableUniverse: List<LibraryTabEntry> = statusEntries + listEntries
 
-    val reorderableOrdered = if (draftTabOrder.isEmpty()) {
-        reorderableUniverse
-    } else {
-        val byId = reorderableUniverse.associateBy { it.id }
-
-        val ordered = draftTabOrder
-            .distinct()
-            .mapNotNull { byId[it] }
-
-        val orderedIds = ordered.map { it.id }.toSet()
-        val appended = reorderableUniverse.filter { it.id !in orderedIds }
-
-        ordered + appended
-    }
+    val reorderableOrdered = reorderableUniverse.inLibraryTabOrder(draftTabOrder) { it.id }
 
     return (listOf<LibraryTabEntry>(LibraryTabEntry.All(totalCount = totalCount)) + reorderableOrdered)
         .toImmutableList()

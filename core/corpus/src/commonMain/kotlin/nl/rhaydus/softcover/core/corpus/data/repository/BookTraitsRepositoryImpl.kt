@@ -16,6 +16,9 @@ internal class BookTraitsRepositoryImpl(
     override fun observe(bookId: Int): Flow<BookTraits> =
         localDataSource.observe(bookId = bookId).map { it?.toDomain() ?: BookTraits(bookId = bookId) }
 
+    override fun observeAll(): Flow<Map<Int, BookTraits>> =
+        localDataSource.observeAll().map { entities -> entities.associate { it.bookId to it.toDomain() } }
+
     override suspend fun get(bookId: Int): BookTraits =
         localDataSource.get(bookId = bookId)?.toDomain() ?: BookTraits(bookId = bookId)
 

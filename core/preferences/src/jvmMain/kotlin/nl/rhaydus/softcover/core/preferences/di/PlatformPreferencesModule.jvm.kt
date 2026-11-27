@@ -5,6 +5,8 @@ import eu.anifantakis.lib.ksafe.KSafeConfig
 import nl.rhaydus.platform.JvmSecureStorage
 import nl.rhaydus.platform.SecureStorage
 import nl.rhaydus.softcover.core.domain.platform.desktopAppDataDirectory
+import nl.rhaydus.softcover.core.preferences.data.datasource.CurrencyCatalog
+import nl.rhaydus.softcover.core.preferences.data.datasource.JavaCurrencyCatalog
 import nl.rhaydus.softcover.core.preferences.data.datastore.AppSettingsDataStore
 import nl.rhaydus.softcover.core.preferences.data.datastore.createAppSettingsDataStore
 import okio.FileSystem
@@ -13,6 +15,8 @@ import org.koin.core.module.Module
 import org.koin.dsl.module
 
 actual val platformPreferencesModule: Module = module {
+    single<CurrencyCatalog> { JavaCurrencyCatalog() }
+
     single<AppSettingsDataStore> {
         AppSettingsDataStore(
             store = createAppSettingsDataStore(FileSystem.SYSTEM) {

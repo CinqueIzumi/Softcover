@@ -70,11 +70,14 @@ internal class RandomPickWidgetModelSource(
                     lists = lists,
                 )
             },
-            coverUri = images::coverUri,
+            coverBitmap = images::coverBitmap,
             coverHeightDp = options
                 .map { bundle ->
-                    randomPickCoverHeightDp(
-                        bundle.reportedWidgetSizes { context.providerMinSize(appWidgetId) },
+                    val sizes = bundle.reportedWidgetSizes { context.providerMinSize(appWidgetId) }
+
+                    images.fitCoverHeightDp(
+                        requestedDp = randomPickCoverHeightDp(sizes),
+                        sizeCount = sizes.size,
                     )
                 }
                 .distinctUntilChanged(),

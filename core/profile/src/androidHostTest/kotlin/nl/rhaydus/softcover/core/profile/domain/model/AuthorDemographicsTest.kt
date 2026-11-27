@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.core.profile.domain.model
 
 import io.kotest.matchers.doubles.plusOrMinus
 import io.kotest.matchers.shouldBe
-import nl.rhaydus.softcover.core.domain.model.Gender
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -22,24 +21,24 @@ class AuthorDemographicsTest {
     )
 
     @Nested
-    inner class ExcludingUntaggedAuthors {
+    inner class ExcludingBooksWithoutDetail {
         @Test
         fun `each remaining gender slice's fraction equals its count over known gender count`() {
             // ----- Arrange -----
             val original = demographics(
                 genderSlices = listOf(
                     GenderSlice(
-                        gender = Gender.Male,
+                        gender = AuthorshipGender.Male,
                         count = 3,
                         fraction = 0.3,
                     ),
                     GenderSlice(
-                        gender = Gender.Female,
+                        gender = AuthorshipGender.Female,
                         count = 6,
                         fraction = 0.6,
                     ),
                     GenderSlice(
-                        gender = Gender.Unknown,
+                        gender = AuthorshipGender.Unknown,
                         count = 1,
                         fraction = 0.1,
                     ),
@@ -49,7 +48,7 @@ class AuthorDemographicsTest {
             )
 
             // ----- Act -----
-            val result = original.excludingUntaggedAuthors()
+            val result = original.excludingBooksWithoutDetail()
 
             // ----- Assert -----
             result.genderSlices.forEach { slice ->
@@ -63,12 +62,12 @@ class AuthorDemographicsTest {
             val original = demographics(
                 genderSlices = listOf(
                     GenderSlice(
-                        gender = Gender.Male,
+                        gender = AuthorshipGender.Male,
                         count = 3,
                         fraction = 0.3,
                     ),
                     GenderSlice(
-                        gender = Gender.Unknown,
+                        gender = AuthorshipGender.Unknown,
                         count = 1,
                         fraction = 0.1,
                     ),
@@ -78,10 +77,10 @@ class AuthorDemographicsTest {
             )
 
             // ----- Act -----
-            val result = original.excludingUntaggedAuthors()
+            val result = original.excludingBooksWithoutDetail()
 
             // ----- Assert -----
-            result.genderSlices.none { it.gender == Gender.Unknown } shouldBe true
+            result.genderSlices.none { it.gender == AuthorshipGender.Unknown } shouldBe true
             result.unknownGenderCount shouldBe 0
         }
 
@@ -102,7 +101,7 @@ class AuthorDemographicsTest {
             )
 
             // ----- Act -----
-            val result = original.excludingUntaggedAuthors()
+            val result = original.excludingBooksWithoutDetail()
 
             // ----- Assert -----
             result.bipocBreakdown shouldBe DemographicBreakdown(
@@ -123,12 +122,45 @@ class AuthorDemographicsTest {
         }
 
         @Test
+        fun `Mixed survives the exclusion and is renormalised with the known genders`() {
+            // ----- Arrange -----
+            val original = demographics(
+                genderSlices = listOf(
+                    GenderSlice(
+                        gender = AuthorshipGender.Female,
+                        count = 2,
+                        fraction = 0.4,
+                    ),
+                    GenderSlice(
+                        gender = AuthorshipGender.Mixed,
+                        count = 2,
+                        fraction = 0.4,
+                    ),
+                    GenderSlice(
+                        gender = AuthorshipGender.Unknown,
+                        count = 1,
+                        fraction = 0.2,
+                    ),
+                ),
+                knownGenderCount = 4,
+                unknownGenderCount = 1,
+            )
+
+            // ----- Act -----
+            val result = original.excludingBooksWithoutDetail()
+
+            // ----- Assert -----
+            result.genderSlices.map { it.gender } shouldBe listOf(AuthorshipGender.Female, AuthorshipGender.Mixed)
+            result.genderSlices.map { it.fraction } shouldBe listOf(0.5, 0.5)
+        }
+
+        @Test
         fun `known gender count of zero returns empty gender slices rather than dividing by zero`() {
             // ----- Arrange -----
             val original = demographics(
                 genderSlices = listOf(
                     GenderSlice(
-                        gender = Gender.Unknown,
+                        gender = AuthorshipGender.Unknown,
                         count = 5,
                         fraction = 1.0,
                     ),
@@ -138,7 +170,7 @@ class AuthorDemographicsTest {
             )
 
             // ----- Act -----
-            val result = original.excludingUntaggedAuthors()
+            val result = original.excludingBooksWithoutDetail()
 
             // ----- Assert -----
             result.genderSlices shouldBe emptyList()
@@ -153,7 +185,7 @@ class AuthorDemographicsTest {
             )
 
             // ----- Act -----
-            val result = original.excludingUntaggedAuthors()
+            val result = original.excludingBooksWithoutDetail()
 
             // ----- Assert -----
             result.bipocBreakdown.total shouldBe 0
@@ -166,12 +198,12 @@ class AuthorDemographicsTest {
             val original = demographics(
                 genderSlices = listOf(
                     GenderSlice(
-                        gender = Gender.Male,
+                        gender = AuthorshipGender.Male,
                         count = 4,
                         fraction = 0.5,
                     ),
                     GenderSlice(
-                        gender = Gender.Female,
+                        gender = AuthorshipGender.Female,
                         count = 4,
                         fraction = 0.5,
                     ),
@@ -191,7 +223,7 @@ class AuthorDemographicsTest {
             )
 
             // ----- Act -----
-            val result = original.excludingUntaggedAuthors()
+            val result = original.excludingBooksWithoutDetail()
 
             // ----- Assert -----
             result shouldBe original

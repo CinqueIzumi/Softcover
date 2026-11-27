@@ -5,7 +5,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.component.sheet.openOrUpdate
 import nl.rhaydus.softcover.core.component.sheet.requestClose
-import nl.rhaydus.softcover.core.uibinding.session.endSessionPauseSheetScaffold
+import nl.rhaydus.softcover.core.uibinding.session.SessionEndingStatus
+import nl.rhaydus.softcover.core.uibinding.session.endSessionSheetScaffold
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
@@ -34,7 +35,10 @@ internal class EndSessionPauseSheetCollector : LibraryCollector {
                     it.copy(
                         endSessionPauseSheet = if (requested && it.endSessionPauseBookIds.isNotEmpty()) {
                             it.endSessionPauseSheet.openOrUpdate(
-                                model = endSessionPauseSheetScaffold(bookTitle = title),
+                                model = endSessionSheetScaffold(
+                                    bookTitle = title,
+                                    targetStatus = SessionEndingStatus.Paused,
+                                ),
                             )
                         } else {
                             it.endSessionPauseSheet.requestClose()

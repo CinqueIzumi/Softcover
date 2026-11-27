@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.widget.presentation.mapper
 
-import android.net.Uri
+import android.graphics.Bitmap
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
@@ -12,7 +12,7 @@ import nl.rhaydus.softcover.core.uibinding.format.percentLabel
 import nl.rhaydus.softcover.feature.widget.domain.util.resolveShownBookId
 import nl.rhaydus.softcover.feature.widget.presentation.model.BookArtworkUiModel
 import nl.rhaydus.softcover.feature.widget.presentation.model.CurrentlyReadingWidgetUiModel
-import nl.rhaydus.softcover.feature.widget.presentation.render.WavyProgressUris
+import nl.rhaydus.softcover.feature.widget.presentation.render.WavyProgressImages
 
 private class CurrentlyReadingWidgetInputs(
     val isSignedIn: Boolean,
@@ -22,7 +22,7 @@ private class CurrentlyReadingWidgetInputs(
 )
 
 /**
- * Emits each model for a shown book first with its text and no images, then with the stored image [Uri]s. The
+ * Emits each model for a shown book first with its text and no images, then with the stored image [Bitmap]s. The
  * cover is rendered again only when [coverHeightDp] changes and the bars whenever [barWidthsDp] changes, so the
  * text never waits on rendering. [shelf] arrives ordered most recently updated first.
  */
@@ -32,11 +32,11 @@ internal fun currentlyReadingWidgetModels(
     themeConfiguration: Flow<ThemeConfiguration>,
     shelf: Flow<List<Book>>,
     selectedBookId: Flow<Int?>,
-    coverUri: suspend (book: Book, coverHeightDp: Int) -> Uri?,
+    coverBitmap: suspend (book: Book, coverHeightDp: Int) -> Bitmap?,
     coverHeightDp: Flow<Int>,
     barWidthsDp: Flow<Set<Int>>,
-    progressUris: suspend (fraction: Float, widthDp: Int) -> WavyProgressUris?,
-    artworkUris: suspend (Book) -> BookArtworkUiModel? = { null },
+    progressImages: suspend (fraction: Float, widthDp: Int) -> WavyProgressImages?,
+    loadArtwork: suspend (Book) -> BookArtworkUiModel? = { null },
 ): Flow<CurrentlyReadingWidgetUiModel> = combine(
     isSignedIn,
     themeConfiguration,
@@ -56,17 +56,17 @@ internal fun currentlyReadingWidgetModels(
     if (textContent is CurrentlyReadingWidgetUiModel.Content.Reading) {
         val book = inputs.books.first { it.id == textContent.bookId }
 
-        val artwork = artworkUris(book)
+        val artwork = loadArtwork(book)
 
         coverHeightDp.collectLatest { heightDp ->
-            val cover = coverUri(
+            val cover = coverBitmap(
                 book,
                 heightDp,
             )
 
             barWidthsDp.collectLatest { widths ->
                 val progress = widths.mapNotNull { widthDp ->
-                    progressUris(
+                    progressImages(
                         book.progressFraction(),
                         widthDp,
                     )?.let { widthDp to it }

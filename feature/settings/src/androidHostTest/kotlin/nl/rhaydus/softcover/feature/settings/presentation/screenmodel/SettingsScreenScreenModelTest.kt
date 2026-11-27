@@ -67,6 +67,7 @@ class SettingsScreenScreenModelTest {
                 setShelfSwipeEnabledUseCase = mockk(relaxed = true),
                 getUiScaleAsFlowUseCase = mockk(relaxed = true),
                 setUiScaleUseCase = mockk(relaxed = true),
+                getUsualCurrencyAsFlowUseCase = mockk(relaxed = true),
                 observeAppUpdateStateUseCase = mockk(relaxed = true),
                 appVersionProvider = appVersionProvider,
                 homeScreenWidgets = FakeHomeScreenWidgets(),

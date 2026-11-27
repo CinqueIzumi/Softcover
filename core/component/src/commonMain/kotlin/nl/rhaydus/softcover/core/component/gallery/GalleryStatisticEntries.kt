@@ -22,7 +22,7 @@ internal val statisticEntries: ImmutableList<GalleryEntry> = persistentListOf(
     galleryEntry(
         name = "RankedBars",
         family = GalleryFamily.CHART,
-        blurb = "Numbered bars filled relative to the lead row, with the share at the end; while " +
+        blurb = "Numbered bars filled relative to the lead row, with a value at the end, tappable on request; while " +
             "loading the rows keep their layout and mask.",
         previews = RankedBarsUiModel,
         content = { model, modifier ->

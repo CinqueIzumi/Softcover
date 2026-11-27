@@ -27,12 +27,15 @@ import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
 import nl.rhaydus.softcover.core.presentation.navigation.LocalCreateListPresenter
 import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
 import nl.rhaydus.softcover.core.presentation.util.LocalStartAppUpdate
+import nl.rhaydus.softcover.feature.settings.presentation.action.CurrencySettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.DocumentPageAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.model.DocumentPage
+import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.CurrencySettingsScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenScreenModel
+import nl.rhaydus.softcover.feature.settings.presentation.state.CurrencySettingsUiState
 import nl.rhaydus.softcover.feature.settings.presentation.state.DocumentPageUiState
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
@@ -69,6 +72,20 @@ object SettingsScreen : Screen {
             LibraryVisibilitySettingsUiState()
         }
 
+        // Same reasoning as the Library-tabs model above: desktop hosts the Currency pane inline, mobile
+        // pushes `CurrencySettingsScreen` with its own model.
+        val currencyModel = if (settingsUsesMasterDetail) {
+            koinScreenModel<CurrencySettingsScreenModel>()
+        } else {
+            null
+        }
+
+        val currencyState = if (currencyModel != null) {
+            currencyModel.state.collectAsStateWithLifecycle().value
+        } else {
+            CurrencySettingsUiState()
+        }
+
         // Desktop hosts the Roadmap pane inline in the master–detail surface, so it needs the model
         // under the Settings lifecycle for the same reason as Library tabs above. Mobile pushes
         // `DocumentPageScreen` (its own model) instead, and must not spin up a second one here — that would
@@ -103,6 +120,9 @@ object SettingsScreen : Screen {
             navigateToLibraryVisibility = {
                 navigator.parent?.push(LibraryVisibilitySettingsScreen())
             },
+            navigateToCurrency = {
+                navigator.parent?.push(CurrencySettingsScreen())
+            },
             navigateToWidgets = {
                 navigator.parent?.push(WidgetsSettingsScreen())
             },
@@ -120,6 +140,8 @@ object SettingsScreen : Screen {
             },
             libraryVisibilityState = libraryVisibilityState,
             libraryVisibilityRunAction = { action -> libraryVisibilityModel?.runAction(action) },
+            currencyState = currencyState,
+            currencyRunAction = { action -> currencyModel?.runAction(action) },
             roadmapState = roadmapState,
             roadmapRunAction = roadmapModel?.let { model -> model::runAction },
             whatsNewState = whatsNewState,
@@ -165,6 +187,7 @@ internal expect fun SettingsScreenLayout(
     navigateToProfile: () -> Unit,
     navigateToAppearanceSettings: () -> Unit,
     navigateToLibraryVisibility: () -> Unit,
+    navigateToCurrency: () -> Unit,
     navigateToWidgets: () -> Unit,
     navigateToHiddenSuggestions: () -> Unit,
     navigateToAbout: () -> Unit,
@@ -172,6 +195,8 @@ internal expect fun SettingsScreenLayout(
     navigateToRoadmap: () -> Unit,
     libraryVisibilityState: LibraryVisibilitySettingsUiState,
     libraryVisibilityRunAction: (LibraryVisibilityAction) -> Unit,
+    currencyState: CurrencySettingsUiState,
+    currencyRunAction: (CurrencySettingsAction) -> Unit,
     roadmapState: DocumentPageUiState?,
     roadmapRunAction: ((DocumentPageAction) -> Unit)?,
     whatsNewState: DocumentPageUiState?,

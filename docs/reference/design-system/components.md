@@ -20,23 +20,24 @@ rules all components follow are in [component-contract.md](component-contract.md
 - **PillButton** — `button` — action pill or icon-only circle in five tones.
 - **Toggle** — `control` — filled or bare icon toggle, or a display-only switch inside a row that owns the tap.
 - **ToggleRow** — `control` — a title over an optional gloss with a trailing switch; the row is the tap target.
-- **TextField** — `field` — pill, outlined, multi-line, hero or numeral input, with an optional error state.
+- **TextField** — `field` — pill, outlined (text, number or decimal keyboard), multi-line, hero or numeral input, optional error.
+- **SelectField** — `field` — the outlined field as a tap target: chosen value and a caret, options open elsewhere.
 - **SegmentedControl** — `control` — one-of-N choice as a pill track or as words in a sentence.
 - **ThemePreviewTile** — `control` — mini-page theme choice.
 - **ColorPalettePreviewTile** — `control` — mini-page spine-colour choice.
 
 ## Chips
 
-- **Chip** — `chip` — the one chip, in ten tones (`TonalDashed` the indeterminate third state) with leading and trailing slots; `Disclosure` flips while expanded; `Eyebrow` face sets caps.
+- **Chip** — `chip` — the one chip, in ten tones (`TonalDashed` the indeterminate third state) with leading and trailing slots; `Disclosure` flips while expanded; `Count` adds a muted count in the chip's own ink; `Eyebrow` face sets caps.
 - **ChipFlow** — `chip` — wraps a `ChipSet` in one flow row.
 
 ## Covers & cards
 
 - **Cover** — `cover` — the only book-cover renderer; falls back to a coverless title jacket, never blank.
 - **CoverOverlay** — `badge` — pins a `Badge` to a cover's corner, optionally greying the cover.
-- **BookCard** — `bookcard` — the one book or series card: cover-only, column or row.
+- **BookCard** — `bookcard` — the one book or series card: cover-only, column, row or tile.
 - **BookCardRail** — `bookcard` — a pageable card rail.
-- **QuoteCard** — `quote` — one saved quote in the editorial quote pattern, with a Delete menu.
+- **QuoteCard** — `quote` — a quote in the editorial quote pattern: saved with a Delete menu, or over a tappable book footer.
 - **MoodTile** — `mood` — a mood's title and book count on one of four inks.
 
 ## States & feedback
@@ -59,7 +60,7 @@ rules all components follow are in [component-contract.md](component-contract.md
 
 - **AdaptiveModalSheet** — `sheet` — foundation sheet plus the snackbar host and `Corners.xxl` panel.
 - **SheetScaffold** — `sheet` — chrome every modal sheet shares: header, body, footer and close; `SheetSession` holds its lifetime.
-- **SheetRowGroup** — `sheet` — hairline-divided single-choice rows that dismiss the sheet on selection.
+- **SheetRowGroup** — `sheet` — hairline-divided single-choice rows that dismiss the sheet on selection; an optional trailing free-text row; rows can lead with a short code; `sheetRowItems` lays them into a lazy list.
 - **SheetActionRow** — `sheet` — a plain tappable menu row that acts at once.
 - **LoadingSheet** — `sheet` — full-screen blocking wait.
 - **UpdateProgressBottomSheet** — `progress` — pages, percentage or time reading-progress editor.
@@ -70,11 +71,11 @@ rules all components follow are in [component-contract.md](component-contract.md
 ## Statistics
 
 - **StatNumber** — `statistic` — springs or rolls a number into place, with an optional prefix or suffix.
-- **StatTile** — `statistic` — a labelled stat on a hero, standard or compact tile; null stat is a dash and the compact tile drops its unit.
+- **StatTile** — `statistic` — a labelled stat on a hero, standard or compact tile; null stat is a dash and compact adds a caption, drops its unit.
 - **ColumnChart** — `chart` — vertical columns on one baseline with a per-column readout.
-- **RankedBars** — `chart` — numbered rows, each a name over a bar filled relative to the lead row, with its share.
+- **RankedBars** — `chart` — numbered rows, each a name over a bar filled relative to the lead row, with its value; rows can be tappable.
   Rows from `visibleCount` on fold in and out one by one.
-- **ProportionChart** — `chart` — one slim stacked bar of parts of a whole, with its legend as rows or inline keys (`ProportionChartVariant`).
+- **ProportionChart** — `chart` — one slim stacked bar of parts of a whole, with its legend as rows or inline keys, or the legend rows alone (`ProportionChartVariant`).
 - **YearGrid** — `chart` — a year of day squares, a row per month, tinted by pages read on four steps with a
   "Fewer pages → More" key; tapping a read day emits `YearGridEvent.DayTapped`.
 - **RecentDaysGrid** — `chart` — the last 84 days as 12dp squares, 7 rows by 12 columns filled column by column
@@ -94,6 +95,7 @@ rules all components follow are in [component-contract.md](component-contract.md
 - **VerdictSheet** — `verdict` — the combined rating-and-review editor.
 - **VerdictBlock** — `verdict` — book-page rating and review card that opens the verdict sheet.
 - **HowItReadBlock / HowItReadSheet** — `traits` — the private reading-survey panel and the sheet that edits it.
+- **YourCopyPanel** — `yourcopy` — the book page's private per-copy rows: a value or an invitation, with an optional trailing figure.
 
 ## Modifiers & helpers
 

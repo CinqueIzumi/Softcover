@@ -13,7 +13,10 @@ kotlin {
             api(project(":core:domain"))
             api(project(":core:identity"))
             implementation(project(":core:book"))
+            implementation(project(":core:corpus"))
+            implementation(project(":core:lists"))
             implementation(project(":core:network"))
+            implementation(project(":core:personal"))
 
             implementation(libs.rhaydus.coreCommon)
 

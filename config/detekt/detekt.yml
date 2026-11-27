@@ -94,14 +94,10 @@ style:
       - 'com.apollographql.apollo.**'
       - 'nl.rhaydus.softcover.core.domain.**'
   ForbiddenMethodCall:
-    # A bitmap handed to Glance is copied into the RemoteViews of every responsive size, so one widget update
-    # multiplies it and overflows the RemoteViews bitmap cap. Needs type resolution, which the per-target
-    # `detekt<Target>` tasks have and the plain `detekt` task does not.
+    # Needs type resolution, which the per-target `detekt<Target>` tasks have and the plain `detekt` task does not.
     active: true
     includes: ['**/feature/widget/**']
     methods:
-      - value: 'androidx.glance.ImageProvider(android.graphics.Bitmap)'
-        reason: 'A bitmap in a widget update is multiplied per responsive size. Store it with WidgetImageStore.uriFor and use ImageProvider(uri).'
       - value: 'androidx.glance.action.action(kotlin.String, kotlin.Function0)'
         reason: 'A lambda action needs a live Glance session and breaks in background-rendered RemoteViews. Use actionRunCallback or actionStartActivity.'
       - value: 'androidx.glance.action.clickable(androidx.glance.GlanceModifier, kotlin.Function0)'

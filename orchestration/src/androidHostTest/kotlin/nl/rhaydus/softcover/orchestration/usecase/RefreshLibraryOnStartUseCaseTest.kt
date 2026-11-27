@@ -21,7 +21,9 @@ class RefreshLibraryOnStartUseCaseTest {
     private lateinit var refreshLibraryUseCase: RefreshLibraryUseCase
     private lateinit var useCase: RefreshLibraryOnStartUseCase
 
-    private val readScope = RefreshScope.ByStatuses(statuses = setOf(UserBookStatus.READ))
+    private val readAndStoppedScope = RefreshScope.ByStatuses(
+        statuses = setOf(UserBookStatus.READ, UserBookStatus.DID_NOT_FINISH),
+    )
 
     private val activeScope = RefreshScope.ByStatuses(
         statuses = setOf(UserBookStatus.CURRENTLY_READING, UserBookStatus.PAUSED),
@@ -178,7 +180,7 @@ class RefreshLibraryOnStartUseCaseTest {
         }
 
         @Test
-        fun `refreshes only the read status when demographics are not backfilled`() = runTest {
+        fun `refreshes only the Read and Did not finish statuses when demographics are not backfilled`() = runTest {
             // ----- Arrange -----
             every {
                 settingsRepository.readThroughsBackfilled
@@ -197,13 +199,13 @@ class RefreshLibraryOnStartUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
-            coVerify(exactly = 1) { refreshLibraryUseCase(scope = readScope) }
+            coVerify(exactly = 1) { refreshLibraryUseCase(scope = readAndStoppedScope) }
             coVerify(exactly = 0) { refreshLibraryUseCase(scope = activeScope) }
             coVerify(exactly = 0) { settingsRepository.markReadThroughsBackfilled() }
         }
 
         @Test
-        fun `refreshes only the read status when contributor roles are not backfilled`() = runTest {
+        fun `refreshes only the Read and Did not finish statuses when contributor roles are not backfilled`() = runTest {
             // ----- Arrange -----
             every {
                 settingsRepository.readThroughsBackfilled
@@ -226,7 +228,7 @@ class RefreshLibraryOnStartUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
-            coVerify(exactly = 1) { refreshLibraryUseCase(scope = readScope) }
+            coVerify(exactly = 1) { refreshLibraryUseCase(scope = readAndStoppedScope) }
             coVerify(exactly = 0) { refreshLibraryUseCase(scope = activeScope) }
         }
 

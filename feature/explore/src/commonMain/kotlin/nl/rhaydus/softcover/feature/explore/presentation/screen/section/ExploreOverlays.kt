@@ -91,6 +91,8 @@ private fun ContinueSeriesMenuSheet(
                                 kind = event.key,
                             ),
                         )
+
+                        is SheetRowEvent.InputChanged -> Unit
                     }
                 },
             )
@@ -122,6 +124,8 @@ private fun RecommendedMenuSheet(
                     is SheetRowEvent.Selected -> runAction(
                         OnRecommendedHideChosenAction(bookId = event.key),
                     )
+
+                    is SheetRowEvent.InputChanged -> Unit
                 }
             },
         )
@@ -152,6 +156,8 @@ private fun BecauseYouReadGenreSheet(
                     is SheetRowEvent.Selected -> onEvent(
                         BecauseYouReadGenreSheetEvent.GenreSelected(genre = event.key),
                     )
+
+                    is SheetRowEvent.InputChanged -> Unit
                 }
             },
         )

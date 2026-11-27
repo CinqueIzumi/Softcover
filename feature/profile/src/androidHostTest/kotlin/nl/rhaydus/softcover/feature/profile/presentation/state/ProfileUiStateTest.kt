@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.profile.presentation.state
 
 import io.kotest.matchers.shouldBe
+import nl.rhaydus.softcover.core.profile.domain.model.PagesRead
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
@@ -9,6 +10,14 @@ import org.junit.jupiter.api.Test
 
 class ProfileUiStateTest {
     private val readingStats = ReadingStats()
+
+    private val pagesRead = PagesRead(
+        total = 0,
+        finishedBookCount = 0,
+        stoppedBookCount = 0,
+        hasInProgressPages = false,
+        pagesPerDay = null,
+    )
 
     private val readingHistory = ReadingHistory()
 
@@ -26,6 +35,7 @@ class ProfileUiStateTest {
             // ----- Arrange -----
             val state = ProfileUiState(
                 readingStats = readingStats,
+                pagesRead = pagesRead,
                 readingHistory = readingHistory,
                 userProfileData = profileData,
             )
@@ -58,6 +68,7 @@ class ProfileUiStateTest {
             // ----- Arrange -----
             val state = ProfileUiState(
                 readingStats = readingStats,
+                pagesRead = pagesRead,
                 readingHistory = null,
                 userProfileData = profileData,
             )
@@ -74,6 +85,7 @@ class ProfileUiStateTest {
             // ----- Arrange -----
             val state = ProfileUiState(
                 readingStats = readingStats,
+                pagesRead = pagesRead,
                 readingHistory = readingHistory,
                 userProfileData = null,
             )
@@ -94,6 +106,7 @@ class ProfileUiStateTest {
             val state = ProfileUiState(
                 isLoading = true,
                 readingStats = readingStats,
+                pagesRead = pagesRead,
                 readingHistory = readingHistory,
             )
 
@@ -126,7 +139,25 @@ class ProfileUiStateTest {
             val state = ProfileUiState(
                 isLoading = false,
                 readingStats = readingStats,
+                pagesRead = pagesRead,
                 readingHistory = null,
+            )
+
+            // ----- Act -----
+            val result = state.isReadingLifeLoading
+
+            // ----- Assert -----
+            result shouldBe true
+        }
+
+        @Test
+        fun `is true while the pages read have not loaded`() {
+            // ----- Arrange -----
+            val state = ProfileUiState(
+                isLoading = false,
+                readingStats = readingStats,
+                pagesRead = null,
+                readingHistory = readingHistory,
             )
 
             // ----- Act -----
@@ -142,6 +173,7 @@ class ProfileUiStateTest {
             val state = ProfileUiState(
                 isLoading = false,
                 readingStats = readingStats,
+                pagesRead = pagesRead,
                 readingHistory = readingHistory,
             )
 

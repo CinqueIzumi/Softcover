@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.widget.presentation.mapper
 
-import android.net.Uri
+import android.graphics.Bitmap
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -55,7 +55,7 @@ internal fun randomPickWidgetModels(
     changes: Flow<Unit>,
     settingsChanges: Flow<RandomPickSettingsChange> = emptyFlow(),
     resolve: suspend (wantToRead: List<Book>, lists: List<BookList>) -> Result<RandomPickResolution>,
-    coverUri: suspend (pick: RandomPickBook, coverHeightDp: Int) -> Uri?,
+    coverBitmap: suspend (pick: RandomPickBook, coverHeightDp: Int) -> Bitmap?,
     coverHeightDp: Flow<Int>,
     artwork: suspend (RandomPickBook) -> BookArtworkUiModel?,
 ): Flow<RandomPickWidgetUiModel> = flow {
@@ -110,7 +110,7 @@ internal fun randomPickWidgetModels(
             val resolved = settled.resolveInto(
                 inputs = inputs,
                 resolve = resolve,
-                coverUri = coverUri,
+                coverBitmap = coverBitmap,
                 coverHeightDp = coverHeightDp,
                 artwork = artwork,
             )
@@ -126,7 +126,7 @@ internal fun randomPickWidgetModels(
 private suspend fun FlowCollector<RandomPickWidgetUiModel>.resolveInto(
     inputs: RandomPickWidgetInputs,
     resolve: suspend (wantToRead: List<Book>, lists: List<BookList>) -> Result<RandomPickResolution>,
-    coverUri: suspend (pick: RandomPickBook, coverHeightDp: Int) -> Uri?,
+    coverBitmap: suspend (pick: RandomPickBook, coverHeightDp: Int) -> Bitmap?,
     coverHeightDp: Flow<Int>,
     artwork: suspend (RandomPickBook) -> BookArtworkUiModel?,
 ): Boolean {
@@ -155,7 +155,7 @@ private suspend fun FlowCollector<RandomPickWidgetUiModel>.resolveInto(
         is RandomPickResolution.Resolved -> emitResolved(
             inputs = inputs,
             resolution = resolution,
-            coverUri = coverUri,
+            coverBitmap = coverBitmap,
             coverHeightDp = coverHeightDp,
             artwork = artwork,
         )
@@ -167,7 +167,7 @@ private suspend fun FlowCollector<RandomPickWidgetUiModel>.resolveInto(
 private suspend fun FlowCollector<RandomPickWidgetUiModel>.emitResolved(
     inputs: RandomPickWidgetInputs,
     resolution: RandomPickResolution.Resolved,
-    coverUri: suspend (pick: RandomPickBook, coverHeightDp: Int) -> Uri?,
+    coverBitmap: suspend (pick: RandomPickBook, coverHeightDp: Int) -> Bitmap?,
     coverHeightDp: Flow<Int>,
     artwork: suspend (RandomPickBook) -> BookArtworkUiModel?,
 ) {
@@ -204,7 +204,7 @@ private suspend fun FlowCollector<RandomPickWidgetUiModel>.emitResolved(
     coverHeightDp.collectLatest { heightDp ->
         coroutineScope {
             val cover = async {
-                coverUri(
+                coverBitmap(
                     pick,
                     heightDp,
                 )
@@ -228,7 +228,7 @@ private suspend fun FlowCollector<RandomPickWidgetUiModel>.emitResolved(
                 )
             }
 
-            val (uri, resolvedArtwork) = ready ?: (cover.await() to art.await())
+            val (bitmap, resolvedArtwork) = ready ?: (cover.await() to art.await())
 
             shown = true
 
@@ -237,7 +237,7 @@ private suspend fun FlowCollector<RandomPickWidgetUiModel>.emitResolved(
                     picked(
                         eyebrow = eyebrow,
                         pick = pick,
-                        cover = uri.toCover(),
+                        cover = bitmap.toCover(),
                         artwork = resolvedArtwork,
                         imagesPending = false,
                     ),
@@ -268,10 +268,10 @@ private fun picked(
     imagesPending = imagesPending,
 )
 
-private fun Uri?.toCover(): RandomPickWidgetUiModel.Cover = if (this == null) {
+private fun Bitmap?.toCover(): RandomPickWidgetUiModel.Cover = if (this == null) {
     RandomPickWidgetUiModel.Cover.Missing
 } else {
-    RandomPickWidgetUiModel.Cover.Loaded(uri = this)
+    RandomPickWidgetUiModel.Cover.Loaded(bitmap = this)
 }
 
 private val IMAGE_HIT_WINDOW = 150.milliseconds

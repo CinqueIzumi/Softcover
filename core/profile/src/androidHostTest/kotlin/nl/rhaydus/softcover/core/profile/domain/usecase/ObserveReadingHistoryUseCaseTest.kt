@@ -5,11 +5,14 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.TimeZone
 import nl.rhaydus.common.AppDispatchers
+import nl.rhaydus.softcover.core.book.domain.usecase.GetDidNotFinishUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetReadUserBooksUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveProgressUpdatesUseCase
 import nl.rhaydus.softcover.core.profile.domain.mapper.readBook
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -23,15 +26,33 @@ class ObserveReadingHistoryUseCaseTest {
     }
 
     private lateinit var getReadUserBooksUseCase: GetReadUserBooksUseCase
-    private lateinit var useCase: ObserveReadingHistoryUseCase
+    private lateinit var getDidNotFinishUserBooksUseCase: GetDidNotFinishUserBooksUseCase
+    private lateinit var observeProgressUpdatesUseCase: ObserveProgressUpdatesUseCase
 
     @BeforeEach
     fun setUp() {
         getReadUserBooksUseCase = mockk()
-        val dispatcher = UnconfinedTestDispatcher()
+        getDidNotFinishUserBooksUseCase = mockk()
+        observeProgressUpdatesUseCase = mockk()
 
-        useCase = ObserveReadingHistoryUseCase(
-            getReadUserBooksUseCase = getReadUserBooksUseCase,
+        every {
+            getDidNotFinishUserBooksUseCase()
+        } returns flowOf(emptyList())
+
+        every {
+            observeProgressUpdatesUseCase()
+        } returns flowOf(emptyList())
+    }
+
+    private fun TestScope.buildUseCase(): ObserveReadingHistoryUseCase {
+        val dispatcher = UnconfinedTestDispatcher(testScheduler)
+
+        return ObserveReadingHistoryUseCase(
+            observePageCreditInputsUseCase = ObservePageCreditInputsUseCase(
+                observeProgressUpdatesUseCase = observeProgressUpdatesUseCase,
+                getReadUserBooksUseCase = getReadUserBooksUseCase,
+                getDidNotFinishUserBooksUseCase = getDidNotFinishUserBooksUseCase,
+            ),
             appDispatchers = AppDispatchers(
                 main = dispatcher,
                 io = dispatcher,
@@ -58,7 +79,7 @@ class ObserveReadingHistoryUseCaseTest {
             } returns flowOf(books)
 
             // ----- Act & Assert -----
-            useCase().test {
+            buildUseCase()().test {
                 val history = awaitItem()
                 history.booksByYear.map { it.year } shouldBe listOf(2025, 2026)
                 history.pagesByMonth.all { it.year == 2026 } shouldBe true
@@ -82,7 +103,7 @@ class ObserveReadingHistoryUseCaseTest {
             )
 
             // ----- Act & Assert -----
-            useCase().test {
+            buildUseCase()().test {
                 awaitItem().yearsRead shouldBe listOf(2025)
                 awaitComplete()
             }

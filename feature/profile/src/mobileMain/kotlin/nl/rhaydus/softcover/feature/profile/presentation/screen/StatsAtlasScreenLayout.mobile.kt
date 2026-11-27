@@ -23,6 +23,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.feature.profile.presentation.action.StatsAtlasAction
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.DayDetailSheet
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.StatsAtlasBody
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.atlasViewport
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.rememberAtlasChapterJumper
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
 
@@ -33,6 +34,8 @@ internal actual fun StatsAtlasScreenLayout(
     runAction: (StatsAtlasAction) -> Unit,
     onNavigateUp: () -> Unit,
     onBookCardEvent: (BookCardEvent) -> Unit,
+    onRecordEvent: (BookCardEvent) -> Unit,
+    onWaitingEvent: (BookCardEvent) -> Unit,
 ) {
     val scrollState = rememberScrollState()
 
@@ -55,7 +58,7 @@ internal actual fun StatsAtlasScreenLayout(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
-                .then(jumper.viewport())
+                .atlasViewport(jumper)
                 .verticalScroll(scrollState)
                 .cappedContentWidth()
                 .padding(horizontal = Spacing.gutter),
@@ -67,6 +70,8 @@ internal actual fun StatsAtlasScreenLayout(
                 jumper = jumper,
                 runAction = runAction,
                 onBookCardEvent = onBookCardEvent,
+                onRecordEvent = onRecordEvent,
+                onWaitingEvent = onWaitingEvent,
             )
 
             Spacer(modifier = Modifier.height(Spacing.xl))
@@ -88,6 +93,8 @@ private fun StatsAtlasScreenLightPreview() {
             runAction = {},
             onNavigateUp = {},
             onBookCardEvent = {},
+            onRecordEvent = {},
+            onWaitingEvent = {},
         )
     }
 }
@@ -101,6 +108,8 @@ private fun StatsAtlasScreenDarkPreview() {
             runAction = {},
             onNavigateUp = {},
             onBookCardEvent = {},
+            onRecordEvent = {},
+            onWaitingEvent = {},
         )
     }
 }

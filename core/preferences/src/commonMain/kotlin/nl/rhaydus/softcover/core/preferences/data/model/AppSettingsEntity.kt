@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.preferences.data.model
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
@@ -36,15 +37,16 @@ internal data class AppSettingsEntity(
     val authorRolesBackfilled: Boolean = false,
     // False until one refresh covering every status has stored each read's finish-date precision and edition pages.
     val readDatesBackfilled: Boolean = false,
+    val quotesSynced: Boolean = false,
     val libraryTabOrder: List<String> = emptyList(),
     val desktopWindowState: DesktopWindowStateEntity = DesktopWindowStateEntity(),
     val readingStreakEnabled: Boolean = true,
     val shelfSwipeEnabled: Boolean = false,
-    // Off by default: the author breakdown counts every author it knows about, untagged ones included,
-    // so the untagged share stays visible until the reader asks for the tagged-only reading.
-    val hideUntaggedAuthors: Boolean = false,
+    @SerialName("hideUntaggedAuthors")
+    val hideBooksWithoutDetail: Boolean = false,
     val lastUsedProgressUnit: ProgressUnit = ProgressUnit.PAGE,
     val uiScale: UiScale = UiScale.DEFAULT,
     // Null means "use the auto-derived most-read genre" - see GetBecauseYouReadBooksUseCase.
     val becauseYouReadGenre: String? = null,
+    val usualCurrencyCode: String? = null,
 )

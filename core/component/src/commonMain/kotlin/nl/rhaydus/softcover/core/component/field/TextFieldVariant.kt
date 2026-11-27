@@ -16,10 +16,10 @@ sealed interface TextFieldVariant {
         val size: TextFieldPillSize = TextFieldPillSize.Regular,
     ) : TextFieldVariant
 
-    /** A non-null [label] floats above the value. Only this variant can ask for a [numeric] keyboard. */
+    /** A non-null [label] floats above the value. */
     data class Outlined(
         val label: String? = null,
-        val numeric: Boolean = false,
+        val keyboard: TextFieldKeyboard = TextFieldKeyboard.Text,
     ) : TextFieldVariant
 
     /** An outlined box at least four lines tall that grows with its text. Return adds a line, so it never submits. */
@@ -27,6 +27,12 @@ sealed interface TextFieldVariant {
 
     /** Borderless display-face text, centred and shrunk until a long value fits one line. */
     data object Hero : TextFieldVariant
+
+    /** Borderless, start-aligned italic title-face text, so the field reads as an editorial-face sheet row. */
+    data object Bare : TextFieldVariant
+
+    /** [Bare] in the upright body face, so the field reads as a body-face sheet row. */
+    data object Plain : TextFieldVariant
 
     /**
      * A centred numeric entry sized for [charCount] glyphs. Input is limited to digits and its text is

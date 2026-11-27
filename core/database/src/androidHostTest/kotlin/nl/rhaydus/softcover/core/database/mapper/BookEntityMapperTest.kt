@@ -74,6 +74,14 @@ class BookEntityMapperTest {
         owned: Boolean = false,
     ): BookEdition = mockk {
         every {
+            this@mockk.language
+        } returns null
+
+        every {
+            this@mockk.isLanguageFetched
+        } returns false
+
+        every {
             this@mockk.id
         } returns id
 
@@ -888,6 +896,75 @@ class BookEntityMapperTest {
             result.releaseYear shouldBe 2020
             result.format shouldBe "Paperback"
             result.localImageUrl shouldBe null
+        }
+    }
+
+    @Nested
+    inner class BookEditionLanguageRoundTrip {
+        @Test
+        fun `keeps the language and the fetched flag through toEntity and back`() {
+            // ----- Arrange -----
+            val edition = BookEdition(
+                id = 10,
+                canonicalId = null,
+                bookId = 1,
+                publisher = null,
+                title = null,
+                url = null,
+                localImagePath = null,
+                isbn10 = null,
+                isbn13 = null,
+                pages = null,
+                audioSeconds = null,
+                authors = emptyList(),
+                releaseYear = 2020,
+                format = "Paperback",
+                owned = false,
+                language = "Dutch",
+                isLanguageFetched = true,
+            )
+
+            // ----- Act -----
+            val result = edition.toEntity().toModel(
+                authors = emptyList(),
+                owned = false,
+            )
+
+            // ----- Assert -----
+            result.language shouldBe "Dutch"
+            result.isLanguageFetched shouldBe true
+        }
+
+        @Test
+        fun `keeps a missing language and an unfetched flag`() {
+            // ----- Arrange -----
+            val edition = BookEdition(
+                id = 10,
+                canonicalId = null,
+                bookId = 1,
+                publisher = null,
+                title = null,
+                url = null,
+                localImagePath = null,
+                isbn10 = null,
+                isbn13 = null,
+                pages = null,
+                audioSeconds = null,
+                authors = emptyList(),
+                releaseYear = 2020,
+                format = "Paperback",
+                owned = false,
+            )
+
+            // ----- Act -----
+            val result = edition.toEntity().toModel(
+                authors = emptyList(),
+                owned = false,
+            )
+
+            // ----- Assert -----
+            result.language shouldBe null
+            result.isLanguageFetched shouldBe false
         }
     }
 

@@ -6,15 +6,19 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.layout.cappedContentWidth
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.divider.VerticalDivider
 import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.core.component.layout.DesktopScrollPage
 import nl.rhaydus.softcover.core.presentation.util.TabReselectScrollToTopEffect
+import nl.rhaydus.softcover.feature.settings.presentation.action.CurrencySettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.DocumentPageAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnSaveLibraryVisibilityAction
@@ -23,6 +27,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.AboutPane
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.LibraryVisibilitySaveBar
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.SettingsCategorySidebar
+import nl.rhaydus.softcover.feature.settings.presentation.state.CurrencySettingsUiState
 import nl.rhaydus.softcover.feature.settings.presentation.state.DocumentPageUiState
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
@@ -41,6 +46,7 @@ internal actual fun SettingsScreenLayout(
     navigateToProfile: () -> Unit,
     navigateToAppearanceSettings: () -> Unit,
     navigateToLibraryVisibility: () -> Unit,
+    navigateToCurrency: () -> Unit,
     navigateToWidgets: () -> Unit,
     navigateToHiddenSuggestions: () -> Unit,
     navigateToAbout: () -> Unit,
@@ -48,6 +54,8 @@ internal actual fun SettingsScreenLayout(
     navigateToRoadmap: () -> Unit,
     libraryVisibilityState: LibraryVisibilitySettingsUiState,
     libraryVisibilityRunAction: (LibraryVisibilityAction) -> Unit,
+    currencyState: CurrencySettingsUiState,
+    currencyRunAction: (CurrencySettingsAction) -> Unit,
     roadmapState: DocumentPageUiState?,
     roadmapRunAction: ((DocumentPageAction) -> Unit)?,
     whatsNewState: DocumentPageUiState?,
@@ -114,6 +122,15 @@ internal actual fun SettingsScreenLayout(
                         onCreateListClick = onCreateListClick,
                     )
                 }
+
+                SettingsCategory.CURRENCY -> CurrencySettingsContent(
+                    state = currencyState,
+                    runAction = currencyRunAction,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .cappedContentWidth()
+                        .padding(horizontal = Spacing.gutter),
+                )
 
                 SettingsCategory.ABOUT -> DesktopScrollPage(
                     scrollState = pageScrollState,

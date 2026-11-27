@@ -47,6 +47,17 @@ internal fun settingsSidebarFor(selectedCategory: SettingsCategory): SidebarUiMo
             ),
         ),
         SidebarSectionUiModel(
+            label = SectionHeaderUiModel.Label(eyebrow = "Your private data"),
+            rows = persistentListOf(
+                SidebarRowUiModel(
+                    key = SettingsSidebarKey.Category(category = SettingsCategory.CURRENCY),
+                    label = "Currency",
+                    icon = SoftcoverIcon.Euro,
+                    variant = SidebarRowVariant.Destination(selected = selectedCategory == SettingsCategory.CURRENCY),
+                ),
+            ),
+        ),
+        SidebarSectionUiModel(
             label = SectionHeaderUiModel.Label(eyebrow = "About"),
             rows = persistentListOf(
                 SidebarRowUiModel(
