@@ -56,7 +56,7 @@ internal class QuoteWidgetModelSource(
                 .filter { it == appWidgetId }
                 .map { getQuoteSelection(appWidgetId = appWidgetId).getOrNull() },
             fetchState = fetchTracker.state,
-            artworkUris = images::artworkUris,
+            loadArtwork = images::artwork,
         ).catch { error ->
             AppLog.e(
                 error,

@@ -16,6 +16,8 @@ class ExploreStandInsTest {
     private fun BookCardUiModel.standInCover(): CoverUiModel = when (val variant = variant) {
         is BookCardVariant.Column -> variant.cover.shouldNotBeNull().model
 
+        is BookCardVariant.Tile -> variant.cover.model
+
         is BookCardVariant.CoverOnly -> variant.cover.model
 
         is BookCardVariant.Row -> when (val lead = variant.lead) {

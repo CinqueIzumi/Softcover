@@ -188,6 +188,16 @@ private fun CompactTile(
                     )
                 }
             }
+
+            variant.caption?.let { caption ->
+                Spacer(modifier = Modifier.height(Spacing.xs))
+
+                FadeThroughText(
+                    text = caption,
+                    style = typography.bodySmall,
+                    color = colors.onSurfaceVariant,
+                )
+            }
         }
     }
 }

@@ -61,6 +61,46 @@ class BookTraitsDaoTest {
     }
 
     @Nested
+    inner class ObserveAll {
+        @Test
+        fun `emits every row and re-emits after an upsert and a delete`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val first = BookTraitsEntity(
+                bookId = 1,
+                updatedAt = 10L,
+            )
+
+            val second = BookTraitsEntity(
+                bookId = 2,
+                pace = "slow",
+                updatedAt = 20L,
+            )
+
+            dao.upsert(entity = first)
+
+            // ----- Act & Assert -----
+            dao.observeAll().test {
+                awaitItem() shouldBe listOf(first)
+
+                dao.upsert(entity = second)
+                awaitItem().toSet() shouldBe setOf(first, second)
+
+                dao.delete(bookId = 1)
+                awaitItem() shouldBe listOf(second)
+            }
+        }
+
+        @Test
+        fun `emits an empty list while the table is empty`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            // ----- Act & Assert -----
+            dao.observeAll().test {
+                awaitItem() shouldBe emptyList()
+            }
+        }
+    }
+
+    @Nested
     inner class Delete {
         @Test
         fun `delete removes only the requested book`() = runTest(testDispatcher) {

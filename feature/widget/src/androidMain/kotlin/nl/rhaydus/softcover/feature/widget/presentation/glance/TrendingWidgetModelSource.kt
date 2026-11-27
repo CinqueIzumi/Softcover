@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import nl.rhaydus.common.AppLog
+import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.navigation.TabDestination
 import nl.rhaydus.softcover.core.uibinding.cover.loadCoverBitmap
 import nl.rhaydus.softcover.core.uibinding.cover.resolveCoverSource
@@ -23,11 +24,13 @@ import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveTrendingChanges
 import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveTrendingFeedFetchingUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveTrendingFeedUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveTrendingSettingsChangesUseCase
+import nl.rhaydus.softcover.feature.widget.domain.util.TRENDING_PAGE_SIZE
 import nl.rhaydus.softcover.feature.widget.presentation.activity.TrendingSettingsActivity
 import nl.rhaydus.softcover.feature.widget.presentation.activity.widgetSettingsIntent
 import nl.rhaydus.softcover.feature.widget.presentation.image.WidgetImageFormat
 import nl.rhaydus.softcover.feature.widget.presentation.mapper.trendingWidgetModels
 import nl.rhaydus.softcover.feature.widget.presentation.model.TrendingWidgetUiModel
+import nl.rhaydus.softcover.feature.widget.presentation.util.fittingCoverHeightDp
 import nl.rhaydus.softcover.feature.widget.presentation.util.providerMinSize
 import nl.rhaydus.softcover.feature.widget.presentation.util.reportedWidgetSizes
 import nl.rhaydus.softcover.feature.widget.presentation.util.trendingCoverHeightDp
@@ -55,6 +58,28 @@ internal class TrendingWidgetModelSource(
     ): Flow<TrendingWidgetUiModel> {
         val density = context.resources.displayMetrics.density
 
+        // The shown page and the prefetch share one key, format and render, so a prefetched file is a later hit.
+        fun trendingCover(
+            book: Book,
+            coverHeightDp: Int,
+        ): TrendingCover? {
+            val coverHeightPx = (coverHeightDp * density).roundToInt()
+
+            val source = resolveCoverSource(
+                edition = book.currentEdition,
+                defaultEdition = book.defaultEdition,
+                fallbackCoverUrl = book.coverUrl,
+            ) ?: return null
+
+            return TrendingCover(key = "trending-cover:v2:$source:$coverHeightPx") {
+                loadCoverBitmap(
+                    context = context,
+                    source = source,
+                    sizePx = coverHeightPx,
+                )
+            }
+        }
+
         return trendingWidgetModels(
             isSignedIn = environment.isSignedIn(),
             themeConfiguration = environment.getThemeConfiguration(),
@@ -78,30 +103,43 @@ internal class TrendingWidgetModelSource(
             fetchStatus = { feed -> observeTrendingFeedFetching(feed = feed) },
             eyebrowFor = { feed -> context.getString(feed.eyebrowRes()) },
             emptyHeadlineFor = { feed -> context.getString(feed.emptyHeadlineRes()) },
-            coverUri = { book, coverHeightDp ->
-                val coverHeightPx = (coverHeightDp * density).roundToInt()
-
-                val source = resolveCoverSource(
-                    edition = book.currentEdition,
-                    defaultEdition = book.defaultEdition,
-                    fallbackCoverUrl = book.coverUrl,
-                )
-
-                source?.let {
-                    environment.imageStore.uriFor("trending-cover:v2:$it:$coverHeightPx", WidgetImageFormat.Photo) {
-                        loadCoverBitmap(
-                            context = context,
-                            source = it,
-                            sizePx = coverHeightPx,
-                        )
-                    }
+            coverBitmap = { book, coverHeightDp ->
+                trendingCover(
+                    book,
+                    coverHeightDp,
+                )?.let { cover ->
+                    environment.imageStore.bitmapFor(
+                        cover.key,
+                        WidgetImageFormat.Photo,
+                        cover.render,
+                    )
+                }
+            },
+            prefetchCover = { book, coverHeightDp ->
+                trendingCover(
+                    book,
+                    coverHeightDp,
+                )?.let { cover ->
+                    environment.imageStore.ensureCached(
+                        cover.key,
+                        WidgetImageFormat.Photo,
+                        cover.render,
+                    )
                 }
             },
             coverHeightDp = options
                 .map { bundle ->
-                    trendingCoverHeightDp(
-                        sizes = bundle.reportedWidgetSizes { context.providerMinSize(appWidgetId) },
-                        fontScale = context.resources.configuration.fontScale,
+                    val sizes = bundle.reportedWidgetSizes { context.providerMinSize(appWidgetId) }
+
+                    fittingCoverHeightDp(
+                        requestedDp = trendingCoverHeightDp(
+                            sizes = sizes,
+                            fontScale = context.resources.configuration.fontScale,
+                        ),
+                        density = density,
+                        sizeCount = sizes.size,
+                        fixedBytesPerSize = 0L,
+                        coversPerSize = TRENDING_PAGE_SIZE,
                     )
                 }
                 .distinctUntilChanged(),

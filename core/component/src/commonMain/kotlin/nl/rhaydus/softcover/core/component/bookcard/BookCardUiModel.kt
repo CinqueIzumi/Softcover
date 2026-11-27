@@ -91,6 +91,19 @@ data class BookCardUiModel(
             isLoading = true,
         )
 
+        private val LOADING_TILE = BookCardUiModel(
+            key = BookCardKey.Book(bookId = 35),
+            variant = BookCardVariant.Tile(
+                cover = BookCardCover(model = loadingCover()),
+                text = BookCardContent(
+                    title = "Loading title",
+                    eyebrow = BookCardEyebrow(text = "LONGEST BOOK"),
+                    supportingLines = persistentListOf(persistentListOf(BookCardLinePart.Text(text = "000 pages"))),
+                ),
+            ),
+            isLoading = true,
+        )
+
         override val previews: ImmutableMap<String, BookCardUiModel> = persistentMapOf(
             "Cover only, progress" to BookCardUiModel(
                 key = BookCardKey.Book(bookId = 1),
@@ -377,8 +390,20 @@ data class BookCardUiModel(
                 ),
                 decorations = BookCardDecorations(selection = BookCardSelection.Single(selected = false)),
             ),
+            "Tile" to BookCardUiModel(
+                key = BookCardKey.Book(bookId = 36),
+                variant = BookCardVariant.Tile(
+                    cover = bookCover(title = "The Wise Man's Fear"),
+                    text = BookCardContent(
+                        title = "The Wise Man's Fear",
+                        eyebrow = BookCardEyebrow(text = "LONGEST BOOK"),
+                        supportingLines = persistentListOf(persistentListOf(BookCardLinePart.Text(text = "994 pages"))),
+                    ),
+                ),
+            ),
             "Cover only, loading, progress" to LOADING_COVER_ONLY,
             "Column, loading" to LOADING_COLUMN,
+            "Tile, loading" to LOADING_TILE,
             "Row Standard, loading" to LOADING_ROW,
             "Row Standard, loading, series stack" to LOADING_SERIES_ROW,
         )

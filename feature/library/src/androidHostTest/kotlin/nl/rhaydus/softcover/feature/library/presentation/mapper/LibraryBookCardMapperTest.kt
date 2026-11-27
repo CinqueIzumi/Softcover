@@ -128,6 +128,7 @@ class LibraryBookCardMapperTest {
 
     private fun BookCardVariant.coverBadge() = when (this) {
         is BookCardVariant.Column -> cover?.badge
+        is BookCardVariant.Tile -> cover.badge
         is BookCardVariant.CoverOnly -> cover.badge
         is BookCardVariant.Row -> null
     }
@@ -139,6 +140,7 @@ class LibraryBookCardMapperTest {
 
     private fun BookCardVariant.byline(): String? = when (this) {
         is BookCardVariant.Column -> text.byline
+        is BookCardVariant.Tile -> text.byline
         is BookCardVariant.Row -> text.byline
         is BookCardVariant.CoverOnly -> null
     }
@@ -454,6 +456,7 @@ class LibraryBookCardMapperTest {
     inner class TransitionKeys {
         private fun BookCardVariant.titleKey(): BookTransitionKey? = when (this) {
             is BookCardVariant.Column -> text.titleTransitionKey
+            is BookCardVariant.Tile -> text.titleTransitionKey
             is BookCardVariant.Row -> text.titleTransitionKey
             is BookCardVariant.CoverOnly -> null
         }
@@ -623,6 +626,7 @@ class LibraryBookCardMapperTest {
 
         private fun BookCardVariant.stripOrNull(): BookCardTagStrip? = when (this) {
             is BookCardVariant.Column -> text.tagStrip
+            is BookCardVariant.Tile -> text.tagStrip
             is BookCardVariant.Row -> text.tagStrip
             is BookCardVariant.CoverOnly -> null
         }

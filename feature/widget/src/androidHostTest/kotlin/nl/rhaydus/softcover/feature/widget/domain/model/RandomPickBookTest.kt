@@ -53,6 +53,7 @@ class RandomPickBookTest {
         id: Int = 50,
         title: String?,
         authorName: String?,
+        owned: Boolean = false,
     ): BookEdition = BookEdition(
         id = id,
         canonicalId = null,
@@ -75,8 +76,58 @@ class RandomPickBookTest {
         ),
         releaseYear = 2000,
         format = "",
-        owned = false,
+        owned = owned,
     )
+
+    private val ownedEdition = edition(
+        id = 9,
+        title = "Owned edition title",
+        authorName = "Owned edition author",
+        owned = true,
+    )
+
+    private val unreadBook = book.copy(
+        editions = listOf(ownedEdition),
+        userBook = null,
+    )
+
+    @Nested
+    inner class ShownEdition {
+        @Test
+        fun `a list edition wins`() {
+            // ----- Arrange -----
+            val listEdition = edition(
+                title = "List edition title",
+                authorName = null,
+            )
+
+            val pick = RandomPickBook(
+                book = unreadBook,
+                listEdition = listEdition,
+            )
+
+            // ----- Act -----
+            val result = pick.shownEdition
+
+            // ----- Assert -----
+            (result === listEdition) shouldBe true
+        }
+
+        @Test
+        fun `with no list or reader edition it is the owned edition`() {
+            // ----- Arrange -----
+            val pick = RandomPickBook(
+                book = unreadBook,
+                listEdition = null,
+            )
+
+            // ----- Act -----
+            val result = pick.shownEdition
+
+            // ----- Assert -----
+            (result === ownedEdition) shouldBe true
+        }
+    }
 
     @Nested
     inner class Title {

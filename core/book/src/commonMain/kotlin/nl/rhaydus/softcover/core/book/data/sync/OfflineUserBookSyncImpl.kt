@@ -24,6 +24,8 @@ import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteQueue
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookStatus
+import nl.rhaydus.softcover.core.domain.model.JournalEventType
+import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
@@ -373,7 +375,8 @@ internal class OfflineUserBookSyncImpl(
         val reconciledUserBook: UserBook = userBook ?: return this
 
         val isReadingLike: Boolean = reconciledUserBook.status == BookStatus.Reading ||
-            reconciledUserBook.status == BookStatus.Paused
+            reconciledUserBook.status == BookStatus.Paused ||
+            reconciledUserBook.status == BookStatus.DidNotFinish
 
         if (isReadingLike.not() || reconciledUserBook.reads.any { it.isFinished.not() }) return this
 
@@ -470,12 +473,40 @@ internal class OfflineUserBookSyncImpl(
         )
     }
 
+    /**
+     * A Did not finish snapshot keeps its optimistic `status_stopped` journal entry because that entry drives
+     * the stop date and the stop-point displays while the fetch lags the queued write.
+     */
     private fun Book.preserveStatus(snapshot: Book): Book {
         val snapshotUserBook: UserBook = snapshot.userBook ?: return this
 
         val fetchedUserBook: UserBook = userBook ?: return this
 
-        return copy(userBook = fetchedUserBook.copy(status = snapshotUserBook.status))
+        val stoppedEntry: ReadingJournal? = snapshotUserBook.journals
+            .filter { it.event == JournalEventType.StatusDidNotFinish.eventName }
+            .maxByOrNull { it.updatedAt }
+            .takeIf { snapshotUserBook.status == BookStatus.DidNotFinish }
+
+        val snapshotJournalTimestamps: Set<String> = snapshotUserBook.journals.map { it.updatedAt }.toSet()
+
+        val fetchedHasStoppedEntry: Boolean = stoppedEntry == null ||
+            (
+                fetchedUserBook.status == BookStatus.DidNotFinish &&
+                    fetchedUserBook.journals.any {
+                        it.event == stoppedEntry.event && it.updatedAt !in snapshotJournalTimestamps
+                    }
+            )
+
+        return copy(
+            userBook = fetchedUserBook.copy(
+                status = snapshotUserBook.status,
+                journals = if (stoppedEntry == null || fetchedHasStoppedEntry) {
+                    fetchedUserBook.journals
+                } else {
+                    fetchedUserBook.journals + stoppedEntry
+                },
+            ),
+        )
     }
 
     private fun Book.preserveRating(snapshot: Book): Book {

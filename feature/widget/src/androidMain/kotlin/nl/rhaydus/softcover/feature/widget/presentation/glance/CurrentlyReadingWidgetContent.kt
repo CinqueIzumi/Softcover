@@ -35,14 +35,14 @@ import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.feature.widget.R
 import nl.rhaydus.softcover.feature.widget.presentation.activity.updateProgressIntent
 import nl.rhaydus.softcover.feature.widget.presentation.callback.CycleBookCallback
+import nl.rhaydus.softcover.feature.widget.presentation.component.BitmapMask
 import nl.rhaydus.softcover.feature.widget.presentation.component.CYCLE_EYEBROW_HEIGHT_DP
 import nl.rhaydus.softcover.feature.widget.presentation.component.CycleEyebrow
 import nl.rhaydus.softcover.feature.widget.presentation.component.SingleBookWidgetLayout
-import nl.rhaydus.softcover.feature.widget.presentation.component.UriMask
 import nl.rhaydus.softcover.feature.widget.presentation.component.WidgetMessage
 import nl.rhaydus.softcover.feature.widget.presentation.component.widgetCornerRadius
 import nl.rhaydus.softcover.feature.widget.presentation.model.CurrentlyReadingWidgetUiModel
-import nl.rhaydus.softcover.feature.widget.presentation.render.WavyProgressUris
+import nl.rhaydus.softcover.feature.widget.presentation.render.WavyProgressImages
 import nl.rhaydus.softcover.feature.widget.presentation.theme.LocalWidgetExtraColors
 import nl.rhaydus.softcover.feature.widget.presentation.theme.SoftcoverWidgetTheme
 import nl.rhaydus.softcover.feature.widget.presentation.util.PROGRESS_BAR_HEIGHT_DP
@@ -170,7 +170,7 @@ private fun ProgressRow(content: CurrentlyReadingWidgetUiModel.Content.Reading) 
 }
 
 @Composable
-private fun ProgressBar(progress: Map<Int, WavyProgressUris>) {
+private fun ProgressBar(progress: Map<Int, WavyProgressImages>) {
     val widthDp = progressBarWidthDp(LocalSize.current)
 
     val bars = progress[widthDp]
@@ -182,13 +182,13 @@ private fun ProgressBar(progress: Map<Int, WavyProgressUris>) {
     ) {
         if (bars == null) return@Box
 
-        UriMask(
+        BitmapMask(
             mask = bars.track,
             tint = GlanceTheme.colors.secondaryContainer,
             contentScale = ContentScale.Fit,
         )
 
-        UriMask(
+        BitmapMask(
             mask = bars.indicator,
             tint = GlanceTheme.colors.primary,
             contentScale = ContentScale.Fit,

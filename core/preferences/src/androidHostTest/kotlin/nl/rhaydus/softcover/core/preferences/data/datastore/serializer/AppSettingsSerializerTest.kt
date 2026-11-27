@@ -49,6 +49,18 @@ class AppSettingsSerializerTest {
         }
 
         @Test
+        fun `the key stored before the rename still decodes to hide books without detail`() = runTest {
+            // ----- Arrange -----
+            val json = """{"hideUntaggedAuthors": true}"""
+
+            // ----- Act -----
+            val result = read(json)
+
+            // ----- Assert -----
+            result.hideBooksWithoutDetail shouldBe true
+        }
+
+        @Test
         fun `unknown keys are ignored`() = runTest {
             // ----- Arrange -----
             val json = """{"userId": 7, "somethingFromTheFuture": {"a": 1}}"""

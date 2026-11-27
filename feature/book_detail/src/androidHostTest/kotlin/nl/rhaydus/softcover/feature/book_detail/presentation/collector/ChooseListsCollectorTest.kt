@@ -4,6 +4,7 @@ import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentSetOf
@@ -18,6 +19,7 @@ import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryTabOrderAsFlowUseCase
 import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
@@ -31,6 +33,7 @@ import org.junit.jupiter.api.Test
 class ChooseListsCollectorTest {
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
+    private lateinit var tabOrderFlow: MutableStateFlow<List<String>>
     private lateinit var scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>
 
     @BeforeEach
@@ -43,7 +46,19 @@ class ChooseListsCollectorTest {
             eventChannel = Channel(Channel.BUFFERED),
         )
 
+        tabOrderFlow = MutableStateFlow(emptyList())
+
+        val getTabOrder = mockk<GetLibraryTabOrderAsFlowUseCase>()
+
+        every {
+            getTabOrder()
+        } returns tabOrderFlow
+
         dependencies = mockk<BookDetailDependencies>(relaxed = true)
+
+        every {
+            dependencies.getLibraryTabOrderAsFlowUseCase
+        } returns getTabOrder
     }
 
     private fun buildList(
@@ -257,6 +272,36 @@ class ChooseListsCollectorTest {
             val row = stateFlow.value.chooseListsSheet?.rows?.first { it.listId == onList.id }.shouldNotBeNull()
             row.isPending shouldBe true
             row.membership shouldBe ListMembership.ALL
+            job.cancel()
+        }
+    }
+
+    @Nested
+    inner class RowOrder {
+        @Test
+        fun `a tab order change re-emits the rows in the new order`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val book = PreviewData.baseBook
+            val apple = buildList(id = 2, name = "Apple", slug = "apple", bookId = book.id)
+            val zebra = buildList(id = 1, name = "Zebra", slug = "zebra", bookId = book.id)
+
+            val job = launch {
+                ChooseListsCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            stateFlow.value = stateFlow.value.copy(
+                book = book,
+                userLists = persistentListOf(zebra, apple),
+            )
+
+            // ----- Act -----
+            tabOrderFlow.value = listOf("list-1")
+
+            // ----- Assert -----
+            stateFlow.value.chooseListsSheet?.rows.orEmpty().map { it.listId } shouldBe listOf(1, 2)
             job.cancel()
         }
     }

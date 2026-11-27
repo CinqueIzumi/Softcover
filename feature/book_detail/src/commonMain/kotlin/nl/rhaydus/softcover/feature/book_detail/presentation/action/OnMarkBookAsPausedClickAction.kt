@@ -4,6 +4,7 @@ import kotlinx.collections.immutable.toPersistentSet
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookStatus
+import nl.rhaydus.softcover.core.uibinding.session.SessionEndingStatus
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -12,14 +13,14 @@ import nl.rhaydus.toad.ActionScope
 
 internal class OnMarkBookAsPausedClickAction(
     private val book: Book,
-    private val sessionPauseConfirmed: Boolean = false,
+    private val sessionEndConfirmed: Boolean = false,
 ) : BookDetailAction {
     override suspend fun execute(
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
-        if (sessionPauseConfirmed.not() && scope.currentState.activeSessionBookId == book.id) {
-            scope.setState { it.copy(endSessionPauseRequested = true) }
+        if (sessionEndConfirmed.not() && scope.currentState.activeSessionBookId == book.id) {
+            scope.setState { it.copy(endSessionRequest = SessionEndingStatus.Paused) }
 
             return
         }

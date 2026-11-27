@@ -20,6 +20,7 @@ import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingActivity
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingDay
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingDayBook
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingDayEnding
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingStreak
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingDayUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.event.StatsAtlasEvent
@@ -52,7 +53,7 @@ class DayDetailCollectorTest {
             toPage = pages,
             updateCount = 1,
             pages = pages,
-            finished = false,
+            ending = ReadingDayEnding.NONE,
             firstUpdateAt = null,
             lastUpdateAt = null,
         )

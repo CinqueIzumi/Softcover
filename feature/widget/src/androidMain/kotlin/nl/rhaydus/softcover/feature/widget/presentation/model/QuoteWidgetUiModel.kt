@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.widget.presentation.model
 
-import android.net.Uri
+import android.graphics.Bitmap
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 
 internal data class QuoteWidgetUiModel(
@@ -35,10 +35,10 @@ internal data class QuoteWidgetUiModel(
 
     /** [backdrop] is `null` while the quote's edition has no cover. */
     data class Artwork(
-        val backdrop: Uri?,
-        val veil: Uri,
-        val veilLift: Uri,
-        val washPrimary: Uri,
-        val washTertiary: Uri,
+        val backdrop: Bitmap?,
+        val veil: Bitmap,
+        val veilLift: Bitmap,
+        val washPrimary: Bitmap,
+        val washTertiary: Bitmap,
     )
 }

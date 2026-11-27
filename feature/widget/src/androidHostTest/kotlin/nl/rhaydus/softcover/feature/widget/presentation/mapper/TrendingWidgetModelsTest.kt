@@ -1,7 +1,8 @@
 package nl.rhaydus.softcover.feature.widget.presentation.mapper
 
-import android.net.Uri
+import android.graphics.Bitmap
 import app.cash.turbine.test
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
@@ -33,7 +34,8 @@ import kotlin.time.Duration.Companion.seconds
 
 class TrendingWidgetModelsTest {
     private val requestedBookIds = mutableListOf<Int>()
-    private val coverUris = mutableMapOf<Int, Uri?>()
+    private val prefetchedBookIds = mutableListOf<Int>()
+    private val coverBitmaps = mutableMapOf<Int, Bitmap?>()
     private val coverDelaysMs = mutableMapOf<Int, Long>()
     private val requestedHeights = mutableListOf<Int>()
 
@@ -67,11 +69,14 @@ class TrendingWidgetModelsTest {
         fetchStatus = fetchStatus,
         eyebrowFor = { feed -> "Eyebrow ${feed.eyebrowName()}" },
         emptyHeadlineFor = { feed -> "Headline ${feed.eyebrowName()}" },
-        coverUri = { book, heightDp ->
+        coverBitmap = { book, heightDp ->
             requestedBookIds += book.id
             requestedHeights += heightDp
             delay(coverDelaysMs[book.id] ?: 0L)
-            coverUris[book.id]
+            coverBitmaps[book.id]
+        },
+        prefetchCover = { book, _ ->
+            prefetchedBookIds += book.id
         },
         coverHeightDp = coverHeightDp,
     )
@@ -359,8 +364,8 @@ class TrendingWidgetModelsTest {
         @Test
         fun `a cover that resolves within the hit window is shown in a single emission`() = runTest {
             // ----- Arrange -----
-            val uri = mockk<Uri>()
-            coverUris[1] = uri
+            val bitmap = mockk<Bitmap>()
+            coverBitmaps[1] = bitmap
             coverDelaysMs[1] = 50L
             coverDelaysMs[2] = 50L
             val flow = models(observeTrending = fixedBooks(listOf(book(1), book(2))))
@@ -371,7 +376,7 @@ class TrendingWidgetModelsTest {
                 val content = awaitItem().content.shouldBeInstanceOf<TrendingWidgetUiModel.Content.Ranked>()
 
                 content.items.map { it.cover } shouldContainExactly listOf(
-                    TrendingWidgetUiModel.Cover.Loaded(uri = uri),
+                    TrendingWidgetUiModel.Cover.Loaded(bitmap = bitmap),
                     TrendingWidgetUiModel.Cover.Missing,
                 )
 
@@ -382,8 +387,8 @@ class TrendingWidgetModelsTest {
         @Test
         fun `a slow cover shows the page with pending covers first, then the resolved covers`() = runTest {
             // ----- Arrange -----
-            val uri = mockk<Uri>()
-            coverUris[1] = uri
+            val bitmap = mockk<Bitmap>()
+            coverBitmaps[1] = bitmap
             coverDelaysMs[1] = 200L
             coverDelaysMs[2] = 200L
             val flow = models(observeTrending = fixedBooks(listOf(book(1), book(2))))
@@ -397,7 +402,7 @@ class TrendingWidgetModelsTest {
                 val resolved = awaitItem().content.shouldBeInstanceOf<TrendingWidgetUiModel.Content.Ranked>()
 
                 resolved.items.map { it.cover } shouldContainExactly listOf(
-                    TrendingWidgetUiModel.Cover.Loaded(uri = uri),
+                    TrendingWidgetUiModel.Cover.Loaded(bitmap = bitmap),
                     TrendingWidgetUiModel.Cover.Missing,
                 )
 
@@ -427,8 +432,8 @@ class TrendingWidgetModelsTest {
         fun `a new cover height resolves the page's covers again at that height and emits them`() = runTest {
             // ----- Arrange -----
             val heights = MutableStateFlow(200)
-            val uri = mockk<Uri>()
-            coverUris[1] = uri
+            val bitmap = mockk<Bitmap>()
+            coverBitmaps[1] = bitmap
 
             val flow = models(
                 coverHeightDp = heights,
@@ -443,7 +448,7 @@ class TrendingWidgetModelsTest {
 
                 // ----- Assert -----
                 reresolved.items.map { it.cover } shouldContainExactly listOf(
-                    TrendingWidgetUiModel.Cover.Loaded(uri = uri),
+                    TrendingWidgetUiModel.Cover.Loaded(bitmap = bitmap),
                     TrendingWidgetUiModel.Cover.Missing,
                 )
 
@@ -453,7 +458,7 @@ class TrendingWidgetModelsTest {
         }
 
         @Test
-        fun `a middle page prefetches the covers of the previous and next page`() = runTest {
+        fun `a middle page prefetches the covers of the previous and next page without decoding them`() = runTest {
             // ----- Arrange -----
             val flow = models(
                 position = flowOf(positionAt(1)),
@@ -467,7 +472,8 @@ class TrendingWidgetModelsTest {
             }
 
             // ----- Assert -----
-            requestedBookIds.sorted() shouldContainExactly listOf(1, 2, 3, 4, 5, 6)
+            requestedBookIds.sorted() shouldContainExactly listOf(3, 4)
+            prefetchedBookIds.sorted() shouldContainExactly listOf(1, 2, 5, 6)
         }
 
         @Test
@@ -485,7 +491,8 @@ class TrendingWidgetModelsTest {
             }
 
             // ----- Assert -----
-            requestedBookIds.sorted() shouldContainExactly listOf(1, 2, 3, 4, 9, 10)
+            requestedBookIds.sorted() shouldContainExactly listOf(1, 2)
+            prefetchedBookIds.sorted() shouldContainExactly listOf(3, 4, 9, 10)
         }
 
         @Test
@@ -503,7 +510,8 @@ class TrendingWidgetModelsTest {
             }
 
             // ----- Assert -----
-            requestedBookIds.sorted() shouldContainExactly listOf(1, 2, 7, 8, 9, 10)
+            requestedBookIds.sorted() shouldContainExactly listOf(9, 10)
+            prefetchedBookIds.sorted() shouldContainExactly listOf(1, 2, 7, 8)
         }
 
         @Test
@@ -518,7 +526,8 @@ class TrendingWidgetModelsTest {
             }
 
             // ----- Assert -----
-            requestedBookIds.sorted() shouldContainExactly listOf(1, 2, 3, 4)
+            requestedBookIds.sorted() shouldContainExactly listOf(1, 2)
+            prefetchedBookIds.sorted() shouldContainExactly listOf(3, 4)
         }
 
         @Test
@@ -534,6 +543,7 @@ class TrendingWidgetModelsTest {
 
             // ----- Assert -----
             requestedBookIds.sorted() shouldContainExactly listOf(1, 2)
+            prefetchedBookIds.shouldBeEmpty()
         }
 
         @Test
