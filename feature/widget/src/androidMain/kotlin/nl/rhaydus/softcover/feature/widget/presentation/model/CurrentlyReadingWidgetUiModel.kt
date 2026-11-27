@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.feature.widget.presentation.model
 
-import android.net.Uri
+import android.graphics.Bitmap
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
-import nl.rhaydus.softcover.feature.widget.presentation.render.WavyProgressUris
+import nl.rhaydus.softcover.feature.widget.presentation.render.WavyProgressImages
 
 internal data class CurrentlyReadingWidgetUiModel(
     val themeConfiguration: ThemeConfiguration,
@@ -25,9 +25,9 @@ internal data class CurrentlyReadingWidgetUiModel(
             val author: String,
             val bookId: Int,
             val progressLabel: String,
-            val cover: Uri?,
+            val cover: Bitmap?,
             /** One render per bar width in dp, keyed by [progressBarWidthDp] of each size the launcher reports. */
-            val progress: Map<Int, WavyProgressUris>,
+            val progress: Map<Int, WavyProgressImages>,
             val eyebrow: String,
             val canCycle: Boolean,
             val artwork: BookArtworkUiModel?,

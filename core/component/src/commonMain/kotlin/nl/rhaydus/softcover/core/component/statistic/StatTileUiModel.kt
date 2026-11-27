@@ -37,6 +37,14 @@ data class StatTileUiModel(
                 ),
                 variant = StatTileVariant.Compact(unit = "★"),
             ),
+            "Compact, captioned" to StatTileUiModel(
+                eyebrow = "Time on the list",
+                stat = StatNumberUiModel(value = 4.0),
+                variant = StatTileVariant.Compact(
+                    unit = "months",
+                    caption = "Typical wait from adding a book to starting it, for the 27 books you started.",
+                ),
+            ),
             "Compact, no value" to StatTileUiModel(
                 eyebrow = "Avg. rating",
                 stat = null,

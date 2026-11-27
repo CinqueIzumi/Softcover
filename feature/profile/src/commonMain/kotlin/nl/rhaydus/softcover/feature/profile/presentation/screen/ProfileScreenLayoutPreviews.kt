@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.profile.presentation.screen
 import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.readingSummaryUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profilePagesReadPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingActivityPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingHistoryPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingStatsPreview
@@ -22,6 +23,7 @@ internal val ProfileScreenPreviewState = ProfileUiState(
         bio = "Mostly literary fiction, the occasional doorstop fantasy.",
     ),
     readingStats = PreviewReadingStats,
+    pagesRead = profilePagesReadPreview(),
     readingHistory = PreviewReadingHistory,
     readingSummary = readingSummaryUiModel(
         history = PreviewReadingHistory,

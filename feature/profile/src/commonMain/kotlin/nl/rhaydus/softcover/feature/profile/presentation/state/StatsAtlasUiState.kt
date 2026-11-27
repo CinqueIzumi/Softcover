@@ -53,6 +53,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasFormatSplit
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasMonthlyPages
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasTimeOfDayPages
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasTopAuthors
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.inYourWordsUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.loadingGenreHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.loadingMonthlyPagesChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.loadingMonthlyPagesHeader
@@ -66,13 +67,16 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsAverageCa
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsAverageUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsEmptyCaption
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.readingRecordsUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeToFinishUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.toRatingsHistogramCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.toRatingsHistogramHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.topAuthorRows
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.topAuthorsCaption
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.waitingLongestUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearHistoryCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearHistoryChartUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.yourReadingListUiModel
 import nl.rhaydus.toad.UiState
 
 internal data class StatsAtlasUiState(
@@ -207,6 +211,30 @@ internal data class StatsAtlasUiState(
     /** Mapped by `AtlasScopedSectionsCollector`; masked while loading. */
     val timeToFinish: TimeToFinishUiModel = timeToFinishUiModel(
         timeToFinish = null,
+        scope = StatsScope.AllTime,
+    ),
+
+    /** Mapped by `AtlasScopedSectionsCollector`; masked while loading. */
+    val readingRecords: ReadingRecordsUiModel = readingRecordsUiModel(
+        stats = null,
+        timeToFinish = null,
+        scope = StatsScope.AllTime,
+    ),
+
+    /** Mapped by `AtlasScopedSectionsCollector`; masked while loading. */
+    val yourReadingList: YourReadingListUiModel = yourReadingListUiModel(
+        stats = null,
+        booksRead = null,
+        didNotFinish = null,
+        scope = StatsScope.AllTime,
+    ),
+
+    /** Mapped by `WaitingLongestCollector`; scope-free, and stand-in rows until the first emission. */
+    val waitingLongest: WaitingLongestUiModel = waitingLongestUiModel(longest = null),
+
+    val inYourWords: InYourWordsUiModel = inYourWordsUiModel(
+        written = null,
+        ownTags = null,
         scope = StatsScope.AllTime,
     ),
 

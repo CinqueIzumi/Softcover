@@ -8,9 +8,12 @@ internal data class RandomPickBook(
     val book: Book,
     val listEdition: BookEdition?,
 ) {
+    val shownEdition: BookEdition?
+        get() = listEdition ?: book.currentEdition
+
     val title: String
-        get() = listEdition?.let(book::titleIn) ?: book.displayTitle
+        get() = book.titleIn(shownEdition)
 
     val author: String
-        get() = listEdition?.let(book::authorsIn) ?: book.authorString
+        get() = book.authorsIn(shownEdition)
 }

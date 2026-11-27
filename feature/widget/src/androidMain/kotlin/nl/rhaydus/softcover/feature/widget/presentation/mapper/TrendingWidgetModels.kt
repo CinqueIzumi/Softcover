@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.widget.presentation.mapper
 
-import android.net.Uri
+import android.graphics.Bitmap
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
@@ -50,9 +50,9 @@ private class TrendingWidgetInputs(
  * [position] re-emits on every settings or page change, because a live Glance session does not re-run
  * `provideGlance`. [observeTrending] arrives ordered by rank.
  *
- * Each input emits the page with its covers pending, then again with their [coverUri]s, and again whenever
+ * Each input emits the page with its covers pending, then again with their [coverBitmap]s, and again whenever
  * [coverHeightDp] changes. Covers that resolve within [COVER_HIT_WINDOW] skip the pending step. Once the page is
- * shown, the neighbouring pages' covers are resolved in the background so a page turn finds them ready.
+ * shown, the neighbouring pages' covers are warmed through [prefetchCover] so a page turn finds them ready.
  *
  * An empty ranking shows the loader, with the eyebrow of the feed, until [fetchStatus] says the feed has had data,
  * so [TrendingWidgetUiModel.Content.Empty] means a fetch finished with nothing, and
@@ -73,7 +73,8 @@ internal fun trendingWidgetModels(
     fetchStatus: (TrendingFeed) -> Flow<TrendingFeedFetchStatus>,
     eyebrowFor: (TrendingFeed) -> String,
     emptyHeadlineFor: (TrendingFeed) -> String,
-    coverUri: suspend (book: Book, coverHeightDp: Int) -> Uri?,
+    coverBitmap: suspend (book: Book, coverHeightDp: Int) -> Bitmap?,
+    prefetchCover: suspend (book: Book, coverHeightDp: Int) -> Unit,
     coverHeightDp: Flow<Int>,
 ): Flow<TrendingWidgetUiModel> {
     val positionedBooks = position.flatMapLatest { current ->
@@ -129,7 +130,8 @@ internal fun trendingWidgetModels(
                     inputs = inputs,
                     eyebrowFor = eyebrowFor,
                     emptyHeadlineFor = emptyHeadlineFor,
-                    coverUri = coverUri,
+                    coverBitmap = coverBitmap,
+                    prefetchCover = prefetchCover,
                     coverHeightDp = coverHeightDp,
                 )
             },
@@ -141,7 +143,8 @@ private suspend fun FlowCollector<TrendingWidgetUiModel>.emitRanking(
     inputs: TrendingWidgetInputs,
     eyebrowFor: (TrendingFeed) -> String,
     emptyHeadlineFor: (TrendingFeed) -> String,
-    coverUri: suspend (book: Book, coverHeightDp: Int) -> Uri?,
+    coverBitmap: suspend (book: Book, coverHeightDp: Int) -> Bitmap?,
+    prefetchCover: suspend (book: Book, coverHeightDp: Int) -> Unit,
     coverHeightDp: Flow<Int>,
 ) {
     if (inputs.isSignedIn.not()) {
@@ -198,7 +201,7 @@ private suspend fun FlowCollector<TrendingWidgetUiModel>.emitRanking(
         coroutineScope {
             val covers = shown.map { book ->
                 async {
-                    coverUri(
+                    coverBitmap(
                         book,
                         heightDp,
                     )
@@ -250,7 +253,7 @@ private suspend fun FlowCollector<TrendingWidgetUiModel>.emitRanking(
                 .flatMap { top.pageBooks(it) }
                 .forEach { book ->
                     launch {
-                        coverUri(
+                        prefetchCover(
                             book,
                             heightDp,
                         )
@@ -267,10 +270,10 @@ private fun TrendingWidgetInputs.model(content: TrendingWidgetUiModel.Content) =
 
 private fun List<Book>.pageBooks(page: Int): List<Book> = drop(page * TRENDING_PAGE_SIZE).take(TRENDING_PAGE_SIZE)
 
-private fun Uri?.toCover(): TrendingWidgetUiModel.Cover = if (this == null) {
+private fun Bitmap?.toCover(): TrendingWidgetUiModel.Cover = if (this == null) {
     TrendingWidgetUiModel.Cover.Missing
 } else {
-    TrendingWidgetUiModel.Cover.Loaded(uri = this)
+    TrendingWidgetUiModel.Cover.Loaded(bitmap = this)
 }
 
 private fun ranked(

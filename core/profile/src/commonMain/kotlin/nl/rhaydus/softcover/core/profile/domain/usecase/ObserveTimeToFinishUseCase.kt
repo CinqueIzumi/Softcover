@@ -8,6 +8,7 @@ import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.core.domain.model.StatsRange
 import nl.rhaydus.softcover.core.profile.domain.mapper.countExcludedReads
+import nl.rhaydus.softcover.core.profile.domain.mapper.quickestRead
 import nl.rhaydus.softcover.core.profile.domain.mapper.toReadDurations
 import nl.rhaydus.softcover.core.profile.domain.mapper.toTimeToFinish
 import nl.rhaydus.softcover.core.profile.domain.model.TimeToFinish
@@ -18,8 +19,11 @@ class ObserveTimeToFinishUseCase internal constructor(
 ) {
     operator fun invoke(range: StatsRange): Flow<TimeToFinish> = getAllUserBooksUseCase()
         .map { books ->
-            books.toReadDurations(range)
+            val durations = books.toReadDurations(range)
+
+            durations
                 .toTimeToFinish(excludedReadCount = books.countExcludedReads(range))
+                .copy(quickestRead = durations.quickestRead(books))
         }
         .flowOn(appDispatchers.default)
         .distinctUntilChanged()

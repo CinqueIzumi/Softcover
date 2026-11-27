@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.widget.presentation.glance
 
-import android.net.Uri
+import android.graphics.Bitmap
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import kotlinx.collections.immutable.persistentListOf
@@ -59,7 +59,7 @@ class TrendingWidgetModelSourceTest {
             // ----- Arrange -----
             val model = model(
                 ranked(
-                    TrendingWidgetUiModel.Cover.Loaded(mockk<Uri>()),
+                    TrendingWidgetUiModel.Cover.Loaded(mockk<Bitmap>()),
                     TrendingWidgetUiModel.Cover.Pending,
                 ),
             )
@@ -76,7 +76,7 @@ class TrendingWidgetModelSourceTest {
             // ----- Arrange -----
             val model = model(
                 ranked(
-                    TrendingWidgetUiModel.Cover.Loaded(mockk<Uri>()),
+                    TrendingWidgetUiModel.Cover.Loaded(mockk<Bitmap>()),
                     TrendingWidgetUiModel.Cover.Missing,
                 ),
             )

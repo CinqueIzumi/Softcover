@@ -13,6 +13,7 @@ import nl.rhaydus.softcover.core.personal.data.datasource.QuoteRemoteDataSource
 import nl.rhaydus.softcover.core.personal.data.mapper.newPendingQuoteEntity
 import nl.rhaydus.softcover.core.personal.data.mapper.toDomain
 import nl.rhaydus.softcover.core.personal.domain.repository.QuoteRepository
+import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 import kotlin.time.Clock
 import kotlin.time.Instant
 
@@ -20,6 +21,7 @@ internal class QuoteRepositoryImpl(
     private val localDataSource: QuoteLocalDataSource,
     private val remoteDataSource: QuoteRemoteDataSource,
     private val drainer: QuoteWriteDrainer,
+    private val settingsRepository: SettingsRepository,
     private val clock: Clock,
 ) : QuoteRepository {
     override fun observeForBook(bookId: Int): Flow<List<Quote>> =
@@ -46,6 +48,8 @@ internal class QuoteRepositoryImpl(
         drainer.drain()
 
         localDataSource.replaceAllSynced(remote = remoteDataSource.getAllQuotes())
+
+        settingsRepository.markQuotesSynced()
     }
 
     override suspend fun add(

@@ -5,7 +5,6 @@ import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.Gender
 import nl.rhaydus.softcover.core.domain.model.StatsRange
-import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
@@ -13,14 +12,13 @@ import nl.rhaydus.softcover.core.profile.domain.model.AuthorRanking
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.FormatSplit
 import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
-import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
-import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
+import nl.rhaydus.softcover.core.profile.domain.model.LongestBook
+import nl.rhaydus.softcover.core.profile.domain.model.OwnTagCount
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
 import kotlin.math.roundToInt
 
-private const val GENRES_PER_BOOK = 10
 private const val RATING_BUCKET_COUNT = 9
 private const val RATING_BUCKET_STEP = 0.5
 private const val RATING_BUCKET_FLOOR = 1.0
@@ -38,17 +36,36 @@ internal fun List<Book>.toReadingStats(
 
     return ReadingStats(
         booksRead = inRange.size,
-        totalPages = inRange.sumOf { it.statsPages() },
         genres = inRange.toGenreBreakdown(userTagsByBookId),
         ratings = inRange.toRatingsDistribution(),
         authorDemographics = inRange.toAuthorDemographics(),
         topAuthors = inRange.toTopAuthors(),
         formatSplit = inRange.toFormatSplit(),
+        longestBook = inRange.longestBook(),
+        ownTags = inRange.toOwnTagCounts(userTagsByBookId),
     )
 }
 
 /** The reader's own edition decides the page count, then the book's, since editions differ widely. */
 internal fun Book.statsPages(): Int = readerEdition?.pages ?: pages ?: 0
+
+/**
+ * The book with the most pages; a tie goes to the later finish (none ranks last), then the higher
+ * book id. Null when no book has a known page count.
+ */
+internal fun List<Book>.longestBook(): LongestBook? {
+    val winner = filter { it.statsPages() > 0 }
+        .maxWithOrNull(
+            compareBy<Book> { it.statsPages() }
+                .thenBy(nullsFirst()) { it.userBook?.finishDate }
+                .thenBy { it.id },
+        ) ?: return null
+
+    return LongestBook(
+        book = winner,
+        pages = winner.statsPages(),
+    )
+}
 
 private fun List<Book>.toFormatSplit(): FormatSplit {
     val formats = map { it.readerEdition?.readingFormat }
@@ -100,59 +117,26 @@ private fun List<Double>.toHalfStarBuckets(): List<Int> {
     return buckets
 }
 
-// Fractions are shares of the books with at least one genre, not of genre assignments; untagged books
-// stay out of the denominator. A book counts with its top Hardcover genres plus the reader's own, deduped
-// ignoring case so one genre is one slice, and the most common Hardcover spelling (ties by name) wins where both exist.
-private fun List<Book>.toGenreBreakdown(userTagsByBookId: Map<Int, List<UserTag>>): GenreBreakdown {
-    val genreNamesPerBook = map { book ->
-        book.hardcoverGenreNames() + userGenreNames(userTagsByBookId[book.id].orEmpty())
-    }.map { names -> names.distinctBy { it.lowercase() } }
-        .filter { it.isNotEmpty() }
-
-    if (genreNamesPerBook.isEmpty()) return GenreBreakdown()
-
-    val hardcoverSpellings = flatMap { it.hardcoverGenreNames() }
-        .groupBy { it.lowercase() }
-        .mapValues { (_, spellings) ->
-            spellings
-                .groupingBy { it }
-                .eachCount()
-                .entries
-                .sortedWith(
-                    compareByDescending<Map.Entry<String, Int>> { it.value }.thenBy { it.key },
-                )
-                .first()
-                .key
-        }
-
-    val slices = genreNamesPerBook
-        .flatten()
-        .groupBy { it.lowercase() }
-        .map { (key, spellings) ->
-            GenreSlice(
-                name = hardcoverSpellings[key] ?: spellings.first(),
-                count = spellings.size,
-                fraction = spellings.size.toDouble() / genreNamesPerBook.size,
-            )
-        }
-        .sortedWith(
-            compareByDescending<GenreSlice> { it.count }.thenBy { it.name },
+// Names are matched exactly, so a row lines up with the library's (category, name) filter key; a name
+// repeated on one book counts once. Ties order by lowercase name, then by name, as the library list does.
+private fun List<Book>.toOwnTagCounts(userTagsByBookId: Map<Int, List<UserTag>>): List<OwnTagCount> = flatMap { book ->
+    userTagsByBookId[book.id].orEmpty()
+        .filter { it.category == TagCategory.TAG }
+        .map { it.name }
+        .distinct()
+}.groupingBy { it }
+    .eachCount()
+    .map { (name, bookCount) ->
+        OwnTagCount(
+            name = name,
+            bookCount = bookCount,
         )
-
-    return GenreBreakdown(slices = slices)
-}
-
-private fun Book.hardcoverGenreNames(): List<String> = tags
-    .filter { it.category == TagCategory.GENRE }
+    }
     .sortedWith(
-        compareByDescending<Tag> { it.count }.thenBy { it.name },
+        compareByDescending<OwnTagCount> { it.bookCount }
+            .thenBy { it.name.lowercase() }
+            .thenBy { it.name },
     )
-    .take(GENRES_PER_BOOK)
-    .map { it.name }
-
-private fun userGenreNames(userTags: List<UserTag>): List<String> = userTags
-    .filter { it.category == TagCategory.GENRE }
-    .map { it.name }
 
 // Authors are deduped by id across the range, so one who wrote many of the books counts once. A
 // null gender is Gender.Unknown, a bucket of its own pinned last and never folded into Other. No

@@ -30,6 +30,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingDay
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingDayBook
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingDayEnding
 import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.state.AtlasStreaks
 import nl.rhaydus.softcover.feature.profile.presentation.state.DayDetailBook
@@ -157,7 +158,11 @@ private fun ReadingDayBook.toRow(book: Book?): Pair<BookCardUiModel, DayDetailBo
 private fun ReadingDayBook.caption(): String = listOfNotNull(
     if (fromPage == 0) "Up to page $toPage" else "Pages $fromPage to $toPage",
     updatesLabel(),
-    "finished".takeIf { finished },
+    when (ending) {
+        ReadingDayEnding.FINISHED -> "finished"
+        ReadingDayEnding.STOPPED -> "stopped here"
+        ReadingDayEnding.NONE -> null
+    },
 ).joinToString(separator = " · ")
 
 private fun ReadingDayBook.updatesLabel(): String? {

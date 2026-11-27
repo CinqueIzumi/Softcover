@@ -27,16 +27,16 @@ rules all components follow are in [component-contract.md](component-contract.md
 
 ## Chips
 
-- **Chip** — `chip` — the one chip, in ten tones (`TonalDashed` the indeterminate third state) with leading and trailing slots; `Disclosure` flips while expanded; `Eyebrow` face sets caps.
+- **Chip** — `chip` — the one chip, in ten tones (`TonalDashed` the indeterminate third state) with leading and trailing slots; `Disclosure` flips while expanded; `Count` adds a muted count in the chip's own ink; `Eyebrow` face sets caps.
 - **ChipFlow** — `chip` — wraps a `ChipSet` in one flow row.
 
 ## Covers & cards
 
 - **Cover** — `cover` — the only book-cover renderer; falls back to a coverless title jacket, never blank.
 - **CoverOverlay** — `badge` — pins a `Badge` to a cover's corner, optionally greying the cover.
-- **BookCard** — `bookcard` — the one book or series card: cover-only, column or row.
+- **BookCard** — `bookcard` — the one book or series card: cover-only, column, row or tile.
 - **BookCardRail** — `bookcard` — a pageable card rail.
-- **QuoteCard** — `quote` — one saved quote in the editorial quote pattern, with a Delete menu.
+- **QuoteCard** — `quote` — a quote in the editorial quote pattern: saved with a Delete menu, or over a tappable book footer.
 - **MoodTile** — `mood` — a mood's title and book count on one of four inks.
 
 ## States & feedback
@@ -70,9 +70,9 @@ rules all components follow are in [component-contract.md](component-contract.md
 ## Statistics
 
 - **StatNumber** — `statistic` — springs or rolls a number into place, with an optional prefix or suffix.
-- **StatTile** — `statistic` — a labelled stat on a hero, standard or compact tile; null stat is a dash and the compact tile drops its unit.
+- **StatTile** — `statistic` — a labelled stat on a hero, standard or compact tile; null stat is a dash and compact adds a caption, drops its unit.
 - **ColumnChart** — `chart` — vertical columns on one baseline with a per-column readout.
-- **RankedBars** — `chart` — numbered rows, each a name over a bar filled relative to the lead row, with its share.
+- **RankedBars** — `chart` — numbered rows, each a name over a bar filled relative to the lead row, with its value; rows can be tappable.
   Rows from `visibleCount` on fold in and out one by one.
 - **ProportionChart** — `chart` — one slim stacked bar of parts of a whole, with its legend as rows or inline keys (`ProportionChartVariant`).
 - **YearGrid** — `chart` — a year of day squares, a row per month, tinted by pages read on four steps with a

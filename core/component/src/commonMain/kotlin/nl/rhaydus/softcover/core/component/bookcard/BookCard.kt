@@ -66,6 +66,13 @@ fun BookCard(
             content = content,
         )
 
+        is BookCardVariant.Tile -> BookCardTile(
+            model = model,
+            variant = variant,
+            onEvent = onEvent,
+            modifier = modifier,
+        )
+
         is BookCardVariant.Row -> BookCardRowLayout(
             model = model,
             variant = variant,

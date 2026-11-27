@@ -32,8 +32,8 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissVer
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditVerdictDraftAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionSearchQueryChangeAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionSelectedAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEndSessionPauseClickAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEndSessionPauseSheetDismissedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEndSessionClickAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEndSessionSheetDismissedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnHowItReadBalanceChangedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnHowItReadChipClickedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnLookUpEditionByIsbnClickAction
@@ -87,14 +87,14 @@ internal fun BookDetailOverlays(
     state: BookDetailUiState,
     runAction: (BookDetailAction) -> Unit,
 ) {
-    state.endSessionPauseSheet.modelOrNull?.let { scaffold ->
+    state.endSessionSheet.modelOrNull?.let { scaffold ->
         SheetScaffold(
             model = scaffold,
             onEvent = { event ->
                 when (event) {
-                    SheetScaffoldEvent.PrimaryClicked -> runAction(OnEndSessionPauseClickAction())
+                    SheetScaffoldEvent.PrimaryClicked -> runAction(OnEndSessionClickAction())
 
-                    SheetScaffoldEvent.Dismissed -> runAction(OnEndSessionPauseSheetDismissedAction())
+                    SheetScaffoldEvent.Dismissed -> runAction(OnEndSessionSheetDismissedAction())
 
                     SheetScaffoldEvent.SecondaryClicked,
                     SheetScaffoldEvent.HeaderActionClicked -> Unit
