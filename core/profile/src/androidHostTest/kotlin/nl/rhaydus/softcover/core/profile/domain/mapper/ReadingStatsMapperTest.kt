@@ -1334,4 +1334,446 @@ class ReadingStatsMapperTest {
             split.unknownCount shouldBe 0
         }
     }
+
+    @Nested
+    inner class LongestBookSelection {
+        @Test
+        fun `the book with the most pages wins`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    pages = 200,
+                ),
+                readBook(
+                    id = 2,
+                    pages = 500,
+                ),
+                readBook(
+                    id = 3,
+                    pages = 300,
+                ),
+            )
+
+            // ----- Act -----
+            val result = books.longestBook()
+
+            // ----- Assert -----
+            listOf(result?.book?.id, result?.pages) shouldBe listOf(2, 500)
+        }
+
+        @Test
+        fun `the reader's own edition decides the page count over the book's`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    pages = 300,
+                ),
+                readBook(
+                    id = 2,
+                    pages = 100,
+                    editions = listOf(
+                        edition(
+                            id = 20,
+                            pages = 900,
+                        ),
+                    ),
+                    editionId = 20,
+                ),
+            )
+
+            // ----- Act -----
+            val result = books.longestBook()
+
+            // ----- Assert -----
+            listOf(result?.book?.id, result?.pages) shouldBe listOf(2, 900)
+        }
+
+        @Test
+        fun `a book with zero or unknown pages never qualifies`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    pages = 0,
+                ),
+                readBook(
+                    id = 2,
+                    pages = null,
+                ),
+                readBook(
+                    id = 3,
+                    pages = 10,
+                ),
+            )
+
+            // ----- Act -----
+            val result = books.longestBook()
+
+            // ----- Assert -----
+            result?.book?.id shouldBe 3
+        }
+
+        @Test
+        fun `no book with a known page count gives null`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    pages = 0,
+                ),
+                readBook(
+                    id = 2,
+                    pages = null,
+                ),
+            )
+
+            // ----- Act -----
+            val result = books.longestBook()
+
+            // ----- Assert -----
+            result shouldBe null
+        }
+
+        @Test
+        fun `an empty list gives null`() {
+            // ----- Arrange -----
+            val books = emptyList<Book>()
+
+            // ----- Act -----
+            val result = books.longestBook()
+
+            // ----- Assert -----
+            result shouldBe null
+        }
+
+        @Test
+        fun `a page tie goes to the later finish date`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 9,
+                    finishedAt = "2026-02-01",
+                    pages = 400,
+                ),
+                readBook(
+                    id = 1,
+                    finishedAt = "2026-06-01",
+                    pages = 400,
+                ),
+            )
+
+            // ----- Act -----
+            val result = books.longestBook()
+
+            // ----- Assert -----
+            result?.book?.id shouldBe 1
+        }
+
+        @Test
+        fun `a page tie ranks a book without a finish date last`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 9,
+                    pages = 400,
+                ),
+                readBook(
+                    id = 1,
+                    finishedAt = "2026-02-01",
+                    pages = 400,
+                ),
+            )
+
+            // ----- Act -----
+            val result = books.longestBook()
+
+            // ----- Assert -----
+            result?.book?.id shouldBe 1
+        }
+
+        @Test
+        fun `a page and finish tie goes to the higher book id`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 5,
+                    finishedAt = "2026-02-01",
+                    pages = 400,
+                ),
+                readBook(
+                    id = 8,
+                    finishedAt = "2026-02-01",
+                    pages = 400,
+                ),
+                readBook(
+                    id = 3,
+                    finishedAt = "2026-02-01",
+                    pages = 400,
+                ),
+            )
+
+            // ----- Act -----
+            val result = books.longestBook()
+
+            // ----- Assert -----
+            result?.book?.id shouldBe 8
+        }
+    }
+
+    @Nested
+    inner class OwnTags {
+        private fun tagCounts(
+            books: List<Book>,
+            tags: Map<Int, List<UserTag>>,
+        ) = books.toStats(
+            range = bounded,
+            userTagsByBookId = tags,
+        ).ownTags.map { it.name to it.bookCount }
+
+        @Test
+        fun `only TAG category user tags are counted`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    finishedAt = "2026-02-01",
+                ),
+            )
+
+            val tags = mapOf(
+                1 to listOf(
+                    userTag(
+                        "cozy",
+                        TagCategory.TAG,
+                    ),
+                    userTag(
+                        "Fantasy",
+                        TagCategory.GENRE,
+                    ),
+                    userTag(
+                        "Hopeful",
+                        TagCategory.MOOD,
+                    ),
+                    userTag(
+                        "Gore",
+                        TagCategory.CONTENT_WARNING,
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = tagCounts(
+                books,
+                tags,
+            )
+
+            // ----- Assert -----
+            result shouldContainExactly listOf("cozy" to 1)
+        }
+
+        @Test
+        fun `books not finished inside a bounded range are excluded`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    finishedAt = "2026-02-01",
+                ),
+                readBook(
+                    id = 2,
+                    finishedAt = "2025-12-31",
+                ),
+                readBook(id = 3),
+            )
+
+            val tags = mapOf(
+                1 to listOf(
+                    userTag(
+                        "cozy",
+                        TagCategory.TAG,
+                    ),
+                ),
+                2 to listOf(
+                    userTag(
+                        "cozy",
+                        TagCategory.TAG,
+                    ),
+                ),
+                3 to listOf(
+                    userTag(
+                        "cozy",
+                        TagCategory.TAG,
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = tagCounts(
+                books,
+                tags,
+            )
+
+            // ----- Assert -----
+            result shouldContainExactly listOf("cozy" to 1)
+        }
+
+        @Test
+        fun `a tag repeated on one book counts that book once and counts add up across books`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    finishedAt = "2026-02-01",
+                ),
+                readBook(
+                    id = 2,
+                    finishedAt = "2026-03-01",
+                ),
+            )
+
+            val tags = mapOf(
+                1 to listOf(
+                    userTag(
+                        "cozy",
+                        TagCategory.TAG,
+                    ),
+                    userTag(
+                        "cozy",
+                        TagCategory.TAG,
+                    ),
+                ),
+                2 to listOf(
+                    userTag(
+                        "cozy",
+                        TagCategory.TAG,
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = tagCounts(
+                books,
+                tags,
+            )
+
+            // ----- Assert -----
+            result shouldContainExactly listOf("cozy" to 2)
+        }
+
+        @Test
+        fun `names group exactly so case variants stay separate rows`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    finishedAt = "2026-02-01",
+                ),
+            )
+
+            val tags = mapOf(
+                1 to listOf(
+                    userTag(
+                        "Cozy",
+                        TagCategory.TAG,
+                    ),
+                    userTag(
+                        "cozy",
+                        TagCategory.TAG,
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = tagCounts(
+                books,
+                tags,
+            )
+
+            // ----- Assert -----
+            result shouldContainExactly listOf("Cozy" to 1, "cozy" to 1)
+        }
+
+        @Test
+        fun `rows order by count descending then lowercased name`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    finishedAt = "2026-02-01",
+                ),
+                readBook(
+                    id = 2,
+                    finishedAt = "2026-03-01",
+                ),
+            )
+
+            val tags = mapOf(
+                1 to listOf(
+                    userTag(
+                        "banana",
+                        TagCategory.TAG,
+                    ),
+                    userTag(
+                        "Apple",
+                        TagCategory.TAG,
+                    ),
+                    userTag(
+                        "zebra",
+                        TagCategory.TAG,
+                    ),
+                ),
+                2 to listOf(
+                    userTag(
+                        "zebra",
+                        TagCategory.TAG,
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = tagCounts(
+                books,
+                tags,
+            )
+
+            // ----- Assert -----
+            result shouldContainExactly listOf(
+                "zebra" to 2,
+                "Apple" to 1,
+                "banana" to 1,
+            )
+        }
+
+        @Test
+        fun `spoiler flagged tags are counted`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    finishedAt = "2026-02-01",
+                ),
+            )
+
+            val tags = mapOf(
+                1 to listOf(
+                    UserTag(
+                        name = "twist",
+                        category = TagCategory.TAG,
+                        spoiler = true,
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = tagCounts(
+                books,
+                tags,
+            )
+
+            // ----- Assert -----
+            result shouldContainExactly listOf("twist" to 1)
+        }
+    }
 }

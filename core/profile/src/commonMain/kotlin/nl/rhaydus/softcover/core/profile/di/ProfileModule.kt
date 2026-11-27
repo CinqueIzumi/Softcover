@@ -4,6 +4,7 @@ import kotlinx.datetime.TimeZone
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.identity.di.identityModule
 import nl.rhaydus.softcover.core.network.di.apolloModule
+import nl.rhaydus.softcover.core.personal.di.personalModule
 import nl.rhaydus.softcover.core.profile.data.datasource.ProfileLocalDataSource
 import nl.rhaydus.softcover.core.profile.data.datasource.ProfileLocalDataSourceImpl
 import nl.rhaydus.softcover.core.profile.data.datasource.ProfileRemoteDataSource
@@ -19,6 +20,7 @@ import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingHistoryUse
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveTimeToFinishUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveWrittenStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileStatsUseCase
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -33,6 +35,7 @@ val profileModule = module {
         dispatcherModule,
         identityModule,
         apolloModule,
+        personalModule,
     )
 
     single<ProfileRemoteDataSource> {
@@ -65,6 +68,7 @@ val profileModule = module {
             statsRefreshGate = get(statsRefreshGateQualifier),
             refreshLibraryUseCase = get(),
             hasSyncedReadBooksThisSessionUseCase = get(),
+            refreshAllQuotesUseCase = get(),
         )
     }
 
@@ -72,6 +76,15 @@ val profileModule = module {
         ObserveReadingStatsUseCase(
             getReadUserBooksUseCase = get(),
             observeUserTagsByBookUseCase = get(),
+            appDispatchers = get(),
+        )
+    }
+
+    factory {
+        ObserveWrittenStatsUseCase(
+            getAllUserBooksUseCase = get(),
+            observeAllQuotesUseCase = get(),
+            timeZone = get(),
             appDispatchers = get(),
         )
     }

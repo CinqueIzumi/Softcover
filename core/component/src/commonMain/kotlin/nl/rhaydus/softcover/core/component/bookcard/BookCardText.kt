@@ -52,19 +52,9 @@ internal fun BookCardTextBlock(
         verticalArrangement = Arrangement.spacedBy(Spacing.xxxs),
     ) {
         if (eyebrow != null) {
-            val eyebrowColor = when (eyebrow.tone) {
-                BookCardEyebrow.Tone.Accent -> MaterialTheme.colorScheme.primary
-                BookCardEyebrow.Tone.Error -> MaterialTheme.colorScheme.error
-            }
-
-            SoftcoverText(
-                text = eyebrow.text,
+            BookCardEyebrowText(
+                eyebrow = eyebrow,
                 isLoading = isLoading,
-                standIn = eyebrow.text,
-                style = typography.eyebrowSmall,
-                color = eyebrowColor,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
             )
         }
 
@@ -114,6 +104,29 @@ internal fun BookCardTextBlock(
             )
         }
     }
+}
+
+@Composable
+internal fun BookCardEyebrowText(
+    eyebrow: BookCardEyebrow,
+    isLoading: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val color = when (eyebrow.tone) {
+        BookCardEyebrow.Tone.Accent -> MaterialTheme.colorScheme.primary
+        BookCardEyebrow.Tone.Error -> MaterialTheme.colorScheme.error
+    }
+
+    SoftcoverText(
+        text = eyebrow.text,
+        isLoading = isLoading,
+        standIn = eyebrow.text,
+        style = MaterialTheme.editorialTypography.eyebrowSmall,
+        color = color,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        modifier = modifier,
+    )
 }
 
 @Composable

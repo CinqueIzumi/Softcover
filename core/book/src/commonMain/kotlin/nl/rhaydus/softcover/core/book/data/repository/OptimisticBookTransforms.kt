@@ -111,6 +111,7 @@ internal fun Book.withRating(rating: Double): Book {
 internal fun Book.withReview(
     review: ReviewDocument,
     hasSpoilers: Boolean,
+    reviewedAt: String?,
 ): Book {
     val existingUserBook = userBook ?: return this
 
@@ -121,6 +122,7 @@ internal fun Book.withReview(
     val updatedUserBook: UserBook = existingUserBook.copy(
         reviewDocument = normalizedReview,
         reviewHasSpoilers = hasSpoilers,
+        reviewedAt = reviewedAt,
     )
 
     return copy(userBook = updatedUserBook)
