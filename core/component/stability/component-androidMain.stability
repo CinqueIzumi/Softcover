@@ -69,6 +69,15 @@ private fun nl.rhaydus.softcover.core.component.bookcard.BookCardCoverScaffold(m
     - content: STABLE (composable function type)
 
 @Composable
+internal fun nl.rhaydus.softcover.core.component.bookcard.BookCardEyebrowText(eyebrow: nl.rhaydus.softcover.core.component.bookcard.BookCardEyebrow, isLoading: kotlin.Boolean, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - eyebrow: STABLE (marked @Stable or @Immutable)
+    - isLoading: STABLE (primitive type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
 internal fun nl.rhaydus.softcover.core.component.bookcard.BookCardProgressBar(progress: nl.rhaydus.softcover.core.component.bookcard.BookCardProgress, isLoading: kotlin.Boolean, modifier: androidx.compose.ui.Modifier): kotlin.Unit
   skippable: true
   restartable: true
@@ -139,6 +148,16 @@ internal fun nl.rhaydus.softcover.core.component.bookcard.BookCardTextBlock(cont
     - isLoading: STABLE (primitive type)
     - modifier: STABLE (marked @Stable or @Immutable)
     - progress: STABLE (marked @Stable or @Immutable)
+
+@Composable
+internal fun nl.rhaydus.softcover.core.component.bookcard.BookCardTile(model: nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel, variant: nl.rhaydus.softcover.core.component.bookcard.BookCardVariant.Tile, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.bookcard.BookCardEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - variant: STABLE (class with no mutable properties)
+    - onEvent: STABLE (function type)
+    - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
 internal fun nl.rhaydus.softcover.core.component.bookcard.BookCardTrailingControl(trailing: nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing, isLoading: kotlin.Boolean, onClick: kotlin.Function0<kotlin.Unit>): kotlin.Unit

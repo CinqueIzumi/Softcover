@@ -9,4 +9,5 @@ data class ReadingStats(
     val authorDemographics: AuthorDemographics = AuthorDemographics(),
     val topAuthors: List<AuthorRanking> = emptyList(),
     val formatSplit: FormatSplit = FormatSplit(),
+    val longestBook: LongestBook? = null,
 )

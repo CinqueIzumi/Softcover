@@ -38,9 +38,12 @@ import nl.rhaydus.softcover.core.profile.domain.model.FormatSplit
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
 import nl.rhaydus.softcover.core.profile.domain.model.HourlyPages
+import nl.rhaydus.softcover.core.profile.domain.model.LongestBook
 import nl.rhaydus.softcover.core.profile.domain.model.MonthlyPages
+import nl.rhaydus.softcover.core.profile.domain.model.QuickestRead
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
+import nl.rhaydus.softcover.core.profile.domain.model.ReadDuration
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
 import nl.rhaydus.softcover.core.profile.domain.model.TimeToFinish
@@ -709,6 +712,106 @@ class AtlasScopedSectionsCollectorTest {
             whileLoading shouldBe true
             stateFlow.value.timeToFinish.isLoading shouldBe false
             stateFlow.value.timeToFinish.framing shouldBe "Your typical book took 9 days."
+            job.cancel()
+        }
+
+        @Test
+        fun `writes the longest book and the quickest read into the reading records`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val longest = mockk<Book> {
+                every {
+                    id
+                } returns 1
+
+                every {
+                    title
+                } returns "Longest"
+
+                every {
+                    currentEdition
+                } returns null
+
+                every {
+                    defaultEdition
+                } returns null
+
+                every {
+                    coverUrl
+                } returns "https://example.com/cover.jpg"
+            }
+
+            val quickest = mockk<Book> {
+                every {
+                    id
+                } returns 2
+
+                every {
+                    title
+                } returns "Quickest"
+
+                every {
+                    currentEdition
+                } returns null
+
+                every {
+                    defaultEdition
+                } returns null
+
+                every {
+                    coverUrl
+                } returns "https://example.com/cover.jpg"
+            }
+
+            statsFor = {
+                ReadingStats(
+                    booksRead = 2,
+                    longestBook = LongestBook(
+                        book = longest,
+                        pages = 500,
+                    ),
+                )
+            }
+
+            timeToFinishFor = {
+                TimeToFinish(
+                    readCount = 1,
+                    medianDays = 3,
+                    bandMedianDays = emptyMap(),
+                    excludedReadCount = 0,
+                    quickestRead = QuickestRead(
+                        book = quickest,
+                        duration = ReadDuration(
+                            bookId = 2,
+                            readId = 1,
+                            startedOn = LocalDate(
+                                2026,
+                                3,
+                                1,
+                            ),
+                            finishedOn = LocalDate(
+                                2026,
+                                3,
+                                3,
+                            ),
+                            pages = null,
+                        ),
+                    ),
+                )
+            }
+
+            // ----- Act -----
+            val job = launchCollector()
+
+            // ----- Assert -----
+            val records = stateFlow.value.readingRecords
+
+            records.isLoading shouldBe false
+
+            records.cards.cards.map { it.key } shouldBe
+                listOf(BookCardKey.Book(bookId = 1), BookCardKey.Book(bookId = 2))
+
+            records.cards[BookCardKey.Book(bookId = 1)].shouldNotBeNull().book shouldBe longest
+            records.cards[BookCardKey.Book(bookId = 2)].shouldNotBeNull().book shouldBe quickest
             job.cancel()
         }
     }

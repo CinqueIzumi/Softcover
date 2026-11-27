@@ -59,6 +59,10 @@ class StatsAtlasScreen : Screen {
                     state = state,
                     navigator = navigator,
                 ),
+                onRecordEvent = rememberReadingRecordEventHandler(
+                    state = state,
+                    navigator = navigator,
+                ),
             )
         }
     }
@@ -75,6 +79,7 @@ internal expect fun StatsAtlasScreenLayout(
     runAction: (StatsAtlasAction) -> Unit,
     onNavigateUp: () -> Unit,
     onBookCardEvent: (BookCardEvent) -> Unit,
+    onRecordEvent: (BookCardEvent) -> Unit,
 )
 
 /**
@@ -96,6 +101,33 @@ private fun rememberRecentlyLovedEventHandler(
             val destination = ScreenDestination.BookDetail(
                 id = entry.loved.bookId,
                 initialCover = BookInitialCover.fromBook(entry.libraryBook),
+            )
+
+            currentNavigator.push(item = appNavigator.screen(destination))
+        }
+    }
+}
+
+/**
+ * Opens book detail for a tapped record card with the cover's shared-element transition, and warms the
+ * detail on finger-down.
+ */
+@Composable
+private fun rememberReadingRecordEventHandler(
+    state: StatsAtlasUiState,
+    navigator: Navigator,
+): (BookCardEvent) -> Unit {
+    val appNavigator = koinInject<AppNavigator>()
+    val currentNavigator by rememberUpdatedState(navigator)
+
+    return rememberPrefetchingBookCardEventHandler(
+        set = state.readingRecords.cards,
+    ) { event, entry ->
+        if (event is BookCardEvent.Clicked) {
+            val destination = ScreenDestination.BookDetail(
+                id = entry.book.id,
+                initialCover = BookInitialCover.fromBook(entry.book),
+                transitionSurface = entry.surface,
             )
 
             currentNavigator.push(item = appNavigator.screen(destination))

@@ -15,6 +15,7 @@ import nl.rhaydus.softcover.core.profile.domain.model.FormatSplit
 import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
+import nl.rhaydus.softcover.core.profile.domain.model.LongestBook
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
@@ -44,11 +45,30 @@ internal fun List<Book>.toReadingStats(
         authorDemographics = inRange.toAuthorDemographics(),
         topAuthors = inRange.toTopAuthors(),
         formatSplit = inRange.toFormatSplit(),
+        longestBook = inRange.longestBook(),
     )
 }
 
 /** The reader's own edition decides the page count, then the book's, since editions differ widely. */
 internal fun Book.statsPages(): Int = readerEdition?.pages ?: pages ?: 0
+
+/**
+ * The book with the most pages; a tie goes to the later finish (none ranks last), then the higher
+ * book id. Null when no book has a known page count.
+ */
+internal fun List<Book>.longestBook(): LongestBook? {
+    val winner = filter { it.statsPages() > 0 }
+        .maxWithOrNull(
+            compareBy<Book> { it.statsPages() }
+                .thenBy(nullsFirst()) { it.userBook?.finishDate }
+                .thenBy { it.id },
+        ) ?: return null
+
+    return LongestBook(
+        book = winner,
+        pages = winner.statsPages(),
+    )
+}
 
 private fun List<Book>.toFormatSplit(): FormatSplit {
     val formats = map { it.readerEdition?.readingFormat }

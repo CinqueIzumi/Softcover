@@ -25,6 +25,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.longestStreakTil
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesMonthSetKey
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.readingRecordsUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeOfDayCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeOfDayChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeToFinishUiModel
@@ -136,6 +137,11 @@ internal val StatsAtlasPreviewState = StatsAtlasUiState(
     formatSplitChart = formatSplitChart(PreviewReadingStats.formatSplit),
     hasFormatSplit = hasFormatSplit(PreviewReadingStats.formatSplit),
     timeToFinish = timeToFinishUiModel(
+        timeToFinish = profileTimeToFinishPreview(),
+        scope = StatsScope.AllTime,
+    ),
+    readingRecords = readingRecordsUiModel(
+        stats = PreviewReadingStats,
         timeToFinish = profileTimeToFinishPreview(),
         scope = StatsScope.AllTime,
     ),
