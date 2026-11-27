@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.combine
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
+import nl.rhaydus.softcover.core.presentation.model.inLibraryTabOrder
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
@@ -89,18 +90,8 @@ private fun applyTabOrder(
     tabs: List<LibraryTab>,
     persistedOrder: List<String>,
 ): List<LibraryTab> {
-    if (persistedOrder.isEmpty()) return tabs
-
     val pinned = tabs.firstOrNull { it is LibraryTab.All }
     val reorderable = tabs.filter { it !is LibraryTab.All }
 
-    val byId = reorderable.associateBy { it.id }
-
-    val ordered = persistedOrder.mapNotNull { byId[it] }
-
-    val orderedIds = ordered.map { it.id }.toSet()
-
-    val appended = reorderable.filter { it.id !in orderedIds }
-
-    return listOfNotNull(pinned) + ordered + appended
+    return listOfNotNull(pinned) + reorderable.inLibraryTabOrder(persistedOrder) { it.id }
 }

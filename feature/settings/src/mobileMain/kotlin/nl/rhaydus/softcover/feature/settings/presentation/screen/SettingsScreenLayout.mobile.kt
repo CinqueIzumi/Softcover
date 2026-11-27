@@ -27,13 +27,16 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.core.presentation.util.TabReselectScrollToTopEffect
+import nl.rhaydus.softcover.feature.settings.presentation.action.CurrencySettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.DocumentPageAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.mapper.appUpdateCalloutFor
+import nl.rhaydus.softcover.feature.settings.presentation.screen.section.MoodPromptRow
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.SettingsMenuRow
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.SettingsMenuRowTarget
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.SettingsRowGroup
+import nl.rhaydus.softcover.feature.settings.presentation.state.CurrencySettingsUiState
 import nl.rhaydus.softcover.feature.settings.presentation.state.DocumentPageUiState
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
@@ -45,7 +48,7 @@ internal actual val settingsUsesMasterDetail: Boolean = false
 
 /**
  * The mobile Settings menu pushes its sub-pages, so the desktop-only master–detail parameters
- * ([settingsRunAction], [libraryVisibilityState], [libraryVisibilityRunAction], [roadmapState],
+ * ([settingsRunAction], [libraryVisibilityState], [libraryVisibilityRunAction], [currencyState], [currencyRunAction], [roadmapState],
  * [roadmapRunAction], [whatsNewState], [whatsNewRunAction],
  * [onCreateListClick], [openUrl]) are unused here — the toggles live on the pushed
  * [AppearanceSettingsScreen] / [LibraryVisibilitySettingsScreen] / [AboutScreen] / [DocumentPageScreen], each
@@ -64,6 +67,7 @@ internal actual fun SettingsScreenLayout(
     navigateToProfile: () -> Unit,
     navigateToAppearanceSettings: () -> Unit,
     navigateToLibraryVisibility: () -> Unit,
+    navigateToCurrency: () -> Unit,
     navigateToWidgets: () -> Unit,
     navigateToHiddenSuggestions: () -> Unit,
     navigateToAbout: () -> Unit,
@@ -71,6 +75,8 @@ internal actual fun SettingsScreenLayout(
     navigateToRoadmap: () -> Unit,
     libraryVisibilityState: LibraryVisibilitySettingsUiState,
     libraryVisibilityRunAction: (LibraryVisibilityAction) -> Unit,
+    currencyState: CurrencySettingsUiState,
+    currencyRunAction: (CurrencySettingsAction) -> Unit,
     roadmapState: DocumentPageUiState?,
     roadmapRunAction: ((DocumentPageAction) -> Unit)?,
     whatsNewState: DocumentPageUiState?,
@@ -185,6 +191,30 @@ internal actual fun SettingsScreenLayout(
 
             Spacer(modifier = Modifier.height(Spacing.section))
 
+            SectionHeader(model = state.settingsMenuPrivateDataHeader)
+
+            Spacer(modifier = Modifier.height(Spacing.md))
+
+            SettingsRowGroup {
+                DividedRow {
+                    SettingsMenuRow(
+                        title = "Currency",
+                        gloss = state.currencyGloss,
+                        icon = SoftcoverIcon.Euro,
+                        target = SettingsMenuRowTarget.SubPage(onClick = navigateToCurrency),
+                    )
+                }
+
+                DividedRow {
+                    MoodPromptRow(
+                        state = state,
+                        runAction = settingsRunAction,
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(Spacing.section))
+
             SectionHeader(model = state.settingsMenuAboutHeader)
 
             Spacer(modifier = Modifier.height(Spacing.md))
@@ -235,6 +265,7 @@ private fun SettingsScreenPreview() {
             navigateToProfile = {},
             navigateToAppearanceSettings = {},
             navigateToLibraryVisibility = {},
+            navigateToCurrency = {},
             navigateToWidgets = {},
             navigateToHiddenSuggestions = {},
             navigateToAbout = {},
@@ -242,6 +273,8 @@ private fun SettingsScreenPreview() {
             navigateToRoadmap = {},
             libraryVisibilityState = LibraryVisibilitySettingsUiState(),
             libraryVisibilityRunAction = {},
+            currencyState = CurrencySettingsUiState(),
+            currencyRunAction = {},
             roadmapState = null,
             roadmapRunAction = null,
             whatsNewState = null,
@@ -264,6 +297,7 @@ private fun SettingsScreenUpdateAvailablePreview() {
             navigateToProfile = {},
             navigateToAppearanceSettings = {},
             navigateToLibraryVisibility = {},
+            navigateToCurrency = {},
             navigateToWidgets = {},
             navigateToHiddenSuggestions = {},
             navigateToAbout = {},
@@ -271,6 +305,8 @@ private fun SettingsScreenUpdateAvailablePreview() {
             navigateToRoadmap = {},
             libraryVisibilityState = LibraryVisibilitySettingsUiState(),
             libraryVisibilityRunAction = {},
+            currencyState = CurrencySettingsUiState(),
+            currencyRunAction = {},
             roadmapState = null,
             roadmapRunAction = null,
             whatsNewState = null,

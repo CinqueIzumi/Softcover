@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
@@ -20,13 +21,18 @@ internal class InProgressCollector : BookDetailCollector {
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
         dependencies: BookDetailDependencies,
     ) {
-        scope.state
+        val bookFlow = scope.state
             .map { it.book }
             .distinctUntilChanged()
-            .collectLatest { book ->
+
+        combine(
+            bookFlow,
+            dependencies.observeMoodMomentsUseCase(bookId = scope.currentState.bookId),
+        ) { book, moments -> book to moments }
+            .collectLatest { (book, moments) ->
                 scope.setState {
                     it.copy(
-                        inProgress = book?.toInProgress(),
+                        inProgress = book?.toInProgress(moments = moments),
                         inProgressSectionHeader = book?.toInProgressSectionHeader()
                             ?: it.inProgressSectionHeader,
                     )

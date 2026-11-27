@@ -9,24 +9,29 @@ import kotlinx.coroutines.flow.map
 import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.domain.model.StatsScope
 import nl.rhaydus.softcover.core.domain.model.resolve
+import nl.rhaydus.softcover.core.profile.domain.model.DidNotFinishStats
+import nl.rhaydus.softcover.core.profile.domain.model.DiversityStats
 import nl.rhaydus.softcover.core.profile.domain.model.HourlyPages
 import nl.rhaydus.softcover.core.profile.domain.model.MonthlyPages
+import nl.rhaydus.softcover.core.profile.domain.model.PagesRead
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingListStats
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
 import nl.rhaydus.softcover.core.profile.domain.model.TimeToFinish
+import nl.rhaydus.softcover.core.profile.domain.model.WrittenStats
 import nl.rhaydus.softcover.feature.profile.presentation.event.StatsAtlasEvent
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasContentsHeader
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasContentsRows
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasOpeningUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasScopeLine
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.authorsEmptyCaption
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.authorsScopeCaption
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicBreakdownUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.diversityChapterUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.formatSplitCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.formatSplitChart
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.genderBreakdownUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreEmptyCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasFormatSplit
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasMonthlyPages
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasTimeOfDayPages
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasTopAuthors
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.inYourWordsUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesMonthSetKey
@@ -36,11 +41,13 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsChartUiMo
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsEmptyCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsHistogramCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsHistogramHeader
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.readingRecordsUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeOfDayCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeOfDayChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeToFinishUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.topAuthorRows
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.topAuthorsCaption
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.yourReadingListUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.StatsAtlasDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasLocalVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
@@ -48,9 +55,10 @@ import nl.rhaydus.toad.ActionScope
 
 /**
  * The only writer of every section that answers for the selected scope: the opening tiles, who you
- * read, how you score, the format split, pages by month, pages by time of day and the time to finish,
- * with their framing copy and the scope line. For genres it writes only whether any exist and the
- * empty sentence; `GenreRankingCollector` maps the rest off the stats written here.
+ * read, how you score, the format split, pages by month, pages by time of day, the time to finish, the
+ * reading records, the books you put down and what you wrote, with their framing copy, the scope line
+ * and the contents list. For genres it writes only whether any exist and the empty sentence;
+ * `GenreRankingCollector` maps the rest off the stats written here.
  *
  * It stays idle until the history has landed, because the history decides the default scope and
  * observing the placeholder one first would flash the wrong numbers. Switching scope re-observes the
@@ -63,6 +71,10 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
         scope: ActionScope<StatsAtlasUiState, StatsAtlasEvent, StatsAtlasLocalVariables>,
         dependencies: StatsAtlasDependencies,
     ) {
+        val editionLanguagesPending = scope.state
+            .map { it.editionLanguagesPending }
+            .distinctUntilChanged()
+
         scope.state
             .map { state ->
                 ScopeSnapshot(
@@ -72,32 +84,89 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
             }
             .distinctUntilChanged()
             .flatMapLatest { snapshot ->
-                if (snapshot.isHistoryLoaded) dependencies.observeSections(snapshot.scope) else emptyFlow()
+                if (snapshot.isHistoryLoaded) {
+                    dependencies.observeSections(
+                        scope = snapshot.scope,
+                        editionLanguagesPending = editionLanguagesPending,
+                    )
+                } else {
+                    emptyFlow()
+                }
             }
             .collect { sections -> scope.setState { it.withSections(sections) } }
     }
 
-    private fun StatsAtlasDependencies.observeSections(scope: StatsScope): Flow<ScopedSections> {
+    private fun StatsAtlasDependencies.observeSections(
+        scope: StatsScope,
+        editionLanguagesPending: Flow<Boolean>,
+    ): Flow<ScopedSections> {
         return observeCurrentDateUseCase().flatMapLatest { today ->
             val range = scope.resolve(today)
 
-            combine(
-                observeReadingStatsUseCase(range)
-                    .untilBackfilled(observeReadingStatsBackfilledUseCase()),
-                observeMonthlyPagesReadUseCase(range),
-                observeHourlyPagesReadUseCase(range),
-                getHideUntaggedAuthorsAsFlowUseCase(),
-                observeTimeToFinishUseCase(range)
+            val statsBackfilled = observeReadingStatsBackfilledUseCase()
+
+            val backfilledAndSynced = combine(
+                statsBackfilled,
+                observeQuotesSyncedUseCase(),
+            ) { statsBackfilled, quotesSynced -> statsBackfilled && quotesSynced }
+
+            val statsAndReadDatesBackfilled = combine(
+                statsBackfilled,
+                observeReadDatesBackfilledUseCase(),
+            ) { statsBackfilled, readDatesBackfilled -> statsBackfilled && readDatesBackfilled }
+
+            val readingList = combine(
+                observePagesReadUseCase(range).untilBackfilled(statsBackfilled),
+                observeDidNotFinishStatsUseCase(range).untilBackfilled(statsBackfilled),
+                observeReadingListStatsUseCase(range)
                     .untilBackfilled(observeReadDatesBackfilledUseCase()),
-            ) { stats, monthlyPages, hourlyPages, hideUntaggedAuthors, timeToFinish ->
-                ScopedSections(
-                    scope = scope,
-                    today = today,
-                    stats = stats,
-                    monthlyPages = monthlyPages,
-                    hourlyPages = hourlyPages,
-                    hideUntaggedAuthors = hideUntaggedAuthors,
-                    timeToFinish = timeToFinish,
+            ) { pagesRead, didNotFinish, readingListStats ->
+                Triple(
+                    pagesRead,
+                    didNotFinish,
+                    readingListStats,
+                )
+            }
+
+            combine(
+                combine(
+                    observeReadingStatsUseCase(range)
+                        .untilBackfilled(statsBackfilled),
+                    observeMonthlyPagesReadUseCase(range),
+                    observeHourlyPagesReadUseCase(range),
+                    getHideBooksWithoutDetailAsFlowUseCase(),
+                    observeTimeToFinishUseCase(range)
+                        .untilBackfilled(observeReadDatesBackfilledUseCase()),
+                ) { stats, monthlyPages, hourlyPages, hideBooksWithoutDetail, timeToFinish ->
+                    ScopedSections(
+                        scope = scope,
+                        today = today,
+                        stats = stats,
+                        diversity = null,
+                        monthlyPages = monthlyPages,
+                        hourlyPages = hourlyPages,
+                        hideBooksWithoutDetail = hideBooksWithoutDetail,
+                        timeToFinish = timeToFinish,
+                        written = null,
+                        pagesRead = null,
+                        didNotFinish = null,
+                        readingListStats = null,
+                        editionLanguagesPending = true,
+                    )
+                },
+                observeWrittenStatsUseCase(range).untilBackfilled(backfilledAndSynced),
+                observeDiversityStatsUseCase(range)
+                    .untilBackfilled(statsAndReadDatesBackfilled),
+                readingList,
+                editionLanguagesPending,
+            ) { sections, written, diversity, (pagesRead, didNotFinish, readingListStats), languagesPending ->
+                sections.copy(
+                    diversity = diversity,
+                    editionLanguagesPending = languagesPending,
+                    written = written,
+                    pagesRead = pagesRead,
+                    didNotFinish = didNotFinish,
+                    readingListStats = readingListStats,
                 )
             }
         }
@@ -105,16 +174,32 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
 
     private fun StatsAtlasUiState.withSections(sections: ScopedSections): StatsAtlasUiState {
         val scope = sections.scope
-        val hideUntaggedAuthors = sections.hideUntaggedAuthors
+        val hideBooksWithoutDetail = sections.hideBooksWithoutDetail
         val stats = sections.stats
         val monthlyPages = sections.monthlyPages
         val hourlyPages = sections.hourlyPages
         val ratings = stats?.ratings
         val booksRead = stats?.booksRead ?: 0
 
-        val demographics = stats?.authorDemographics?.let {
-            if (hideUntaggedAuthors) it.excludingUntaggedAuthors() else it
-        }
+        val inYourWords = inYourWordsUiModel(
+            written = sections.written,
+            ownTags = stats?.ownTags,
+            scope = scope,
+        )
+
+        val yourReadingList = yourReadingListUiModel(
+            stats = sections.readingListStats,
+            booksRead = stats?.booksRead,
+            didNotFinish = sections.didNotFinish,
+            scope = scope,
+        )
+
+        val diversityChapter = diversityChapterUiModel(
+            stats = sections.diversity,
+            hideBooksWithoutDetail = hideBooksWithoutDetail,
+            scope = scope,
+            editionLanguagesPending = sections.editionLanguagesPending,
+        )
 
         return copy(
             readingStats = stats,
@@ -124,30 +209,11 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
             ),
             opening = atlasOpeningUiModel(
                 stats = stats,
+                pagesRead = sections.pagesRead,
                 scope = scope,
+                today = sections.today,
             ),
             genreEmptyCaption = genreEmptyCaption(
-                booksRead = booksRead,
-                scope = scope,
-            ),
-            genderBreakdown = genderBreakdownUiModel(
-                demographics = demographics,
-                hideUntaggedAuthors = hideUntaggedAuthors,
-            ),
-            bipocBreakdown = demographicBreakdownUiModel(
-                breakdown = demographics?.bipocBreakdown,
-                hideUntaggedAuthors = hideUntaggedAuthors,
-            ),
-            lgbtqBreakdown = demographicBreakdownUiModel(
-                breakdown = demographics?.lgbtqBreakdown,
-                hideUntaggedAuthors = hideUntaggedAuthors,
-            ),
-            authorsScopeCaption = authorsScopeCaption(
-                hideUntaggedAuthors = hideUntaggedAuthors,
-                scope = scope,
-            ),
-            authorsEmptyCaption = authorsEmptyCaption(
-                hideUntaggedAuthors = hideUntaggedAuthors,
                 booksRead = booksRead,
                 scope = scope,
             ),
@@ -207,6 +273,16 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
                 timeToFinish = sections.timeToFinish,
                 scope = scope,
             ),
+            readingRecords = readingRecordsUiModel(
+                stats = stats,
+                timeToFinish = sections.timeToFinish,
+                scope = scope,
+            ),
+            yourReadingList = yourReadingList,
+            inYourWords = inYourWords,
+            diversityChapter = diversityChapter,
+            contentsHeader = atlasContentsHeader(),
+            contentsRows = atlasContentsRows(),
         )
     }
 
@@ -219,9 +295,15 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
         val scope: StatsScope,
         val today: LocalDate,
         val stats: ReadingStats?,
+        val diversity: DiversityStats?,
         val monthlyPages: MonthlyPages,
         val hourlyPages: HourlyPages,
-        val hideUntaggedAuthors: Boolean,
+        val hideBooksWithoutDetail: Boolean,
         val timeToFinish: TimeToFinish?,
+        val written: WrittenStats?,
+        val pagesRead: PagesRead?,
+        val didNotFinish: DidNotFinishStats?,
+        val readingListStats: ReadingListStats?,
+        val editionLanguagesPending: Boolean,
     )
 }

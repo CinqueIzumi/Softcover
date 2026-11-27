@@ -127,6 +127,12 @@ internal class SettingsRepositoryImpl(
         settingsLocalDataSource.markReadDatesBackfilled()
     }
 
+    override val quotesSynced: Flow<Boolean> = settingsLocalDataSource.quotesSynced
+
+    override suspend fun markQuotesSynced() {
+        settingsLocalDataSource.markQuotesSynced()
+    }
+
     override suspend fun seedEnabledListIds(ids: Set<Int>) {
         settingsLocalDataSource.seedEnabledListIds(ids = ids)
     }
@@ -172,10 +178,10 @@ internal class SettingsRepositoryImpl(
         settingsLocalDataSource.setShelfSwipeEnabled(enabled = enabled)
     }
 
-    override val hideUntaggedAuthors: Flow<Boolean> = settingsLocalDataSource.hideUntaggedAuthors
+    override val hideBooksWithoutDetail: Flow<Boolean> = settingsLocalDataSource.hideBooksWithoutDetail
 
-    override suspend fun setHideUntaggedAuthors(enabled: Boolean) {
-        settingsLocalDataSource.setHideUntaggedAuthors(enabled = enabled)
+    override suspend fun setHideBooksWithoutDetail(enabled: Boolean) {
+        settingsLocalDataSource.setHideBooksWithoutDetail(enabled = enabled)
     }
 
     override val uiScale: Flow<UiScale> = settingsLocalDataSource.uiScale
@@ -194,5 +200,17 @@ internal class SettingsRepositoryImpl(
 
     override suspend fun setBecauseYouReadGenre(genre: String?) {
         settingsLocalDataSource.setBecauseYouReadGenre(genre = genre)
+    }
+
+    override val usualCurrencyCode: Flow<String?> = settingsLocalDataSource.usualCurrencyCode
+
+    override suspend fun setUsualCurrencyCode(code: String?) {
+        settingsLocalDataSource.setUsualCurrencyCode(code = code)
+    }
+
+    override val askForMoodAfterProgress: Flow<Boolean> = settingsLocalDataSource.askForMoodAfterProgress
+
+    override suspend fun setAskForMoodAfterProgress(enabled: Boolean) {
+        settingsLocalDataSource.setAskForMoodAfterProgress(enabled = enabled)
     }
 }

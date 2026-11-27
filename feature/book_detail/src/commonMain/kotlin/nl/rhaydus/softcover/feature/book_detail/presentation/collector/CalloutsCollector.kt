@@ -1,8 +1,14 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNot
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.scanEditionCallout
 import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.toStatusCallout
@@ -12,11 +18,12 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiS
 import nl.rhaydus.toad.ActionScope
 
 internal class CalloutsCollector : BookDetailCollector {
+    @OptIn(ExperimentalCoroutinesApi::class)
     override suspend fun onLaunch(
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
         dependencies: BookDetailDependencies,
     ) {
-        scope.state
+        val inputsFlow = scope.state
             .map { state ->
                 CalloutInputs(
                     book = state.book,
@@ -27,8 +34,25 @@ internal class CalloutsCollector : BookDetailCollector {
                 )
             }
             .distinctUntilChanged()
-            .collectLatest { inputs ->
-                val statusCallout = inputs.book?.toStatusCallout(dateStyle = inputs.dateStyle)
+
+        val reasonsFlow = scope.state
+            .map { it.book?.status == BookStatus.DidNotFinish }
+            .distinctUntilChanged()
+            .flatMapLatest { didNotFinish ->
+                if (didNotFinish) {
+                    dependencies.observeDidNotFinishReasonsUseCase(bookId = scope.currentState.bookId)
+                } else {
+                    flowOf(null)
+                }
+            }
+
+        combine(inputsFlow, reasonsFlow) { inputs, reasons -> inputs to reasons }
+            .filterNot { (inputs, reasons) -> inputs.book?.status == BookStatus.DidNotFinish && reasons == null }
+            .collectLatest { (inputs, reasons) ->
+                val statusCallout = inputs.book?.toStatusCallout(
+                    dateStyle = inputs.dateStyle,
+                    reasons = reasons,
+                )
 
                 val scanEditionCallout = scanEditionCallout(
                     scannedEditionId = inputs.scannedEditionId,

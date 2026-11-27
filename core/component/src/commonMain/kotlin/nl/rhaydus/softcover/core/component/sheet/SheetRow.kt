@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -17,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -33,6 +35,7 @@ internal fun <K> SheetRow(
     model: SheetRowUiModel<K>,
     onEvent: (SheetRowEvent<K>) -> Unit,
     modifier: Modifier = Modifier,
+    face: SheetRowFace = SheetRowFace.Editorial,
 ) {
     Column(modifier = modifier) {
         Divider()
@@ -74,14 +77,33 @@ internal fun <K> SheetRow(
                 )
             }
 
-            SoftcoverText(
-                text = model.label,
-                style = MaterialTheme.editorialTypography.titleLarge.copy(fontStyle = FontStyle.Italic),
-                color = ink,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f),
-            )
+            if (model.leadingText != null) {
+                SoftcoverText(
+                    text = model.leadingText,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = if (model.selected) ink else MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    modifier = Modifier.width(40.dp),
+                )
+            }
+
+            Column(modifier = Modifier.weight(1f)) {
+                SoftcoverText(
+                    text = model.label,
+                    style = face.labelStyle(),
+                    color = ink,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+
+                if (model.gloss != null) {
+                    SoftcoverText(
+                        text = model.gloss,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
 
             if (model.count != null) {
                 SoftcoverText(
@@ -95,4 +117,10 @@ internal fun <K> SheetRow(
             SelectionCheck(selected = model.selected)
         }
     }
+}
+
+@Composable
+private fun SheetRowFace.labelStyle(): TextStyle = when (this) {
+    SheetRowFace.Editorial -> MaterialTheme.editorialTypography.titleLarge.copy(fontStyle = FontStyle.Italic)
+    SheetRowFace.Body -> MaterialTheme.typography.bodyLarge
 }

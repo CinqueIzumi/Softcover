@@ -77,9 +77,9 @@ class TextFieldKeyboardOptionsTest {
     @Nested
     inner class KeyboardMapping {
         @Test
-        fun `a non-numeric outlined field uses the text keyboard`() {
+        fun `a text outlined field uses the text keyboard`() {
             // ----- Arrange -----
-            val field = model(TextFieldVariant.Outlined(numeric = false))
+            val field = model(TextFieldVariant.Outlined(keyboard = TextFieldKeyboard.Text))
 
             // ----- Act -----
             val options = field.keyboardOptions()
@@ -89,15 +89,27 @@ class TextFieldKeyboardOptionsTest {
         }
 
         @Test
-        fun `a numeric outlined field uses the number keyboard`() {
+        fun `a number outlined field uses the number keyboard`() {
             // ----- Arrange -----
-            val field = model(TextFieldVariant.Outlined(numeric = true))
+            val field = model(TextFieldVariant.Outlined(keyboard = TextFieldKeyboard.Number))
 
             // ----- Act -----
             val options = field.keyboardOptions()
 
             // ----- Assert -----
             options.keyboardType shouldBe KeyboardType.Number
+        }
+
+        @Test
+        fun `a decimal outlined field uses the decimal keyboard`() {
+            // ----- Arrange -----
+            val field = model(TextFieldVariant.Outlined(keyboard = TextFieldKeyboard.Decimal))
+
+            // ----- Act -----
+            val options = field.keyboardOptions()
+
+            // ----- Assert -----
+            options.keyboardType shouldBe KeyboardType.Decimal
         }
 
         @Test
@@ -131,7 +143,7 @@ class TextFieldKeyboardOptionsTest {
         fun `keeps the keyboard type independent of the ime action`() {
             // ----- Arrange -----
             val field = model(
-                TextFieldVariant.Outlined(numeric = true),
+                TextFieldVariant.Outlined(keyboard = TextFieldKeyboard.Number),
                 submittable = true,
             )
 

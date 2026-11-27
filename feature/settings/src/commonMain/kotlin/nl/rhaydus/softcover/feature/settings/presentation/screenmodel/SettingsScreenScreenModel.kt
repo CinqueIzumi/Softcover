@@ -4,15 +4,18 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.domain.app.AppVersionProvider
 import nl.rhaydus.softcover.core.domain.appupdate.ObserveAppUpdateStateUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetAskForMoodAfterProgressAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnabledAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetShelfSwipeEnabledAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetUiScaleAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetUsualCurrencyAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetReadingStreakEnabledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetShelfSwipeEnabledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetUiScaleUseCase
 import nl.rhaydus.softcover.core.presentation.widget.HomeScreenWidgets
+import nl.rhaydus.softcover.feature.settings.domain.usecase.SetAskForMoodAfterProgressUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetBottomBarStyleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetColorPaletteUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDateStyleUseCase
@@ -39,6 +42,9 @@ internal class SettingsScreenScreenModel(
     setShelfSwipeEnabledUseCase: SetShelfSwipeEnabledUseCase,
     getUiScaleAsFlowUseCase: GetUiScaleAsFlowUseCase,
     setUiScaleUseCase: SetUiScaleUseCase,
+    getUsualCurrencyAsFlowUseCase: GetUsualCurrencyAsFlowUseCase,
+    getAskForMoodAfterProgressAsFlowUseCase: GetAskForMoodAfterProgressAsFlowUseCase,
+    setAskForMoodAfterProgressUseCase: SetAskForMoodAfterProgressUseCase,
     observeAppUpdateStateUseCase: ObserveAppUpdateStateUseCase,
     appVersionProvider: AppVersionProvider,
     homeScreenWidgets: HomeScreenWidgets,
@@ -67,6 +73,9 @@ internal class SettingsScreenScreenModel(
         setShelfSwipeEnabledUseCase = setShelfSwipeEnabledUseCase,
         getUiScaleAsFlowUseCase = getUiScaleAsFlowUseCase,
         setUiScaleUseCase = setUiScaleUseCase,
+        getUsualCurrencyAsFlowUseCase = getUsualCurrencyAsFlowUseCase,
+        getAskForMoodAfterProgressAsFlowUseCase = getAskForMoodAfterProgressAsFlowUseCase,
+        setAskForMoodAfterProgressUseCase = setAskForMoodAfterProgressUseCase,
         observeAppUpdateStateUseCase = observeAppUpdateStateUseCase,
         coroutineScope = screenModelScope,
         mainDispatcher = appDispatchers.main,

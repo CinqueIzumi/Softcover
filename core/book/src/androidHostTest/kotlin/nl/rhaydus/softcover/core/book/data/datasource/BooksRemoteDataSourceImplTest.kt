@@ -1889,6 +1889,50 @@ class BooksRemoteDataSourceImplTest {
         }
 
         @Test
+        fun `points a merged book's editions and default edition at the canonical book id`() = runTest {
+            // ----- Arrange -----
+            fun edition(id: Int) = BookEdition(
+                id = id,
+                canonicalId = null,
+                bookId = 10,
+                publisher = null,
+                title = null,
+                url = null,
+                localImagePath = null,
+                isbn10 = null,
+                isbn13 = null,
+                pages = null,
+                audioSeconds = null,
+                authors = emptyList(),
+                releaseYear = 2020,
+                format = "Paperback",
+                owned = false,
+            )
+
+            val original = baseBook.copy(
+                id = 10,
+                canonicalId = 20,
+                editions = listOf(edition(id = 1), edition(id = 2)),
+                defaultEdition = edition(id = 1),
+            )
+
+            val canonical = baseBook.copy(
+                id = 20,
+                userBook = null,
+            )
+
+            stubUserBooksQuery(userBooks = listOf(original))
+            stubCanonicalBooksQuery(canonicalBooks = listOf(canonical))
+
+            // ----- Act -----
+            val result = dataSource.initializeBooks(userId = 1).books.single()
+
+            // ----- Assert -----
+            result.editions.map { it.bookId } shouldBe listOf(20, 20)
+            result.defaultEdition?.bookId shouldBe 20
+        }
+
+        @Test
         fun `replaces a merged book's metadata with the canonical book's and keeps the user's own data`() = runTest {
             // ----- Arrange -----
             val original = baseBook.copy(

@@ -79,6 +79,8 @@ internal fun ListsLiveLayout(
                     onEvent = { event ->
                         when (event) {
                             is SheetRowEvent.Selected -> runAction(OnDemoSelectedAction(demo = event.key))
+
+                            is SheetRowEvent.InputChanged -> Unit
                         }
                     },
                 )

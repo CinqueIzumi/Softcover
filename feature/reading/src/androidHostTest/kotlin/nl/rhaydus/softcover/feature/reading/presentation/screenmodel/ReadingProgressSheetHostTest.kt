@@ -5,20 +5,27 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.progresssheet.presentation.ProgressEntry
+import nl.rhaydus.softcover.core.progresssheet.presentation.mood.MoodMomentSheetSlice
+import nl.rhaydus.softcover.core.progresssheet.presentation.mood.PendingMoodMoment
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
@@ -29,6 +36,7 @@ import org.junit.jupiter.api.Test
 
 class ReadingProgressSheetHostTest {
     private lateinit var recordBookProgress: RecordBookProgressUseCase
+    private lateinit var moodMomentSheetSlice: MoodMomentSheetSlice
     private val eventChannel = Channel<ReadingScreenEvent>(Channel.BUFFERED)
     private lateinit var stateFlow: MutableStateFlow<ReadingScreenUiState>
     private lateinit var localVariablesFlow: MutableStateFlow<ReadingLocalVariables>
@@ -37,6 +45,16 @@ class ReadingProgressSheetHostTest {
     @BeforeEach
     fun setUp() {
         recordBookProgress = mockk()
+        moodMomentSheetSlice = mockk()
+
+        coEvery {
+            moodMomentSheetSlice.openAfterProgress<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>(
+                pending = any(),
+                host = any(),
+                scope = any(),
+            )
+        } just Runs
+
         stubOutcome(Result.success(null))
         stateFlow = MutableStateFlow(ReadingScreenUiState())
         localVariablesFlow = MutableStateFlow(ReadingLocalVariables())
@@ -76,12 +94,16 @@ class ReadingProgressSheetHostTest {
             } returns dispatcher
 
             every {
+                mock.moodMomentSheetSlice
+            } returns moodMomentSheetSlice
+
+            every {
                 mock.launch(any())
             } answers { callOriginal() }
         }
     }
 
-    private fun stubBook(id: Int = 7): Book = mockk<Book>().also { mock ->
+    private fun stubBook(id: Int = 7): Book = mockk<Book>(relaxed = true).also { mock ->
         every {
             mock.id
         } returns id
@@ -253,6 +275,161 @@ class ReadingProgressSheetHostTest {
             otherJob.isCancelled shouldBe false
             localVariablesFlow.value.bookMutationJobs[8] shouldBe otherJob
         }
+
+        @Test
+        fun `stores a pending mood moment for the book when the use case returns no outcome`() = runTest {
+            // ----- Arrange -----
+            val book = PreviewData.baseBook
+            val dependencies = stubDependencies(this)
+
+            // ----- Act -----
+            ReadingProgressSheetHost.record(
+                book = book,
+                entry = entry,
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            localVariablesFlow.value.pendingMoodMoment shouldBe PendingMoodMoment(
+                bookId = book.id,
+                page = 50,
+                seconds = null,
+                percent = 50,
+            )
+        }
+
+        @Test
+        fun `stores no pending mood moment when the outcome is Applied`() = runTest {
+            // ----- Arrange -----
+            stubOutcome(Result.success(ShelfMutationOutcome.Applied))
+            val dependencies = stubDependencies(this)
+
+            // ----- Act -----
+            ReadingProgressSheetHost.record(
+                book = PreviewData.baseBook,
+                entry = entry,
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            localVariablesFlow.value.pendingMoodMoment.shouldBeNull()
+        }
+
+        @Test
+        fun `stores no pending mood moment when the outcome is NoChange`() = runTest {
+            // ----- Arrange -----
+            stubOutcome(Result.success(ShelfMutationOutcome.NoChange))
+            val dependencies = stubDependencies(this)
+
+            // ----- Act -----
+            ReadingProgressSheetHost.record(
+                book = PreviewData.baseBook,
+                entry = entry,
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            localVariablesFlow.value.pendingMoodMoment.shouldBeNull()
+        }
+
+        @Test
+        fun `stores no pending mood moment when recording fails`() = runTest {
+            // ----- Arrange -----
+            stubOutcome(Result.failure(RuntimeException("network error")))
+            val dependencies = stubDependencies(this)
+
+            // ----- Act -----
+            ReadingProgressSheetHost.record(
+                book = PreviewData.baseBook,
+                entry = entry,
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            localVariablesFlow.value.pendingMoodMoment.shouldBeNull()
+        }
+
+        @Test
+        fun `clears a previous pending mood moment when the new record yields none`() = runTest {
+            // ----- Arrange -----
+            stubOutcome(Result.success(ShelfMutationOutcome.NoChange))
+
+            localVariablesFlow.value = ReadingLocalVariables(
+                pendingMoodMoment = PendingMoodMoment(
+                    bookId = 1,
+                    page = 10,
+                    seconds = null,
+                    percent = 10,
+                ),
+            )
+
+            val dependencies = stubDependencies(this)
+
+            // ----- Act -----
+            ReadingProgressSheetHost.record(
+                book = PreviewData.baseBook,
+                entry = entry,
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            localVariablesFlow.value.pendingMoodMoment.shouldBeNull()
+        }
+    }
+
+    @Nested
+    inner class AwaitPendingWrite {
+        @Test
+        fun `suspends until the job of the book being updated completes`() = runTest {
+            // ----- Arrange -----
+            val job = Job()
+            stateFlow.value = ReadingScreenUiState(bookToUpdate = stubBook(id = 7))
+            localVariablesFlow.value = ReadingLocalVariables(bookMutationJobs = mapOf(7 to job))
+            val dependencies = stubDependencies(this)
+            var returned = false
+
+            val waiter = launch {
+                ReadingProgressSheetHost.awaitPendingWrite(
+                    dependencies = dependencies,
+                    scope = scope,
+                )
+
+                returned = true
+            }
+
+            // ----- Act -----
+            runCurrent()
+            val returnedWhileRunning = returned
+            job.complete()
+            runCurrent()
+
+            // ----- Assert -----
+            returnedWhileRunning shouldBe false
+            returned shouldBe true
+            waiter.isCompleted shouldBe true
+        }
+
+        @Test
+        fun `returns immediately when the book has no job`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = ReadingScreenUiState(bookToUpdate = stubBook(id = 7))
+            localVariablesFlow.value = ReadingLocalVariables(bookMutationJobs = mapOf(8 to Job()))
+            val dependencies = stubDependencies(this)
+
+            // ----- Act -----
+            ReadingProgressSheetHost.awaitPendingWrite(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.bookToUpdate.shouldNotBeNull()
+        }
     }
 
     @Nested
@@ -332,6 +509,58 @@ class ReadingProgressSheetHostTest {
             // ----- Assert -----
             stateFlow.value.bookToUpdate.shouldBeNull()
             stateFlow.value.verdictPromptBook shouldBe prompted
+        }
+
+        @Test
+        fun `opens the mood moment sheet for the pending moment and clears it`() = runTest {
+            // ----- Arrange -----
+            val pending = PendingMoodMoment(
+                bookId = 7,
+                page = 50,
+                seconds = null,
+                percent = 50,
+            )
+
+            localVariablesFlow.value = ReadingLocalVariables(pendingMoodMoment = pending)
+            val dependencies = stubDependencies(this)
+
+            // ----- Act -----
+            ReadingProgressSheetHost.afterClose(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            localVariablesFlow.value.pendingMoodMoment.shouldBeNull()
+
+            coVerify(exactly = 1) {
+                moodMomentSheetSlice.openAfterProgress<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>(
+                    pending = pending,
+                    host = ReadingMoodMomentSheetHost,
+                    scope = scope,
+                )
+            }
+        }
+
+        @Test
+        fun `does not open the mood moment sheet without a pending moment`() = runTest {
+            // ----- Arrange -----
+            val dependencies = stubDependencies(this)
+
+            // ----- Act -----
+            ReadingProgressSheetHost.afterClose(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                moodMomentSheetSlice.openAfterProgress<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>(
+                    pending = any(),
+                    host = any(),
+                    scope = any(),
+                )
+            }
         }
     }
 }

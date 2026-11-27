@@ -13,6 +13,8 @@ import nl.rhaydus.softcover.core.component.chart.RecentDaysGridUiModel
 import nl.rhaydus.softcover.core.component.chart.YearGrid
 import nl.rhaydus.softcover.core.component.chart.YearGridUiModel
 import nl.rhaydus.softcover.core.component.progress.ProgressBar
+import nl.rhaydus.softcover.core.component.statistic.CountRows
+import nl.rhaydus.softcover.core.component.statistic.CountRowsUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumber
 import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatTile
@@ -20,9 +22,21 @@ import nl.rhaydus.softcover.core.component.statistic.StatTileUiModel
 
 internal val statisticEntries: ImmutableList<GalleryEntry> = persistentListOf(
     galleryEntry(
+        name = "CountRows",
+        family = GalleryFamily.STATISTIC,
+        blurb = "Plain label-and-count rows, the label at the start and a tabular count at the end, with no bar.",
+        previews = CountRowsUiModel,
+        content = { model, modifier ->
+            CountRows(
+                model = model,
+                modifier = modifier,
+            )
+        },
+    ),
+    galleryEntry(
         name = "RankedBars",
         family = GalleryFamily.CHART,
-        blurb = "Numbered bars filled relative to the lead row, with the share at the end; while " +
+        blurb = "Numbered bars filled relative to the lead row, with a value at the end, tappable on request; while " +
             "loading the rows keep their layout and mask.",
         previews = RankedBarsUiModel,
         content = { model, modifier ->

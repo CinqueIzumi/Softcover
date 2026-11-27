@@ -6,6 +6,7 @@ import nl.rhaydus.softcover.core.component.statistic.StatNumberSuffix
 import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumberVariant
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.MoodMoment
 import nl.rhaydus.softcover.core.uibinding.progress.toPositionText
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.InProgressUiModel
 import kotlin.math.roundToInt
@@ -15,7 +16,7 @@ internal fun Book.toInProgressSectionHeader(): SectionHeaderUiModel =
     SectionHeaderUiModel.Section(eyebrow = if (isPaused) "On hold" else "In progress")
 
 /** Null when the book has no read or no current edition, which is when the section has nothing to show. */
-internal fun Book.toInProgress(): InProgressUiModel? {
+internal fun Book.toInProgress(moments: List<MoodMoment> = emptyList()): InProgressUiModel? {
     val read = currentRead ?: return null
 
     val text = toPositionText() ?: return null
@@ -33,5 +34,6 @@ internal fun Book.toInProgress(): InProgressUiModel? {
         fraction = read.progress / 100f,
         summaryStart = text.position,
         summaryEnd = text.remaining,
+        ribbon = moments.toMoodRibbon(),
     )
 }

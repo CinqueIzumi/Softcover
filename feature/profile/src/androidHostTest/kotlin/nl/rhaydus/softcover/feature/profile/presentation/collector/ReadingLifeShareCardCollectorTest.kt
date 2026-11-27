@@ -18,6 +18,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDepe
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
 import nl.rhaydus.softcover.feature.profile.presentation.state.buildShareCard
+import nl.rhaydus.softcover.feature.profile.presentation.state.buildSharePagesRead
 import nl.rhaydus.softcover.feature.profile.presentation.state.buildShareProfile
 import nl.rhaydus.softcover.feature.profile.presentation.state.buildShareReadingHistory
 import nl.rhaydus.softcover.feature.profile.presentation.state.buildShareReadingStats
@@ -66,6 +67,7 @@ class ReadingLifeShareCardCollectorTest {
         shareCapture: ShareCaptureState = ShareCaptureState(),
     ): ProfileUiState = ProfileUiState(
         readingStats = buildShareReadingStats(),
+        pagesRead = buildSharePagesRead(),
         readingHistory = buildShareReadingHistory(),
         userProfileData = buildShareProfile(),
         isShareSheetRequested = true,
@@ -87,6 +89,7 @@ class ReadingLifeShareCardCollectorTest {
             // ----- Arrange -----
             stateFlow.value = ProfileUiState(
                 readingStats = buildShareReadingStats(),
+                pagesRead = buildSharePagesRead(),
                 readingHistory = buildShareReadingHistory(),
                 userProfileData = buildShareProfile(),
             )
@@ -117,6 +120,7 @@ class ReadingLifeShareCardCollectorTest {
             // ----- Arrange -----
             stateFlow.value = ProfileUiState(
                 readingStats = buildShareReadingStats(),
+                pagesRead = buildSharePagesRead(),
                 readingHistory = buildShareReadingHistory(),
                 isShareSheetRequested = true,
             )
@@ -134,6 +138,7 @@ class ReadingLifeShareCardCollectorTest {
             // ----- Arrange -----
             stateFlow.value = ProfileUiState(
                 readingStats = buildShareReadingStats(),
+                pagesRead = buildSharePagesRead(),
                 readingHistory = buildShareReadingHistory(),
                 userProfileData = buildShareProfile(),
             )
@@ -238,6 +243,7 @@ class ReadingLifeShareCardCollectorTest {
             // ----- Arrange -----
             stateFlow.value = ProfileUiState(
                 readingStats = buildShareReadingStats(),
+                pagesRead = buildSharePagesRead(),
                 readingHistory = buildShareReadingHistory(),
                 userProfileData = buildShareProfile(),
                 shareSheet = openSheet(closing = true),

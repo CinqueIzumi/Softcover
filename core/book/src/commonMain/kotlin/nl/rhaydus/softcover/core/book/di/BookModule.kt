@@ -23,7 +23,9 @@ import nl.rhaydus.softcover.core.book.domain.repository.UserTagsRepository
 import nl.rhaydus.softcover.core.book.domain.sync.OfflineUserBookSync
 import nl.rhaydus.softcover.core.book.domain.usecase.AddBookByIsbnUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.CommitBookRemovalUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.DidNotFinishBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.FetchBookByIdUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.FillEditionLanguagesUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetDidNotFinishUserBooksUseCase
@@ -33,7 +35,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.GetReadUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetSortedAllUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetSortedBooksByStatusUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetWantToReadUserBooksUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.HasSyncedReadBooksThisSessionUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.HasSyncedStatusesThisSessionUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.LoadSimilarBooksPageUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadingUseCase
@@ -292,7 +294,7 @@ val bookModule = module {
     }
 
     factory {
-        HasSyncedReadBooksThisSessionUseCase(booksRepository = get())
+        HasSyncedStatusesThisSessionUseCase(booksRepository = get())
     }
 
     factory {
@@ -303,6 +305,10 @@ val bookModule = module {
         FetchBookByIdUseCase(
             booksRepository = get(),
         )
+    }
+
+    factory {
+        FillEditionLanguagesUseCase(booksRepository = get())
     }
 
     factory {
@@ -329,6 +335,10 @@ val bookModule = module {
 
     factory {
         PauseBookUseCase(booksRepository = get())
+    }
+
+    factory {
+        DidNotFinishBookUseCase(booksRepository = get())
     }
 
     factory {

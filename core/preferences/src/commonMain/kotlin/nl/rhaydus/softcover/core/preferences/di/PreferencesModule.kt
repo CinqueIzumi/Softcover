@@ -12,12 +12,14 @@ import nl.rhaydus.softcover.core.preferences.data.datasource.SettingsRemoteDataS
 import nl.rhaydus.softcover.core.preferences.data.repository.SettingsRepositoryImpl
 import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 import nl.rhaydus.softcover.core.preferences.domain.usecase.DismissPlanTodayUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetAskForMoodAfterProgressAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetBecauseYouReadGenreAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetCurrenciesUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDesktopWindowStateAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetEnabledListIdsAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetEnabledStatusCodesAsFlowUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.GetHideUntaggedAuthorsAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetHideBooksWithoutDetailAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLastUsedProgressUnitAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryGridLayoutAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibrarySortSettingsAsFlowUseCase
@@ -26,12 +28,14 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnab
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetShelfSwipeEnabledAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetUiScaleAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetUsualCurrencyAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObservePlanTodayDismissalsUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveQuotesSyncedUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadDatesBackfilledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsBackfilledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetBecauseYouReadGenreUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetDesktopWindowStateUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.SetHideUntaggedAuthorsUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.SetHideBooksWithoutDetailUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLastUsedProgressUnitUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibraryGridLayoutUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibrarySortUseCase
@@ -94,6 +98,8 @@ val preferencesModule = module {
 
     factory { ObserveReadDatesBackfilledUseCase(settingsRepository = get()) }
 
+    factory { ObserveQuotesSyncedUseCase(settingsRepository = get()) }
+
     factory { SetLibraryGridLayoutUseCase(settingsRepository = get()) }
 
     factory { SetLibrarySortUseCase(settingsRepository = get()) }
@@ -106,15 +112,17 @@ val preferencesModule = module {
 
     factory { GetReadingStreakEnabledAsFlowUseCase(settingsRepository = get()) }
 
+    factory { GetAskForMoodAfterProgressAsFlowUseCase(settingsRepository = get()) }
+
     factory { SetReadingStreakEnabledUseCase(settingsRepository = get()) }
 
     factory { GetShelfSwipeEnabledAsFlowUseCase(settingsRepository = get()) }
 
     factory { SetShelfSwipeEnabledUseCase(settingsRepository = get()) }
 
-    factory { GetHideUntaggedAuthorsAsFlowUseCase(settingsRepository = get()) }
+    factory { GetHideBooksWithoutDetailAsFlowUseCase(settingsRepository = get()) }
 
-    factory { SetHideUntaggedAuthorsUseCase(settingsRepository = get()) }
+    factory { SetHideBooksWithoutDetailUseCase(settingsRepository = get()) }
 
     factory { GetUiScaleAsFlowUseCase(settingsRepository = get()) }
 
@@ -127,6 +135,15 @@ val preferencesModule = module {
     factory { GetBecauseYouReadGenreAsFlowUseCase(settingsRepository = get()) }
 
     factory { SetBecauseYouReadGenreUseCase(settingsRepository = get()) }
+
+    factory { GetCurrenciesUseCase(currencyCatalog = get()) }
+
+    factory {
+        GetUsualCurrencyAsFlowUseCase(
+            settingsRepository = get(),
+            currencyCatalog = get(),
+        )
+    }
 
     single<GetThemeConfigurationUseCase> {
         GetThemeConfigurationUseCase(settingsRepository = get())

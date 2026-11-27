@@ -419,6 +419,86 @@ class BooksLocalDataSourceImplTest {
     }
 
     @Nested
+    inner class GetEditionIdsWithoutFetchedLanguage {
+        @Test
+        fun `queries in chunks of 500 and merges the answers`() = runTest {
+            // ----- Arrange -----
+            val ids = (1..1_100).toList()
+
+            coEvery {
+                dao.getEditionIdsWithoutFetchedLanguage(editionIds = any())
+            } answers {
+                firstArg<List<Int>>().filter { editionId -> editionId % 2 == 0 }
+            }
+
+            // ----- Act -----
+            val result = dataSource.getEditionIdsWithoutFetchedLanguage(ids = ids)
+
+            // ----- Assert -----
+            result shouldBe ids.filter { it % 2 == 0 }
+
+            coVerify(exactly = 1) {
+                dao.getEditionIdsWithoutFetchedLanguage(
+                    editionIds = ids.subList(
+                        0,
+                        500,
+                    ),
+                )
+            }
+
+            coVerify(exactly = 1) {
+                dao.getEditionIdsWithoutFetchedLanguage(
+                    editionIds = ids.subList(
+                        500,
+                        1_000,
+                    ),
+                )
+            }
+
+            coVerify(exactly = 1) {
+                dao.getEditionIdsWithoutFetchedLanguage(
+                    editionIds = ids.subList(
+                        1_000,
+                        1_100,
+                    ),
+                )
+            }
+        }
+
+        @Test
+        fun `asks about a repeated id only once`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                dao.getEditionIdsWithoutFetchedLanguage(editionIds = any())
+            } answers {
+                firstArg()
+            }
+
+            // ----- Act -----
+            val result = dataSource.getEditionIdsWithoutFetchedLanguage(ids = listOf(5, 5, 6))
+
+            // ----- Assert -----
+            result shouldBe listOf(5, 6)
+        }
+
+        @Test
+        fun `returns empty without a query when there are no ids`() = runTest {
+            // ----- Arrange -----
+            // (no ids)
+
+            // ----- Act -----
+            val result = dataSource.getEditionIdsWithoutFetchedLanguage(ids = emptyList())
+
+            // ----- Assert -----
+            result shouldBe emptyList()
+
+            coVerify(exactly = 0) {
+                dao.getEditionIdsWithoutFetchedLanguage(editionIds = any())
+            }
+        }
+    }
+
+    @Nested
     inner class CacheEditions {
         @Test
         fun `deletes stale cover files returned by the DAO`() = runTest {

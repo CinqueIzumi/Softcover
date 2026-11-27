@@ -2,8 +2,7 @@ package nl.rhaydus.softcover.feature.widget.presentation.image
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.net.Uri
-import androidx.core.net.toUri
+import android.graphics.BitmapFactory
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -24,32 +23,67 @@ internal class WidgetImageStore(
     private val directory: File = WidgetImageFiles.directory(context)
 
     /**
-     * [render] runs only when no non-empty file exists for [key] yet. Null when [render] returns null or the write
-     * fails.
+     * [render] runs only when no readable file exists for [key] yet; a file that fails to decode is deleted first.
+     * Null when [render] returns null. A failed write still returns the rendered bitmap, which then goes uncached.
      */
-    suspend fun uriFor(
+    suspend fun bitmapFor(
         key: String,
         format: WidgetImageFormat = WidgetImageFormat.Lossless,
         render: suspend () -> Bitmap?,
-    ): Uri? {
-        val file = File(
-            directory,
-            fileName(
-                key = key,
-                format = format,
-            ),
+    ): Bitmap? {
+        val file = fileFor(
+            key = key,
+            format = format,
         )
 
-        if (touch(file)) return uriOf(file)
+        if (touch(file)) decode(file)?.let { return it }
 
         val bitmap = render() ?: return null
 
-        return write(
+        write(
+            bitmap = bitmap,
+            format = format,
+            file = file,
+        )
+
+        return bitmap
+    }
+
+    /**
+     * Warms the file for [key] without decoding it: an existing file is only touched, and [render] runs only on a
+     * miss. A file that [bitmapFor] later fails to decode is deleted and rendered again there.
+     */
+    suspend fun ensureCached(
+        key: String,
+        format: WidgetImageFormat = WidgetImageFormat.Lossless,
+        render: suspend () -> Bitmap?,
+    ) {
+        val file = fileFor(
+            key = key,
+            format = format,
+        )
+
+        if (touch(file)) return
+
+        val bitmap = render() ?: return
+
+        write(
             bitmap = bitmap,
             format = format,
             file = file,
         )
     }
+
+    private fun fileFor(
+        key: String,
+        format: WidgetImageFormat,
+    ) = File(
+        directory,
+        fileName(
+            key = key,
+            format = format,
+        ),
+    )
 
     /** Deletes files not touched for [maxAge]. */
     suspend fun prune(maxAge: Duration = 7.days) {
@@ -86,11 +120,18 @@ internal class WidgetImageStore(
         }
     }
 
+    private suspend fun decode(file: File): Bitmap? = withContext(ioDispatcher) {
+        BitmapFactory.decodeFile(file.path) ?: run {
+            file.delete()
+            null
+        }
+    }
+
     private suspend fun write(
         bitmap: Bitmap,
         format: WidgetImageFormat,
         file: File,
-    ): Uri? = withContext(ioDispatcher) {
+    ) = withContext(ioDispatcher) {
         var temp: File? = null
 
         runCatchingCancellable {
@@ -111,7 +152,7 @@ internal class WidgetImageStore(
                 )
             }
 
-            if (compressed && created.length() > 0L && created.renameTo(file)) uriOf(file) else null
+            compressed && created.length() > 0L && created.renameTo(file)
         }.onFailure { error ->
             AppLog.e(
                 error,
@@ -119,10 +160,8 @@ internal class WidgetImageStore(
             )
         }.also {
             temp?.delete()
-        }.getOrNull()
+        }
     }
-
-    private fun uriOf(file: File): Uri = "content://${WidgetImageFiles.authority(context)}/${file.name}".toUri()
 
     private fun fileName(
         key: String,

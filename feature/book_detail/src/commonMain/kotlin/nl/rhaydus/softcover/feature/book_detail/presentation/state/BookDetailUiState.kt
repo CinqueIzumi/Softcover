@@ -24,6 +24,8 @@ import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.control.SegmentedControlUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.deadline.DeadlineRowUiModel
+import nl.rhaydus.softcover.core.component.feeling.HowItFeltBlockUiModel
+import nl.rhaydus.softcover.core.component.feeling.HowItFeltSheetUiModel
 import nl.rhaydus.softcover.core.component.field.TextFieldUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
@@ -39,6 +41,7 @@ import nl.rhaydus.softcover.core.component.traits.HowItReadSheetUiModel
 import nl.rhaydus.softcover.core.component.transition.BookTransitionKey
 import nl.rhaydus.softcover.core.component.verdict.VerdictBlockUiModel
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetUiModel
+import nl.rhaydus.softcover.core.component.yourcopy.YourCopyPanelUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
@@ -51,7 +54,8 @@ import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingPaceForecast
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.progresssheet.presentation.ProgressSheetState
-import nl.rhaydus.softcover.core.uibinding.session.ConfirmedPause
+import nl.rhaydus.softcover.core.progresssheet.presentation.mood.MoodMomentSheetState
+import nl.rhaydus.softcover.core.uibinding.session.SessionEndingStatus
 import nl.rhaydus.softcover.core.uibinding.verdict.VerdictSheetContext
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.BOOK_REVIEW_STAND_INS
@@ -128,6 +132,27 @@ internal data class BookDetailUiState(
     /** What the how-it-read sheet renders, derived from [book] and [howItReadDraft] by `HowItReadSheetCollector`. */
     val howItReadSheet: SheetSession<HowItReadSheetUiModel, Nothing> = SheetSession.Closed,
 
+    /** Null hides the Yours lens "How it felt" section. */
+    val howItFelt: HowItFeltBlockUiModel? = null,
+
+    /** Non-null exactly while the how-it-felt sheet is requested. */
+    val howItFeltDraft: HowItFeltDraft? = null,
+
+    val howItFeltSheet: SheetSession<HowItFeltSheetUiModel, Nothing> = SheetSession.Closed,
+
+    val moodMomentSheet: MoodMomentSheetState = MoodMomentSheetState(),
+
+    /** Null hides the Yours lens "Your copy" section. */
+    val yourCopy: YourCopyPanelUiModel<String>? = null,
+
+    /** Non-null exactly while the where-you-got-it sheet is requested. */
+    val whereYouGotItDraft: WhereYouGotItDraft? = null,
+    val whereYouGotItSheet: SheetSession<WhereYouGotItSheetUiModel, Nothing> = SheetSession.Closed,
+
+    /** Non-null exactly while the did-not-finish reason sheet is requested. */
+    val didNotFinishReasonDraft: DidNotFinishReasonDraft? = null,
+    val didNotFinishReasonSheet: SheetSession<DidNotFinishReasonSheetUiModel, Nothing> = SheetSession.Closed,
+
     /** The local id of the quote awaiting its delete confirm; `null` when none is. */
     val quoteDeleteRequestId: Long? = null,
 
@@ -150,6 +175,7 @@ internal data class BookDetailUiState(
     val tagsLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Tags"),
     val yourTagsLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Your tags"),
     val howItReadLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "How it read"),
+    val yourCopyLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Your copy"),
 
     /** The "Shelve this book" opener; the retry label when the last shelve write for this book failed. */
     val shelveControlHeader: SectionHeaderUiModel = SectionHeaderUiModel.Inline(eyebrow = "Shelve this book"),
@@ -263,9 +289,9 @@ internal data class BookDetailUiState(
 
     val activeSessionBookId: Int? = null,
 
-    val endSessionPauseRequested: Boolean = false,
+    val endSessionRequest: SessionEndingStatus? = null,
 
-    val endSessionPauseSheet: SheetSession<SheetScaffoldUiModel, ConfirmedPause> = SheetSession.Closed,
+    val endSessionSheet: SheetSession<SheetScaffoldUiModel, SessionEndingStatus> = SheetSession.Closed,
 
     val chosenShareVariant: ShareCardVariant? = null,
 

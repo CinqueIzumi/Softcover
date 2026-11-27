@@ -23,6 +23,7 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.ObserveChangelogUseC
 import nl.rhaydus.softcover.feature.settings.domain.usecase.ObserveRoadmapUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.RefreshChangelogUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.RefreshRoadmapUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.SetAskForMoodAfterProgressUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetBottomBarStyleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetColorPaletteUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDateStyleUseCase
@@ -31,7 +32,9 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledListIdsUse
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledStatusCodesUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibraryTabOrderUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetThemeModeUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.SetUsualCurrencyUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.collector.AppUpdateCollector
+import nl.rhaydus.softcover.feature.settings.presentation.collector.CurrencySettingsCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.DateStyleCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.DisplayToggleRowsCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.DocumentPageCollector
@@ -39,14 +42,18 @@ import nl.rhaydus.softcover.feature.settings.presentation.collector.DocumentPage
 import nl.rhaydus.softcover.feature.settings.presentation.collector.DocumentPageRefreshCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.LibraryTabCountsCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.LibraryVisibilityCollector
+import nl.rhaydus.softcover.feature.settings.presentation.collector.MoodPromptToggleRowCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.PersistedLibraryVisibilityCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.PlacedWidgetsCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.SettingsCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.ThemeConfigurationCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.UiScaleCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.UserListsCollector
+import nl.rhaydus.softcover.feature.settings.presentation.collector.UsualCurrencyCollector
+import nl.rhaydus.softcover.feature.settings.presentation.collector.UsualCurrencyGlossCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.WidgetsSettingsCollector
 import nl.rhaydus.softcover.feature.settings.presentation.model.DocumentPage
+import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.CurrencySettingsScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.DocumentPageScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenScreenModel
@@ -86,6 +93,9 @@ val settingsModule = module {
             setShelfSwipeEnabledUseCase = get(),
             getUiScaleAsFlowUseCase = get(),
             setUiScaleUseCase = get(),
+            getUsualCurrencyAsFlowUseCase = get(),
+            getAskForMoodAfterProgressAsFlowUseCase = get(),
+            setAskForMoodAfterProgressUseCase = get(),
             observeAppUpdateStateUseCase = get(),
             appVersionProvider = get(),
             homeScreenWidgets = get(),
@@ -102,6 +112,10 @@ val settingsModule = module {
 
     factory { AppUpdateCollector() } bind SettingsCollector::class
 
+    factory { UsualCurrencyGlossCollector() } bind SettingsCollector::class
+
+    factory { MoodPromptToggleRowCollector() } bind SettingsCollector::class
+
     factory { SetBottomBarStyleUseCase(settingsRepository = get()) }
 
     factory { SetThemeModeUseCase(settingsRepository = get()) }
@@ -117,6 +131,22 @@ val settingsModule = module {
     factory { SetEnabledListIdsUseCase(settingsRepository = get()) }
 
     factory { SetLibraryTabOrderUseCase(settingsRepository = get()) }
+
+    factory { SetUsualCurrencyUseCase(settingsRepository = get()) }
+
+    factory { SetAskForMoodAfterProgressUseCase(settingsRepository = get()) }
+
+    factory { UsualCurrencyCollector() } bind CurrencySettingsCollector::class
+
+    factory {
+        CurrencySettingsScreenModel(
+            getCurrenciesUseCase = get(),
+            getUsualCurrencyAsFlowUseCase = get(),
+            setUsualCurrencyUseCase = get(),
+            appDispatchers = get(),
+            flows = getAll(),
+        )
+    }
 
     factory { PersistedLibraryVisibilityCollector() } bind LibraryVisibilityCollector::class
 

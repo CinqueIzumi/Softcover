@@ -82,6 +82,10 @@ interface SettingsLocalDataSource {
 
     suspend fun markReadDatesBackfilled()
 
+    val quotesSynced: Flow<Boolean>
+
+    suspend fun markQuotesSynced()
+
     suspend fun seedEnabledListIds(ids: Set<Int>)
 
     suspend fun resetLibraryVisibilityPreferences()
@@ -108,9 +112,9 @@ interface SettingsLocalDataSource {
 
     suspend fun setShelfSwipeEnabled(enabled: Boolean)
 
-    val hideUntaggedAuthors: Flow<Boolean>
+    val hideBooksWithoutDetail: Flow<Boolean>
 
-    suspend fun setHideUntaggedAuthors(enabled: Boolean)
+    suspend fun setHideBooksWithoutDetail(enabled: Boolean)
 
     val uiScale: Flow<UiScale>
 
@@ -123,6 +127,14 @@ interface SettingsLocalDataSource {
     val becauseYouReadGenre: Flow<String?>
 
     suspend fun setBecauseYouReadGenre(genre: String?)
+
+    val usualCurrencyCode: Flow<String?>
+
+    suspend fun setUsualCurrencyCode(code: String?)
+
+    val askForMoodAfterProgress: Flow<Boolean>
+
+    suspend fun setAskForMoodAfterProgress(enabled: Boolean)
 }
 
 internal class SettingsLocalDataSourceImpl(
@@ -291,6 +303,16 @@ internal class SettingsLocalDataSourceImpl(
         }
     }
 
+    override val quotesSynced: Flow<Boolean> = appSettingsDataStore.store.data
+        .map { it.quotesSynced }
+        .distinctUntilChanged()
+
+    override suspend fun markQuotesSynced() {
+        appSettingsDataStore.store.updateData { entity ->
+            entity.copy(quotesSynced = true)
+        }
+    }
+
     override suspend fun seedEnabledListIds(ids: Set<Int>) {
         appSettingsDataStore.store.updateData { entity ->
             entity.copy(
@@ -369,13 +391,13 @@ internal class SettingsLocalDataSourceImpl(
         }
     }
 
-    override val hideUntaggedAuthors: Flow<Boolean> = appSettingsDataStore.store.data
-        .map { it.hideUntaggedAuthors }
+    override val hideBooksWithoutDetail: Flow<Boolean> = appSettingsDataStore.store.data
+        .map { it.hideBooksWithoutDetail }
         .distinctUntilChanged()
 
-    override suspend fun setHideUntaggedAuthors(enabled: Boolean) {
+    override suspend fun setHideBooksWithoutDetail(enabled: Boolean) {
         appSettingsDataStore.store.updateData { entity ->
-            entity.copy(hideUntaggedAuthors = enabled)
+            entity.copy(hideBooksWithoutDetail = enabled)
         }
     }
 
@@ -406,6 +428,26 @@ internal class SettingsLocalDataSourceImpl(
     override suspend fun setBecauseYouReadGenre(genre: String?) {
         appSettingsDataStore.store.updateData { entity ->
             entity.copy(becauseYouReadGenre = genre)
+        }
+    }
+
+    override val usualCurrencyCode: Flow<String?> = appSettingsDataStore.store.data
+        .map { it.usualCurrencyCode }
+        .distinctUntilChanged()
+
+    override suspend fun setUsualCurrencyCode(code: String?) {
+        appSettingsDataStore.store.updateData { entity ->
+            entity.copy(usualCurrencyCode = code)
+        }
+    }
+
+    override val askForMoodAfterProgress: Flow<Boolean> = appSettingsDataStore.store.data
+        .map { it.askForMoodAfterProgress }
+        .distinctUntilChanged()
+
+    override suspend fun setAskForMoodAfterProgress(enabled: Boolean) {
+        appSettingsDataStore.store.updateData { entity ->
+            entity.copy(askForMoodAfterProgress = enabled)
         }
     }
 }

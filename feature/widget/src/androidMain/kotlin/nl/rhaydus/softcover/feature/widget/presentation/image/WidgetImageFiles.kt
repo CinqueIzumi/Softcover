@@ -12,6 +12,4 @@ internal object WidgetImageFiles {
         context.filesDir,
         DIRECTORY_NAME,
     )
-
-    fun authority(context: Context): String = "${context.packageName}.widgetimages"
 }

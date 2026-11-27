@@ -5,6 +5,7 @@ import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
 import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsBackfilledUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObservePagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingActivityUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingHistoryUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingStatsUseCase
@@ -20,6 +21,7 @@ import nl.rhaydus.toad.ToadScreenModel
 internal class ProfileScreenScreenModel(
     observeUserProfileDataUseCase: ObserveUserProfileDataUseCase,
     observeReadingStatsUseCase: ObserveReadingStatsUseCase,
+    observePagesReadUseCase: ObservePagesReadUseCase,
     observeReadingHistoryUseCase: ObserveReadingHistoryUseCase,
     observeReadingActivityUseCase: ObserveReadingActivityUseCase,
     observeCurrentDateUseCase: ObserveCurrentDateUseCase,
@@ -36,6 +38,7 @@ internal class ProfileScreenScreenModel(
     override val dependencies: ProfileDependencies = ProfileDependencies(
         observeUserProfileDataUseCase = observeUserProfileDataUseCase,
         observeReadingStatsUseCase = observeReadingStatsUseCase,
+        observePagesReadUseCase = observePagesReadUseCase,
         observeReadingHistoryUseCase = observeReadingHistoryUseCase,
         observeReadingActivityUseCase = observeReadingActivityUseCase,
         observeCurrentDateUseCase = observeCurrentDateUseCase,

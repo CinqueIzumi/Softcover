@@ -411,5 +411,41 @@ class VisibleTabsCollectorTest {
             listTabs[1].listId shouldBe 1
             job.cancel()
         }
+
+        @Test
+        fun `persistedOrder repeating a tab id yields that tab once`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val listA = stubBookList(
+                id = 1,
+                name = "Alpha",
+            )
+
+            val listB = stubBookList(
+                id = 2,
+                name = "Beta",
+            )
+
+            val collector = VisibleTabsCollector()
+
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            statusCodesFlow.emit(emptySet())
+            enabledListIdsFlow.emit(setOf(1, 2))
+            listsFlow.emit(listOf(listA, listB))
+            tabOrderFlow.emit(listOf("list-2", "list-1", "list-2"))
+
+            // ----- Assert -----
+            stateFlow.value.visibleTabs
+                .filterIsInstance<LibraryTab.CustomList>()
+                .map { it.listId } shouldBe listOf(2, 1)
+
+            job.cancel()
+        }
     }
 }

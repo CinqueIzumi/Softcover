@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.reading.presentation.action
 
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
@@ -9,6 +10,7 @@ import kotlinx.datetime.LocalDateTime
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.progresssheet.presentation.ProgressSheetState
+import nl.rhaydus.softcover.core.progresssheet.presentation.mood.PendingMoodMoment
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
@@ -20,6 +22,7 @@ import org.junit.jupiter.api.Test
 
 class OnShowProgressSheetClickActionTest {
     private lateinit var dependencies: ReadingScreenDependencies
+    private lateinit var localVariablesFlow: MutableStateFlow<ReadingLocalVariables>
     private lateinit var stateFlow: MutableStateFlow<ReadingScreenUiState>
     private lateinit var scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>
 
@@ -27,10 +30,11 @@ class OnShowProgressSheetClickActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(ReadingScreenUiState())
+        localVariablesFlow = MutableStateFlow(ReadingLocalVariables())
 
         scope = ActionScope(
             stateFlow = stateFlow,
-            localVariablesFlow = MutableStateFlow(ReadingLocalVariables()),
+            localVariablesFlow = localVariablesFlow,
             eventChannel = Channel(Channel.BUFFERED),
         )
     }
@@ -98,6 +102,30 @@ class OnShowProgressSheetClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.progressSheet.tab shouldBe ProgressSheetTab.PERCENTAGE
+        }
+
+        @Test
+        fun `clears a pending mood moment`() = runTest {
+            // ----- Arrange -----
+            localVariablesFlow.value = ReadingLocalVariables(
+                pendingMoodMoment = PendingMoodMoment(
+                    bookId = 1,
+                    page = 10,
+                    seconds = null,
+                    percent = 10,
+                ),
+            )
+
+            val action = OnShowProgressSheetClickAction(book = PreviewData.baseBook)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            localVariablesFlow.value.pendingMoodMoment.shouldBeNull()
         }
     }
 }

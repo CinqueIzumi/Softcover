@@ -7,6 +7,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.progresssheet.presentation.ProgressEntry
 import nl.rhaydus.softcover.core.progresssheet.presentation.ProgressSheetHost
 import nl.rhaydus.softcover.core.progresssheet.presentation.ProgressSheetState
+import nl.rhaydus.softcover.core.progresssheet.presentation.mood.toPendingMoodMoment
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
@@ -35,6 +36,8 @@ internal object ReadingProgressSheetHost : ProgressSheetHost<
     ) {
         scope.currentLocalVariables.bookMutationJobs[book.id]?.cancel()
 
+        scope.setLocalVariables { it.copy(pendingMoodMoment = null) }
+
         val job = dependencies.launch {
             dependencies.recordBookProgressUseCase(
                 book = book,
@@ -50,6 +53,10 @@ internal object ReadingProgressSheetHost : ProgressSheetHost<
                             )
                         }
                     } else {
+                        if (outcome == null) {
+                            scope.setLocalVariables { it.copy(pendingMoodMoment = entry.toPendingMoodMoment(book)) }
+                        }
+
                         scope.sendEvent(ReadingScreenEvent.ProgressUpdatedEvent())
                     }
                 }
@@ -84,12 +91,24 @@ internal object ReadingProgressSheetHost : ProgressSheetHost<
     override suspend fun awaitPendingWrite(
         dependencies: ReadingScreenDependencies,
         scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>,
-    ) = Unit
+    ) {
+        scope.currentState.bookToUpdate?.id?.let { scope.currentLocalVariables.bookMutationJobs[it]?.join() }
+    }
 
     override suspend fun afterClose(
         dependencies: ReadingScreenDependencies,
         scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>,
     ) {
         scope.setState { it.copy(bookToUpdate = null) }
+
+        val pending = scope.currentLocalVariables.pendingMoodMoment ?: return
+
+        scope.setLocalVariables { it.copy(pendingMoodMoment = null) }
+
+        dependencies.moodMomentSheetSlice.openAfterProgress(
+            pending = pending,
+            host = ReadingMoodMomentSheetHost,
+            scope = scope,
+        )
     }
 }

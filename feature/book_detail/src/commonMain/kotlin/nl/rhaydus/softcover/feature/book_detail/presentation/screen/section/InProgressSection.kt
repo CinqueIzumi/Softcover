@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.button.PillButton
 import nl.rhaydus.softcover.core.component.deadline.DeadlineRow
+import nl.rhaydus.softcover.core.component.feeling.MoodRibbon
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.progress.ProgressBar
 import nl.rhaydus.softcover.core.component.state.RevealedWhenPresent
@@ -57,6 +58,10 @@ internal fun InProgressSection(
         Spacer(modifier = Modifier.height(Spacing.sm))
 
         ProgressBar(fraction = inProgress.fraction)
+
+        inProgress.ribbon?.let { ribbon ->
+            MoodRibbon(model = ribbon)
+        }
 
         Spacer(modifier = Modifier.height(Spacing.sm))
 

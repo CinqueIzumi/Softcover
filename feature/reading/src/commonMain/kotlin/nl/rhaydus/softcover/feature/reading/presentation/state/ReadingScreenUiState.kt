@@ -28,6 +28,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.progresssheet.presentation.ProgressSheetState
+import nl.rhaydus.softcover.core.progresssheet.presentation.mood.MoodMomentSheetState
 import nl.rhaydus.softcover.core.uibinding.masthead.mastheadRefreshFor
 import nl.rhaydus.softcover.feature.reading.presentation.collector.mastheadEyebrowFor
 import nl.rhaydus.softcover.feature.reading.presentation.mapper.ALSO_READING_STAND_IN_CARDS
@@ -52,6 +53,7 @@ internal data class ReadingScreenUiState(
     ),
     val bookToUpdate: Book? = null,
     val progressSheet: ProgressSheetState = ProgressSheetState(),
+    val moodMomentSheet: MoodMomentSheetState = MoodMomentSheetState(),
 
     val deadlines: ImmutableMap<Int, BookDeadline> = persistentMapOf(),
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,

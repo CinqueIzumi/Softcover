@@ -18,13 +18,14 @@ file under `patterns/`.
 - [Book-detail tag block](patterns/book-detail.md#book-detail-tag-block) — read-only, category-grouped tags on The Book lens.
 - [How it read](patterns/book-detail.md#how-it-read) — private survey on the Yours lens.
 - [Your tags section](patterns/book-detail.md#your-tags-section) — the reader's own tags on the Yours lens.
-- [Tag editor sheet](patterns/book-detail.md#tag-editor-sheet) — add, suggest and remove the reader's tags.
-- [Change edition sheet](patterns/book-detail.md#change-edition-sheet) — searchable single-choice edition picker.
-- [Shelve control](patterns/book-detail.md#shelve-control) — three-row Want to read / Reading / Read control.
+- [Your copy](patterns/book-detail.md#your-copy) — where the reader got the book, on the Yours lens.
+- [Tag editor sheet](patterns/book-detail.md#tag-editor-sheet) — add, suggest, remove tags.
+- [Change edition sheet](patterns/book-detail.md#change-edition-sheet) — searchable edition picker.
+- [Shelve control](patterns/book-detail.md#shelve-control) — Want to read / Reading / Read.
 - [Lens toggle](patterns/book-detail.md#lens-toggle) — sticky switch between The Book and Yours.
-- [Similar books](patterns/book-detail.md#similar-books) — "If you liked this" rail on The Book lens.
-- [Book-detail in-progress stat](patterns/book-detail.md#book-detail-in-progress-stat) — Reading hero stat with pace and deadline.
-- [Edition colophon line](patterns/book-detail.md#edition-colophon-line) — publisher, format and ISBN readout.
+- [Similar books](patterns/book-detail.md#similar-books) — rail on The Book lens.
+- [Book-detail in-progress stat](patterns/book-detail.md#book-detail-in-progress-stat) — Reading hero stat.
+- [Edition colophon line](patterns/book-detail.md#edition-colophon-line) — publisher, format, ISBN.
 - [External-links strip](patterns/book-detail.md#external-links-strip-labeled-pills) — labelled pills to off-app lookups.
 - [Verdict](patterns/book-detail.md#verdict-rating-and-review) — rating and review as one sheet and one block.
 - [Verdict prompt](patterns/book-detail.md#verdict-prompt-open-on-finish) — verdict sheet raised on a genuine finish.
