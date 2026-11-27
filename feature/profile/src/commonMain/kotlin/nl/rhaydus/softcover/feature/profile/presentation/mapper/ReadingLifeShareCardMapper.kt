@@ -5,6 +5,7 @@ import nl.rhaydus.common.formatDecimalNumber
 import nl.rhaydus.common.formatGroupedNumber
 import nl.rhaydus.softcover.core.component.share.ReadingLifeGenre
 import nl.rhaydus.softcover.core.component.share.ReadingLifeShareCardUiModel
+import nl.rhaydus.softcover.core.profile.domain.model.PagesRead
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
@@ -14,11 +15,12 @@ private const val SHARE_CARD_GENRE_LIMIT = 3
 private const val MONTHS_IN_YEAR = 12
 
 /**
- * Maps all-time [ReadingStats], [ReadingHistory] and [UserProfileData] onto the exportable
+ * Maps all-time [ReadingStats], [PagesRead], [ReadingHistory] and [UserProfileData] onto the exportable
  * [ReadingLifeShareCardUiModel] the share sheet renders. [ReadingLifeShareCardUiModel] deliberately
  * carries no `core:profile` dependency, so this mapping — not a shared use case — is where they meet.
  */
 internal fun ReadingStats.toReadingLifeShareCardUiModel(
+    pagesRead: PagesRead,
     history: ReadingHistory,
     profile: UserProfileData,
     dayStreak: Int,
@@ -26,8 +28,8 @@ internal fun ReadingStats.toReadingLifeShareCardUiModel(
     readerName = profile.name,
     avatarUrl = profile.profileImageUrl.takeIf { it.isNotBlank() },
     readerInitials = profile.name.toInitials(),
-    totalPagesRead = formatGroupedNumber(totalPages),
-    totalBooksLine = "across $booksRead ${if (booksRead == 1) "book" else "books"}",
+    totalPagesRead = formatGroupedNumber(pagesRead.total),
+    totalBooksLine = pagesRead.totalBooksLine(),
     // Already ranked highest-first by the mapper, so the card's leading row is the top genre.
     topGenres = genres.slices.take(SHARE_CARD_GENRE_LIMIT).map { slice ->
         ReadingLifeGenre(
@@ -44,6 +46,15 @@ internal fun ReadingStats.toReadingLifeShareCardUiModel(
     dayStreak = dayStreak.toString(),
     trackedYears = history.trackedYears.toString(),
 )
+
+private fun PagesRead.totalBooksLine(): String {
+    val parts = finishedAndStoppedBookParts(
+        finished = finishedBookCount,
+        stopped = stoppedBookCount,
+    )
+
+    return if (parts.isEmpty()) "across 0 books" else "across ${parts.joinToString(" and ")}"
+}
 
 private fun String.toInitials(): String {
     val letters = trim()

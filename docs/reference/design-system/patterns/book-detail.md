@@ -48,6 +48,31 @@
 - A character chip cycles off, yes, complicated (dashed), off; the sheet's caption says so. Save with every
   answer cleared deletes the stored answers.
 
+### Your copy
+
+- The last section of the Yours lens, after Your tags, for any book the reader has a copy of (Want to read
+  included): a bar-less `YOUR COPY` label over `YourCopyPanel`. The data is private and stays on the device.
+- One row, "Where you got it", shows the chosen source, or the invitation "Add where you got it" when
+  none is set, with the price trailing, also when no source is set. Tapping it opens the sheet.
+- The sheet body lives in the feature: a `SheetRowGroup` of eight presets (Library, Bought in a bookshop,
+  Bought online, Bought second-hand, Bought digital, Subscription or audio credit, Borrowed, A gift) plus a
+  "Somewhere else…" input row. Picking a preset clears the typed text; typing unticks the presets.
+- Under the choices a "Price paid" label holds an optional amount field beside a currency `SelectField`,
+  then a caption. The currency starts at the usual currency from Settings. Tapping it swaps the sheet body
+  to a searchable currency list; picking a currency, or back, returns to the choices.
+- Save is disabled while the amount is invalid ("Enter a price like 14.50.").
+- Re-tapping the chosen preset clears it. Save closes the sheet before the write and keeps every other
+  stored copy field; an empty choice clears the source.
+
+### Why you set it aside
+
+- Only while the status is Did not finish, the status callout in the Yours lens carries a "Why you set it
+  aside" detail row: the picked reasons on one line, the reader's own words under it, or "Add a reason".
+- Tapping the row opens `DidNotFinishReasonSheet`, hosted by `DidNotFinishReasonSheetCollector` from
+  `BookDetailUiState.didNotFinishReasonDraft`: five multi-select reason chips and an "In your own words" field.
+- The reasons are private, stay on the device and are wiped on sign-out. Changing the status hides the row
+  and keeps them, so they return if the book goes back to Did not finish.
+
 ### Your quotes section
 
 - The Yours lens, between How it read and the your-tags section, only for a shelved book: a bar-less
@@ -92,14 +117,14 @@
 
 ### Shelve control
 
-- A bar-less `SHELVE THIS BOOK` label over a `surfaceContainerLow` card of four rows: Want to read /
-  Reading / Paused / Read. The active row fills `primary` / `onPrimary`; active Reading or Paused shows
-  `{pct}% · p. {page}` (time-based for audiobooks), active Read the read date when known.
-- All four rows are enabled for an off-shelf book: Reading, Paused or Read shelves it there in one step.
-  Reading on a paused book resumes it.
-- Paused while the book's reading session is open (timer running or paused) asks first through the
-  shared end-session sheet. "End session and pause" stops the session, then pauses; "Keep reading"
-  leaves both as they were.
+- A bar-less `SHELVE THIS BOOK` label over a `surfaceContainerLow` card of five rows: Want to read /
+  Reading / Paused / Read / Did not finish. The active row fills `primary` / `onPrimary`; active Reading,
+  Paused or Did not finish shows `{pct}% · p. {page}` (time-based for audiobooks), active Read the read date.
+- All five rows are enabled for an off-shelf book: any of them shelves it there in one step. Reading on a
+  paused book resumes it.
+- Paused or Did not finish while the reading session is open asks first through the shared end-session
+  sheet. "End session and pause" / "End session and mark Did not finish" stops the session, then applies
+  that status; "Keep reading" leaves both as they were.
 - Writes are optimistic; failure shakes the card (`Modifier.shakeOnError`) with "Couldn't save — tap to
   retry". Read plays the mark-as-read celebration. While loading, each row is masked and inert.
 

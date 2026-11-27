@@ -12,6 +12,7 @@ import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingDay
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingDayBook
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingDayEnding
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.dayDetailUiModel
 
 /**
@@ -44,7 +45,7 @@ internal data class DayDetailUiModel(
                             toPage = 158,
                             updateCount = 2,
                             pages = 46,
-                            finished = false,
+                            ending = ReadingDayEnding.NONE,
                             firstUpdateAt = LocalTime(
                                 hour = 9,
                                 minute = 10,
@@ -60,7 +61,7 @@ internal data class DayDetailUiModel(
                             toPage = 16,
                             updateCount = 1,
                             pages = 16,
-                            finished = false,
+                            ending = ReadingDayEnding.NONE,
                             firstUpdateAt = LocalTime(
                                 hour = 8,
                                 minute = 5,
@@ -95,7 +96,7 @@ internal data class DayDetailUiModel(
                             toPage = 412,
                             updateCount = 0,
                             pages = 32,
-                            finished = true,
+                            ending = ReadingDayEnding.FINISHED,
                             firstUpdateAt = null,
                             lastUpdateAt = null,
                         ),
@@ -105,7 +106,7 @@ internal data class DayDetailUiModel(
                             toPage = 30,
                             updateCount = 1,
                             pages = 20,
-                            finished = false,
+                            ending = ReadingDayEnding.NONE,
                             firstUpdateAt = LocalTime(
                                 hour = 14,
                                 minute = 41,

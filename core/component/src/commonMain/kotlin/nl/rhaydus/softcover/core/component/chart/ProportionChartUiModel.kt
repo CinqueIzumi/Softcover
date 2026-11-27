@@ -8,7 +8,7 @@ import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 
 /**
- * One stacked bar of parts of a whole, with its legend beneath as rows or inline keys.
+ * One stacked bar of parts of a whole, with its legend beneath as rows or inline keys, or the rows alone.
  *
  * While [isLoading] the bar masks as one block and the legend keeps its rows with masked text and swatches.
  */
@@ -110,6 +110,29 @@ data class ProportionChartUiModel(
                     ),
                 ),
                 variant = ProportionChartVariant.Keys,
+            ),
+            "Legend only" to ProportionChartUiModel(
+                segments = persistentListOf(
+                    ChartSliceUiModel(
+                        label = "Euro",
+                        share = "62%",
+                        fraction = 0.62f,
+                        tone = ChartTone.Lead,
+                    ),
+                    ChartSliceUiModel(
+                        label = "Pound sterling",
+                        share = "27%",
+                        fraction = 0.27f,
+                        tone = ChartTone.Second,
+                    ),
+                    ChartSliceUiModel(
+                        label = "US dollar",
+                        share = "11%",
+                        fraction = 0.11f,
+                        tone = ChartTone.Third,
+                    ),
+                ),
+                variant = ProportionChartVariant.Legend,
             ),
             "Inline keys loading" to ProportionChartUiModel(
                 segments = persistentListOf(

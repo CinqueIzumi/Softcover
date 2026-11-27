@@ -7,13 +7,11 @@ import io.kotest.matchers.shouldBe
 import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.Gender
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.model.StatsRange
 import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
-import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -158,87 +156,9 @@ class ReadingStatsMapperTest {
 
             // ----- Assert -----
             stats.booksRead shouldBe 0
-            stats.totalPages shouldBe 0
             stats.genres.slices shouldBe emptyList()
             stats.ratings.totalRatings shouldBe 0
             stats.ratings.average shouldBe 0.0
-        }
-    }
-
-    @Nested
-    inner class Pages {
-        @Test
-        fun `the readers edition pages win over the book pages`() {
-            // ----- Arrange -----
-            val book = readBook(
-                id = 1,
-                finishedAt = "2026-02-01",
-                pages = 200,
-                editions = listOf(
-                    edition(
-                        id = 10,
-                        pages = 300,
-                    ),
-                ),
-                editionId = 10,
-            )
-
-            // ----- Act -----
-            val stats = listOf(book).toStats(StatsRange.Unbounded)
-
-            // ----- Assert -----
-            stats.totalPages shouldBe 300
-        }
-
-        @Test
-        fun `falls back to the book pages when the edition has none or is not the readers`() {
-            // ----- Arrange -----
-            val noEditionPages = readBook(
-                id = 1,
-                finishedAt = "2026-02-01",
-                pages = 200,
-                editions = listOf(
-                    edition(
-                        id = 10,
-                        pages = null,
-                    ),
-                ),
-                editionId = 10,
-            )
-
-            val otherEdition = readBook(
-                id = 2,
-                finishedAt = "2026-02-01",
-                pages = 100,
-                editions = listOf(
-                    edition(
-                        id = 11,
-                        pages = 999,
-                    ),
-                ),
-                editionId = 12,
-            )
-
-            // ----- Act -----
-            val stats = listOf(noEditionPages, otherEdition).toStats(StatsRange.Unbounded)
-
-            // ----- Assert -----
-            stats.totalPages shouldBe 300
-        }
-
-        @Test
-        fun `counts zero pages when neither edition nor book has a count`() {
-            // ----- Arrange -----
-            val book = readBook(
-                id = 1,
-                finishedAt = "2026-02-01",
-            )
-
-            // ----- Act -----
-            val stats = listOf(book).toStats(StatsRange.Unbounded)
-
-            // ----- Assert -----
-            stats.totalPages shouldBe 0
         }
     }
 
@@ -652,184 +572,6 @@ class ReadingStatsMapperTest {
 
             // ----- Assert -----
             ratings.halfStarBuckets shouldBe listOf(2, 0, 0, 0, 0, 0, 0, 0, 0)
-        }
-    }
-
-    @Nested
-    inner class AuthorDemographicsAggregation {
-        @Test
-        fun `an author on several books counts once`() {
-            // ----- Arrange -----
-            val author = Author(
-                id = 1,
-                name = "Sam",
-                gender = Gender.Female,
-            )
-
-            val books = listOf(
-                readBook(
-                    id = 1,
-                    finishedAt = "2026-01-10",
-                    authors = listOf(author),
-                ),
-                readBook(
-                    id = 2,
-                    finishedAt = "2026-01-11",
-                    authors = listOf(author),
-                ),
-            )
-
-            // ----- Act -----
-            val demographics = books.toStats(StatsRange.Unbounded).authorDemographics
-
-            // ----- Assert -----
-            demographics.knownGenderCount shouldBe 1
-            demographics.genderSlices.map { it.count } shouldBe listOf(1)
-        }
-
-        @Test
-        fun `two authors sharing a name but not an id stay apart`() {
-            // ----- Arrange -----
-            val books = listOf(
-                readBook(
-                    id = 1,
-                    finishedAt = "2026-01-10",
-                    authors = listOf(
-                        Author(
-                            id = 2,
-                            name = "Sam",
-                            gender = Gender.Male,
-                        ),
-                        Author(
-                            id = 3,
-                            name = "Sam",
-                            gender = Gender.Male,
-                        ),
-                    ),
-                ),
-            )
-
-            // ----- Act -----
-            val demographics = books.toStats(StatsRange.Unbounded).authorDemographics
-
-            // ----- Assert -----
-            demographics.knownGenderCount shouldBe 2
-            demographics.genderSlices.single().count shouldBe 2
-            demographics.genderSlices.single().fraction shouldBe 1.0
-        }
-
-        @Test
-        fun `unknown gender is its own bucket pinned last and apart from other`() {
-            // ----- Arrange -----
-            val books = listOf(
-                readBook(
-                    id = 1,
-                    finishedAt = "2026-01-10",
-                    authors = listOf(
-                        Author(
-                            id = 1,
-                            name = "A",
-                            gender = Gender.Unknown,
-                        ),
-                        Author(
-                            id = 2,
-                            name = "B",
-                            gender = Gender.Other,
-                        ),
-                        Author(
-                            id = 3,
-                            name = "C",
-                            gender = Gender.Male,
-                        ),
-                        Author(
-                            id = 4,
-                            name = "D",
-                            gender = Gender.Male,
-                        ),
-                    ),
-                ),
-            )
-
-            // ----- Act -----
-            val demographics = books.toStats(StatsRange.Unbounded).authorDemographics
-
-            // ----- Assert -----
-            demographics.genderSlices.map { it.gender } shouldBe listOf(Gender.Male, Gender.Other, Gender.Unknown)
-            demographics.genderSlices.map { it.count } shouldBe listOf(2, 1, 1)
-            demographics.knownGenderCount shouldBe 3
-            demographics.unknownGenderCount shouldBe 1
-        }
-
-        @Test
-        fun `bipoc and lgbtq breakdowns split yes, no and unknown across distinct authors`() {
-            // ----- Arrange -----
-            val books = listOf(
-                readBook(
-                    id = 1,
-                    finishedAt = "2026-01-10",
-                    authors = listOf(
-                        Author(
-                            id = 1,
-                            name = "A",
-                            isBipoc = true,
-                            isLgbtq = false,
-                        ),
-                        Author(
-                            id = 2,
-                            name = "B",
-                            isBipoc = false,
-                            isLgbtq = null,
-                        ),
-                        Author(
-                            id = 3,
-                            name = "C",
-                            isBipoc = null,
-                            isLgbtq = null,
-                        ),
-                    ),
-                ),
-            )
-
-            // ----- Act -----
-            val demographics = books.toStats(StatsRange.Unbounded).authorDemographics
-
-            // ----- Assert -----
-            demographics.bipocBreakdown shouldBe DemographicBreakdown(
-                yesCount = 1,
-                noCount = 1,
-                unknownCount = 1,
-            )
-
-            demographics.lgbtqBreakdown shouldBe DemographicBreakdown(
-                yesCount = 0,
-                noCount = 1,
-                unknownCount = 2,
-            )
-        }
-
-        @Test
-        fun `authors of books outside the range are ignored`() {
-            // ----- Arrange -----
-            val books = listOf(
-                readBook(
-                    id = 1,
-                    finishedAt = "2020-01-10",
-                    authors = listOf(
-                        Author(
-                            id = 1,
-                            name = "Old",
-                            gender = Gender.Male,
-                        ),
-                    ),
-                ),
-            )
-
-            // ----- Act -----
-            val demographics = books.toStats(bounded).authorDemographics
-
-            // ----- Assert -----
-            demographics.genderSlices shouldBe emptyList()
-            demographics.knownGenderCount shouldBe 0
         }
     }
 
@@ -1332,6 +1074,448 @@ class ReadingStatsMapperTest {
             // ----- Assert -----
             split.counts shouldBe mapOf(ReadingFormat.Physical to 1)
             split.unknownCount shouldBe 0
+        }
+    }
+
+    @Nested
+    inner class LongestBookSelection {
+        @Test
+        fun `the book with the most pages wins`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    pages = 200,
+                ),
+                readBook(
+                    id = 2,
+                    pages = 500,
+                ),
+                readBook(
+                    id = 3,
+                    pages = 300,
+                ),
+            )
+
+            // ----- Act -----
+            val result = books.longestBook()
+
+            // ----- Assert -----
+            listOf(result?.book?.id, result?.pages) shouldBe listOf(2, 500)
+        }
+
+        @Test
+        fun `the reader's own edition decides the page count over the book's`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    pages = 300,
+                ),
+                readBook(
+                    id = 2,
+                    pages = 100,
+                    editions = listOf(
+                        edition(
+                            id = 20,
+                            pages = 900,
+                        ),
+                    ),
+                    editionId = 20,
+                ),
+            )
+
+            // ----- Act -----
+            val result = books.longestBook()
+
+            // ----- Assert -----
+            listOf(result?.book?.id, result?.pages) shouldBe listOf(2, 900)
+        }
+
+        @Test
+        fun `a book with zero or unknown pages never qualifies`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    pages = 0,
+                ),
+                readBook(
+                    id = 2,
+                    pages = null,
+                ),
+                readBook(
+                    id = 3,
+                    pages = 10,
+                ),
+            )
+
+            // ----- Act -----
+            val result = books.longestBook()
+
+            // ----- Assert -----
+            result?.book?.id shouldBe 3
+        }
+
+        @Test
+        fun `no book with a known page count gives null`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    pages = 0,
+                ),
+                readBook(
+                    id = 2,
+                    pages = null,
+                ),
+            )
+
+            // ----- Act -----
+            val result = books.longestBook()
+
+            // ----- Assert -----
+            result shouldBe null
+        }
+
+        @Test
+        fun `an empty list gives null`() {
+            // ----- Arrange -----
+            val books = emptyList<Book>()
+
+            // ----- Act -----
+            val result = books.longestBook()
+
+            // ----- Assert -----
+            result shouldBe null
+        }
+
+        @Test
+        fun `a page tie goes to the later finish date`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 9,
+                    finishedAt = "2026-02-01",
+                    pages = 400,
+                ),
+                readBook(
+                    id = 1,
+                    finishedAt = "2026-06-01",
+                    pages = 400,
+                ),
+            )
+
+            // ----- Act -----
+            val result = books.longestBook()
+
+            // ----- Assert -----
+            result?.book?.id shouldBe 1
+        }
+
+        @Test
+        fun `a page tie ranks a book without a finish date last`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 9,
+                    pages = 400,
+                ),
+                readBook(
+                    id = 1,
+                    finishedAt = "2026-02-01",
+                    pages = 400,
+                ),
+            )
+
+            // ----- Act -----
+            val result = books.longestBook()
+
+            // ----- Assert -----
+            result?.book?.id shouldBe 1
+        }
+
+        @Test
+        fun `a page and finish tie goes to the higher book id`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 5,
+                    finishedAt = "2026-02-01",
+                    pages = 400,
+                ),
+                readBook(
+                    id = 8,
+                    finishedAt = "2026-02-01",
+                    pages = 400,
+                ),
+                readBook(
+                    id = 3,
+                    finishedAt = "2026-02-01",
+                    pages = 400,
+                ),
+            )
+
+            // ----- Act -----
+            val result = books.longestBook()
+
+            // ----- Assert -----
+            result?.book?.id shouldBe 8
+        }
+    }
+
+    @Nested
+    inner class OwnTags {
+        private fun tagCounts(
+            books: List<Book>,
+            tags: Map<Int, List<UserTag>>,
+        ) = books.toStats(
+            range = bounded,
+            userTagsByBookId = tags,
+        ).ownTags.map { it.name to it.bookCount }
+
+        @Test
+        fun `only TAG category user tags are counted`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    finishedAt = "2026-02-01",
+                ),
+            )
+
+            val tags = mapOf(
+                1 to listOf(
+                    userTag(
+                        "cozy",
+                        TagCategory.TAG,
+                    ),
+                    userTag(
+                        "Fantasy",
+                        TagCategory.GENRE,
+                    ),
+                    userTag(
+                        "Hopeful",
+                        TagCategory.MOOD,
+                    ),
+                    userTag(
+                        "Gore",
+                        TagCategory.CONTENT_WARNING,
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = tagCounts(
+                books,
+                tags,
+            )
+
+            // ----- Assert -----
+            result shouldContainExactly listOf("cozy" to 1)
+        }
+
+        @Test
+        fun `books not finished inside a bounded range are excluded`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    finishedAt = "2026-02-01",
+                ),
+                readBook(
+                    id = 2,
+                    finishedAt = "2025-12-31",
+                ),
+                readBook(id = 3),
+            )
+
+            val tags = mapOf(
+                1 to listOf(
+                    userTag(
+                        "cozy",
+                        TagCategory.TAG,
+                    ),
+                ),
+                2 to listOf(
+                    userTag(
+                        "cozy",
+                        TagCategory.TAG,
+                    ),
+                ),
+                3 to listOf(
+                    userTag(
+                        "cozy",
+                        TagCategory.TAG,
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = tagCounts(
+                books,
+                tags,
+            )
+
+            // ----- Assert -----
+            result shouldContainExactly listOf("cozy" to 1)
+        }
+
+        @Test
+        fun `a tag repeated on one book counts that book once and counts add up across books`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    finishedAt = "2026-02-01",
+                ),
+                readBook(
+                    id = 2,
+                    finishedAt = "2026-03-01",
+                ),
+            )
+
+            val tags = mapOf(
+                1 to listOf(
+                    userTag(
+                        "cozy",
+                        TagCategory.TAG,
+                    ),
+                    userTag(
+                        "cozy",
+                        TagCategory.TAG,
+                    ),
+                ),
+                2 to listOf(
+                    userTag(
+                        "cozy",
+                        TagCategory.TAG,
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = tagCounts(
+                books,
+                tags,
+            )
+
+            // ----- Assert -----
+            result shouldContainExactly listOf("cozy" to 2)
+        }
+
+        @Test
+        fun `names group exactly so case variants stay separate rows`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    finishedAt = "2026-02-01",
+                ),
+            )
+
+            val tags = mapOf(
+                1 to listOf(
+                    userTag(
+                        "Cozy",
+                        TagCategory.TAG,
+                    ),
+                    userTag(
+                        "cozy",
+                        TagCategory.TAG,
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = tagCounts(
+                books,
+                tags,
+            )
+
+            // ----- Assert -----
+            result shouldContainExactly listOf("Cozy" to 1, "cozy" to 1)
+        }
+
+        @Test
+        fun `rows order by count descending then lowercased name`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    finishedAt = "2026-02-01",
+                ),
+                readBook(
+                    id = 2,
+                    finishedAt = "2026-03-01",
+                ),
+            )
+
+            val tags = mapOf(
+                1 to listOf(
+                    userTag(
+                        "banana",
+                        TagCategory.TAG,
+                    ),
+                    userTag(
+                        "Apple",
+                        TagCategory.TAG,
+                    ),
+                    userTag(
+                        "zebra",
+                        TagCategory.TAG,
+                    ),
+                ),
+                2 to listOf(
+                    userTag(
+                        "zebra",
+                        TagCategory.TAG,
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = tagCounts(
+                books,
+                tags,
+            )
+
+            // ----- Assert -----
+            result shouldContainExactly listOf(
+                "zebra" to 2,
+                "Apple" to 1,
+                "banana" to 1,
+            )
+        }
+
+        @Test
+        fun `spoiler flagged tags are counted`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    finishedAt = "2026-02-01",
+                ),
+            )
+
+            val tags = mapOf(
+                1 to listOf(
+                    UserTag(
+                        name = "twist",
+                        category = TagCategory.TAG,
+                        spoiler = true,
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = tagCounts(
+                books,
+                tags,
+            )
+
+            // ----- Assert -----
+            result shouldContainExactly listOf("twist" to 1)
         }
     }
 }

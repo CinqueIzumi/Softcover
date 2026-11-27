@@ -20,4 +20,7 @@ fragment EditionFragment on editions {
     release_date
     edition_format
     reading_format_id
+    language {
+        language
+    }
 }

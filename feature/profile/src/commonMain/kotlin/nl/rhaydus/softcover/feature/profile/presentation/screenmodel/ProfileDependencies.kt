@@ -5,6 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
 import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsBackfilledUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObservePagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingActivityUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingHistoryUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingStatsUseCase
@@ -15,6 +16,7 @@ import nl.rhaydus.toad.ActionDependencies
 internal data class ProfileDependencies(
     val observeUserProfileDataUseCase: ObserveUserProfileDataUseCase,
     val observeReadingStatsUseCase: ObserveReadingStatsUseCase,
+    val observePagesReadUseCase: ObservePagesReadUseCase,
     val observeReadingHistoryUseCase: ObserveReadingHistoryUseCase,
     val observeReadingActivityUseCase: ObserveReadingActivityUseCase,
     val observeCurrentDateUseCase: ObserveCurrentDateUseCase,

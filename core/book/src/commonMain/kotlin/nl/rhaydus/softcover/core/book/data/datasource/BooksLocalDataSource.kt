@@ -133,7 +133,11 @@ interface BooksLocalDataSource {
 
     suspend fun getExistingEditionIds(ids: List<Int>): List<Int>
 
+    suspend fun getEditionIdsWithoutFetchedLanguage(ids: List<Int>): List<Int>
+
     suspend fun cacheEditions(editions: List<BookEdition>)
+
+    suspend fun fillEditionLanguages(languagesById: Map<Int, String?>)
 
     suspend fun updateEditionLocalImage(
         editionId: Int,
@@ -354,8 +358,18 @@ internal class BooksLocalDataSourceImpl(
         return dao.getExistingEditionIds(editionIds = ids)
     }
 
+    override suspend fun getEditionIdsWithoutFetchedLanguage(ids: List<Int>): List<Int> {
+        return ids.distinct().chunked(SQLITE_VARIABLE_CHUNK).flatMap { chunk ->
+            dao.getEditionIdsWithoutFetchedLanguage(editionIds = chunk)
+        }
+    }
+
     override suspend fun cacheEditions(editions: List<BookEdition>) {
         deleteStaleCovers(dao.cacheEditions(editions = editions))
+    }
+
+    override suspend fun fillEditionLanguages(languagesById: Map<Int, String?>) {
+        dao.fillEditionLanguages(languagesById = languagesById)
     }
 
     override suspend fun updateEditionLocalImage(
@@ -605,3 +619,5 @@ internal class BooksLocalDataSourceImpl(
         }.flowOn(appDispatchers.default)
     }
 }
+
+private const val SQLITE_VARIABLE_CHUNK = 500

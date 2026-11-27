@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import nl.rhaydus.softcover.core.book.domain.usecase.DidNotFinishBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.FetchBookByIdUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetEditionsByBookIdUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.LoadSimilarBooksPageUseCase
@@ -19,9 +20,15 @@ import nl.rhaydus.softcover.core.book.domain.usecase.SaveUserTagsUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookReviewUseCase
 import nl.rhaydus.softcover.core.component.state.OfflineCopy
+import nl.rhaydus.softcover.core.corpus.domain.usecase.GetBookCopyUseCase
 import nl.rhaydus.softcover.core.corpus.domain.usecase.GetBookTraitsUseCase
+import nl.rhaydus.softcover.core.corpus.domain.usecase.GetDidNotFinishReasonsUseCase
+import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveBookCopyUseCase
 import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveBookTraitsUseCase
+import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveDidNotFinishReasonsUseCase
+import nl.rhaydus.softcover.core.corpus.domain.usecase.SaveBookCopyUseCase
 import nl.rhaydus.softcover.core.corpus.domain.usecase.SaveBookTraitsUseCase
+import nl.rhaydus.softcover.core.corpus.domain.usecase.SaveDidNotFinishReasonsUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ClearBookDeadlineUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveBookDeadlineUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.SetBookDeadlineUseCase
@@ -36,7 +43,10 @@ import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveBookQuotesUseCas
 import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshBookQuotesUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshReadingJournalHistoryUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetCurrenciesUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryTabOrderAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetUsualCurrencyAsFlowUseCase
 import nl.rhaydus.softcover.core.presentation.removal.UndoableBookRemover
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
@@ -57,10 +67,12 @@ internal class BookDetailDependencies(
     val markBookAsReadingUseCase: MarkBookAsReadingUseCase,
     val markBookAsReadUseCase: MarkBookAsReadUseCase,
     val pauseBookUseCase: PauseBookUseCase,
+    val didNotFinishBookUseCase: DidNotFinishBookUseCase,
     val activeSessionController: ActiveSessionController,
     val saveBookVerdictUseCase: SaveBookVerdictUseCase,
     val undoableBookRemover: UndoableBookRemover,
     val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
+    val getLibraryTabOrderAsFlowUseCase: GetLibraryTabOrderAsFlowUseCase,
     val observeCurrentDateUseCase: ObserveCurrentDateUseCase,
     val setEditionAsOwnedUseCase: SetEditionAsOwnedUseCase,
     val getAllUserListsUseCase: GetAllUserListsUseCase,
@@ -90,6 +102,14 @@ internal class BookDetailDependencies(
     val observeBookTraitsUseCase: ObserveBookTraitsUseCase,
     val getBookTraitsUseCase: GetBookTraitsUseCase,
     val saveBookTraitsUseCase: SaveBookTraitsUseCase,
+    val observeBookCopyUseCase: ObserveBookCopyUseCase,
+    val getBookCopyUseCase: GetBookCopyUseCase,
+    val saveBookCopyUseCase: SaveBookCopyUseCase,
+    val observeDidNotFinishReasonsUseCase: ObserveDidNotFinishReasonsUseCase,
+    val getDidNotFinishReasonsUseCase: GetDidNotFinishReasonsUseCase,
+    val saveDidNotFinishReasonsUseCase: SaveDidNotFinishReasonsUseCase,
+    val getCurrenciesUseCase: GetCurrenciesUseCase,
+    val getUsualCurrencyAsFlowUseCase: GetUsualCurrencyAsFlowUseCase,
     val offlineCopy: OfflineCopy,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,

@@ -66,7 +66,12 @@ class BookMapperTest {
         editionFormat: String? = null,
         audioSeconds: Int? = null,
         readingFormatId: Int = 0,
+        language: EditionFragment.Language? = null,
     ) {
+        every {
+            this@stubEditionFields.language
+        } returns language
+
         every {
             this@stubEditionFields.id
         } returns id
@@ -137,8 +142,10 @@ class BookMapperTest {
         releaseDate: String? = null,
         editionFormat: String? = null,
         readingFormatId: Int = 0,
+        language: EditionFragment.Language? = null,
     ): EditionFragment = mockk<EditionFragment>().also {
         it.stubEditionFields(
+            language = language,
             id = id,
             bookId = bookId,
             image = image,
@@ -653,6 +660,38 @@ class BookMapperTest {
 
             // ----- Assert -----
             result.url.shouldBeNull()
+        }
+
+        @Test
+        fun `maps the language name and marks the language as fetched`() {
+            // ----- Arrange -----
+            val language = mockk<EditionFragment.Language> {
+                every {
+                    this@mockk.language
+                } returns "Dutch"
+            }
+
+            val fragment = stubEditionFragment(language = language)
+
+            // ----- Act -----
+            val result = fragment.toBookEdition()
+
+            // ----- Assert -----
+            result.language shouldBe "Dutch"
+            result.isLanguageFetched shouldBe true
+        }
+
+        @Test
+        fun `an edition with no language is still marked as fetched`() {
+            // ----- Arrange -----
+            val fragment = stubEditionFragment(language = null)
+
+            // ----- Act -----
+            val result = fragment.toBookEdition()
+
+            // ----- Assert -----
+            result.language.shouldBeNull()
+            result.isLanguageFetched shouldBe true
         }
 
         @Test

@@ -2,6 +2,8 @@ package nl.rhaydus.softcover.core.preferences.di
 
 import nl.rhaydus.platform.AndroidSecureStorage
 import nl.rhaydus.platform.SecureStorage
+import nl.rhaydus.softcover.core.preferences.data.datasource.CurrencyCatalog
+import nl.rhaydus.softcover.core.preferences.data.datasource.JavaCurrencyCatalog
 import nl.rhaydus.softcover.core.preferences.data.datastore.AppSettingsDataStore
 import nl.rhaydus.softcover.core.preferences.data.datastore.createAppSettingsDataStore
 import nl.rhaydus.softcover.core.preferences.data.security.AndroidLegacySecureApiKeyStorage
@@ -13,6 +15,8 @@ import org.koin.core.module.Module
 import org.koin.dsl.module
 
 actual val platformPreferencesModule: Module = module {
+    single<CurrencyCatalog> { JavaCurrencyCatalog() }
+
     single<AppSettingsDataStore> {
         val filesDir = androidContext().filesDir.path
 

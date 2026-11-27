@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.widget.presentation.glance
 
-import android.net.Uri
+import android.graphics.Bitmap
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
@@ -41,10 +41,10 @@ class RandomPickWidgetModelSourceTest {
 
     private fun artwork() = BookArtworkUiModel(
         backdrop = null,
-        veil = mockk<Uri>(),
-        veilLift = mockk<Uri>(),
-        washPrimary = mockk<Uri>(),
-        washTertiary = mockk<Uri>(),
+        veil = mockk<Bitmap>(),
+        veilLift = mockk<Bitmap>(),
+        washPrimary = mockk<Bitmap>(),
+        washTertiary = mockk<Bitmap>(),
     )
 
     @Nested
@@ -74,7 +74,7 @@ class RandomPickWidgetModelSourceTest {
 
             val loadedCover = model(
                 picked(
-                    cover = RandomPickWidgetUiModel.Cover.Loaded(mockk<Uri>()),
+                    cover = RandomPickWidgetUiModel.Cover.Loaded(mockk<Bitmap>()),
                     artwork = artwork(),
                     imagesPending = true,
                 ),
@@ -92,7 +92,7 @@ class RandomPickWidgetModelSourceTest {
             // ----- Arrange -----
             val loaded = model(
                 picked(
-                    cover = RandomPickWidgetUiModel.Cover.Loaded(mockk<Uri>()),
+                    cover = RandomPickWidgetUiModel.Cover.Loaded(mockk<Bitmap>()),
                     artwork = artwork(),
                     imagesPending = false,
                 ),

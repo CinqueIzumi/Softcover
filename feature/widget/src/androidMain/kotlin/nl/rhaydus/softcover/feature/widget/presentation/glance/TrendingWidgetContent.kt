@@ -16,7 +16,6 @@ import androidx.glance.action.Action
 import androidx.glance.action.actionParametersOf
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.CircularProgressIndicator
-import androidx.glance.appwidget.ImageProvider
 import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.appWidgetBackground
 import androidx.glance.appwidget.cornerRadius
@@ -477,7 +476,7 @@ private fun Cover(
 
     if (cover is TrendingWidgetUiModel.Cover.Loaded) {
         Image(
-            provider = ImageProvider(cover.uri),
+            provider = ImageProvider(cover.bitmap),
             contentDescription = null,
             modifier = modifier,
             contentScale = ContentScale.Crop,

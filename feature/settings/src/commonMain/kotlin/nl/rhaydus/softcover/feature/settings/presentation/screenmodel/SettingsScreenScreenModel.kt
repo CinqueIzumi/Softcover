@@ -9,6 +9,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnab
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetShelfSwipeEnabledAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetUiScaleAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetUsualCurrencyAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetReadingStreakEnabledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetShelfSwipeEnabledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetUiScaleUseCase
@@ -39,6 +40,7 @@ internal class SettingsScreenScreenModel(
     setShelfSwipeEnabledUseCase: SetShelfSwipeEnabledUseCase,
     getUiScaleAsFlowUseCase: GetUiScaleAsFlowUseCase,
     setUiScaleUseCase: SetUiScaleUseCase,
+    getUsualCurrencyAsFlowUseCase: GetUsualCurrencyAsFlowUseCase,
     observeAppUpdateStateUseCase: ObserveAppUpdateStateUseCase,
     appVersionProvider: AppVersionProvider,
     homeScreenWidgets: HomeScreenWidgets,
@@ -67,6 +69,7 @@ internal class SettingsScreenScreenModel(
         setShelfSwipeEnabledUseCase = setShelfSwipeEnabledUseCase,
         getUiScaleAsFlowUseCase = getUiScaleAsFlowUseCase,
         setUiScaleUseCase = setUiScaleUseCase,
+        getUsualCurrencyAsFlowUseCase = getUsualCurrencyAsFlowUseCase,
         observeAppUpdateStateUseCase = observeAppUpdateStateUseCase,
         coroutineScope = screenModelScope,
         mainDispatcher = appDispatchers.main,

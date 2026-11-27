@@ -79,36 +79,40 @@ fun ProportionChart(
     )
 
     Column(modifier = modifier) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(8.dp)
-                .clippedSkeletonMask(
-                    visible = model.isLoading,
-                    shape = barShape,
-                )
-                .drawWithContent {
-                    clipRect(right = size.width * revealPercent / 100f) {
-                        this@drawWithContent.drawContent()
-                    }
-                },
-            horizontalArrangement = Arrangement.spacedBy(Spacing.xxxs),
-        ) {
-            retention.entries.forEachIndexed { index, entry ->
-                key(if (retention.isLoading) index else entry.slice.label) {
-                    BarSegment(
-                        entry = entry,
-                        sizeSpec = sizeSpec,
-                        onGone = { retention.release(entry.slice.label) },
+        if (model.variant != ProportionChartVariant.Legend) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(8.dp)
+                    .clippedSkeletonMask(
+                        visible = model.isLoading,
+                        shape = barShape,
                     )
+                    .drawWithContent {
+                        clipRect(right = size.width * revealPercent / 100f) {
+                            this@drawWithContent.drawContent()
+                        }
+                    },
+                horizontalArrangement = Arrangement.spacedBy(Spacing.xxxs),
+            ) {
+                retention.entries.forEachIndexed { index, entry ->
+                    key(if (retention.isLoading) index else entry.slice.label) {
+                        BarSegment(
+                            entry = entry,
+                            sizeSpec = sizeSpec,
+                            onGone = { retention.release(entry.slice.label) },
+                        )
+                    }
                 }
             }
+
+            Spacer(modifier = Modifier.height(Spacing.md))
         }
 
-        Spacer(modifier = Modifier.height(Spacing.md))
-
         when (model.variant) {
-            ProportionChartVariant.Rows -> RowsLegend(
+            ProportionChartVariant.Rows,
+            ProportionChartVariant.Legend,
+            -> RowsLegend(
                 retention = retention,
                 isLoading = model.isLoading,
             )

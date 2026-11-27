@@ -47,4 +47,14 @@ internal fun liveCallouts(): ImmutableList<CalloutUiModel> = persistentListOf(
         callToAction = CalloutActionUiModel.Button(label = "Update now"),
         dismissible = true,
     ),
+    CalloutUiModel(
+        variant = CalloutVariant.Neutral(icon = SoftcoverIcon.Info),
+        eyebrow = "Did not finish",
+        body = "You set this one aside.",
+        callToAction = CalloutActionUiModel.Detail(
+            label = "Why you set it aside",
+            lines = persistentListOf("Too slow, Lost interest", "The middle dragged for me."),
+            emptyText = "Add a reason",
+        ),
+    ),
 )

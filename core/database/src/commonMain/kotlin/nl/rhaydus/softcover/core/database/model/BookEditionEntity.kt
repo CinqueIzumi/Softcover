@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.database.model
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -23,4 +24,8 @@ data class BookEditionEntity(
     val releaseDate: String?,
     val format: String,
     val readingFormatId: Int?,
+    val language: String? = null,
+
+    @ColumnInfo(defaultValue = "0")
+    val languageFetched: Boolean = false,
 )

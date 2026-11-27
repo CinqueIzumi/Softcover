@@ -15,7 +15,7 @@ the masthead, sheets, and grid these modes sit inside.
   confirm runs an undoable removal. Masthead, search, control line and chip row hide.
 - Move offers "Move to Paused" after Currently Reading. When the selection holds the book of the running
   reading session (timer paused or not), the move opens the end-session confirm first
-  (`endSessionPauseSheetScaffold`, `:core:uibinding`): "End this session?", primary "End session and pause",
+  (`endSessionSheetScaffold`, `:core:uibinding`): "End this session?", primary "End session and pause",
   secondary "Keep reading". Confirming stops the session once the sheet has hidden, then pauses.
 - Desktop right-click on a Paused book adds "Resume reading", moving that book to Currently Reading; the
   mapper decides it (`LibraryBookMenuUiModel`), the grid never reads the book's status.

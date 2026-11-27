@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.widget.presentation.model
 
-import android.net.Uri
+import android.graphics.Bitmap
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 
 internal data class RandomPickWidgetUiModel(
@@ -40,6 +40,6 @@ internal data class RandomPickWidgetUiModel(
 
         data object Missing : Cover
 
-        data class Loaded(val uri: Uri) : Cover
+        data class Loaded(val bitmap: Bitmap) : Cover
     }
 }

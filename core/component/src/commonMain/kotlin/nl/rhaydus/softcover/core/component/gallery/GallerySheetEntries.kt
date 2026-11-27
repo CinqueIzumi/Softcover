@@ -12,6 +12,8 @@ import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.designsystem.layout.rememberWindowSizeClass
 import nl.rhaydus.softcover.core.component.sheet.SheetActionRow
 import nl.rhaydus.softcover.core.component.sheet.SheetActionRowUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetInputRow
+import nl.rhaydus.softcover.core.component.sheet.SheetInputRowUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetLayout
 import nl.rhaydus.softcover.core.component.sheet.SheetRow
 import nl.rhaydus.softcover.core.component.sheet.SheetRowGroup
@@ -46,11 +48,25 @@ internal val sheetEntries: ImmutableList<GalleryEntry> = persistentListOf(
     galleryEntry(
         name = "SheetRow",
         family = GalleryFamily.SHEET,
-        blurb = "One ruled row of a single-choice sheet list: italic label, optional leading icon " +
-            "and count, and a check that marks the selection.",
+        blurb = "One ruled row of a single-choice sheet list: italic label, optional leading icon, " +
+            "short code and count, and a check that marks the selection.",
         previews = SheetRowUiModel,
         content = { model, modifier ->
             SheetRow(
+                model = model,
+                onEvent = {},
+                modifier = modifier,
+            )
+        },
+    ),
+    galleryEntry(
+        name = "SheetInputRow",
+        family = GalleryFamily.SHEET,
+        blurb = "The free-text choice that closes a single-choice list: a bare italic field in a SheetRow's " +
+            "face, ticked once the reader has typed.",
+        previews = SheetInputRowUiModel,
+        content = { model, modifier ->
+            SheetInputRow(
                 model = model,
                 onEvent = {},
                 modifier = modifier,
@@ -75,7 +91,8 @@ internal val sheetEntries: ImmutableList<GalleryEntry> = persistentListOf(
         name = "SheetRowGroup",
         family = GalleryFamily.SHEET,
         blurb = "A single-choice list of SheetRows grouped for selection semantics; picking a row " +
-            "runs the sheet's animated dismiss unless the host closes it itself.",
+            "runs the sheet's animated dismiss unless the host closes it itself. An optional trailing " +
+            "free-text row joins the same group.",
         previews = SheetRowGroupUiModel,
         content = { model, modifier ->
             SheetRowGroup(

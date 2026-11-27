@@ -14,15 +14,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.error
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import nl.rhaydus.designsystem.modifier.rememberShakeTrigger
 import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 @Composable
 fun TextField(
@@ -30,7 +33,22 @@ fun TextField(
     onEvent: (TextFieldEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val focusRequester = remember { FocusRequester() }
+    TextFieldBody(
+        model = model,
+        onEvent = onEvent,
+        ink = MaterialTheme.colorScheme.onSurface,
+        modifier = modifier,
+    )
+}
+
+@Composable
+internal fun TextFieldBody(
+    model: TextFieldUiModel,
+    onEvent: (TextFieldEvent) -> Unit,
+    ink: Color,
+    modifier: Modifier = Modifier,
+    focusRequester: FocusRequester = remember { FocusRequester() },
+) {
     val centred = model.variant is TextFieldVariant.Hero || model.variant is TextFieldVariant.Numeral
 
     val shake = rememberShakeTrigger()
@@ -77,6 +95,22 @@ fun TextField(
                 model = model,
                 onEvent = onEvent,
                 focusRequester = focusRequester,
+            )
+
+            is TextFieldVariant.Bare -> BareTextField(
+                model = model,
+                style = MaterialTheme.editorialTypography.titleLarge.copy(fontStyle = FontStyle.Italic),
+                onEvent = onEvent,
+                focusRequester = focusRequester,
+                ink = ink,
+            )
+
+            is TextFieldVariant.Plain -> BareTextField(
+                model = model,
+                style = MaterialTheme.typography.bodyLarge,
+                onEvent = onEvent,
+                focusRequester = focusRequester,
+                ink = ink,
             )
 
             is TextFieldVariant.Numeral -> NumeralTextField(

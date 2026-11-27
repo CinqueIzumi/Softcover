@@ -18,7 +18,8 @@ import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.uibinding.session.ConfirmedPause
-import nl.rhaydus.softcover.core.uibinding.session.endSessionPauseSheetScaffold
+import nl.rhaydus.softcover.core.uibinding.session.SessionEndingStatus
+import nl.rhaydus.softcover.core.uibinding.session.endSessionSheetScaffold
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
@@ -77,7 +78,10 @@ class OnEndSessionPauseSheetDismissedActionTest {
                 booksByTab = persistentMapOf(tabKey to persistentListOf(book)),
                 activeSessionBookId = 1,
                 endSessionPauseSheet = SheetSession.Open(
-                    model = endSessionPauseSheetScaffold(bookTitle = "Title"),
+                    model = endSessionSheetScaffold(
+                        bookTitle = "Title",
+                        targetStatus = SessionEndingStatus.Paused,
+                    ),
                     pending = ConfirmedPause(bookIds = persistentSetOf(1)),
                 ),
             )
@@ -107,7 +111,12 @@ class OnEndSessionPauseSheetDismissedActionTest {
             stateFlow.value = LibraryUiState(
                 booksByTab = persistentMapOf(tabKey to persistentListOf(book)),
                 endSessionPauseBookIds = persistentSetOf(1),
-                endSessionPauseSheet = SheetSession.Open(model = endSessionPauseSheetScaffold(bookTitle = "Title")),
+                endSessionPauseSheet = SheetSession.Open(
+                    model = endSessionSheetScaffold(
+                        bookTitle = "Title",
+                        targetStatus = SessionEndingStatus.Paused,
+                    ),
+                ),
             )
 
             // ----- Act -----

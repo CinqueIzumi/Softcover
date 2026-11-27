@@ -13,6 +13,8 @@ data class SheetRowUiModel<K>(
     val selected: Boolean,
     val leadingIcon: SoftcoverIcon? = null,
     val count: SheetRowCount? = null,
+    val gloss: String? = null,
+    val leadingText: String? = null,
 ) {
     companion object : UiModelPreviews<SheetRowUiModel<String>> {
         override val previews: ImmutableMap<String, SheetRowUiModel<String>> = persistentMapOf(
@@ -25,6 +27,24 @@ data class SheetRowUiModel<K>(
                 key = "selected",
                 label = "Science fiction",
                 selected = true,
+            ),
+            "Gloss" to SheetRowUiModel(
+                key = "gloss",
+                label = "Bought in a bookshop",
+                selected = false,
+                gloss = "A physical copy, in person.",
+            ),
+            "Leading text" to SheetRowUiModel(
+                key = "leading-text",
+                label = "Pound sterling",
+                selected = false,
+                leadingText = "GBP",
+            ),
+            "Selected, leading text" to SheetRowUiModel(
+                key = "selected-leading-text",
+                label = "Euro",
+                selected = true,
+                leadingText = "EUR",
             ),
             "Icon and count" to SheetRowUiModel(
                 key = "icon-and-count",

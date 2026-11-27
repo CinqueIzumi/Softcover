@@ -14,22 +14,31 @@ private fun nl.rhaydus.softcover.feature.widget.presentation.component.Author(au
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.widget.presentation.component.BackdropUris(backdrop: android.net.Uri?, veil: android.net.Uri, veilLift: android.net.Uri, washPrimary: android.net.Uri, washTertiary: android.net.Uri): kotlin.Unit
+internal fun nl.rhaydus.softcover.feature.widget.presentation.component.BackdropLayers(backdrop: android.graphics.Bitmap?, veil: android.graphics.Bitmap, veilLift: android.graphics.Bitmap, washPrimary: android.graphics.Bitmap, washTertiary: android.graphics.Bitmap): kotlin.Unit
   skippable: false
   restartable: true
   params:
-    - backdrop: UNKNOWN (interface or non-final class; concrete implementation unknown)
-    - veil: UNKNOWN (interface or non-final class; concrete implementation unknown)
-    - veilLift: UNKNOWN (interface or non-final class; concrete implementation unknown)
-    - washPrimary: UNKNOWN (interface or non-final class; concrete implementation unknown)
-    - washTertiary: UNKNOWN (interface or non-final class; concrete implementation unknown)
+    - backdrop: UNSTABLE (has mutable properties or unstable members)
+    - veil: UNSTABLE (has mutable properties or unstable members)
+    - veilLift: UNSTABLE (has mutable properties or unstable members)
+    - washPrimary: UNSTABLE (has mutable properties or unstable members)
+    - washTertiary: UNSTABLE (has mutable properties or unstable members)
 
 @Composable
-private fun nl.rhaydus.softcover.feature.widget.presentation.component.BookCover(cover: android.net.Uri?, modifier: androidx.glance.GlanceModifier): kotlin.Unit
+internal fun nl.rhaydus.softcover.feature.widget.presentation.component.BitmapMask(mask: android.graphics.Bitmap, tint: androidx.glance.unit.ColorProvider, contentScale: androidx.glance.layout.ContentScale): kotlin.Unit
   skippable: false
   restartable: true
   params:
-    - cover: UNKNOWN (interface or non-final class; concrete implementation unknown)
+    - mask: UNSTABLE (has mutable properties or unstable members)
+    - tint: UNKNOWN (interface or non-final class; concrete implementation unknown)
+    - contentScale: RUNTIME (requires runtime check)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.widget.presentation.component.BookCover(cover: android.graphics.Bitmap?, modifier: androidx.glance.GlanceModifier): kotlin.Unit
+  skippable: false
+  restartable: true
+  params:
+    - cover: UNSTABLE (has mutable properties or unstable members)
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
@@ -82,27 +91,18 @@ internal fun nl.rhaydus.softcover.feature.widget.presentation.component.Reserved
     - reservedLines: STABLE (primitive type)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.widget.presentation.component.SingleBookWidgetLayout(title: kotlin.String, author: kotlin.String, cover: android.net.Uri?, artwork: nl.rhaydus.softcover.feature.widget.presentation.model.BookArtworkUiModel?, eyebrowHeightDp: kotlin.Int, footHeightDp: kotlin.Int, eyebrow: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>, foot: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit
+internal fun nl.rhaydus.softcover.feature.widget.presentation.component.SingleBookWidgetLayout(title: kotlin.String, author: kotlin.String, cover: android.graphics.Bitmap?, artwork: nl.rhaydus.softcover.feature.widget.presentation.model.BookArtworkUiModel?, eyebrowHeightDp: kotlin.Int, footHeightDp: kotlin.Int, eyebrow: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>, foot: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit
   skippable: false
   restartable: true
   params:
     - title: STABLE (String is immutable)
     - author: STABLE (String is immutable)
-    - cover: UNKNOWN (interface or non-final class; concrete implementation unknown)
-    - artwork: RUNTIME (requires runtime check)
+    - cover: UNSTABLE (has mutable properties or unstable members)
+    - artwork: UNSTABLE (has mutable properties or unstable members)
     - eyebrowHeightDp: STABLE (primitive type)
     - footHeightDp: STABLE (primitive type)
     - eyebrow: STABLE (composable function type)
     - foot: STABLE (composable function type)
-
-@Composable
-internal fun nl.rhaydus.softcover.feature.widget.presentation.component.UriMask(mask: android.net.Uri, tint: androidx.glance.unit.ColorProvider, contentScale: androidx.glance.layout.ContentScale): kotlin.Unit
-  skippable: false
-  restartable: true
-  params:
-    - mask: UNKNOWN (interface or non-final class; concrete implementation unknown)
-    - tint: UNKNOWN (interface or non-final class; concrete implementation unknown)
-    - contentScale: RUNTIME (requires runtime check)
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.widget.presentation.component.WidgetMessage(headline: kotlin.String, subline: kotlin.String?, header: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>, footer: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit
@@ -233,11 +233,11 @@ private fun nl.rhaydus.softcover.feature.widget.presentation.glance.PickedBook(c
   skippable: false
   restartable: true
   params:
-    - content: RUNTIME (requires runtime check)
+    - content: UNSTABLE (has mutable properties or unstable members)
     - openSettings: UNKNOWN (interface or non-final class; concrete implementation unknown)
 
 @Composable
-private fun nl.rhaydus.softcover.feature.widget.presentation.glance.ProgressBar(progress: kotlin.collections.Map<kotlin.Int, nl.rhaydus.softcover.feature.widget.presentation.render.WavyProgressUris>): kotlin.Unit
+private fun nl.rhaydus.softcover.feature.widget.presentation.glance.ProgressBar(progress: kotlin.collections.Map<kotlin.Int, nl.rhaydus.softcover.feature.widget.presentation.render.WavyProgressImages>): kotlin.Unit
   skippable: false
   restartable: true
   params:
@@ -248,7 +248,7 @@ private fun nl.rhaydus.softcover.feature.widget.presentation.glance.ProgressRow(
   skippable: false
   restartable: true
   params:
-    - content: RUNTIME (requires runtime check)
+    - content: UNSTABLE (has mutable properties or unstable members)
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.widget.presentation.glance.QuoteWidgetContent(model: nl.rhaydus.softcover.feature.widget.presentation.model.QuoteWidgetUiModel, openApp: androidx.glance.action.Action, openBook: kotlin.Function1<@[ParameterName(name = \): kotlin.Unit
@@ -308,14 +308,14 @@ private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Reading(cont
   skippable: false
   restartable: true
   params:
-    - content: RUNTIME (requires runtime check)
+    - content: UNSTABLE (has mutable properties or unstable members)
 
 @Composable
 private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Shown(content: nl.rhaydus.softcover.feature.widget.presentation.model.QuoteWidgetUiModel.Content.Shown, openBook: androidx.glance.action.Action): kotlin.Unit
   skippable: false
   restartable: true
   params:
-    - content: RUNTIME (requires runtime check)
+    - content: UNSTABLE (has mutable properties or unstable members)
     - openBook: UNKNOWN (interface or non-final class; concrete implementation unknown)
 
 @Composable

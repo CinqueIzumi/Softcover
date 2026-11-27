@@ -4,6 +4,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coJustRun
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -35,6 +36,11 @@ class ListsRepositoryImplRefreshTest {
         listWriteQueue = mockk(relaxed = true)
         listWriteDrainer = mockk(relaxed = true)
 
+        coEvery {
+            listsLocalDataSource.getOwnedListId()
+        } returns null
+
+
         repository = ListsRepositoryImpl(
             listsRemoteDataSource = listsRemoteDataSource,
             listsLocalDataSource = listsLocalDataSource,
@@ -46,7 +52,7 @@ class ListsRepositoryImplRefreshTest {
     }
 
     private fun stubBookList(id: Int = 1): BookList = mockk {
-        io.mockk.every {
+        every {
             this@mockk.id
         } returns id
     }
@@ -63,6 +69,7 @@ class ListsRepositoryImplRefreshTest {
             coEvery {
                 listsRemoteDataSource.fetchListSignatures()
             } returns emptyList()
+
 
             coEvery {
                 listsLocalDataSource.getCachedListSignatures()
@@ -96,6 +103,7 @@ class ListsRepositoryImplRefreshTest {
             coEvery {
                 listsRemoteDataSource.fetchListSignatures()
             } returns signatures
+
 
             coEvery {
                 listsLocalDataSource.getCachedListSignatures()
@@ -137,9 +145,11 @@ class ListsRepositoryImplRefreshTest {
                 listsRemoteDataSource.fetchListSignatures()
             } returns signatures
 
+
             coEvery {
                 listsLocalDataSource.getCachedListSignatures()
             } returns mapOf(1 to "sig-a", 2 to "sig-b-old")
+
 
             coEvery {
                 listsRemoteDataSource.fetchUserLists(
@@ -180,9 +190,11 @@ class ListsRepositoryImplRefreshTest {
                 listsRemoteDataSource.fetchListSignatures()
             } returns signatures
 
+
             coEvery {
                 listsLocalDataSource.getCachedListSignatures()
             } returns emptyMap()
+
 
             coEvery {
                 listsRemoteDataSource.fetchUserLists(

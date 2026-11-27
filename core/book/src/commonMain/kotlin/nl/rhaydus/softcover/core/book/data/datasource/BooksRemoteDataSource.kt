@@ -157,6 +157,11 @@ interface BooksRemoteDataSource {
         editionId: Int? = null,
     ): Book
 
+    suspend fun markBookAsDidNotFinish(
+        book: Book,
+        editionId: Int? = null,
+    ): Book
+
     suspend fun updateBookRating(
         userBook: UserBook,
         rating: Double,
@@ -603,6 +608,15 @@ internal class BooksRemoteDataSourceImpl(
         editionId = editionId,
     )
 
+    override suspend fun markBookAsDidNotFinish(
+        book: Book,
+        editionId: Int?,
+    ): Book = setStatusOrCreate(
+        book = book,
+        status = UserBookStatus.DID_NOT_FINISH,
+        editionId = editionId,
+    )
+
     private suspend fun setStatusOrCreate(
         book: Book,
         status: UserBookStatus,
@@ -833,6 +847,8 @@ internal class BooksRemoteDataSourceImpl(
 
     private fun Book.withCanonicalMetadata(canonical: Book): Book = copy(
         id = canonical.id,
+        editions = editions.map { it.copy(bookId = canonical.id) },
+        defaultEdition = defaultEdition?.copy(bookId = canonical.id),
         canonicalId = null,
         title = canonical.title,
         rating = canonical.rating,

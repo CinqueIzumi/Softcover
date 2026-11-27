@@ -7,10 +7,12 @@ import androidx.room.migration.Migration
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import androidx.sqlite.execSQL
+import nl.rhaydus.softcover.core.database.dao.BookCopyDao
 import nl.rhaydus.softcover.core.database.dao.BookDao
 import nl.rhaydus.softcover.core.database.dao.BookDeadlineDao
 import nl.rhaydus.softcover.core.database.dao.BookTraitsDao
 import nl.rhaydus.softcover.core.database.dao.BookUserTagDao
+import nl.rhaydus.softcover.core.database.dao.DidNotFinishReasonsDao
 import nl.rhaydus.softcover.core.database.dao.DismissedContinueSeriesDao
 import nl.rhaydus.softcover.core.database.dao.HiddenRecommendationDao
 import nl.rhaydus.softcover.core.database.dao.PendingListWriteDao
@@ -23,6 +25,7 @@ import nl.rhaydus.softcover.core.database.dao.ReadingSessionDao
 import nl.rhaydus.softcover.core.database.dao.UserTagVocabularyDao
 import nl.rhaydus.softcover.core.database.model.AuthorEntity
 import nl.rhaydus.softcover.core.database.model.BookAuthorCrossRef
+import nl.rhaydus.softcover.core.database.model.BookCopyEntity
 import nl.rhaydus.softcover.core.database.model.BookDeadlineEntity
 import nl.rhaydus.softcover.core.database.model.BookEditionEntity
 import nl.rhaydus.softcover.core.database.model.BookEditionView
@@ -32,6 +35,7 @@ import nl.rhaydus.softcover.core.database.model.BookSeriesEntity
 import nl.rhaydus.softcover.core.database.model.BookTagCrossRef
 import nl.rhaydus.softcover.core.database.model.BookTraitsEntity
 import nl.rhaydus.softcover.core.database.model.BookUserTagEntity
+import nl.rhaydus.softcover.core.database.model.DidNotFinishReasonsEntity
 import nl.rhaydus.softcover.core.database.model.DismissedContinueSeriesBookEntity
 import nl.rhaydus.softcover.core.database.model.DismissedContinueSeriesEntity
 import nl.rhaydus.softcover.core.database.model.EditionAuthorCrossRef
@@ -86,11 +90,13 @@ import kotlin.coroutines.CoroutineContext
         RankedListMetaEntity::class,
         HiddenRecommendationEntity::class,
         BookTraitsEntity::class,
+        BookCopyEntity::class,
+        DidNotFinishReasonsEntity::class,
     ],
     views = [
         BookEditionView::class
     ],
-    version = 66,
+    version = 70,
 )
 @ConstructedBy(SoftcoverDatabaseConstructor::class)
 abstract class SoftcoverDatabase : RoomDatabase() {
@@ -107,6 +113,10 @@ abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun hiddenRecommendationDao(): HiddenRecommendationDao
 
     abstract fun bookTraitsDao(): BookTraitsDao
+
+    abstract fun bookCopyDao(): BookCopyDao
+
+    abstract fun didNotFinishReasonsDao(): DidNotFinishReasonsDao
 
     abstract fun quoteDao(): QuoteDao
 
@@ -1601,6 +1611,80 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_69_70 = object : Migration(69, 70) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS did_not_finish_reasons (
+                            bookId INTEGER NOT NULL,
+                            notTheRightTime INTEGER NOT NULL,
+                            notMyKindOfWriting INTEGER NOT NULL,
+                            tooSlow INTEGER NOT NULL,
+                            lostInterest INTEGER NOT NULL,
+                            unwantedContent INTEGER NOT NULL,
+                            ownWords TEXT,
+                            updatedAt INTEGER NOT NULL,
+                            PRIMARY KEY(bookId)
+                        )
+                    """.trimIndent(),
+                )
+            }
+        }
+
+        private val MIGRATION_68_69 = object : Migration(68, 69) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL("ALTER TABLE book_copies ADD COLUMN priceThousandths INTEGER")
+                connection.execSQL("ALTER TABLE book_copies ADD COLUMN priceCurrency TEXT")
+            }
+        }
+
+        private val MIGRATION_67_68 = object : Migration(67, 68) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL("ALTER TABLE book_editions ADD COLUMN language TEXT")
+                connection.execSQL("ALTER TABLE book_editions ADD COLUMN languageFetched INTEGER NOT NULL DEFAULT 0")
+
+                connection.execSQL("DROP VIEW IF EXISTS book_edition_view")
+
+                connection.execSQL(
+                    """
+                        CREATE VIEW `book_edition_view` AS SELECT
+                                edition.*,
+                                EXISTS(
+                                    SELECT 1
+                                    FROM list_books lb
+                                    JOIN book_lists bl ON bl.id = lb.listId
+                                    WHERE bl.slug = 'owned'
+                                    AND (
+                                        lb.editionId = edition.id
+                                        OR lb.editionId = edition.canonicalId
+                                        OR lb.editionId IN (
+                                            SELECT sub.id FROM book_editions sub
+                                            WHERE sub.canonicalId = edition.id
+                                        )
+                                    )
+                                ) AS isOwned
+                            FROM book_editions edition
+                    """.trimIndent(),
+                )
+            }
+        }
+
+        private val MIGRATION_66_67 = object : Migration(66, 67) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS book_copies (
+                            bookId INTEGER NOT NULL,
+                            source TEXT,
+                            customSource TEXT,
+                            updatedAt INTEGER NOT NULL,
+                            PRIMARY KEY(bookId)
+                        )
+                    """.trimIndent(),
+                )
+            }
+        }
+
         // Existing rows get pagesRead 0 rather than a backfill from consecutive positions: the library
         // sync now refetches every book's journal and replaces its synced rows with computed values.
         private val MIGRATION_63_64 = object : Migration(63, 64) {
@@ -1697,6 +1781,10 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             MIGRATION_63_64,
             MIGRATION_64_65,
             MIGRATION_65_66,
+            MIGRATION_66_67,
+            MIGRATION_67_68,
+            MIGRATION_68_69,
+            MIGRATION_69_70,
         )
     }
 }

@@ -159,7 +159,7 @@ private fun shrink(
     )
 }
 
-private const val GRADIENT_WIDTH = 8
+internal const val GRADIENT_WIDTH = 8
 private const val OPAQUE = 255
 private const val ALPHA_SHIFT = 24
 private const val WHITE = 0xFFFFFF
