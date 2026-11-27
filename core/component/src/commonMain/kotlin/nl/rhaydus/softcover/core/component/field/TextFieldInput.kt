@@ -29,6 +29,7 @@ internal fun TextFieldInput(
     focusRequester: FocusRequester,
     decorationBox: @Composable (innerTextField: @Composable () -> Unit) -> Unit,
     modifier: Modifier = Modifier,
+    ink: Color = MaterialTheme.colorScheme.onSurface,
 ) {
     BasicTextField(
         value = model.text,
@@ -39,7 +40,7 @@ internal fun TextFieldInput(
             color = if (model.error != null && model.variant is TextFieldVariant.Hero) {
                 MaterialTheme.colorScheme.error
             } else {
-                MaterialTheme.colorScheme.onSurface.forEnabled(model.enabled)
+                ink.forEnabled(model.enabled)
             },
         ),
         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),

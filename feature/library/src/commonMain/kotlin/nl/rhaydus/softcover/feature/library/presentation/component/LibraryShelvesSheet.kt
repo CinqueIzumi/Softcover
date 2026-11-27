@@ -38,6 +38,8 @@ internal fun LibraryShelvesSheet(
             onEvent = { event ->
                 when (event) {
                     is SheetRowEvent.Selected -> runAction(OnShelvesSheetTabPickedAction(tabId = event.key))
+
+                    is SheetRowEvent.InputChanged -> Unit
                 }
             },
         )

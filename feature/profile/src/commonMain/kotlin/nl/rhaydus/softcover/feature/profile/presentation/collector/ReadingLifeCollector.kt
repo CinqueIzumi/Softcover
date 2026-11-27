@@ -13,12 +13,14 @@ internal class ReadingLifeCollector : ProfileCollector {
     ) {
         observeLoadedReadingLife(
             observeReadingStatsUseCase = dependencies.observeReadingStatsUseCase,
+            observePagesReadUseCase = dependencies.observePagesReadUseCase,
             observeReadingHistoryUseCase = dependencies.observeReadingHistoryUseCase,
             observeReadingStatsBackfilledUseCase = dependencies.observeReadingStatsBackfilledUseCase,
         ).collect { loaded ->
             scope.setState {
                 it.copy(
                     readingStats = loaded?.stats,
+                    pagesRead = loaded?.pagesRead,
                     readingHistory = loaded?.history,
                 )
             }

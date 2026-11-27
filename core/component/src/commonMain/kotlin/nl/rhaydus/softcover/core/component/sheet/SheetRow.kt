@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -33,6 +34,7 @@ internal fun <K> SheetRow(
     model: SheetRowUiModel<K>,
     onEvent: (SheetRowEvent<K>) -> Unit,
     modifier: Modifier = Modifier,
+    face: SheetRowFace = SheetRowFace.Editorial,
 ) {
     Column(modifier = modifier) {
         Divider()
@@ -74,14 +76,23 @@ internal fun <K> SheetRow(
                 )
             }
 
-            SoftcoverText(
-                text = model.label,
-                style = MaterialTheme.editorialTypography.titleLarge.copy(fontStyle = FontStyle.Italic),
-                color = ink,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f),
-            )
+            Column(modifier = Modifier.weight(1f)) {
+                SoftcoverText(
+                    text = model.label,
+                    style = face.labelStyle(),
+                    color = ink,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+
+                if (model.gloss != null) {
+                    SoftcoverText(
+                        text = model.gloss,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
 
             if (model.count != null) {
                 SoftcoverText(
@@ -95,4 +106,10 @@ internal fun <K> SheetRow(
             SelectionCheck(selected = model.selected)
         }
     }
+}
+
+@Composable
+private fun SheetRowFace.labelStyle(): TextStyle = when (this) {
+    SheetRowFace.Editorial -> MaterialTheme.editorialTypography.titleLarge.copy(fontStyle = FontStyle.Italic)
+    SheetRowFace.Body -> MaterialTheme.typography.bodyLarge
 }

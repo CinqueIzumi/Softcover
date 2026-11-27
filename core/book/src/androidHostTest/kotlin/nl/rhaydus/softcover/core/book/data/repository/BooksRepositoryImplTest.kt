@@ -236,6 +236,19 @@ class BooksRepositoryImplTest {
 
     private fun stubBookEdition(): BookEdition = mockk()
 
+    private fun stubEdition(
+        id: Int,
+        language: String?,
+    ): BookEdition = mockk {
+        every {
+            this@mockk.id
+        } returns id
+
+        every {
+            this@mockk.language
+        } returns language
+    }
+
     private fun stagedBook(
         bookId: Int,
         userBookId: Int?,
@@ -1196,6 +1209,142 @@ class BooksRepositoryImplTest {
             // ----- Assert -----
             coVerify(exactly = 0) {
                 booksLocalDataSource.cacheEditions(editions = any())
+            }
+        }
+    }
+
+    @Nested
+    inner class FillEditionLanguages {
+        @Test
+        fun `fetches from the network only the editions whose language is unfetched and writes their languages`() = runTest {
+            // ----- Arrange -----
+            val unfetchedIds = listOf(2, 3)
+
+            coEvery {
+                booksLocalDataSource.getEditionIdsWithoutFetchedLanguage(ids = any())
+            } returns unfetchedIds
+
+            coEvery {
+                booksRemoteDataSource.fetchEditionsByIds(
+                    ids = unfetchedIds,
+                    forceNetwork = true,
+                )
+            } returns listOf(
+                stubEdition(
+                    id = 2,
+                    language = "Dutch",
+                ),
+                stubEdition(
+                    id = 3,
+                    language = "English",
+                ),
+            )
+
+            // ----- Act -----
+            repository.fillEditionLanguages(editionIds = setOf(1, 2, 3))
+
+            // ----- Assert -----
+            coVerify {
+                booksLocalDataSource.fillEditionLanguages(
+                    languagesById = mapOf(2 to "Dutch", 3 to "English"),
+                )
+            }
+        }
+
+        @Test
+        fun `writes a null language for a requested id the response omits`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                booksLocalDataSource.getEditionIdsWithoutFetchedLanguage(ids = any())
+            } returns listOf(2, 3)
+
+            coEvery {
+                booksRemoteDataSource.fetchEditionsByIds(
+                    ids = any(),
+                    forceNetwork = any(),
+                )
+            } returns listOf(
+                stubEdition(
+                    id = 2,
+                    language = "Dutch",
+                ),
+            )
+
+            // ----- Act -----
+            repository.fillEditionLanguages(editionIds = setOf(2, 3))
+
+            // ----- Assert -----
+            coVerify {
+                booksLocalDataSource.fillEditionLanguages(
+                    languagesById = mapOf(2 to "Dutch", 3 to null),
+                )
+            }
+        }
+
+        @Test
+        fun `makes no network call when every edition language is already fetched`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                booksLocalDataSource.getEditionIdsWithoutFetchedLanguage(ids = any())
+            } returns emptyList()
+
+            // ----- Act -----
+            repository.fillEditionLanguages(editionIds = setOf(1, 2))
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.fetchEditionsByIds(
+                    ids = any(),
+                    forceNetwork = any(),
+                )
+            }
+
+            coVerify(exactly = 0) {
+                booksLocalDataSource.fillEditionLanguages(languagesById = any())
+            }
+        }
+
+        @Test
+        fun `does nothing for an empty set`() = runTest {
+            // ----- Arrange -----
+            // (no ids)
+
+            // ----- Act -----
+            repository.fillEditionLanguages(editionIds = emptySet())
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                booksLocalDataSource.getEditionIdsWithoutFetchedLanguage(ids = any())
+            }
+
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.fetchEditionsByIds(
+                    ids = any(),
+                    forceNetwork = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `writes a null language for every requested id when the network returns no editions`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                booksLocalDataSource.getEditionIdsWithoutFetchedLanguage(ids = any())
+            } returns listOf(1)
+
+            coEvery {
+                booksRemoteDataSource.fetchEditionsByIds(
+                    ids = any(),
+                    forceNetwork = any(),
+                )
+            } returns emptyList()
+
+            // ----- Act -----
+            repository.fillEditionLanguages(editionIds = setOf(1))
+
+            // ----- Assert -----
+            coVerify {
+                booksLocalDataSource.fillEditionLanguages(languagesById = mapOf(1 to null))
             }
         }
     }
@@ -7908,7 +8057,7 @@ class BooksRepositoryImplTest {
     }
 
     @Nested
-    inner class HasSyncedReadBooksThisSession {
+    inner class SyncedStatusesThisSession {
         private val userId = 20
 
         private fun arrangeSuccessfulRefresh() {
@@ -7921,7 +8070,7 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `is set after a refresh of every status`() = runTest {
+        fun `a refresh of every status records every status`() = runTest {
             // ----- Arrange -----
             arrangeSuccessfulRefresh()
 
@@ -7932,41 +8081,46 @@ class BooksRepositoryImplTest {
             )
 
             // ----- Assert -----
-            repository.hasSyncedReadBooksThisSession shouldBe true
+            repository.syncedStatusesThisSession shouldBe UserBookStatus.entries.toSet()
         }
 
         @Test
-        fun `is set after a refresh whose filter contains Read`() = runTest {
+        fun `a filtered refresh records exactly its statuses`() = runTest {
             // ----- Arrange -----
             arrangeSuccessfulRefresh()
 
             // ----- Act -----
             repository.refreshUserBooks(
                 userId = userId,
-                statusFilter = setOf(UserBookStatus.CURRENTLY_READING, UserBookStatus.READ),
+                statusFilter = setOf(UserBookStatus.READ, UserBookStatus.DID_NOT_FINISH),
             )
 
             // ----- Assert -----
-            repository.hasSyncedReadBooksThisSession shouldBe true
+            repository.syncedStatusesThisSession shouldBe setOf(UserBookStatus.READ, UserBookStatus.DID_NOT_FINISH)
         }
 
         @Test
-        fun `stays unset after a refresh whose filter leaves out Read`() = runTest {
+        fun `successive filtered refreshes accumulate their statuses`() = runTest {
             // ----- Arrange -----
             arrangeSuccessfulRefresh()
 
             // ----- Act -----
             repository.refreshUserBooks(
                 userId = userId,
-                statusFilter = setOf(UserBookStatus.WANT_TO_READ, UserBookStatus.CURRENTLY_READING),
+                statusFilter = setOf(UserBookStatus.READ),
+            )
+
+            repository.refreshUserBooks(
+                userId = userId,
+                statusFilter = setOf(UserBookStatus.DID_NOT_FINISH),
             )
 
             // ----- Assert -----
-            repository.hasSyncedReadBooksThisSession shouldBe false
+            repository.syncedStatusesThisSession shouldBe setOf(UserBookStatus.READ, UserBookStatus.DID_NOT_FINISH)
         }
 
         @Test
-        fun `stays unset when the refresh fails`() = runTest {
+        fun `stays empty when the refresh fails`() = runTest {
             // ----- Arrange -----
             coEvery {
                 offlineSync.drainReconcileAndCache(
@@ -7985,7 +8139,7 @@ class BooksRepositoryImplTest {
 
             // ----- Assert -----
             outcome.isFailure shouldBe true
-            repository.hasSyncedReadBooksThisSession shouldBe false
+            repository.syncedStatusesThisSession shouldBe emptySet()
         }
 
         @Test
@@ -8002,7 +8156,7 @@ class BooksRepositoryImplTest {
             repository.removeAllBooks()
 
             // ----- Assert -----
-            repository.hasSyncedReadBooksThisSession shouldBe false
+            repository.syncedStatusesThisSession shouldBe emptySet()
         }
     }
 

@@ -104,6 +104,12 @@ data class TextFieldUiModel(
                 placeholder = "Summer reads",
                 variant = TextFieldVariant.Hero,
             ),
+            "Bare" to TextFieldUiModel(
+                key = "bare",
+                text = "",
+                placeholder = "Somewhere else…",
+                variant = TextFieldVariant.Bare,
+            ),
             "Pill, disabled" to TextFieldUiModel(
                 key = "pill-disabled",
                 text = "slow burn",

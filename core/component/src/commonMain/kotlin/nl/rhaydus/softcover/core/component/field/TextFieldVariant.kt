@@ -28,6 +28,12 @@ sealed interface TextFieldVariant {
     /** Borderless display-face text, centred and shrunk until a long value fits one line. */
     data object Hero : TextFieldVariant
 
+    /** Borderless, start-aligned italic title-face text, so the field reads as an editorial-face sheet row. */
+    data object Bare : TextFieldVariant
+
+    /** [Bare] in the upright body face, so the field reads as a body-face sheet row. */
+    data object Plain : TextFieldVariant
+
     /**
      * A centred numeric entry sized for [charCount] glyphs. Input is limited to digits and its text is
      * selected when it gains focus. It always uses the number keyboard, and Done dismisses focus and

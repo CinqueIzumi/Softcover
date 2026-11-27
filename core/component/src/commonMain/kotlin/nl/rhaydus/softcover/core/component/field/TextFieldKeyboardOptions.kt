@@ -14,7 +14,9 @@ private val TextFieldUiModel.keyboardType: KeyboardType
         is TextFieldVariant.Outlined -> if (variant.numeric) KeyboardType.Number else KeyboardType.Text
         is TextFieldVariant.Pill,
         TextFieldVariant.Multiline,
-        TextFieldVariant.Hero -> KeyboardType.Text
+        TextFieldVariant.Hero,
+        TextFieldVariant.Bare,
+        TextFieldVariant.Plain -> KeyboardType.Text
     }
 
 internal fun TextFieldUiModel.keyboardOptions(): KeyboardOptions = KeyboardOptions(

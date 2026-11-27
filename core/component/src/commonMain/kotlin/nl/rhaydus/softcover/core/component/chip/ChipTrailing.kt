@@ -15,6 +15,12 @@ sealed interface ChipTrailing {
         val label: String,
     ) : ChipTrailing
 
+    /**
+     * A muted count after the label, not interactive. TalkBack does not announce it on its own, so callers
+     * set [ChipUiModel.contentDescription] to the spoken name ("Fantasy, 3 books").
+     */
+    data class Count(val text: String) : ChipTrailing
+
     /** Its own tap target reporting [ChipEvent.Dismissed], described by [label]. */
     data class Dismiss(val label: String) : ChipTrailing
 }

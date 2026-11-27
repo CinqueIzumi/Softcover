@@ -18,6 +18,7 @@ fun <K> SheetRowGroup(
         model.rows.forEach { row ->
             SheetRow(
                 model = row,
+                face = model.face,
                 onEvent = { event ->
                     onEvent(event)
 
@@ -25,6 +26,13 @@ fun <K> SheetRowGroup(
                         dismissSheet()
                     }
                 },
+            )
+        }
+
+        if (model.input != null) {
+            SheetInputRow(
+                model = model.input,
+                onEvent = { event -> onEvent(SheetRowEvent.InputChanged(event = event)) },
             )
         }
     }

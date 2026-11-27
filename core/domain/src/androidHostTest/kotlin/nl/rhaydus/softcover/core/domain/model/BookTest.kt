@@ -144,7 +144,7 @@ class BookTest {
         }
 
         @Test
-        fun `ignores owned and default editions when there is no user book`() {
+        fun `uses an owned edition's title over the default when there is no user book`() {
             // ----- Arrange -----
             val owned = buildEdition(
                 id = 1,
@@ -158,8 +158,80 @@ class BookTest {
             )
 
             val book = buildBook(
-                editions = listOf(owned, default),
+                editions = listOf(default, owned),
                 defaultEdition = default,
+            )
+
+            // ----- Act -----
+            val result = book.displayTitle
+
+            // ----- Assert -----
+            result shouldBe "Owned Title"
+        }
+
+        @Test
+        fun `uses the default edition's title when nothing is owned`() {
+            // ----- Arrange -----
+            val first = buildEdition(
+                id = 1,
+                title = "First Title",
+            )
+
+            val default = buildEdition(
+                id = 2,
+                title = "Default Title",
+            )
+
+            val book = buildBook(
+                editions = listOf(first, default),
+                defaultEdition = default,
+            )
+
+            // ----- Act -----
+            val result = book.displayTitle
+
+            // ----- Assert -----
+            result shouldBe "Default Title"
+        }
+
+        @Test
+        fun `uses the first edition's title when there is no reader, owned or default edition`() {
+            // ----- Arrange -----
+            val book = buildBook(
+                editions = listOf(
+                    buildEdition(
+                        id = 1,
+                        title = "First Title",
+                    ),
+                    buildEdition(
+                        id = 2,
+                        title = "Second Title",
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = book.displayTitle
+
+            // ----- Assert -----
+            result shouldBe "First Title"
+        }
+
+        @Test
+        fun `falls back to the book title when the current edition's title is blank`() {
+            // ----- Arrange -----
+            val book = buildBook(
+                editions = listOf(
+                    buildEdition(
+                        id = 1,
+                        owned = true,
+                        title = " ",
+                    ),
+                    buildEdition(
+                        id = 2,
+                        title = "Second Title",
+                    ),
+                ),
             )
 
             // ----- Act -----

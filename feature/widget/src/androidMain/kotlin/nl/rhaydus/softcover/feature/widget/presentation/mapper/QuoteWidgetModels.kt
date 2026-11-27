@@ -33,7 +33,7 @@ private const val QUOTE_OF_THE_DAY_EYEBROW = "QUOTE OF THE DAY"
  * [QuoteWidgetUiModel.Content.FetchFailed] means a fetch failed with nothing cached.
  *
  * Emits each model twice for a shown quote: first with its text and no artwork, then with the stored artwork
- * [android.net.Uri]s, so the text never waits on the cover download or rendering.
+ * [android.graphics.Bitmap]s, so the text never waits on the cover download or rendering.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 internal fun quoteWidgetModels(
@@ -42,7 +42,7 @@ internal fun quoteWidgetModels(
     quotes: Flow<List<Quote>>,
     selection: Flow<QuoteSelection?>,
     fetchState: Flow<QuoteFetchTracker.State?>,
-    artworkUris: suspend (Quote) -> QuoteWidgetUiModel.Artwork? = { null },
+    loadArtwork: suspend (Quote) -> QuoteWidgetUiModel.Artwork? = { null },
     today: Flow<Long> = epochDayChanges(),
 ): Flow<QuoteWidgetUiModel> = combine(
     isSignedIn,
@@ -97,7 +97,7 @@ internal fun quoteWidgetModels(
             QuoteWidgetUiModel(
                 themeConfiguration = inputs.themeConfiguration,
                 content = content.copy(
-                    artwork = artworkUris(shown),
+                    artwork = loadArtwork(shown),
                     imagesPending = false,
                 ),
             ),

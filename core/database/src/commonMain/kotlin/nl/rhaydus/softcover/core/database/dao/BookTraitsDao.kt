@@ -11,6 +11,9 @@ interface BookTraitsDao {
     @Query("SELECT * FROM book_traits WHERE bookId = :bookId")
     fun observe(bookId: Int): Flow<BookTraitsEntity?>
 
+    @Query("SELECT * FROM book_traits")
+    fun observeAll(): Flow<List<BookTraitsEntity>>
+
     @Query("SELECT * FROM book_traits WHERE bookId = :bookId")
     suspend fun get(bookId: Int): BookTraitsEntity?
 

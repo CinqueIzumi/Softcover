@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.chrome.ChromeIconButton
 import nl.rhaydus.softcover.core.component.divider.Divider
+import nl.rhaydus.softcover.core.component.field.TextFieldEvent
 import nl.rhaydus.softcover.core.component.sheet.LazySheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.LoadingSheet
 import nl.rhaydus.softcover.core.component.sheet.LoadingSheetEvent
@@ -36,6 +37,7 @@ import nl.rhaydus.softcover.showcase.appearance.screen.AppearanceSheetHost
 import nl.rhaydus.softcover.showcase.live.sheet.action.OnDemoSelectedAction
 import nl.rhaydus.softcover.showcase.live.sheet.action.OnLoadingFinishedAction
 import nl.rhaydus.softcover.showcase.live.sheet.action.OnSheetDismissedAction
+import nl.rhaydus.softcover.showcase.live.sheet.action.OnSheetInputChangedAction
 import nl.rhaydus.softcover.showcase.live.sheet.action.OnSheetPrimaryClickedAction
 import nl.rhaydus.softcover.showcase.live.sheet.action.OnSheetRowSelectedAction
 import nl.rhaydus.softcover.showcase.live.sheet.action.OnSheetSecondaryClickedAction
@@ -88,6 +90,8 @@ internal fun SheetLiveLayout(
                     onEvent = { event ->
                         when (event) {
                             is SheetRowEvent.Selected -> runAction(OnDemoSelectedAction(demo = event.key))
+
+                            is SheetRowEvent.InputChanged -> Unit
                         }
                     },
                 )
@@ -127,6 +131,14 @@ internal fun SheetLiveLayout(
                         onEvent = { event ->
                             when (event) {
                                 is SheetRowEvent.Selected -> runAction(OnSheetRowSelectedAction(key = event.key))
+
+                                is SheetRowEvent.InputChanged -> when (val input = event.event) {
+                                    is TextFieldEvent.ValueChanged -> runAction(OnSheetInputChangedAction(text = input.text))
+
+                                    is TextFieldEvent.Submitted,
+                                    is TextFieldEvent.TrailingClicked,
+                                    is TextFieldEvent.ShakeEnded -> Unit
+                                }
                             }
                         },
                     )

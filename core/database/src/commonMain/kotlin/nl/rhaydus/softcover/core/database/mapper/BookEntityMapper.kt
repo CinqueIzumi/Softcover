@@ -114,6 +114,8 @@ internal fun BookEdition.toEntity(): BookEditionEntity = BookEditionEntity(
     releaseDate = releaseDate?.toString(),
     format = format,
     readingFormatId = readingFormat?.id,
+    language = language,
+    languageFetched = isLanguageFetched,
 )
 
 internal fun Author.toEntity(): AuthorEntity = AuthorEntity(
@@ -179,6 +181,8 @@ fun BookEditionEntity.toModel(
     readingFormat = ReadingFormat.fromId(readingFormatId),
     bookId = bookId,
     owned = owned,
+    language = language,
+    isLanguageFetched = languageFetched,
 )
 
 fun UserBookReadEntity.toModel(): UserBookRead = UserBookRead(

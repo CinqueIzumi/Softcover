@@ -20,6 +20,8 @@ data class BookEdition(
     val format: String,
     val readingFormat: ReadingFormat? = null,
     val owned: Boolean,
+    val language: String? = null,
+    val isLanguageFetched: Boolean = false,
 ) {
     val authorString: String
         get() = authors.joinToString(", ") { it.name }

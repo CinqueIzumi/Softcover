@@ -13,7 +13,7 @@ snackbars, dialogs, notifications and share cards. Previews, the `:showcase` app
 - **Be accurate.** Copy describes the behaviour the code actually has. A gloss that promises something the
   app does not do is a bug.
 - **Name things by their labels.** Refer to a setting, theme or button by the label the reader sees on
-  screen ("Turn off Hide untagged authors"), never by a nickname or a metaphor for it.
+  screen ("Turn off Hide books without this detail"), never by a nickname or a metaphor for it.
 - **Errors and status stay plain.** Say what failed and what to do: "Couldn't log out. Try again."
 
 ## 8.2 Tells to cut

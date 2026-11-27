@@ -78,6 +78,10 @@ interface SettingsRepository {
 
     suspend fun markReadDatesBackfilled()
 
+    val quotesSynced: Flow<Boolean>
+
+    suspend fun markQuotesSynced()
+
     suspend fun seedEnabledListIds(ids: Set<Int>)
 
     suspend fun resetLibraryVisibilityPreferences()
@@ -109,13 +113,9 @@ interface SettingsRepository {
 
     suspend fun setShelfSwipeEnabled(enabled: Boolean)
 
-    /**
-     * Whether the profile's author breakdown drops the authors it has no data for, per bar, so the
-     * remaining percentages are read over the tagged authors alone. Off by default.
-     */
-    val hideUntaggedAuthors: Flow<Boolean>
+    val hideBooksWithoutDetail: Flow<Boolean>
 
-    suspend fun setHideUntaggedAuthors(enabled: Boolean)
+    suspend fun setHideBooksWithoutDetail(enabled: Boolean)
 
     val uiScale: Flow<UiScale>
 

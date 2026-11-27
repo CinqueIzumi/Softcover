@@ -102,6 +102,14 @@ class EditionCachePlannerTest {
         every {
             this@mockk.owned
         } returns false
+
+        every {
+            this@mockk.language
+        } returns null
+
+        every {
+            this@mockk.isLanguageFetched
+        } returns false
     }
 
     @Nested

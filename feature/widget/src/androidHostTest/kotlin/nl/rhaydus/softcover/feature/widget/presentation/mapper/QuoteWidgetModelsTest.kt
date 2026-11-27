@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.widget.presentation.mapper
 
-import android.net.Uri
+import android.graphics.Bitmap
 import app.cash.turbine.test
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
@@ -33,14 +33,14 @@ class QuoteWidgetModelsTest {
         selection: QuoteSelection? = null,
         fetchState: Flow<QuoteFetchTracker.State?> = flowOf(null),
         epochDays: Flow<Long> = flowOf(today),
-        artworkUris: suspend (Quote) -> QuoteWidgetUiModel.Artwork? = { null },
+        loadArtwork: suspend (Quote) -> QuoteWidgetUiModel.Artwork? = { null },
     ): Flow<QuoteWidgetUiModel> = quoteWidgetModels(
         isSignedIn = flowOf(isSignedIn),
         themeConfiguration = flowOf(ThemeConfiguration()),
         quotes = flowOf(quotes),
         selection = flowOf(selection),
         fetchState = fetchState,
-        artworkUris = artworkUris,
+        loadArtwork = loadArtwork,
         today = epochDays,
     )
 
@@ -416,15 +416,15 @@ class QuoteWidgetModelsTest {
             // ----- Arrange -----
             val resolved = QuoteWidgetUiModel.Artwork(
                 backdrop = null,
-                veil = mockk<Uri>(),
-                veilLift = mockk<Uri>(),
-                washPrimary = mockk<Uri>(),
-                washTertiary = mockk<Uri>(),
+                veil = mockk<Bitmap>(),
+                veilLift = mockk<Bitmap>(),
+                washPrimary = mockk<Bitmap>(),
+                washTertiary = mockk<Bitmap>(),
             )
 
             val flow = models(
                 quotes = testQuotes(count = 2),
-                artworkUris = { resolved },
+                loadArtwork = { resolved },
             )
 
             // ----- Act -----
@@ -448,7 +448,7 @@ class QuoteWidgetModelsTest {
             // ----- Arrange -----
             val flow = models(
                 quotes = testQuotes(count = 2),
-                artworkUris = { null },
+                loadArtwork = { null },
             )
 
             // ----- Act -----
