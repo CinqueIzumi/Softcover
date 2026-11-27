@@ -1,9 +1,10 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
+import nl.rhaydus.softcover.core.presentation.model.inLibraryTabOrder
 import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import nl.rhaydus.softcover.core.uibinding.lists.toChooseListsUiModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
@@ -17,20 +18,23 @@ internal class ChooseListsCollector : BookDetailCollector {
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
         dependencies: BookDetailDependencies,
     ) {
-        scope.state
-            .map {
-                ChooseListsSnapshot(
-                    book = it.book,
-                    userLists = it.userLists,
-                    listsBeingMutated = it.listsBeingMutated,
-                )
-            }
+        combine(
+            scope.state,
+            dependencies.getLibraryTabOrderAsFlowUseCase(),
+        ) { state, tabOrder ->
+            ChooseListsSnapshot(
+                book = state.book,
+                userLists = state.userLists,
+                listsBeingMutated = state.listsBeingMutated,
+                tabOrder = tabOrder,
+            )
+        }
             .distinctUntilChanged()
             .collectLatest { snapshot ->
                 val book = snapshot.book
 
                 val model = if (book != null) {
-                    snapshot.userLists.toChooseListsUiModel(
+                    snapshot.userLists.inLibraryTabOrder(snapshot.tabOrder).toChooseListsUiModel(
                         bookId = book.id,
                         bookTitle = book.title,
                         cover = book.toCoverUiModel(variant = CoverVariant.Jacket),

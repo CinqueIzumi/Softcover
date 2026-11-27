@@ -298,7 +298,7 @@ class ProgressSheetMapperTest {
         }
 
         @Test
-        fun `header headline is the book title when the reader has no edition`() {
+        fun `header headline is the current edition's title when the reader has no edition`() {
             // ----- Arrange -----
             val edition = PreviewData.baseEdition.copy(
                 id = 77,
@@ -308,6 +308,7 @@ class ProgressSheetMapperTest {
             val book = PreviewData.baseBook.copy(
                 title = "The Starless Sea",
                 editions = listOf(edition),
+                defaultEdition = null,
                 userBook = PreviewData.baseBook.userBook?.copy(editionId = null),
             )
 
@@ -315,7 +316,7 @@ class ProgressSheetMapperTest {
             val scaffold = book.toProgressSheetUiModel(selectedTab = ProgressSheetTab.PAGE).scaffold
 
             // ----- Assert -----
-            scaffold.header.shouldNotBeNull().section.headlineText shouldBe "The Starless Sea"
+            scaffold.header.shouldNotBeNull().section.headlineText shouldBe "Some Other Edition"
         }
 
         @Test

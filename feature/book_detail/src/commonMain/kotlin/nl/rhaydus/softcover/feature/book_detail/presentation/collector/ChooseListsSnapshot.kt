@@ -8,4 +8,5 @@ internal data class ChooseListsSnapshot(
     val book: Book?,
     val userLists: List<BookList>,
     val listsBeingMutated: Set<Int>,
+    val tabOrder: List<String>,
 )

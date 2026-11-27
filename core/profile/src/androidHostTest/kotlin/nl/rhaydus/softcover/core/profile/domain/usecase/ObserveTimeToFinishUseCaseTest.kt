@@ -127,5 +127,54 @@ class ObserveTimeToFinishUseCaseTest {
                 awaitComplete()
             }
         }
+
+        @Test
+        fun `the emitted result carries the quickest read of the range with its book`() = runTest(dispatcher) {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    reads = listOf(
+                        datedRead(
+                            id = 10,
+                            startedAt = "2026-01-01",
+                            finishedAt = "2026-01-09",
+                        ),
+                    ),
+                ),
+                readBook(
+                    id = 2,
+                    reads = listOf(
+                        datedRead(
+                            id = 20,
+                            startedAt = "2026-02-01",
+                            finishedAt = "2026-02-02",
+                        ),
+                        datedRead(
+                            id = 21,
+                            startedAt = "2025-12-30",
+                            finishedAt = "2025-12-30",
+                        ),
+                    ),
+                ),
+            )
+
+            every {
+                getAllUserBooksUseCase()
+            } returns flowOf(books)
+
+            val range = StatsRange.Bounded(
+                start = LocalDate.parse("2026-01-01"),
+                endInclusive = LocalDate.parse("2026-12-31"),
+            )
+
+            // ----- Act & Assert -----
+            useCase(range).test {
+                val quickest = awaitItem().quickestRead
+
+                listOf(quickest?.duration?.readId, quickest?.book?.id) shouldBe listOf(20, 2)
+                awaitComplete()
+            }
+        }
     }
 }

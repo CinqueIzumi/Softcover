@@ -369,7 +369,38 @@ class SettingsLocalDataSourceImplTest {
     }
 
     @Nested
+    inner class QuotesSynced {
+        @Test
+        fun `emits true after markQuotesSynced`() = runTest {
+            // ----- Arrange -----
+            dataSource.quotesSynced.test {
+                awaitItem() shouldBe false
+
+                // ----- Act -----
+                dataSource.markQuotesSynced()
+
+                // ----- Assert -----
+                awaitItem() shouldBe true
+            }
+        }
+    }
+
+    @Nested
     inner class ResetAllSettings {
+        @Test
+        fun `returns the quotes synced flag to false`() = runTest {
+            // ----- Arrange -----
+            persisted.value = AppSettingsEntity(quotesSynced = true)
+
+            // ----- Act -----
+            dataSource.resetAllSettings()
+
+            // ----- Assert -----
+            dataSource.quotesSynced.test {
+                awaitItem() shouldBe false
+            }
+        }
+
         @Test
         fun `returns the backfilled flag to false`() = runTest {
             // ----- Arrange -----

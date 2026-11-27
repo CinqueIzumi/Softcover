@@ -17,10 +17,13 @@ import kotlinx.coroutines.test.setMain
 import nl.rhaydus.softcover.core.domain.account.ReAuthenticateUseCase
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
 import nl.rhaydus.softcover.core.domain.message.SessionExpiredNotifier
+import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.DrainPendingListWritesUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
 import nl.rhaydus.softcover.core.presentation.navigation.ExternalNavigationRequest
+import nl.rhaydus.softcover.core.presentation.navigation.LibraryFilterRequests
+import nl.rhaydus.softcover.core.presentation.navigation.LibraryTagFilterRequest
 import nl.rhaydus.softcover.orchestration.navigation.ExternalNavigationRequestsImpl
 import nl.rhaydus.softcover.orchestration.usecase.RefreshLibraryOnStartUseCase
 import org.junit.jupiter.api.AfterEach
@@ -37,6 +40,7 @@ class MainActivityViewModelTest {
     private lateinit var reAuthenticateUseCase: ReAuthenticateUseCase
     private lateinit var resetUserDataUseCase: ResetUserDataUseCase
     private lateinit var externalNavigationRequests: ExternalNavigationRequestsImpl
+    private lateinit var libraryFilterRequests: LibraryFilterRequests
     private lateinit var viewModel: MainActivityViewModel
 
     @BeforeEach
@@ -50,6 +54,7 @@ class MainActivityViewModelTest {
         reAuthenticateUseCase = mockk(relaxed = true)
         resetUserDataUseCase = mockk(relaxed = true)
         externalNavigationRequests = ExternalNavigationRequestsImpl()
+        libraryFilterRequests = LibraryFilterRequests()
 
         coEvery {
             getUserIdUseCase()
@@ -67,6 +72,7 @@ class MainActivityViewModelTest {
             reAuthenticateUseCase = reAuthenticateUseCase,
             resetUserDataUseCase = resetUserDataUseCase,
             externalNavigationRequests = externalNavigationRequests,
+            libraryFilterRequests = libraryFilterRequests,
         )
     }
 
@@ -83,6 +89,7 @@ class MainActivityViewModelTest {
         reAuthenticateUseCase = reAuthenticateUseCase,
         resetUserDataUseCase = resetUserDataUseCase,
         externalNavigationRequests = externalNavigationRequests,
+        libraryFilterRequests = libraryFilterRequests,
     )
 
     private fun showReAuthSheet() {
@@ -519,6 +526,34 @@ class MainActivityViewModelTest {
 
             // ----- Assert -----
             externalNavigationRequests.pending.value.shouldBeNull()
+        }
+    }
+
+    @Nested
+    inner class PendingLibraryFilterRequest {
+        @Test
+        fun `is cleared when the sign-in state resolves to signed out`() {
+            // ----- Arrange -----
+            val userId = CompletableDeferred<Result<Int>>()
+
+            coEvery {
+                getUserIdUseCase()
+            } coAnswers { userId.await() }
+
+            createViewModel()
+
+            libraryFilterRequests.request(
+                LibraryTagFilterRequest(
+                    category = TagCategory.GENRE,
+                    name = "Fantasy",
+                ),
+            )
+
+            // ----- Act -----
+            userId.complete(Result.success(-1))
+
+            // ----- Assert -----
+            libraryFilterRequests.pending.value.shouldBeNull()
         }
     }
 }
