@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.library.presentation.collector
 
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
@@ -38,6 +39,7 @@ import org.junit.jupiter.api.Test
 class ChooseListsCollectorTest {
     private lateinit var dependencies: LibraryDependencies
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
+    private lateinit var tabOrderFlow: MutableStateFlow<List<String>>
     private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
 
     @BeforeEach
@@ -50,7 +52,13 @@ class ChooseListsCollectorTest {
             eventChannel = Channel(Channel.BUFFERED),
         )
 
-        dependencies = mockk<LibraryDependencies>(relaxed = true)
+        tabOrderFlow = MutableStateFlow(emptyList())
+
+        dependencies = mockk<LibraryDependencies>(relaxed = true).also { mock ->
+            every {
+                mock.getLibraryTabOrderAsFlowUseCase()
+            } returns tabOrderFlow
+        }
     }
 
     private fun bookWithId(id: Int): Book {
@@ -352,6 +360,36 @@ class ChooseListsCollectorTest {
 
             // ----- Assert -----
             shownSheet().rows.map { it.listId } shouldBe listOf(2)
+            job.cancel()
+        }
+
+        @Test
+        fun `changing the tab order while the sheet is shown re-emits the rows in the new order`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = stateFlow.value.copy(
+                booksByTab = persistentMapOf("all" to persistentListOf(bookWithId(id = 1))),
+                selectedBookIds = persistentSetOf(1),
+                customLists = persistentListOf(
+                    customList(
+                        id = 1,
+                        name = "Alpha",
+                    ),
+                    customList(
+                        id = 2,
+                        name = "Beta",
+                    ),
+                ),
+                isChooseListsSheetRequested = true,
+            )
+
+            val job = launchCollector()
+            shownSheet().rows.map { it.listId } shouldBe listOf(1, 2)
+
+            // ----- Act -----
+            tabOrderFlow.value = listOf("list-2", "list-1")
+
+            // ----- Assert -----
+            shownSheet().rows.map { it.listId } shouldBe listOf(2, 1)
             job.cancel()
         }
     }

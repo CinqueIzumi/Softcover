@@ -92,14 +92,14 @@
 
 ### Shelve control
 
-- A bar-less `SHELVE THIS BOOK` label over a `surfaceContainerLow` card of four rows: Want to read /
-  Reading / Paused / Read. The active row fills `primary` / `onPrimary`; active Reading or Paused shows
-  `{pct}% · p. {page}` (time-based for audiobooks), active Read the read date when known.
-- All four rows are enabled for an off-shelf book: Reading, Paused or Read shelves it there in one step.
-  Reading on a paused book resumes it.
-- Paused while the book's reading session is open (timer running or paused) asks first through the
-  shared end-session sheet. "End session and pause" stops the session, then pauses; "Keep reading"
-  leaves both as they were.
+- A bar-less `SHELVE THIS BOOK` label over a `surfaceContainerLow` card of five rows: Want to read /
+  Reading / Paused / Read / Did not finish. The active row fills `primary` / `onPrimary`; active Reading,
+  Paused or Did not finish shows `{pct}% · p. {page}` (time-based for audiobooks), active Read the read date.
+- All five rows are enabled for an off-shelf book: any of them shelves it there in one step. Reading on a
+  paused book resumes it.
+- Paused or Did not finish while the reading session is open asks first through the shared end-session
+  sheet. "End session and pause" / "End session and mark Did not finish" stops the session, then applies
+  that status; "Keep reading" leaves both as they were.
 - Writes are optimistic; failure shakes the card (`Modifier.shakeOnError`) with "Couldn't save — tap to
   retry". Read plays the mark-as-read celebration. While loading, each row is masked and inert.
 

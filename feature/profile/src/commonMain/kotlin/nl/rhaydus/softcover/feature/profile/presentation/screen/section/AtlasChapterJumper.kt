@@ -28,15 +28,16 @@ internal class AtlasChapterJumper(
 
     private var viewportTop = 0f
 
-    /** Marks the scroll viewport; apply it before the `verticalScroll` so it measures the fixed window. */
-    fun viewport(): Modifier = Modifier.onGloballyPositioned { viewportTop = it.positionInRoot().y }
-
-    /** Marks the chrome sitting directly above the scroll viewport when the viewport itself is out of reach. */
-    fun aboveViewport(): Modifier = Modifier.onGloballyPositioned {
-        viewportTop = it.positionInRoot().y + it.size.height
+    fun recordViewportTop(top: Float) {
+        viewportTop = top
     }
 
-    fun chapter(chapter: AtlasChapter): Modifier = Modifier.onGloballyPositioned { chapters[chapter] = it }
+    fun recordChapter(
+        chapter: AtlasChapter,
+        coordinates: LayoutCoordinates,
+    ) {
+        chapters[chapter] = coordinates
+    }
 
     fun jumpTo(chapter: AtlasChapter) {
         val coordinates = chapters[chapter]?.takeIf { it.isAttached } ?: return
@@ -45,6 +46,26 @@ internal class AtlasChapterJumper(
 
         coroutineScope.launch { scrollState.animateScrollTo(target) }
     }
+}
+
+/** Marks the scroll viewport; apply it before the `verticalScroll` so it measures the fixed window. */
+internal fun Modifier.atlasViewport(jumper: AtlasChapterJumper): Modifier = onGloballyPositioned {
+    jumper.recordViewportTop(it.positionInRoot().y)
+}
+
+/** Marks the chrome sitting directly above the scroll viewport when the viewport itself is out of reach. */
+internal fun Modifier.atlasAboveViewport(jumper: AtlasChapterJumper): Modifier = onGloballyPositioned {
+    jumper.recordViewportTop(it.positionInRoot().y + it.size.height)
+}
+
+internal fun Modifier.atlasChapter(
+    jumper: AtlasChapterJumper,
+    chapter: AtlasChapter,
+): Modifier = onGloballyPositioned {
+    jumper.recordChapter(
+        chapter,
+        it,
+    )
 }
 
 @Composable

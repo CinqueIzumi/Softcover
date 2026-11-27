@@ -23,6 +23,8 @@ class BookTraitsRepositoryImplTest {
 
         override fun observe(bookId: Int): Flow<BookTraitsEntity?> = rows.map { it[bookId] }
 
+        override fun observeAll(): Flow<List<BookTraitsEntity>> = rows.map { it.values.toList() }
+
         override suspend fun get(bookId: Int): BookTraitsEntity? = rows.value[bookId]
 
         override suspend fun upsert(entity: BookTraitsEntity) {
@@ -75,6 +77,47 @@ class BookTraitsRepositoryImplTest {
                 awaitItem() shouldBe BookTraits(bookId = 9)
                 repository.save(traits = traits)
                 awaitItem() shouldBe traits
+            }
+        }
+    }
+
+    @Nested
+    inner class ObserveAll {
+        @Test
+        fun `emits an empty map while nothing is stored`() = runTest {
+            // ----- Arrange -----
+            // ----- Act & Assert -----
+            repository.observeAll().test {
+                awaitItem() shouldBe emptyMap()
+            }
+        }
+
+        @Test
+        fun `keys the stored traits by book id and re-emits after a save`() = runTest {
+            // ----- Arrange -----
+            val first = BookTraits(
+                bookId = 4,
+                pace = Pace.FAST,
+            )
+
+            val second = BookTraits(
+                bookId = 8,
+                pace = Pace.SLOW,
+            )
+
+            // ----- Act & Assert -----
+            repository.observeAll().test {
+                awaitItem() shouldBe emptyMap()
+
+                repository.save(traits = first)
+                awaitItem() shouldBe mapOf(4 to first)
+
+                repository.save(traits = second)
+
+                awaitItem() shouldBe mapOf(
+                    4 to first,
+                    8 to second,
+                )
             }
         }
     }

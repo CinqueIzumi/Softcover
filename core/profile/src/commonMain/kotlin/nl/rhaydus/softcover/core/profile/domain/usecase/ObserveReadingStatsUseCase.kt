@@ -16,7 +16,6 @@ class ObserveReadingStatsUseCase internal constructor(
     private val observeUserTagsByBookUseCase: ObserveUserTagsByBookUseCase,
     private val appDispatchers: AppDispatchers,
 ) {
-    /** Re-emits when the read books or the user's tags change; the aggregation runs off the main thread. */
     operator fun invoke(range: StatsRange): Flow<ReadingStats> = combine(
         getReadUserBooksUseCase(),
         observeUserTagsByBookUseCase(),

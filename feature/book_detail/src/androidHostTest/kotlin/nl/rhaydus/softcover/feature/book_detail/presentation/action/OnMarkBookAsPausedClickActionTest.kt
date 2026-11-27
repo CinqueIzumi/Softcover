@@ -18,6 +18,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.UserBook
+import nl.rhaydus.softcover.core.uibinding.session.SessionEndingStatus
 import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
@@ -179,7 +180,7 @@ class OnMarkBookAsPausedClickActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.endSessionPauseRequested shouldBe true
+            stateFlow.value.endSessionRequest shouldBe SessionEndingStatus.Paused
 
             coVerify(exactly = 0) {
                 pauseBookUseCase(
@@ -206,7 +207,7 @@ class OnMarkBookAsPausedClickActionTest {
             // ----- Act -----
             OnMarkBookAsPausedClickAction(
                 book = book,
-                sessionPauseConfirmed = true,
+                sessionEndConfirmed = true,
             ).execute(
                 dependencies = dependencies,
                 scope = scope,

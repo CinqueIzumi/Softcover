@@ -10,7 +10,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.collector.AtlasScopeChi
 import nl.rhaydus.softcover.feature.profile.presentation.collector.AtlasScopedSectionsCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.DayDetailCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.GenreRankingCollector
-import nl.rhaydus.softcover.feature.profile.presentation.collector.HideUntaggedAuthorsCollector
+import nl.rhaydus.softcover.feature.profile.presentation.collector.HideBooksWithoutDetailCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.ProfileCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.ReadingLifeCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.ReadingLifeShareCardCollector
@@ -18,6 +18,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.collector.ReadingSummar
 import nl.rhaydus.softcover.feature.profile.presentation.collector.RecentlyLovedCardsCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.StatsAtlasCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.UserInformationCollector
+import nl.rhaydus.softcover.feature.profile.presentation.collector.WaitingLongestCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.YearGridCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.YearHistoryCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.YearMetricToggleCollector
@@ -42,6 +43,7 @@ val profileScreenModule = module {
             resetUserDataUseCase = get(),
             observeUserProfileDataUseCase = get(),
             observeReadingStatsUseCase = get(),
+            observePagesReadUseCase = get(),
             observeReadingHistoryUseCase = get(),
             observeReadingActivityUseCase = get(),
             observeCurrentDateUseCase = get(),
@@ -61,6 +63,9 @@ val profileScreenModule = module {
             initializers = getAll(),
             observeUserProfileDataUseCase = get(),
             observeReadingStatsUseCase = get(),
+            observeDiversityStatsUseCase = get(),
+            observePagesReadUseCase = get(),
+            observeDidNotFinishStatsUseCase = get(),
             observeMonthlyPagesReadUseCase = get(),
             observeHourlyPagesReadUseCase = get(),
             observeReadingActivityUseCase = get(),
@@ -68,9 +73,14 @@ val profileScreenModule = module {
             observeReadingHistoryUseCase = get(),
             observeReadingStatsBackfilledUseCase = get(),
             observeReadDatesBackfilledUseCase = get(),
+            refreshLibraryUseCase = get(),
             observeTimeToFinishUseCase = get(),
-            getHideUntaggedAuthorsAsFlowUseCase = get(),
-            setHideUntaggedAuthorsUseCase = get(),
+            observeReadingListStatsUseCase = get(),
+            observeLongestWaitingUseCase = get(),
+            observeWrittenStatsUseCase = get(),
+            observeQuotesSyncedUseCase = get(),
+            getHideBooksWithoutDetailAsFlowUseCase = get(),
+            setHideBooksWithoutDetailUseCase = get(),
             observeBooksByIdsUseCase = get(),
             observeCurrentDateUseCase = get(),
         )
@@ -79,8 +89,9 @@ val profileScreenModule = module {
     factory { AtlasProfileDataCollector() } bind StatsAtlasCollector::class
     factory { AtlasScopeChipsCollector() } bind StatsAtlasCollector::class
     factory { RecentlyLovedCardsCollector() } bind StatsAtlasCollector::class
+    factory { WaitingLongestCollector() } bind StatsAtlasCollector::class
     factory { AtlasScopedSectionsCollector() } bind StatsAtlasCollector::class
-    factory { HideUntaggedAuthorsCollector() } bind StatsAtlasCollector::class
+    factory { HideBooksWithoutDetailCollector() } bind StatsAtlasCollector::class
     factory { YearMetricToggleCollector() } bind StatsAtlasCollector::class
     factory { YearHistoryCollector() } bind StatsAtlasCollector::class
     factory { GenreRankingCollector() } bind StatsAtlasCollector::class

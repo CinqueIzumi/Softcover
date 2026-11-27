@@ -13,11 +13,13 @@ import nl.rhaydus.softcover.core.profile.domain.model.ReadingStreak
 internal fun toReadingActivity(
     updates: List<ProgressUpdate>,
     readBooks: List<Book>,
+    didNotFinishBooks: List<Book>,
     timeZone: TimeZone,
 ): ReadingActivity {
     val pagesByDay = attributePages(
         updates = updates,
         readBooks = readBooks,
+        didNotFinishBooks = didNotFinishBooks,
         timeZone = timeZone,
     )
         .groupBy { it.date }

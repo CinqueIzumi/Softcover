@@ -75,21 +75,24 @@ internal class CurrentlyReadingWidgetModelSource(
             themeConfiguration = environment.getThemeConfiguration(),
             shelf = getCurrentlyReadingUserBooks(),
             selectedBookId = selectedBookId,
-            coverUri = images::coverUri,
+            coverBitmap = images::coverBitmap,
             coverHeightDp = reportedSizes
                 .map { sizes ->
-                    tallestCoverHeightDp(
+                    images.fitCoverHeightDp(
+                        requestedDp = tallestCoverHeightDp(
+                            sizes = sizes,
+                            eyebrowDp = { CYCLE_EYEBROW_HEIGHT_DP },
+                            footDp = { PROGRESS_ROW_HEIGHT_DP },
+                        ),
                         sizes = sizes,
-                        eyebrowDp = { CYCLE_EYEBROW_HEIGHT_DP },
-                        footDp = { PROGRESS_ROW_HEIGHT_DP },
                     )
                 }
                 .distinctUntilChanged(),
             barWidthsDp = reportedSizes
                 .map { progressBarWidthsDp(it) }
                 .distinctUntilChanged(),
-            progressUris = images::progressUris,
-            artworkUris = images::artworkUris,
+            progressImages = images::progressImages,
+            loadArtwork = images::artwork,
         )
     }
 

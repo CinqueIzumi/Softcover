@@ -5,6 +5,7 @@ import nl.rhaydus.softcover.core.corpus.data.datasource.BookTraitsLocalDataSourc
 import nl.rhaydus.softcover.core.corpus.data.repository.BookTraitsRepositoryImpl
 import nl.rhaydus.softcover.core.corpus.domain.repository.BookTraitsRepository
 import nl.rhaydus.softcover.core.corpus.domain.usecase.GetBookTraitsUseCase
+import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveAllBookTraitsUseCase
 import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveBookTraitsUseCase
 import nl.rhaydus.softcover.core.corpus.domain.usecase.SaveBookTraitsUseCase
 import nl.rhaydus.softcover.core.database.SoftcoverDatabase
@@ -29,6 +30,7 @@ val corpusModule = module {
     }
 
     factory { ObserveBookTraitsUseCase(repository = get()) }
+    factory { ObserveAllBookTraitsUseCase(repository = get()) }
     factory { GetBookTraitsUseCase(repository = get()) }
     factory { SaveBookTraitsUseCase(repository = get()) }
 }

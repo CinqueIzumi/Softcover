@@ -1,9 +1,11 @@
 package nl.rhaydus.softcover.core.profile.di
 
 import kotlinx.datetime.TimeZone
+import nl.rhaydus.softcover.core.corpus.di.corpusModule
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.identity.di.identityModule
 import nl.rhaydus.softcover.core.network.di.apolloModule
+import nl.rhaydus.softcover.core.personal.di.personalModule
 import nl.rhaydus.softcover.core.profile.data.datasource.ProfileLocalDataSource
 import nl.rhaydus.softcover.core.profile.data.datasource.ProfileLocalDataSourceImpl
 import nl.rhaydus.softcover.core.profile.data.datasource.ProfileRemoteDataSource
@@ -11,14 +13,21 @@ import nl.rhaydus.softcover.core.profile.data.datasource.ProfileRemoteDataSource
 import nl.rhaydus.softcover.core.profile.data.repository.ProfileRepositoryImpl
 import nl.rhaydus.softcover.core.profile.domain.ProfileRefreshGate
 import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveDidNotFinishStatsUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveDiversityStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveHourlyPagesReadUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveLongestWaitingUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveMonthlyPagesReadUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObservePageCreditInputsUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObservePagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingActivityUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingDayUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingHistoryUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingListStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveTimeToFinishUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveWrittenStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileStatsUseCase
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -33,6 +42,8 @@ val profileModule = module {
         dispatcherModule,
         identityModule,
         apolloModule,
+        personalModule,
+        corpusModule,
     )
 
     single<ProfileRemoteDataSource> {
@@ -64,7 +75,31 @@ val profileModule = module {
             profileRepository = get(),
             statsRefreshGate = get(statsRefreshGateQualifier),
             refreshLibraryUseCase = get(),
-            hasSyncedReadBooksThisSessionUseCase = get(),
+            hasSyncedStatusesThisSessionUseCase = get(),
+            refreshAllQuotesUseCase = get(),
+        )
+    }
+
+    factory {
+        ObserveDidNotFinishStatsUseCase(
+            getDidNotFinishUserBooksUseCase = get(),
+            observeUserTagsByBookUseCase = get(),
+            appDispatchers = get(),
+        )
+    }
+
+    factory {
+        ObserveReadingListStatsUseCase(
+            getAllUserBooksUseCase = get(),
+            appDispatchers = get(),
+        )
+    }
+
+    factory {
+        ObserveLongestWaitingUseCase(
+            getAllUserBooksUseCase = get(),
+            getAllUserListsUseCase = get(),
+            appDispatchers = get(),
         )
     }
 
@@ -72,6 +107,28 @@ val profileModule = module {
         ObserveReadingStatsUseCase(
             getReadUserBooksUseCase = get(),
             observeUserTagsByBookUseCase = get(),
+            appDispatchers = get(),
+        )
+    }
+
+    factory {
+        ObserveDiversityStatsUseCase(
+            getCurrentlyReadingUserBooksUseCase = get(),
+            getPausedUserBooksUseCase = get(),
+            getReadUserBooksUseCase = get(),
+            getDidNotFinishUserBooksUseCase = get(),
+            observeProgressUpdatesUseCase = get(),
+            observeAllBookTraitsUseCase = get(),
+            appDispatchers = get(),
+            timeZone = get(),
+        )
+    }
+
+    factory {
+        ObserveWrittenStatsUseCase(
+            getAllUserBooksUseCase = get(),
+            observeAllQuotesUseCase = get(),
+            timeZone = get(),
             appDispatchers = get(),
         )
     }
@@ -92,9 +149,25 @@ val profileModule = module {
     }
 
     factory {
-        ObserveMonthlyPagesReadUseCase(
+        ObservePageCreditInputsUseCase(
             observeProgressUpdatesUseCase = get(),
             getReadUserBooksUseCase = get(),
+            getDidNotFinishUserBooksUseCase = get(),
+        )
+    }
+
+    factory {
+        ObservePagesReadUseCase(
+            observePageCreditInputsUseCase = get(),
+            appDispatchers = get(),
+            clock = get(),
+            timeZone = get(),
+        )
+    }
+
+    factory {
+        ObserveMonthlyPagesReadUseCase(
+            observePageCreditInputsUseCase = get(),
             timeZone = get(),
             appDispatchers = get(),
         )
@@ -102,8 +175,7 @@ val profileModule = module {
 
     factory {
         ObserveReadingActivityUseCase(
-            observeProgressUpdatesUseCase = get(),
-            getReadUserBooksUseCase = get(),
+            observePageCreditInputsUseCase = get(),
             timeZone = get(),
             appDispatchers = get(),
         )
@@ -111,8 +183,7 @@ val profileModule = module {
 
     factory {
         ObserveReadingDayUseCase(
-            observeProgressUpdatesUseCase = get(),
-            getReadUserBooksUseCase = get(),
+            observePageCreditInputsUseCase = get(),
             timeZone = get(),
             appDispatchers = get(),
         )
@@ -120,7 +191,7 @@ val profileModule = module {
 
     factory {
         ObserveReadingHistoryUseCase(
-            getReadUserBooksUseCase = get(),
+            observePageCreditInputsUseCase = get(),
             appDispatchers = get(),
             clock = get(),
             timeZone = get(),

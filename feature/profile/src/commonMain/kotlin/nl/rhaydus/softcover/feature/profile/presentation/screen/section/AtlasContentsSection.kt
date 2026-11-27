@@ -20,7 +20,7 @@ internal fun AtlasContentsSection(
     onRowClick: (AtlasChapter) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier) {
+    Column(modifier = modifier.animateScopeContentSize()) {
         SectionHeader(model = header)
 
         Spacer(modifier = Modifier.height(Spacing.xs))

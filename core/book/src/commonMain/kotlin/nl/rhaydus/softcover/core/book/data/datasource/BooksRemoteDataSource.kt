@@ -157,6 +157,11 @@ interface BooksRemoteDataSource {
         editionId: Int? = null,
     ): Book
 
+    suspend fun markBookAsDidNotFinish(
+        book: Book,
+        editionId: Int? = null,
+    ): Book
+
     suspend fun updateBookRating(
         userBook: UserBook,
         rating: Double,
@@ -600,6 +605,15 @@ internal class BooksRemoteDataSourceImpl(
     ): Book = setStatusOrCreate(
         book = book,
         status = UserBookStatus.PAUSED,
+        editionId = editionId,
+    )
+
+    override suspend fun markBookAsDidNotFinish(
+        book: Book,
+        editionId: Int?,
+    ): Book = setStatusOrCreate(
+        book = book,
+        status = UserBookStatus.DID_NOT_FINISH,
         editionId = editionId,
     )
 

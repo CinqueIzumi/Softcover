@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import nl.rhaydus.softcover.core.book.domain.usecase.DidNotFinishBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.FetchBookByIdUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetEditionsByBookIdUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.LoadSimilarBooksPageUseCase
@@ -37,6 +38,7 @@ import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveReadingJournalHi
 import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshBookQuotesUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryTabOrderAsFlowUseCase
 import nl.rhaydus.softcover.core.presentation.removal.UndoableBookRemover
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
@@ -57,10 +59,12 @@ internal class BookDetailDependencies(
     val markBookAsReadingUseCase: MarkBookAsReadingUseCase,
     val markBookAsReadUseCase: MarkBookAsReadUseCase,
     val pauseBookUseCase: PauseBookUseCase,
+    val didNotFinishBookUseCase: DidNotFinishBookUseCase,
     val activeSessionController: ActiveSessionController,
     val saveBookVerdictUseCase: SaveBookVerdictUseCase,
     val undoableBookRemover: UndoableBookRemover,
     val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
+    val getLibraryTabOrderAsFlowUseCase: GetLibraryTabOrderAsFlowUseCase,
     val observeCurrentDateUseCase: ObserveCurrentDateUseCase,
     val setEditionAsOwnedUseCase: SetEditionAsOwnedUseCase,
     val getAllUserListsUseCase: GetAllUserListsUseCase,

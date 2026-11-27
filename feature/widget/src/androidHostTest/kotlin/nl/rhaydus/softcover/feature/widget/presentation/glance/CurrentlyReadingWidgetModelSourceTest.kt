@@ -1,12 +1,12 @@
 package nl.rhaydus.softcover.feature.widget.presentation.glance
 
-import android.net.Uri
+import android.graphics.Bitmap
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.feature.widget.presentation.model.BookArtworkUiModel
 import nl.rhaydus.softcover.feature.widget.presentation.model.CurrentlyReadingWidgetUiModel
-import nl.rhaydus.softcover.feature.widget.presentation.render.WavyProgressUris
+import nl.rhaydus.softcover.feature.widget.presentation.render.WavyProgressImages
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -25,7 +25,7 @@ class CurrentlyReadingWidgetModelSourceTest {
     )
 
     private fun reading(
-        progress: Map<Int, WavyProgressUris>,
+        progress: Map<Int, WavyProgressImages>,
         artwork: BookArtworkUiModel?,
         imagesPending: Boolean,
     ) = CurrentlyReadingWidgetUiModel.Content.Reading(
@@ -43,10 +43,10 @@ class CurrentlyReadingWidgetModelSourceTest {
 
     private fun artwork() = BookArtworkUiModel(
         backdrop = null,
-        veil = mockk<Uri>(),
-        veilLift = mockk<Uri>(),
-        washPrimary = mockk<Uri>(),
-        washTertiary = mockk<Uri>(),
+        veil = mockk<Bitmap>(),
+        veilLift = mockk<Bitmap>(),
+        washPrimary = mockk<Bitmap>(),
+        washTertiary = mockk<Bitmap>(),
     )
 
     @Nested
@@ -56,7 +56,7 @@ class CurrentlyReadingWidgetModelSourceTest {
             // ----- Arrange -----
             val model = model(
                 reading(
-                    progress = mapOf(120 to mockk<WavyProgressUris>()),
+                    progress = mapOf(120 to mockk<WavyProgressImages>()),
                     artwork = artwork(),
                     imagesPending = true,
                 ),
