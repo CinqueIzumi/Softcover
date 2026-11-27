@@ -21,10 +21,12 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingUiMo
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasFormatSplit
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasTimeOfDayPages
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasTopAuthors
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.inYourWordsUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.longestStreakTile
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesMonthSetKey
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.readingRecordsUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeOfDayCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeOfDayChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeToFinishUiModel
@@ -38,6 +40,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileR
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingHistoryPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingStatsPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileTimeToFinishPreview
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileWrittenStatsPreview
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
 
 private val PreviewReadingStats = profileReadingStatsPreview()
@@ -137,6 +140,15 @@ internal val StatsAtlasPreviewState = StatsAtlasUiState(
     hasFormatSplit = hasFormatSplit(PreviewReadingStats.formatSplit),
     timeToFinish = timeToFinishUiModel(
         timeToFinish = profileTimeToFinishPreview(),
+        scope = StatsScope.AllTime,
+    ),
+    readingRecords = readingRecordsUiModel(
+        stats = PreviewReadingStats,
+        timeToFinish = profileTimeToFinishPreview(),
+        scope = StatsScope.AllTime,
+    ),
+    inYourWords = inYourWordsUiModel(
+        written = profileWrittenStatsPreview(),
         scope = StatsScope.AllTime,
     ),
     genreHeader = genreHeader(

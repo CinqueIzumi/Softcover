@@ -20,6 +20,7 @@ import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.core.domain.model.Quote
 import nl.rhaydus.softcover.core.personal.data.datasource.QuoteLocalDataSource
 import nl.rhaydus.softcover.core.personal.data.datasource.QuoteRemoteDataSource
+import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -30,6 +31,7 @@ class QuoteRepositoryImplTest {
     private lateinit var localDataSource: QuoteLocalDataSource
     private lateinit var remoteDataSource: QuoteRemoteDataSource
     private lateinit var drainer: QuoteWriteDrainer
+    private lateinit var settingsRepository: SettingsRepository
     private lateinit var repository: QuoteRepositoryImpl
     private val fixedInstant = Instant.parse("2024-06-15T12:30:00Z")
 
@@ -38,11 +40,13 @@ class QuoteRepositoryImplTest {
         localDataSource = mockk()
         remoteDataSource = mockk()
         drainer = mockk()
+        settingsRepository = mockk()
 
         repository = QuoteRepositoryImpl(
             localDataSource = localDataSource,
             remoteDataSource = remoteDataSource,
             drainer = drainer,
+            settingsRepository = settingsRepository,
             clock = FixedClock(fixedInstant),
         )
     }
@@ -234,6 +238,7 @@ class QuoteRepositoryImplTest {
             } returns fetched
 
             coJustRun { localDataSource.replaceAllSynced(remote = fetched) }
+            coJustRun { settingsRepository.markQuotesSynced() }
 
             // ----- Act -----
             repository.refreshAll()
@@ -244,6 +249,70 @@ class QuoteRepositoryImplTest {
                 remoteDataSource.getAllQuotes()
                 localDataSource.replaceAllSynced(remote = fetched)
             }
+        }
+
+        @Test
+        fun `marks quotes synced only after the replace succeeded`() = runTest {
+            // ----- Arrange -----
+            val fetched = listOf(entity(localId = 1))
+
+            coJustRun { drainer.drain() }
+
+            coEvery {
+                remoteDataSource.getAllQuotes()
+            } returns fetched
+
+            coJustRun { localDataSource.replaceAllSynced(remote = fetched) }
+            coJustRun { settingsRepository.markQuotesSynced() }
+
+            // ----- Act -----
+            repository.refreshAll()
+
+            // ----- Assert -----
+            coVerifyOrder {
+                localDataSource.replaceAllSynced(remote = fetched)
+                settingsRepository.markQuotesSynced()
+            }
+        }
+
+        @Test
+        fun `a failed fetch does not mark quotes synced`() = runTest {
+            // ----- Arrange -----
+            coJustRun { drainer.drain() }
+
+            coEvery {
+                remoteDataSource.getAllQuotes()
+            } throws RuntimeException("offline")
+
+            // ----- Act -----
+            val result = runCatching { repository.refreshAll() }
+
+            // ----- Assert -----
+            result.isFailure shouldBe true
+            coVerify(exactly = 0) { settingsRepository.markQuotesSynced() }
+        }
+
+        @Test
+        fun `a failed replace does not mark quotes synced`() = runTest {
+            // ----- Arrange -----
+            val fetched = listOf(entity(localId = 1))
+
+            coJustRun { drainer.drain() }
+
+            coEvery {
+                remoteDataSource.getAllQuotes()
+            } returns fetched
+
+            coEvery {
+                localDataSource.replaceAllSynced(remote = fetched)
+            } throws RuntimeException("disk full")
+
+            // ----- Act -----
+            val result = runCatching { repository.refreshAll() }
+
+            // ----- Assert -----
+            result.isFailure shouldBe true
+            coVerify(exactly = 0) { settingsRepository.markQuotesSynced() }
         }
     }
 

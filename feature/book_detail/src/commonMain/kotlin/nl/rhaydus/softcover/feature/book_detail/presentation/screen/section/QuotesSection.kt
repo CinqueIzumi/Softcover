@@ -52,6 +52,8 @@ internal fun QuotesSection(
                             is QuoteCardEvent.DeleteRequested -> runAction(
                                 OnQuoteDeleteRequestedAction(localId = event.key),
                             )
+
+                            QuoteCardEvent.Clicked -> Unit
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),

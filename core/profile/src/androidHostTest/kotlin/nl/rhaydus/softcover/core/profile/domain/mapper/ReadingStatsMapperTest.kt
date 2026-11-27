@@ -1334,4 +1334,191 @@ class ReadingStatsMapperTest {
             split.unknownCount shouldBe 0
         }
     }
+
+    @Nested
+    inner class LongestBookSelection {
+        @Test
+        fun `the book with the most pages wins`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    pages = 200,
+                ),
+                readBook(
+                    id = 2,
+                    pages = 500,
+                ),
+                readBook(
+                    id = 3,
+                    pages = 300,
+                ),
+            )
+
+            // ----- Act -----
+            val result = books.longestBook()
+
+            // ----- Assert -----
+            listOf(result?.book?.id, result?.pages) shouldBe listOf(2, 500)
+        }
+
+        @Test
+        fun `the reader's own edition decides the page count over the book's`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    pages = 300,
+                ),
+                readBook(
+                    id = 2,
+                    pages = 100,
+                    editions = listOf(
+                        edition(
+                            id = 20,
+                            pages = 900,
+                        ),
+                    ),
+                    editionId = 20,
+                ),
+            )
+
+            // ----- Act -----
+            val result = books.longestBook()
+
+            // ----- Assert -----
+            listOf(result?.book?.id, result?.pages) shouldBe listOf(2, 900)
+        }
+
+        @Test
+        fun `a book with zero or unknown pages never qualifies`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    pages = 0,
+                ),
+                readBook(
+                    id = 2,
+                    pages = null,
+                ),
+                readBook(
+                    id = 3,
+                    pages = 10,
+                ),
+            )
+
+            // ----- Act -----
+            val result = books.longestBook()
+
+            // ----- Assert -----
+            result?.book?.id shouldBe 3
+        }
+
+        @Test
+        fun `no book with a known page count gives null`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    pages = 0,
+                ),
+                readBook(
+                    id = 2,
+                    pages = null,
+                ),
+            )
+
+            // ----- Act -----
+            val result = books.longestBook()
+
+            // ----- Assert -----
+            result shouldBe null
+        }
+
+        @Test
+        fun `an empty list gives null`() {
+            // ----- Arrange -----
+            val books = emptyList<Book>()
+
+            // ----- Act -----
+            val result = books.longestBook()
+
+            // ----- Assert -----
+            result shouldBe null
+        }
+
+        @Test
+        fun `a page tie goes to the later finish date`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 9,
+                    finishedAt = "2026-02-01",
+                    pages = 400,
+                ),
+                readBook(
+                    id = 1,
+                    finishedAt = "2026-06-01",
+                    pages = 400,
+                ),
+            )
+
+            // ----- Act -----
+            val result = books.longestBook()
+
+            // ----- Assert -----
+            result?.book?.id shouldBe 1
+        }
+
+        @Test
+        fun `a page tie ranks a book without a finish date last`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 9,
+                    pages = 400,
+                ),
+                readBook(
+                    id = 1,
+                    finishedAt = "2026-02-01",
+                    pages = 400,
+                ),
+            )
+
+            // ----- Act -----
+            val result = books.longestBook()
+
+            // ----- Assert -----
+            result?.book?.id shouldBe 1
+        }
+
+        @Test
+        fun `a page and finish tie goes to the higher book id`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 5,
+                    finishedAt = "2026-02-01",
+                    pages = 400,
+                ),
+                readBook(
+                    id = 8,
+                    finishedAt = "2026-02-01",
+                    pages = 400,
+                ),
+                readBook(
+                    id = 3,
+                    finishedAt = "2026-02-01",
+                    pages = 400,
+                ),
+            )
+
+            // ----- Act -----
+            val result = books.longestBook()
+
+            // ----- Assert -----
+            result?.book?.id shouldBe 8
+        }
+    }
 }

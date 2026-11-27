@@ -3,7 +3,10 @@ package nl.rhaydus.softcover.feature.profile.presentation.screen.section
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
+import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.Gender
+import nl.rhaydus.softcover.core.domain.model.PrivacySetting
+import nl.rhaydus.softcover.core.domain.model.Quote
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
@@ -15,16 +18,22 @@ import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
 import nl.rhaydus.softcover.core.profile.domain.model.HourlyPages
 import nl.rhaydus.softcover.core.profile.domain.model.LengthBand
+import nl.rhaydus.softcover.core.profile.domain.model.LongestBook
 import nl.rhaydus.softcover.core.profile.domain.model.MonthCount
 import nl.rhaydus.softcover.core.profile.domain.model.MonthlyPages
+import nl.rhaydus.softcover.core.profile.domain.model.MostQuotedBook
+import nl.rhaydus.softcover.core.profile.domain.model.QuickestRead
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
+import nl.rhaydus.softcover.core.profile.domain.model.ReadDuration
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingActivity
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
 import nl.rhaydus.softcover.core.profile.domain.model.RecentlyLovedBook
 import nl.rhaydus.softcover.core.profile.domain.model.TimeToFinish
+import nl.rhaydus.softcover.core.profile.domain.model.WrittenStats
 import nl.rhaydus.softcover.core.profile.domain.model.YearCount
+import kotlin.time.Instant
 
 /**
  * A representative [ReadingStats] sample (the redline spec's sample reader, Elena Marchetti) shared by
@@ -39,6 +48,13 @@ internal fun profileReadingStatsPreview(): ReadingStats = ReadingStats(
     authorDemographics = previewAuthorDemographics(),
     topAuthors = previewTopAuthors(),
     formatSplit = previewFormatSplit(),
+    longestBook = LongestBook(
+        book = previewRecordBook(
+            id = 101,
+            title = "The Stand",
+        ),
+        pages = 1_296,
+    ),
 )
 
 internal fun profileTimeToFinishPreview(): TimeToFinish = TimeToFinish(
@@ -50,6 +66,73 @@ internal fun profileTimeToFinishPreview(): TimeToFinish = TimeToFinish(
         LengthBand.OVER_450 to 23,
     ),
     excludedReadCount = 2,
+    quickestRead = QuickestRead(
+        book = previewRecordBook(
+            id = 102,
+            title = "Of Mice and Men",
+        ),
+        duration = ReadDuration(
+            bookId = 102,
+            readId = 1,
+            startedOn = LocalDate(
+                2025,
+                3,
+                1,
+            ),
+            finishedOn = LocalDate(
+                2025,
+                3,
+                2,
+            ),
+            pages = 272,
+        ),
+    ),
+)
+
+internal fun profileWrittenStatsPreview(): WrittenStats = WrittenStats(
+    reviewCount = 14,
+    reviewWordCount = 3_200,
+    quoteCount = 62,
+    quotedBookCount = 19,
+    mostQuoted = MostQuotedBook(
+        book = previewRecordBook(
+            id = 103,
+            title = "Piranesi",
+        ),
+        quoteCount = 11,
+        firstQuote = Quote(
+            localId = 1,
+            remoteId = 1,
+            bookId = 103,
+            editionId = null,
+            text = "The beauty of the House is immeasurable; its Kindness infinite.",
+            privacy = PrivacySetting.PUBLIC,
+            actionAt = Instant.fromEpochSeconds(1_700_000_000),
+            position = null,
+            isPending = false,
+        ),
+    ),
+)
+
+private fun previewRecordBook(
+    id: Int,
+    title: String,
+): Book = Book(
+    id = id,
+    title = title,
+    editions = emptyList(),
+    defaultEdition = null,
+    rating = 4.2,
+    description = "",
+    releaseYear = 1990,
+    coverUrl = "",
+    authors = emptyList(),
+    usersCount = 0,
+    ratingsCount = 0,
+    bookSeries = null,
+    positionsInSeries = emptyList(),
+    isCompilation = false,
+    userBook = null,
 )
 
 private fun previewFormatSplit(): FormatSplit = FormatSplit(
