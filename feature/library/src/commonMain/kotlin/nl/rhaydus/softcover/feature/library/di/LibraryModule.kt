@@ -26,6 +26,7 @@ import nl.rhaydus.softcover.feature.library.presentation.collector.FilterDraftCh
 import nl.rhaydus.softcover.feature.library.presentation.collector.FilterOptionsCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.GridLayoutCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.LibraryCollector
+import nl.rhaydus.softcover.feature.library.presentation.collector.LibraryTagFilterRequestCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.MastheadCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.PillButtonsCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.RearrangeChipCollector
@@ -61,6 +62,7 @@ val libraryModule = module {
     factory { ChooseListsCollector() } bind LibraryCollector::class
 
     factory { VisibleTabsCollector() } bind LibraryCollector::class
+    factory { LibraryTagFilterRequestCollector() } bind LibraryCollector::class
     factory { ShelfSidebarCollector() } bind LibraryCollector::class
     factory { EmptyStatesCollector() } bind LibraryCollector::class
 
@@ -129,6 +131,7 @@ val libraryModule = module {
             refreshRecommendedFeedUseCase = get(),
             hideRecommendedBookUseCase = get(),
             restoreRecommendedBookUseCase = get(),
+            libraryFilterRequests = get(),
         )
     }
 }

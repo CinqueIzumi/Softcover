@@ -49,6 +49,7 @@ class PageAttributionTest {
             val result = attributePages(
                 updates = updates,
                 readBooks = books,
+                didNotFinishBooks = emptyList(),
                 timeZone = TimeZone.UTC,
             )
 
@@ -62,7 +63,7 @@ class PageAttributionTest {
                     ),
                     bookId = 1,
                     pages = 100,
-                    isRemainder = false,
+                    kind = AttributedPagesKind.Update,
                 ),
                 AttributedPages(
                     date = LocalDate(
@@ -72,7 +73,7 @@ class PageAttributionTest {
                     ),
                     bookId = 1,
                     pages = 200,
-                    isRemainder = true,
+                    kind = AttributedPagesKind.FinishRemainder(endPage = 300),
                 ),
             )
         }
@@ -92,6 +93,7 @@ class PageAttributionTest {
             val result = attributePages(
                 updates = emptyList(),
                 readBooks = books,
+                didNotFinishBooks = emptyList(),
                 timeZone = TimeZone.UTC,
             )
 
@@ -123,11 +125,12 @@ class PageAttributionTest {
             val result = attributePages(
                 updates = updates,
                 readBooks = books,
+                didNotFinishBooks = emptyList(),
                 timeZone = TimeZone.UTC,
             )
 
             // ----- Assert -----
-            result.map { it.isRemainder to it.pages } shouldBe listOf(false to 350)
+            result.map { it.kind to it.pages } shouldBe listOf(AttributedPagesKind.Update to 350)
         }
 
         @Test
@@ -151,6 +154,7 @@ class PageAttributionTest {
             val result = attributePages(
                 updates = updates,
                 readBooks = emptyList(),
+                didNotFinishBooks = emptyList(),
                 timeZone = TimeZone.UTC,
             )
 
@@ -174,6 +178,7 @@ class PageAttributionTest {
             val result = attributePages(
                 updates = updates,
                 readBooks = emptyList(),
+                didNotFinishBooks = emptyList(),
                 timeZone = TimeZone.UTC,
             )
 
@@ -197,6 +202,7 @@ class PageAttributionTest {
             val result = attributePages(
                 updates = updates,
                 readBooks = emptyList(),
+                didNotFinishBooks = emptyList(),
                 timeZone = TimeZone.of("Europe/Amsterdam"),
             )
 
@@ -208,6 +214,228 @@ class PageAttributionTest {
                     day = 11,
                 ),
             )
+        }
+
+        @Test
+        fun `credits a stopped book the pages between its last logged position and its stop page`() {
+            // ----- Arrange -----
+            val updates = listOf(
+                update(
+                    bookId = 2,
+                    at = "2026-03-01T10:00:00Z",
+                    pagesRead = 100,
+                    pages = 100,
+                ),
+            )
+
+            val stopped = dnfBook(
+                id = 2,
+                stoppedAt = "2026-03-12T12:00:00.000000",
+                pages = 400,
+                read = unfinishedRead(
+                    id = 2,
+                    currentPage = 160,
+                ),
+            )
+
+            // ----- Act -----
+            val result = attributePages(
+                updates = updates,
+                readBooks = emptyList(),
+                didNotFinishBooks = listOf(stopped),
+                timeZone = TimeZone.UTC,
+            )
+
+            // ----- Assert -----
+            result shouldContainExactlyInAnyOrder listOf(
+                AttributedPages(
+                    date = LocalDate(
+                        year = 2026,
+                        month = 3,
+                        day = 1,
+                    ),
+                    bookId = 2,
+                    pages = 100,
+                    kind = AttributedPagesKind.Update,
+                ),
+                AttributedPages(
+                    date = LocalDate(
+                        year = 2026,
+                        month = 3,
+                        day = 12,
+                    ),
+                    bookId = 2,
+                    pages = 60,
+                    kind = AttributedPagesKind.StopRemainder(endPage = 160),
+                ),
+            )
+        }
+
+        @Test
+        fun `credits a stopped book with no updates all pages up to its stop page`() {
+            // ----- Arrange -----
+            val stopped = dnfBook(
+                id = 2,
+                pages = 400,
+                read = unfinishedRead(
+                    id = 2,
+                    currentPage = 160,
+                ),
+            )
+
+            // ----- Act -----
+            val result = attributePages(
+                updates = emptyList(),
+                readBooks = emptyList(),
+                didNotFinishBooks = listOf(stopped),
+                timeZone = TimeZone.UTC,
+            )
+
+            // ----- Assert -----
+            result.map { it.pages } shouldBe listOf(160)
+        }
+
+        @Test
+        fun `ignores logged positions after the stop date when measuring the stop remainder`() {
+            // ----- Arrange -----
+            val updates = listOf(
+                update(
+                    bookId = 2,
+                    at = "2026-03-20T10:00:00Z",
+                    pagesRead = 150,
+                    pages = 150,
+                ),
+            )
+
+            val stopped = dnfBook(
+                id = 2,
+                stoppedAt = "2026-03-12T12:00:00.000000",
+                pages = 400,
+                read = unfinishedRead(
+                    id = 2,
+                    currentPage = 160,
+                ),
+            )
+
+            // ----- Act -----
+            val result = attributePages(
+                updates = updates,
+                readBooks = emptyList(),
+                didNotFinishBooks = listOf(stopped),
+                timeZone = TimeZone.UTC,
+            )
+
+            // ----- Assert -----
+            result.filter { it.kind is AttributedPagesKind.StopRemainder }.map { it.pages } shouldBe listOf(160)
+        }
+
+        @Test
+        fun `credits no stop remainder when the book is logged up to or past its stop page`() {
+            // ----- Arrange -----
+            val updates = listOf(
+                update(
+                    bookId = 2,
+                    at = "2026-03-01T10:00:00Z",
+                    pagesRead = 200,
+                    pages = 200,
+                ),
+            )
+
+            val stopped = dnfBook(
+                id = 2,
+                pages = 400,
+                read = unfinishedRead(
+                    id = 2,
+                    currentPage = 160,
+                ),
+            )
+
+            // ----- Act -----
+            val result = attributePages(
+                updates = updates,
+                readBooks = emptyList(),
+                didNotFinishBooks = listOf(stopped),
+                timeZone = TimeZone.UTC,
+            )
+
+            // ----- Assert -----
+            result.map { it.kind } shouldBe listOf(AttributedPagesKind.Update)
+        }
+
+        @Test
+        fun `credits no stop remainder to a stopped book without a stop date`() {
+            // ----- Arrange -----
+            val stopped = dnfBook(
+                id = 2,
+                stoppedAt = null,
+                pages = 400,
+                read = unfinishedRead(
+                    id = 2,
+                    currentPage = 160,
+                ),
+            )
+
+            // ----- Act -----
+            val result = attributePages(
+                updates = emptyList(),
+                readBooks = emptyList(),
+                didNotFinishBooks = listOf(stopped),
+                timeZone = TimeZone.UTC,
+            )
+
+            // ----- Assert -----
+            result.shouldBeEmpty()
+        }
+
+        @Test
+        fun `credits no stop remainder when the stop point is unknown`() {
+            // ----- Arrange -----
+            val stopped = dnfBook(
+                id = 2,
+                pages = 400,
+                read = unfinishedRead(id = 2),
+            )
+
+            // ----- Act -----
+            val result = attributePages(
+                updates = emptyList(),
+                readBooks = emptyList(),
+                didNotFinishBooks = listOf(stopped),
+                timeZone = TimeZone.UTC,
+            )
+
+            // ----- Assert -----
+            result.shouldBeEmpty()
+        }
+
+        @Test
+        fun `measures the finish remainder against the readers edition pages over the book pages`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    finishedAt = "2026-03-12",
+                    pages = 200,
+                    editions = listOf(
+                        edition(
+                            id = 10,
+                            pages = 300,
+                        ),
+                    ),
+                    editionId = 10,
+                ),
+            )
+
+            // ----- Act -----
+            val result = attributePages(
+                updates = emptyList(),
+                readBooks = books,
+                didNotFinishBooks = emptyList(),
+                timeZone = TimeZone.UTC,
+            )
+
+            // ----- Assert -----
+            result.map { it.pages } shouldBe listOf(300)
         }
     }
 

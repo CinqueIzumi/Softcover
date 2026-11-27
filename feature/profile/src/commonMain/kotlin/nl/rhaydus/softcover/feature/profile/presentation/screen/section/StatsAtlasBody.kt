@@ -12,6 +12,8 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnGenreRankingShowLessAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnGenreRankingShowMoreAction
+import nl.rhaydus.softcover.feature.profile.presentation.action.OnMostQuotedBookTappedAction
+import nl.rhaydus.softcover.feature.profile.presentation.action.OnOwnTagTappedAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnReadingDayTappedAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnScopeSelectedAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.StatsAtlasAction
@@ -25,6 +27,8 @@ internal fun ColumnScope.StatsAtlasBody(
     jumper: AtlasChapterJumper,
     runAction: (StatsAtlasAction) -> Unit,
     onBookCardEvent: (BookCardEvent) -> Unit,
+    onRecordEvent: (BookCardEvent) -> Unit,
+    onWaitingEvent: (BookCardEvent) -> Unit,
 ) {
     PageMasthead(model = state.masthead)
 
@@ -56,7 +60,12 @@ internal fun ColumnScope.StatsAtlasBody(
 
     Spacer(modifier = Modifier.height(Spacing.section))
 
-    Column(modifier = jumper.chapter(AtlasChapter.YEAR_AT_A_GLANCE)) {
+    Column(
+        modifier = Modifier.atlasChapter(
+            jumper,
+            AtlasChapter.YEAR_AT_A_GLANCE,
+        ),
+    ) {
         YearAtAGlanceChapter(
             header = state.yearAtAGlanceHeader,
             title = state.timeOfDayTitle,
@@ -75,7 +84,12 @@ internal fun ColumnScope.StatsAtlasBody(
 
     Spacer(modifier = Modifier.height(Spacing.section))
 
-    Column(modifier = jumper.chapter(AtlasChapter.SEASONS_AND_RECORDS)) {
+    Column(
+        modifier = Modifier.atlasChapter(
+            jumper,
+            AtlasChapter.SEASONS_AND_RECORDS,
+        ),
+    ) {
         SeasonsAndRecordsChapter(
             header = state.monthlyPagesHeader,
             chart = state.monthlyPagesChart,
@@ -89,13 +103,20 @@ internal fun ColumnScope.StatsAtlasBody(
             formatSplitCaption = state.formatSplitCaption,
             formatSplitChart = state.formatSplitChart,
             hasFormatSplit = state.hasFormatSplit,
+            readingRecords = state.readingRecords,
+            onRecordEvent = onRecordEvent,
             timeToFinish = state.timeToFinish,
         )
     }
 
     Spacer(modifier = Modifier.height(Spacing.section))
 
-    Column(modifier = jumper.chapter(AtlasChapter.GENRES_AND_HOW_YOU_READ)) {
+    Column(
+        modifier = Modifier.atlasChapter(
+            jumper,
+            AtlasChapter.GENRES_AND_HOW_YOU_READ,
+        ),
+    ) {
         GenresChapter(
             header = state.genreHeader,
             ranking = state.genreRanking,
@@ -110,9 +131,32 @@ internal fun ColumnScope.StatsAtlasBody(
         )
     }
 
+    YourReadingListChapter(
+        model = state.yourReadingList,
+        waiting = state.waitingLongest,
+        onWaitingEvent = onWaitingEvent,
+        jumper = jumper,
+    )
+
+    InYourWordsChapter(
+        model = state.inYourWords,
+        jumper = jumper,
+        onMostQuotedTapped = {
+            runAction(OnMostQuotedBookTappedAction())
+        },
+        onOwnTagTapped = {
+            runAction(OnOwnTagTappedAction(tagName = it))
+        },
+    )
+
     Spacer(modifier = Modifier.height(Spacing.section))
 
-    Column(modifier = jumper.chapter(AtlasChapter.TEMPORARY)) {
+    Column(
+        modifier = Modifier.atlasChapter(
+            jumper,
+            AtlasChapter.TEMPORARY,
+        ),
+    ) {
         TemporaryChapter(
             state = state,
             runAction = runAction,

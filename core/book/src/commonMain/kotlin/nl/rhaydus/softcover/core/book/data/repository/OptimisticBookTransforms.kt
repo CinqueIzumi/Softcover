@@ -98,6 +98,18 @@ internal fun Book.withMarkedAsPaused(): Book {
     return copy(userBook = updatedUserBook)
 }
 
+internal fun Book.withMarkedAsDidNotFinish(): Book {
+    val existingUserBook = userBook ?: return this
+
+    if (existingUserBook.status == BookStatus.DidNotFinish) return this
+
+    val updatedUserBook: UserBook = existingUserBook
+        .copy(status = BookStatus.DidNotFinish)
+        .withAppendedJournal(event = JournalEventType.StatusDidNotFinish)
+
+    return copy(userBook = updatedUserBook)
+}
+
 internal fun Book.withRating(rating: Double): Book {
     val existingUserBook = userBook ?: return this
 
@@ -111,6 +123,7 @@ internal fun Book.withRating(rating: Double): Book {
 internal fun Book.withReview(
     review: ReviewDocument,
     hasSpoilers: Boolean,
+    reviewedAt: String?,
 ): Book {
     val existingUserBook = userBook ?: return this
 
@@ -121,6 +134,7 @@ internal fun Book.withReview(
     val updatedUserBook: UserBook = existingUserBook.copy(
         reviewDocument = normalizedReview,
         reviewHasSpoilers = hasSpoilers,
+        reviewedAt = reviewedAt,
     )
 
     return copy(userBook = updatedUserBook)

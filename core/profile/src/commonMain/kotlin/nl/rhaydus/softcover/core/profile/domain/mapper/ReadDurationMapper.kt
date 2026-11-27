@@ -39,4 +39,4 @@ private fun UserBookRead.toReadDurationOrNull(book: Book): ReadDuration? {
 
 private fun Book.knownPages(): Int? = (readerEdition?.pages ?: pages)?.takeIf { it > 0 }
 
-private fun String?.toLocalDateOrNull(): LocalDate? = this?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+internal fun String?.toLocalDateOrNull(): LocalDate? = this?.let { runCatching { LocalDate.parse(it) }.getOrNull() }

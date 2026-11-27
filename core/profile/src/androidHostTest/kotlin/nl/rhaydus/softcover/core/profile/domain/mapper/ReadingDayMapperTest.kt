@@ -11,6 +11,7 @@ import nl.rhaydus.softcover.core.book.domain.model.ProgressUpdate
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingDay
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingDayBook
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingDayEnding
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import kotlin.time.Instant
@@ -37,9 +38,11 @@ class ReadingDayMapperTest {
     private fun readingDay(
         updates: List<ProgressUpdate>,
         books: List<Book> = emptyList(),
+        didNotFinishBooks: List<Book> = emptyList(),
     ): ReadingDay = toReadingDay(
         updates = updates,
         readBooks = books,
+        didNotFinishBooks = didNotFinishBooks,
         date = day,
         timeZone = TimeZone.UTC,
     )
@@ -77,7 +80,7 @@ class ReadingDayMapperTest {
                     toPage = 180,
                     updateCount = 2,
                     pages = 80,
-                    finished = false,
+                    ending = ReadingDayEnding.NONE,
                     firstUpdateAt = LocalTime(
                         hour = 10,
                         minute = 0,
@@ -195,7 +198,7 @@ class ReadingDayMapperTest {
                         toPage = 300,
                         updateCount = 0,
                         pages = 50,
-                        finished = true,
+                        ending = ReadingDayEnding.FINISHED,
                         firstUpdateAt = null,
                         lastUpdateAt = null,
                     ),
@@ -237,7 +240,7 @@ class ReadingDayMapperTest {
                     toPage = 300,
                     updateCount = 1,
                     pages = 100,
-                    finished = true,
+                    ending = ReadingDayEnding.FINISHED,
                     firstUpdateAt = LocalTime(
                         hour = 10,
                         minute = 0,
@@ -248,6 +251,171 @@ class ReadingDayMapperTest {
                     ),
                 ),
             )
+        }
+
+        private val stoppedOnDay = "2026-06-10T12:00:00.000000"
+
+        @Test
+        fun `a stopped book ends at its stop page on the stop day`() {
+            // ----- Arrange -----
+            val updates = listOf(
+                update(
+                    bookId = 2,
+                    at = "2026-06-01T10:00:00Z",
+                    pagesRead = 80,
+                    pages = 80,
+                ),
+            )
+
+            val stopped = dnfBook(
+                id = 2,
+                stoppedAt = stoppedOnDay,
+                pages = 300,
+                read = unfinishedRead(
+                    id = 2,
+                    currentPage = 120,
+                ),
+            )
+
+            // ----- Act -----
+            val result = readingDay(
+                updates = updates,
+                didNotFinishBooks = listOf(stopped),
+            )
+
+            // ----- Assert -----
+            result shouldBe ReadingDay(
+                date = day,
+                books = listOf(
+                    ReadingDayBook(
+                        bookId = 2,
+                        fromPage = 80,
+                        toPage = 120,
+                        updateCount = 0,
+                        pages = 40,
+                        ending = ReadingDayEnding.STOPPED,
+                        firstUpdateAt = null,
+                        lastUpdateAt = null,
+                    ),
+                ),
+            )
+        }
+
+        @Test
+        fun `a stopped book with updates that day still ends at its stop page`() {
+            // ----- Arrange -----
+            val updates = listOf(
+                update(
+                    bookId = 2,
+                    at = "2026-06-10T09:00:00Z",
+                    pagesRead = 100,
+                    pages = 100,
+                ),
+            )
+
+            val stopped = dnfBook(
+                id = 2,
+                stoppedAt = stoppedOnDay,
+                pages = 300,
+                read = unfinishedRead(
+                    id = 2,
+                    currentPage = 150,
+                ),
+            )
+
+            // ----- Act -----
+            val result = readingDay(
+                updates = updates,
+                didNotFinishBooks = listOf(stopped),
+            )
+
+            // ----- Assert -----
+            val book = result.bookFor(2)
+
+            book.ending shouldBe ReadingDayEnding.STOPPED
+            book.toPage shouldBe 150
+            book.pages shouldBe 150
+            book.updateCount shouldBe 1
+        }
+
+        @Test
+        fun `a stopped book with no stop remainder still ends as stopped when it has an update that day`() {
+            // ----- Arrange -----
+            val updates = listOf(
+                update(
+                    bookId = 2,
+                    at = "2026-06-10T09:00:00Z",
+                    pagesRead = 100,
+                    pages = 100,
+                ),
+            )
+
+            val stopped = dnfBook(
+                id = 2,
+                stoppedAt = stoppedOnDay,
+                pages = 300,
+                read = unfinishedRead(
+                    id = 2,
+                    currentPage = 100,
+                ),
+            )
+
+            // ----- Act -----
+            val result = readingDay(
+                updates = updates,
+                didNotFinishBooks = listOf(stopped),
+            )
+
+            // ----- Assert -----
+            val book = result.bookFor(2)
+
+            book.ending shouldBe ReadingDayEnding.STOPPED
+            book.toPage shouldBe 100
+            book.pages shouldBe 100
+            book.updateCount shouldBe 1
+        }
+
+        @Test
+        fun `a stopped book whose last read date is the stop day is not marked finished`() {
+            // ----- Arrange -----
+            val stopped = dnfBook(
+                id = 2,
+                stoppedAt = stoppedOnDay,
+                pages = 300,
+                lastReadDate = "2026-06-10",
+                read = unfinishedRead(
+                    id = 2,
+                    currentPage = 120,
+                ),
+            )
+
+            // ----- Act -----
+            val result = readingDay(
+                updates = emptyList(),
+                didNotFinishBooks = listOf(stopped),
+            )
+
+            // ----- Assert -----
+            result.bookFor(2).ending shouldBe ReadingDayEnding.STOPPED
+        }
+
+        @Test
+        fun `a book with only logged updates has no ending`() {
+            // ----- Arrange -----
+            val updates = listOf(
+                update(
+                    bookId = 3,
+                    at = "2026-06-10T09:00:00Z",
+                    pagesRead = 20,
+                    pages = 20,
+                ),
+            )
+
+            // ----- Act -----
+            val result = readingDay(updates = updates)
+
+            // ----- Assert -----
+            result.bookFor(3).ending shouldBe ReadingDayEnding.NONE
         }
     }
 
@@ -342,6 +510,7 @@ class ReadingDayMapperTest {
             val activity = toReadingActivity(
                 updates = updates,
                 readBooks = books,
+                didNotFinishBooks = emptyList(),
                 timeZone = TimeZone.UTC,
             )
 

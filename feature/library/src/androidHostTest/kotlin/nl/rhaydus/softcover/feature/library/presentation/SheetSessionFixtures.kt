@@ -44,6 +44,7 @@ internal fun chooseListsModel(selectedBookIds: Set<Int> = setOf(1)): ChooseLists
     customLists = emptyList(),
     listsBeingMutated = emptySet(),
     jacketBooks = emptyList(),
+    tabOrder = emptyList(),
 ).toUiModel(previous = null).shouldNotBeNull()
 
 internal fun openChooseListsSession(

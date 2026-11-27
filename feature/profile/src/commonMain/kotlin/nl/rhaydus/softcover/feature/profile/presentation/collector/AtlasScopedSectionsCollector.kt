@@ -9,11 +9,17 @@ import kotlinx.coroutines.flow.map
 import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.domain.model.StatsScope
 import nl.rhaydus.softcover.core.domain.model.resolve
+import nl.rhaydus.softcover.core.profile.domain.model.DidNotFinishStats
 import nl.rhaydus.softcover.core.profile.domain.model.HourlyPages
 import nl.rhaydus.softcover.core.profile.domain.model.MonthlyPages
+import nl.rhaydus.softcover.core.profile.domain.model.PagesRead
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingListStats
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
 import nl.rhaydus.softcover.core.profile.domain.model.TimeToFinish
+import nl.rhaydus.softcover.core.profile.domain.model.WrittenStats
 import nl.rhaydus.softcover.feature.profile.presentation.event.StatsAtlasEvent
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasContentsHeader
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasContentsRows
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasOpeningUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasScopeLine
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.authorsEmptyCaption
@@ -27,6 +33,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasFormatSplit
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasMonthlyPages
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasTimeOfDayPages
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasTopAuthors
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.inYourWordsUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesMonthSetKey
@@ -36,11 +43,13 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsChartUiMo
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsEmptyCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsHistogramCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsHistogramHeader
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.readingRecordsUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeOfDayCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeOfDayChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeToFinishUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.topAuthorRows
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.topAuthorsCaption
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.yourReadingListUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.StatsAtlasDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasLocalVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
@@ -48,9 +57,10 @@ import nl.rhaydus.toad.ActionScope
 
 /**
  * The only writer of every section that answers for the selected scope: the opening tiles, who you
- * read, how you score, the format split, pages by month, pages by time of day and the time to finish,
- * with their framing copy and the scope line. For genres it writes only whether any exist and the
- * empty sentence; `GenreRankingCollector` maps the rest off the stats written here.
+ * read, how you score, the format split, pages by month, pages by time of day, the time to finish, the
+ * reading records, the books you put down and what you wrote, with their framing copy, the scope line
+ * and the contents list. For genres it writes only whether any exist and the empty sentence;
+ * `GenreRankingCollector` maps the rest off the stats written here.
  *
  * It stays idle until the history has landed, because the history decides the default scope and
  * observing the placeholder one first would flash the wrong numbers. Switching scope re-observes the
@@ -81,23 +91,58 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
         return observeCurrentDateUseCase().flatMapLatest { today ->
             val range = scope.resolve(today)
 
-            combine(
-                observeReadingStatsUseCase(range)
-                    .untilBackfilled(observeReadingStatsBackfilledUseCase()),
-                observeMonthlyPagesReadUseCase(range),
-                observeHourlyPagesReadUseCase(range),
-                getHideUntaggedAuthorsAsFlowUseCase(),
-                observeTimeToFinishUseCase(range)
+            val statsBackfilled = observeReadingStatsBackfilledUseCase()
+
+            val backfilledAndSynced = combine(
+                statsBackfilled,
+                observeQuotesSyncedUseCase(),
+            ) { statsBackfilled, quotesSynced -> statsBackfilled && quotesSynced }
+
+            val readingList = combine(
+                observePagesReadUseCase(range).untilBackfilled(statsBackfilled),
+                observeDidNotFinishStatsUseCase(range).untilBackfilled(statsBackfilled),
+                observeReadingListStatsUseCase(range)
                     .untilBackfilled(observeReadDatesBackfilledUseCase()),
-            ) { stats, monthlyPages, hourlyPages, hideUntaggedAuthors, timeToFinish ->
-                ScopedSections(
-                    scope = scope,
-                    today = today,
-                    stats = stats,
-                    monthlyPages = monthlyPages,
-                    hourlyPages = hourlyPages,
-                    hideUntaggedAuthors = hideUntaggedAuthors,
-                    timeToFinish = timeToFinish,
+            ) { pagesRead, didNotFinish, readingListStats ->
+                Triple(
+                    pagesRead,
+                    didNotFinish,
+                    readingListStats,
+                )
+            }
+
+            combine(
+                combine(
+                    observeReadingStatsUseCase(range)
+                        .untilBackfilled(statsBackfilled),
+                    observeMonthlyPagesReadUseCase(range),
+                    observeHourlyPagesReadUseCase(range),
+                    getHideUntaggedAuthorsAsFlowUseCase(),
+                    observeTimeToFinishUseCase(range)
+                        .untilBackfilled(observeReadDatesBackfilledUseCase()),
+                ) { stats, monthlyPages, hourlyPages, hideUntaggedAuthors, timeToFinish ->
+                    ScopedSections(
+                        scope = scope,
+                        today = today,
+                        stats = stats,
+                        monthlyPages = monthlyPages,
+                        hourlyPages = hourlyPages,
+                        hideUntaggedAuthors = hideUntaggedAuthors,
+                        timeToFinish = timeToFinish,
+                        written = null,
+                        pagesRead = null,
+                        didNotFinish = null,
+                        readingListStats = null,
+                    )
+                },
+                observeWrittenStatsUseCase(range).untilBackfilled(backfilledAndSynced),
+                readingList,
+            ) { sections, written, (pagesRead, didNotFinish, readingListStats) ->
+                sections.copy(
+                    written = written,
+                    pagesRead = pagesRead,
+                    didNotFinish = didNotFinish,
+                    readingListStats = readingListStats,
                 )
             }
         }
@@ -112,6 +157,19 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
         val ratings = stats?.ratings
         val booksRead = stats?.booksRead ?: 0
 
+        val inYourWords = inYourWordsUiModel(
+            written = sections.written,
+            ownTags = stats?.ownTags,
+            scope = scope,
+        )
+
+        val yourReadingList = yourReadingListUiModel(
+            stats = sections.readingListStats,
+            booksRead = stats?.booksRead,
+            didNotFinish = sections.didNotFinish,
+            scope = scope,
+        )
+
         val demographics = stats?.authorDemographics?.let {
             if (hideUntaggedAuthors) it.excludingUntaggedAuthors() else it
         }
@@ -124,7 +182,9 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
             ),
             opening = atlasOpeningUiModel(
                 stats = stats,
+                pagesRead = sections.pagesRead,
                 scope = scope,
+                today = sections.today,
             ),
             genreEmptyCaption = genreEmptyCaption(
                 booksRead = booksRead,
@@ -207,6 +267,15 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
                 timeToFinish = sections.timeToFinish,
                 scope = scope,
             ),
+            readingRecords = readingRecordsUiModel(
+                stats = stats,
+                timeToFinish = sections.timeToFinish,
+                scope = scope,
+            ),
+            yourReadingList = yourReadingList,
+            inYourWords = inYourWords,
+            contentsHeader = atlasContentsHeader(),
+            contentsRows = atlasContentsRows(),
         )
     }
 
@@ -223,5 +292,9 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
         val hourlyPages: HourlyPages,
         val hideUntaggedAuthors: Boolean,
         val timeToFinish: TimeToFinish?,
+        val written: WrittenStats?,
+        val pagesRead: PagesRead?,
+        val didNotFinish: DidNotFinishStats?,
+        val readingListStats: ReadingListStats?,
     )
 }

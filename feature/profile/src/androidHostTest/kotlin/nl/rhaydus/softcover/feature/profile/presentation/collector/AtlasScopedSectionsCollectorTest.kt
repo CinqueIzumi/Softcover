@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.profile.presentation.collector
 
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -29,30 +30,44 @@ import nl.rhaydus.softcover.core.domain.model.StatsScope
 import nl.rhaydus.softcover.core.domain.model.StatsWindow
 import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetHideUntaggedAuthorsAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveQuotesSyncedUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadDatesBackfilledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsBackfilledUseCase
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorRanking
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
+import nl.rhaydus.softcover.core.profile.domain.model.DidNotFinishStats
 import nl.rhaydus.softcover.core.profile.domain.model.FormatSplit
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
 import nl.rhaydus.softcover.core.profile.domain.model.HourlyPages
+import nl.rhaydus.softcover.core.profile.domain.model.LongestBook
 import nl.rhaydus.softcover.core.profile.domain.model.MonthlyPages
+import nl.rhaydus.softcover.core.profile.domain.model.OwnTagCount
+import nl.rhaydus.softcover.core.profile.domain.model.PagesRead
+import nl.rhaydus.softcover.core.profile.domain.model.QuickestRead
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
+import nl.rhaydus.softcover.core.profile.domain.model.ReadDuration
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingListStats
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
 import nl.rhaydus.softcover.core.profile.domain.model.TimeToFinish
+import nl.rhaydus.softcover.core.profile.domain.model.WrittenStats
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveDidNotFinishStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveHourlyPagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveMonthlyPagesReadUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObservePagesReadUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingListStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveTimeToFinishUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveWrittenStatsUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.event.StatsAtlasEvent
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasScopeChips
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicBreakdownUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.statsScopeKey
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.StatsAtlasDependencies
+import nl.rhaydus.softcover.feature.profile.presentation.state.AtlasChapter
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasLocalVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
 import nl.rhaydus.toad.ActionScope
@@ -68,6 +83,15 @@ class AtlasScopedSectionsCollectorTest {
     private lateinit var getHideUntaggedAuthorsAsFlowUseCase: GetHideUntaggedAuthorsAsFlowUseCase
     private lateinit var observeTimeToFinishUseCase: ObserveTimeToFinishUseCase
     private lateinit var observeReadDatesBackfilledUseCase: ObserveReadDatesBackfilledUseCase
+    private lateinit var observeWrittenStatsUseCase: ObserveWrittenStatsUseCase
+    private lateinit var observeQuotesSyncedUseCase: ObserveQuotesSyncedUseCase
+    private lateinit var observePagesReadUseCase: ObservePagesReadUseCase
+    private lateinit var observeDidNotFinishStatsUseCase: ObserveDidNotFinishStatsUseCase
+    private lateinit var observeReadingListStatsUseCase: ObserveReadingListStatsUseCase
+    private lateinit var quotesSyncedFlow: MutableStateFlow<Boolean>
+    private var pagesReadFor: (StatsRange) -> PagesRead = { emptyPagesRead() }
+    private var didNotFinishFor: (StatsRange) -> DidNotFinishStats = { someDidNotFinish() }
+    private var writtenFor: (StatsRange) -> WrittenStats = { emptyWritten() }
     private lateinit var backfilledFlow: MutableStateFlow<Boolean>
     private lateinit var readDatesBackfilledFlow: MutableStateFlow<Boolean>
     private lateinit var hideFlow: MutableStateFlow<Boolean>
@@ -80,6 +104,15 @@ class AtlasScopedSectionsCollectorTest {
     @BeforeEach
     fun setUp() {
         backfilledFlow = MutableStateFlow(true)
+        quotesSyncedFlow = MutableStateFlow(true)
+        writtenFor = { emptyWritten() }
+        pagesReadFor = { emptyPagesRead() }
+        didNotFinishFor = { someDidNotFinish() }
+        observePagesReadUseCase = mockk()
+        observeDidNotFinishStatsUseCase = mockk()
+        observeReadingListStatsUseCase = mockk()
+        observeWrittenStatsUseCase = mockk()
+        observeQuotesSyncedUseCase = mockk()
         readDatesBackfilledFlow = MutableStateFlow(true)
         hideFlow = MutableStateFlow(false)
         observedRanges.clear()
@@ -131,7 +164,48 @@ class AtlasScopedSectionsCollectorTest {
         every {
             observeReadDatesBackfilledUseCase()
         } returns readDatesBackfilledFlow
+
+        every {
+            observeWrittenStatsUseCase(any())
+        } answers { flowOf(writtenFor(firstArg())) }
+
+        every {
+            observeQuotesSyncedUseCase()
+        } returns quotesSyncedFlow
+
+        every {
+            observePagesReadUseCase(any())
+        } answers { flowOf(pagesReadFor(firstArg())) }
+
+        every {
+            observeDidNotFinishStatsUseCase(any())
+        } answers { flowOf(didNotFinishFor(firstArg())) }
+
+        every {
+            observeReadingListStatsUseCase(any())
+        } returns flowOf(ReadingListStats())
     }
+
+    private fun emptyPagesRead(): PagesRead = PagesRead(
+        total = 0,
+        finishedBookCount = 0,
+        stoppedBookCount = 0,
+        hasInProgressPages = false,
+        pagesPerDay = null,
+    )
+
+    private fun someDidNotFinish(): DidNotFinishStats = DidNotFinishStats(
+        bookCount = 1,
+        unknownStopCount = 1,
+    )
+
+    private fun emptyWritten(): WrittenStats = WrittenStats(
+        reviewCount = 0,
+        reviewWordCount = 0,
+        quoteCount = 0,
+        quotedBookCount = 0,
+        mostQuoted = null,
+    )
 
     private fun emptyTimeToFinish(): TimeToFinish = TimeToFinish(
         readCount = 0,
@@ -203,6 +277,26 @@ class AtlasScopedSectionsCollectorTest {
         every {
             dependencies.observeReadDatesBackfilledUseCase
         } returns observeReadDatesBackfilledUseCase
+
+        every {
+            dependencies.observeWrittenStatsUseCase
+        } returns observeWrittenStatsUseCase
+
+        every {
+            dependencies.observeQuotesSyncedUseCase
+        } returns observeQuotesSyncedUseCase
+
+        every {
+            dependencies.observePagesReadUseCase
+        } returns observePagesReadUseCase
+
+        every {
+            dependencies.observeDidNotFinishStatsUseCase
+        } returns observeDidNotFinishStatsUseCase
+
+        every {
+            dependencies.observeReadingListStatsUseCase
+        } returns observeReadingListStatsUseCase
 
         return launch {
             AtlasScopedSectionsCollector().onLaunch(
@@ -407,10 +501,19 @@ class AtlasScopedSectionsCollectorTest {
             // ----- Arrange -----
             stateFlow.value = stateFor(StatsScope.CalendarYear(2025))
 
+            pagesReadFor = {
+                PagesRead(
+                    total = 1_500,
+                    finishedBookCount = 5,
+                    stoppedBookCount = 0,
+                    hasInProgressPages = false,
+                    pagesPerDay = null,
+                )
+            }
+
             statsFor = {
                 ReadingStats(
                     booksRead = 5,
-                    totalPages = 1_500,
                     genres = GenreBreakdown(
                         slices = listOf(
                             GenreSlice(
@@ -445,7 +548,7 @@ class AtlasScopedSectionsCollectorTest {
             stateFlow.value.genreEmptyCaption shouldBe "No finished books in 2025."
             stateFlow.value.ratingsEmptyCaption shouldBe "No finished books in 2025."
             stateFlow.value.authorsEmptyCaption shouldBe "No finished books in 2025."
-            stateFlow.value.heroCaption() shouldBe "No books finished in 2025."
+            stateFlow.value.heroCaption() shouldBe "No pages read in 2025."
             job.cancel()
         }
 
@@ -709,6 +812,316 @@ class AtlasScopedSectionsCollectorTest {
             whileLoading shouldBe true
             stateFlow.value.timeToFinish.isLoading shouldBe false
             stateFlow.value.timeToFinish.framing shouldBe "Your typical book took 9 days."
+            job.cancel()
+        }
+
+        @Test
+        fun `writes the longest book and the quickest read into the reading records`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val longest = mockk<Book> {
+                every {
+                    id
+                } returns 1
+
+                every {
+                    title
+                } returns "Longest"
+
+                every {
+                    currentEdition
+                } returns null
+
+                every {
+                    defaultEdition
+                } returns null
+
+                every {
+                    coverUrl
+                } returns "https://example.com/cover.jpg"
+            }
+
+            val quickest = mockk<Book> {
+                every {
+                    id
+                } returns 2
+
+                every {
+                    title
+                } returns "Quickest"
+
+                every {
+                    currentEdition
+                } returns null
+
+                every {
+                    defaultEdition
+                } returns null
+
+                every {
+                    coverUrl
+                } returns "https://example.com/cover.jpg"
+            }
+
+            statsFor = {
+                ReadingStats(
+                    booksRead = 2,
+                    longestBook = LongestBook(
+                        book = longest,
+                        pages = 500,
+                    ),
+                )
+            }
+
+            timeToFinishFor = {
+                TimeToFinish(
+                    readCount = 1,
+                    medianDays = 3,
+                    bandMedianDays = emptyMap(),
+                    excludedReadCount = 0,
+                    quickestRead = QuickestRead(
+                        book = quickest,
+                        duration = ReadDuration(
+                            bookId = 2,
+                            readId = 1,
+                            startedOn = LocalDate(
+                                2026,
+                                3,
+                                1,
+                            ),
+                            finishedOn = LocalDate(
+                                2026,
+                                3,
+                                3,
+                            ),
+                            pages = null,
+                        ),
+                    ),
+                )
+            }
+
+            // ----- Act -----
+            val job = launchCollector()
+
+            // ----- Assert -----
+            val records = stateFlow.value.readingRecords
+
+            records.isLoading shouldBe false
+
+            records.cards.cards.map { it.key } shouldBe
+                listOf(BookCardKey.Book(bookId = 1), BookCardKey.Book(bookId = 2))
+
+            records.cards[BookCardKey.Book(bookId = 1)].shouldNotBeNull().book shouldBe longest
+            records.cards[BookCardKey.Book(bookId = 2)].shouldNotBeNull().book shouldBe quickest
+            job.cancel()
+        }
+
+        @Test
+        fun `maps the written stats of the scope into the in your words model`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            writtenFor = {
+                WrittenStats(
+                    reviewCount = 4,
+                    reviewWordCount = 1,
+                    quoteCount = 9,
+                    quotedBookCount = 3,
+                    mostQuoted = null,
+                )
+            }
+
+            // ----- Act -----
+            val job = launchCollector()
+
+            // ----- Assert -----
+            val words = stateFlow.value.inYourWords
+            words.isLoading shouldBe false
+            words.tiles.map { it.stat.shouldNotBeNull().value } shouldBe listOf(4.0, 9.0)
+            job.cancel()
+        }
+
+        @Test
+        fun `keeps in your words loading until the quotes are synced`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            quotesSyncedFlow.value = false
+            writtenFor = { emptyWritten().copy(quoteCount = 2) }
+            val job = launchCollector()
+            val whileLoading = stateFlow.value.inYourWords.isLoading
+
+            // ----- Act -----
+            quotesSyncedFlow.value = true
+
+            // ----- Assert -----
+            whileLoading shouldBe true
+            stateFlow.value.inYourWords.isLoading shouldBe false
+            job.cancel()
+        }
+
+        @Test
+        fun `keeps in your words loading until the reading stats are backfilled`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            backfilledFlow.value = false
+            writtenFor = { emptyWritten().copy(quoteCount = 2) }
+            val job = launchCollector()
+            val whileLoading = stateFlow.value.inYourWords.isLoading
+
+            // ----- Act -----
+            backfilledFlow.value = true
+
+            // ----- Assert -----
+            whileLoading shouldBe true
+            stateFlow.value.inYourWords.isLoading shouldBe false
+            job.cancel()
+        }
+
+        @Test
+        fun `keeps every chapter listed when nothing was written and no book was put down`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            writtenFor = { emptyWritten() }
+            didNotFinishFor = { DidNotFinishStats() }
+
+            // ----- Act -----
+            val job = launchCollector()
+
+            // ----- Assert -----
+            val state = stateFlow.value
+            state.contentsRows.map { it.chapter } shouldBe AtlasChapter.entries.toList()
+
+            (state.contentsHeader as SectionHeaderUiModel.Section).headlineText shouldBe
+                "${AtlasChapter.entries.size} chapters"
+
+            job.cancel()
+        }
+
+        @Test
+        fun `keeps the in your words row when the scope has a review`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            writtenFor = { emptyWritten().copy(reviewCount = 1) }
+
+            // ----- Act -----
+            val job = launchCollector()
+
+            // ----- Assert -----
+            val state = stateFlow.value
+            state.contentsRows.map { it.chapter } shouldBe AtlasChapter.entries.toList()
+
+            (state.contentsHeader as SectionHeaderUiModel.Section).headlineText shouldBe
+                "${AtlasChapter.entries.size} chapters"
+
+            job.cancel()
+        }
+
+        @Test
+        fun `keeps the in your words row when the scope has a quote`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            writtenFor = { emptyWritten().copy(quoteCount = 1) }
+
+            // ----- Act -----
+            val job = launchCollector()
+
+            // ----- Assert -----
+            stateFlow.value.contentsRows.map { it.chapter } shouldBe AtlasChapter.entries.toList()
+            job.cancel()
+        }
+
+        @Test
+        fun `keeps the in your words chapter when the scope only has own tags`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            writtenFor = { emptyWritten() }
+
+            statsFor = {
+                ReadingStats(
+                    ownTags = listOf(
+                        OwnTagCount(
+                            name = "cozy",
+                            bookCount = 3,
+                        ),
+                    ),
+                )
+            }
+
+            // ----- Act -----
+            val job = launchCollector()
+
+            // ----- Assert -----
+            val state = stateFlow.value
+            state.contentsRows.map { it.chapter } shouldBe AtlasChapter.entries.toList()
+            state.inYourWords.tiles.shouldNotBeEmpty()
+            job.cancel()
+        }
+
+        @Test
+        fun `keeps the pages read and reading list loading until the stats are backfilled`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            backfilledFlow.value = false
+            val job = launchCollector()
+            val heroWhileLoading = stateFlow.value.opening.hero.stat.shouldNotBeNull().isLoading
+            val listWhileLoading = stateFlow.value.yourReadingList.header.isLoading
+
+            // ----- Act -----
+            backfilledFlow.value = true
+
+            // ----- Assert -----
+            heroWhileLoading shouldBe true
+            listWhileLoading shouldBe true
+            stateFlow.value.opening.hero.stat.shouldNotBeNull().isLoading shouldBe false
+            stateFlow.value.yourReadingList.header.isLoading shouldBe false
+            job.cancel()
+        }
+
+        @Test
+        fun `writes the books you did not finish of the selected scope into the reading list`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val scopeRange = StatsRange.Bounded(
+                start = LocalDate(
+                    year = 2025,
+                    month = 1,
+                    day = 1,
+                ),
+                endInclusive = LocalDate(
+                    year = 2025,
+                    month = 12,
+                    day = 31,
+                ),
+            )
+
+            val requested = mutableListOf<StatsRange>()
+
+            didNotFinishFor = { range ->
+                requested += range
+
+                if (range == scopeRange) {
+                    DidNotFinishStats(
+                        bookCount = 3,
+                        unknownStopCount = 3,
+                    )
+                } else {
+                    DidNotFinishStats()
+                }
+            }
+
+            stateFlow.value = stateFor(StatsScope.CalendarYear(2025))
+
+            // ----- Act -----
+            val job = launchCollector()
+
+            // ----- Assert -----
+            requested.last() shouldBe scopeRange
+            stateFlow.value.yourReadingList.setAside.headlineText shouldBe "3 books you didn't finish"
+            job.cancel()
+        }
+
+        @Test
+        fun `keeps the still to come loading until the read dates are backfilled`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            readDatesBackfilledFlow.value = false
+            val job = launchCollector()
+            val whileLoading = stateFlow.value.yourReadingList.header.isLoading
+
+            // ----- Act -----
+            readDatesBackfilledFlow.value = true
+
+            // ----- Assert -----
+            whileLoading shouldBe true
+            stateFlow.value.yourReadingList.header.isLoading shouldBe false
             job.cancel()
         }
     }

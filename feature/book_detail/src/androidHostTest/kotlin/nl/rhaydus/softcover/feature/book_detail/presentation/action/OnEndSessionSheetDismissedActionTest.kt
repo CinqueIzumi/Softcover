@@ -6,19 +6,19 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.book.domain.usecase.DidNotFinishBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.PauseBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
 import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
-import nl.rhaydus.softcover.core.uibinding.session.ConfirmedPause
-import nl.rhaydus.softcover.core.uibinding.session.endSessionPauseSheetScaffold
+import nl.rhaydus.softcover.core.uibinding.session.SessionEndingStatus
+import nl.rhaydus.softcover.core.uibinding.session.endSessionSheetScaffold
 import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
@@ -29,8 +29,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-class OnEndSessionPauseSheetDismissedActionTest {
+class OnEndSessionSheetDismissedActionTest {
     private lateinit var pauseBookUseCase: PauseBookUseCase
+    private lateinit var didNotFinishBookUseCase: DidNotFinishBookUseCase
     private lateinit var activeSessionController: ActiveSessionController
     private lateinit var book: Book
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
@@ -39,6 +40,7 @@ class OnEndSessionPauseSheetDismissedActionTest {
     @BeforeEach
     fun setUp() {
         pauseBookUseCase = mockk()
+        didNotFinishBookUseCase = mockk()
         activeSessionController = mockk(relaxed = true)
 
         book = mockk<Book>().also { mock ->
@@ -73,6 +75,10 @@ class OnEndSessionPauseSheetDismissedActionTest {
             } returns pauseBookUseCase
 
             every {
+                mock.didNotFinishBookUseCase
+            } returns didNotFinishBookUseCase
+
+            every {
                 mock.activeSessionController
             } returns activeSessionController
 
@@ -99,14 +105,15 @@ class OnEndSessionPauseSheetDismissedActionTest {
         } returns Result.success(ShelfMutationOutcome.Applied)
     }
 
-    private val confirmedPause = ConfirmedPause(bookIds = persistentSetOf(42))
-
-    private fun closedSheetState(pending: ConfirmedPause?): BookDetailUiState = buildBookDetailUiState().copy(
+    private fun closedSheetState(pending: SessionEndingStatus?): BookDetailUiState = buildBookDetailUiState().copy(
         book = book,
         activeSessionBookId = 42,
-        endSessionPauseRequested = true,
-        endSessionPauseSheet = SheetSession.Open(
-            model = endSessionPauseSheetScaffold(bookTitle = "Dune"),
+        endSessionRequest = SessionEndingStatus.Paused,
+        endSessionSheet = SheetSession.Open(
+            model = endSessionSheetScaffold(
+                bookTitle = "Dune",
+                targetStatus = SessionEndingStatus.Paused,
+            ),
             pending = pending,
         ),
     )
@@ -116,12 +123,12 @@ class OnEndSessionPauseSheetDismissedActionTest {
         @Test
         fun `stops the running session when the pause was confirmed`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = closedSheetState(pending = confirmedPause)
+            stateFlow.value = closedSheetState(pending = SessionEndingStatus.Paused)
             val dependencies = stubDependencies(this)
             stubPauseSuccess()
 
             // ----- Act -----
-            OnEndSessionPauseSheetDismissedAction().execute(
+            OnEndSessionSheetDismissedAction().execute(
                 dependencies = dependencies,
                 scope = scope,
             )
@@ -135,12 +142,12 @@ class OnEndSessionPauseSheetDismissedActionTest {
         @Test
         fun `pauses even though the session book id is still this book`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = closedSheetState(pending = confirmedPause)
+            stateFlow.value = closedSheetState(pending = SessionEndingStatus.Paused)
             val dependencies = stubDependencies(this)
             stubPauseSuccess()
 
             // ----- Act -----
-            OnEndSessionPauseSheetDismissedAction().execute(
+            OnEndSessionSheetDismissedAction().execute(
                 dependencies = dependencies,
                 scope = scope,
             )
@@ -155,13 +162,70 @@ class OnEndSessionPauseSheetDismissedActionTest {
         }
 
         @Test
+        fun `marks the book Did not finish when that was the status waiting on the sheet`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = closedSheetState(pending = SessionEndingStatus.DidNotFinish)
+            val dependencies = stubDependencies(this)
+
+            coEvery {
+                didNotFinishBookUseCase(
+                    book = book,
+                    editionId = any(),
+                )
+            } returns Result.success(ShelfMutationOutcome.Applied)
+
+            // ----- Act -----
+            OnEndSessionSheetDismissedAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                didNotFinishBookUseCase(
+                    book = book,
+                    editionId = any(),
+                )
+            }
+
+            coVerify(exactly = 0) {
+                pauseBookUseCase(
+                    book = any(),
+                    editionId = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `does not mark the book Did not finish when the reader pauses`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = closedSheetState(pending = SessionEndingStatus.Paused)
+            val dependencies = stubDependencies(this)
+            stubPauseSuccess()
+
+            // ----- Act -----
+            OnEndSessionSheetDismissedAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                didNotFinishBookUseCase(
+                    book = any(),
+                    editionId = any(),
+                )
+            }
+        }
+
+        @Test
         fun `does neither stop nor pause when the reader chose to keep reading`() = runTest {
             // ----- Arrange -----
             stateFlow.value = closedSheetState(pending = null)
             val dependencies = stubDependencies(this)
 
             // ----- Act -----
-            OnEndSessionPauseSheetDismissedAction().execute(
+            OnEndSessionSheetDismissedAction().execute(
                 dependencies = dependencies,
                 scope = scope,
             )
@@ -169,6 +233,13 @@ class OnEndSessionPauseSheetDismissedActionTest {
             // ----- Assert -----
             verify(exactly = 0) {
                 activeSessionController.stop()
+            }
+
+            coVerify(exactly = 0) {
+                didNotFinishBookUseCase(
+                    book = any(),
+                    editionId = any(),
+                )
             }
 
             coVerify(exactly = 0) {
@@ -182,19 +253,19 @@ class OnEndSessionPauseSheetDismissedActionTest {
         @Test
         fun `closes the sheet session and clears the request when confirmed`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = closedSheetState(pending = confirmedPause)
+            stateFlow.value = closedSheetState(pending = SessionEndingStatus.Paused)
             val dependencies = stubDependencies(this)
             stubPauseSuccess()
 
             // ----- Act -----
-            OnEndSessionPauseSheetDismissedAction().execute(
+            OnEndSessionSheetDismissedAction().execute(
                 dependencies = dependencies,
                 scope = scope,
             )
 
             // ----- Assert -----
-            stateFlow.value.endSessionPauseSheet shouldBe SheetSession.Closed
-            stateFlow.value.endSessionPauseRequested shouldBe false
+            stateFlow.value.endSessionSheet shouldBe SheetSession.Closed
+            stateFlow.value.endSessionRequest shouldBe null
         }
 
         @Test
@@ -204,24 +275,24 @@ class OnEndSessionPauseSheetDismissedActionTest {
             val dependencies = stubDependencies(this)
 
             // ----- Act -----
-            OnEndSessionPauseSheetDismissedAction().execute(
+            OnEndSessionSheetDismissedAction().execute(
                 dependencies = dependencies,
                 scope = scope,
             )
 
             // ----- Assert -----
-            stateFlow.value.endSessionPauseSheet shouldBe SheetSession.Closed
-            stateFlow.value.endSessionPauseRequested shouldBe false
+            stateFlow.value.endSessionSheet shouldBe SheetSession.Closed
+            stateFlow.value.endSessionRequest shouldBe null
         }
 
         @Test
         fun `does not stop or pause when the book is not loaded`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = closedSheetState(pending = confirmedPause).copy(book = null)
+            stateFlow.value = closedSheetState(pending = SessionEndingStatus.Paused).copy(book = null)
             val dependencies = stubDependencies(this)
 
             // ----- Act -----
-            OnEndSessionPauseSheetDismissedAction().execute(
+            OnEndSessionSheetDismissedAction().execute(
                 dependencies = dependencies,
                 scope = scope,
             )

@@ -5,6 +5,7 @@ import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookList
+import nl.rhaydus.softcover.core.presentation.model.inLibraryTabOrder
 import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import nl.rhaydus.softcover.core.uibinding.lists.toBulkChooseListsUiModel
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
@@ -22,13 +23,15 @@ internal data class ChooseListsSnapshot(
     val customLists: List<BookList>,
     val listsBeingMutated: Set<Int>,
     val jacketBooks: List<Book>,
+    val tabOrder: List<String>,
 )
 
-internal fun LibraryUiState.chooseListsSnapshot(): ChooseListsSnapshot = ChooseListsSnapshot(
+internal fun LibraryUiState.chooseListsSnapshot(tabOrder: List<String>): ChooseListsSnapshot = ChooseListsSnapshot(
     selectedBookIds = selectedBookIds,
     customLists = customLists,
     listsBeingMutated = listsBeingMutated,
     jacketBooks = resolveSelectedBooks().take(SheetHeaderTrailing.JacketStack.MAX_COVERS),
+    tabOrder = tabOrder,
 )
 
 internal fun ChooseListsSnapshot.toUiModel(previous: ChooseListsUiModel?): ChooseListsUiModel? {
@@ -36,7 +39,7 @@ internal fun ChooseListsSnapshot.toUiModel(previous: ChooseListsUiModel?): Choos
 
     val covers = jacketBooks.map { book -> book.toCoverUiModel(variant = CoverVariant.StackedJacket) }
 
-    return customLists.toBulkChooseListsUiModel(
+    return customLists.inLibraryTabOrder(tabOrder).toBulkChooseListsUiModel(
         bookIds = selectedBookIds,
         covers = covers,
         listsBeingMutated = listsBeingMutated,

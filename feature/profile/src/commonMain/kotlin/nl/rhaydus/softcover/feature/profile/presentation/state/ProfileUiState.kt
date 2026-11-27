@@ -6,6 +6,7 @@ import nl.rhaydus.softcover.core.component.share.ShareCardSheetUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
+import nl.rhaydus.softcover.core.profile.domain.model.PagesRead
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
@@ -15,6 +16,7 @@ import nl.rhaydus.toad.UiState
 internal data class ProfileUiState(
     val userProfileData: UserProfileData? = null,
     val readingStats: ReadingStats? = null,
+    val pagesRead: PagesRead? = null,
     val readingHistory: ReadingHistory? = null,
 
     val shareSheet: SheetSession<ShareCardSheetUiModel, Nothing> = SheetSession.Closed,
@@ -39,8 +41,8 @@ internal data class ProfileUiState(
     /** Both bars carry no title — the page's own masthead names it. */
     val topBar: TopBarUiModel = TopBarUiModel(),
 ) : UiState {
-    val canShare: Boolean get() = readingStats != null && readingHistory != null && userProfileData != null
+    val canShare: Boolean get() = readingStats != null && pagesRead != null && readingHistory != null && userProfileData != null
 
     val isReadingLifeLoading: Boolean
-        get() = isLoading || readingStats == null || readingHistory == null
+        get() = isLoading || readingStats == null || pagesRead == null || readingHistory == null
 }

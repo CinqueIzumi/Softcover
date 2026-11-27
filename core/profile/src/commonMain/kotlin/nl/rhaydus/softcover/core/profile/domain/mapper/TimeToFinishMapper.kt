@@ -18,17 +18,3 @@ internal fun List<ReadDuration>.toTimeToFinish(excludedReadCount: Int): TimeToFi
         .mapValues { (_, days) -> days.median() },
     excludedReadCount = excludedReadCount,
 )
-
-private fun List<Int>.medianOrNull(): Int? = if (isEmpty()) null else median()
-
-/** An even count averages the middle two, rounded half up. */
-private fun List<Int>.median(): Int {
-    val sorted = sorted()
-    val middle = sorted.size / 2
-
-    return if (sorted.size % 2 == 1) {
-        sorted[middle]
-    } else {
-        (sorted[middle - 1] + sorted[middle] + 1) / 2
-    }
-}

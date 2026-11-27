@@ -7908,7 +7908,7 @@ class BooksRepositoryImplTest {
     }
 
     @Nested
-    inner class HasSyncedReadBooksThisSession {
+    inner class SyncedStatusesThisSession {
         private val userId = 20
 
         private fun arrangeSuccessfulRefresh() {
@@ -7921,7 +7921,7 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `is set after a refresh of every status`() = runTest {
+        fun `a refresh of every status records every status`() = runTest {
             // ----- Arrange -----
             arrangeSuccessfulRefresh()
 
@@ -7932,41 +7932,46 @@ class BooksRepositoryImplTest {
             )
 
             // ----- Assert -----
-            repository.hasSyncedReadBooksThisSession shouldBe true
+            repository.syncedStatusesThisSession shouldBe UserBookStatus.entries.toSet()
         }
 
         @Test
-        fun `is set after a refresh whose filter contains Read`() = runTest {
+        fun `a filtered refresh records exactly its statuses`() = runTest {
             // ----- Arrange -----
             arrangeSuccessfulRefresh()
 
             // ----- Act -----
             repository.refreshUserBooks(
                 userId = userId,
-                statusFilter = setOf(UserBookStatus.CURRENTLY_READING, UserBookStatus.READ),
+                statusFilter = setOf(UserBookStatus.READ, UserBookStatus.DID_NOT_FINISH),
             )
 
             // ----- Assert -----
-            repository.hasSyncedReadBooksThisSession shouldBe true
+            repository.syncedStatusesThisSession shouldBe setOf(UserBookStatus.READ, UserBookStatus.DID_NOT_FINISH)
         }
 
         @Test
-        fun `stays unset after a refresh whose filter leaves out Read`() = runTest {
+        fun `successive filtered refreshes accumulate their statuses`() = runTest {
             // ----- Arrange -----
             arrangeSuccessfulRefresh()
 
             // ----- Act -----
             repository.refreshUserBooks(
                 userId = userId,
-                statusFilter = setOf(UserBookStatus.WANT_TO_READ, UserBookStatus.CURRENTLY_READING),
+                statusFilter = setOf(UserBookStatus.READ),
+            )
+
+            repository.refreshUserBooks(
+                userId = userId,
+                statusFilter = setOf(UserBookStatus.DID_NOT_FINISH),
             )
 
             // ----- Assert -----
-            repository.hasSyncedReadBooksThisSession shouldBe false
+            repository.syncedStatusesThisSession shouldBe setOf(UserBookStatus.READ, UserBookStatus.DID_NOT_FINISH)
         }
 
         @Test
-        fun `stays unset when the refresh fails`() = runTest {
+        fun `stays empty when the refresh fails`() = runTest {
             // ----- Arrange -----
             coEvery {
                 offlineSync.drainReconcileAndCache(
@@ -7985,7 +7990,7 @@ class BooksRepositoryImplTest {
 
             // ----- Assert -----
             outcome.isFailure shouldBe true
-            repository.hasSyncedReadBooksThisSession shouldBe false
+            repository.syncedStatusesThisSession shouldBe emptySet()
         }
 
         @Test
@@ -8002,7 +8007,7 @@ class BooksRepositoryImplTest {
             repository.removeAllBooks()
 
             // ----- Assert -----
-            repository.hasSyncedReadBooksThisSession shouldBe false
+            repository.syncedStatusesThisSession shouldBe emptySet()
         }
     }
 
