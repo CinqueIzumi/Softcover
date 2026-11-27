@@ -18,6 +18,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.feature.profile.presentation.action.StatsAtlasAction
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.DayDetailSheet
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.StatsAtlasBody
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.atlasAboveViewport
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.rememberAtlasChapterJumper
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
 
@@ -31,6 +32,7 @@ internal actual fun StatsAtlasScreenLayout(
     runAction: (StatsAtlasAction) -> Unit,
     onNavigateUp: () -> Unit,
     onBookCardEvent: (BookCardEvent) -> Unit,
+    onRecordEvent: (BookCardEvent) -> Unit,
 ) {
     val scrollState = rememberScrollState()
 
@@ -45,7 +47,7 @@ internal actual fun StatsAtlasScreenLayout(
         DesktopScrollPage(
             scrollState = scrollState,
             topBar = {
-                Box(modifier = jumper.aboveViewport()) {
+                Box(modifier = Modifier.atlasAboveViewport(jumper)) {
                     EditorialTopBar(
                         model = state.topBar,
                         onEvent = { event ->
@@ -62,6 +64,7 @@ internal actual fun StatsAtlasScreenLayout(
                 jumper = jumper,
                 runAction = runAction,
                 onBookCardEvent = onBookCardEvent,
+                onRecordEvent = onRecordEvent,
             )
         }
     }
@@ -81,6 +84,7 @@ private fun StatsAtlasScreenDesktopLightPreview() {
             runAction = {},
             onNavigateUp = {},
             onBookCardEvent = {},
+            onRecordEvent = {},
         )
     }
 }
@@ -94,6 +98,7 @@ private fun StatsAtlasScreenDesktopDarkPreview() {
             runAction = {},
             onNavigateUp = {},
             onBookCardEvent = {},
+            onRecordEvent = {},
         )
     }
 }

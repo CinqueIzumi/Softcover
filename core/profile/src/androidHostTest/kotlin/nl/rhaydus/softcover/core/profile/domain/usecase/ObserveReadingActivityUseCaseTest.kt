@@ -13,10 +13,13 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.book.domain.model.ProgressUpdate
+import nl.rhaydus.softcover.core.book.domain.usecase.GetDidNotFinishUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetReadUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveProgressUpdatesUseCase
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.profile.domain.mapper.dnfBook
 import nl.rhaydus.softcover.core.profile.domain.mapper.readBook
+import nl.rhaydus.softcover.core.profile.domain.mapper.unfinishedRead
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -25,14 +28,20 @@ import kotlin.time.Instant
 class ObserveReadingActivityUseCaseTest {
     private lateinit var observeProgressUpdatesUseCase: ObserveProgressUpdatesUseCase
     private lateinit var getReadUserBooksUseCase: GetReadUserBooksUseCase
+    private lateinit var getDidNotFinishUserBooksUseCase: GetDidNotFinishUserBooksUseCase
 
     @BeforeEach
     fun setUp() {
         observeProgressUpdatesUseCase = mockk()
         getReadUserBooksUseCase = mockk()
+        getDidNotFinishUserBooksUseCase = mockk()
 
         every {
             getReadUserBooksUseCase()
+        } returns flowOf(emptyList<Book>())
+
+        every {
+            getDidNotFinishUserBooksUseCase()
         } returns flowOf(emptyList<Book>())
     }
 
@@ -40,8 +49,11 @@ class ObserveReadingActivityUseCaseTest {
         val dispatcher = UnconfinedTestDispatcher(testScheduler)
 
         return ObserveReadingActivityUseCase(
-            observeProgressUpdatesUseCase = observeProgressUpdatesUseCase,
-            getReadUserBooksUseCase = getReadUserBooksUseCase,
+            observePageCreditInputsUseCase = ObservePageCreditInputsUseCase(
+                observeProgressUpdatesUseCase = observeProgressUpdatesUseCase,
+                getReadUserBooksUseCase = getReadUserBooksUseCase,
+                getDidNotFinishUserBooksUseCase = getDidNotFinishUserBooksUseCase,
+            ),
             timeZone = TimeZone.UTC,
             appDispatchers = AppDispatchers(
                 main = dispatcher,
@@ -126,6 +138,53 @@ class ObserveReadingActivityUseCaseTest {
                         id = 1,
                         finishedAt = "2026-03-12",
                         pages = 100,
+                    ),
+                )
+
+                awaitItem().pagesByDay[LocalDate(
+                    2026,
+                    3,
+                    12,
+                )] shouldBe 60
+
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+        @Test
+        fun `re-emits when a stopped book's remainder appears`() = runTest {
+            // ----- Arrange -----
+            val stoppedBooks = MutableStateFlow(emptyList<Book>())
+
+            every {
+                observeProgressUpdatesUseCase()
+            } returns flowOf(
+                listOf(
+                    update(
+                        at = "2026-03-10T10:00:00Z",
+                        pagesRead = 40,
+                        pages = 40,
+                    ),
+                ),
+            )
+
+            every {
+                getDidNotFinishUserBooksUseCase()
+            } returns stoppedBooks
+
+            // ----- Act & Assert -----
+            buildUseCase()().test {
+                awaitItem().pagesByDay.values.sum() shouldBe 40
+
+                stoppedBooks.value = listOf(
+                    dnfBook(
+                        id = 1,
+                        stoppedAt = "2026-03-12T12:00:00.000000",
+                        pages = 300,
+                        read = unfinishedRead(
+                            id = 1,
+                            currentPage = 100,
+                        ),
                     ),
                 )
 

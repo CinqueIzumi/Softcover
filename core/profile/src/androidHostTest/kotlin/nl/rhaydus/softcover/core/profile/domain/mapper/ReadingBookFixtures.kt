@@ -1,13 +1,16 @@
 package nl.rhaydus.softcover.core.profile.domain.mapper
 
+import nl.rhaydus.softcover.core.book.domain.model.ProgressUpdate
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.DatePrecision
+import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
+import kotlin.time.Instant
 
 /** A book whose finish date is [finishedAt] (an ISO date), or undated when it is null and no extra reads are given. */
 internal fun readBook(
@@ -19,6 +22,7 @@ internal fun readBook(
     editionId: Int? = null,
     authors: List<Author> = emptyList(),
     tags: List<Tag> = emptyList(),
+    lastReadDate: String? = null,
     reads: List<UserBookRead> = listOfNotNull(
         finishedAt?.let {
             finishedRead(
@@ -52,7 +56,7 @@ internal fun readBook(
         privacySettingId = 1,
         reviewHasSpoilers = false,
         editionId = editionId,
-        lastReadDate = null,
+        lastReadDate = lastReadDate,
         rating = rating,
         referrerUserId = null,
         reviewedAt = null,
@@ -112,4 +116,71 @@ internal fun edition(
     releaseYear = 2000,
     format = "",
     owned = false,
+)
+
+/**
+ * A Did not finish book stopped at [stoppedAt] (a naive-UTC journal timestamp, or none when null) whose
+ * newest read is [read].
+ */
+internal fun dnfBook(
+    id: Int,
+    stoppedAt: String? = "2026-03-12T12:00:00.000000",
+    pages: Int? = null,
+    editions: List<BookEdition> = emptyList(),
+    editionId: Int? = null,
+    tags: List<Tag> = emptyList(),
+    lastReadDate: String? = null,
+    read: UserBookRead? = unfinishedRead(id = id),
+): Book {
+    val base = readBook(
+        id = id,
+        pages = pages,
+        editions = editions,
+        editionId = editionId,
+        tags = tags,
+        lastReadDate = lastReadDate,
+        reads = listOfNotNull(read),
+    )
+
+    return base.copy(
+        userBook = base.userBook?.copy(
+            status = BookStatus.DidNotFinish,
+            journals = listOfNotNull(
+                stoppedAt?.let {
+                    ReadingJournal(
+                        updatedAt = it,
+                        event = "status_stopped",
+                    )
+                },
+            ),
+        ),
+    )
+}
+
+internal fun unfinishedRead(
+    id: Int,
+    currentPage: Int? = null,
+    progress: Float = 0f,
+    editionPages: Int? = null,
+): UserBookRead = UserBookRead(
+    id = id,
+    currentPage = currentPage,
+    currentSeconds = null,
+    progress = progress,
+    startedAt = null,
+    finishedAt = null,
+    finishedAtPrecision = null,
+    editionPages = editionPages,
+)
+
+internal fun progressUpdate(
+    bookId: Int,
+    at: String,
+    pagesRead: Int,
+    pages: Int? = null,
+): ProgressUpdate = ProgressUpdate(
+    bookId = bookId,
+    at = Instant.parse(at),
+    pages = pages,
+    pagesRead = pagesRead,
 )

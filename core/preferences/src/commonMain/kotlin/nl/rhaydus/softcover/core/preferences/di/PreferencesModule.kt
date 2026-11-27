@@ -27,6 +27,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetShelfSwipeEnabled
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetUiScaleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObservePlanTodayDismissalsUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveQuotesSyncedUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadDatesBackfilledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsBackfilledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetBecauseYouReadGenreUseCase
@@ -93,6 +94,8 @@ val preferencesModule = module {
     factory { ObserveReadingStatsBackfilledUseCase(settingsRepository = get()) }
 
     factory { ObserveReadDatesBackfilledUseCase(settingsRepository = get()) }
+
+    factory { ObserveQuotesSyncedUseCase(settingsRepository = get()) }
 
     factory { SetLibraryGridLayoutUseCase(settingsRepository = get()) }
 

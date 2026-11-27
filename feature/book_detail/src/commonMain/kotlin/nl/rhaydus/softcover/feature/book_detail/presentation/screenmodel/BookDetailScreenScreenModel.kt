@@ -37,6 +37,7 @@ import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveReadingJournalHi
 import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshBookQuotesUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryTabOrderAsFlowUseCase
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.presentation.removal.UndoableBookRemover
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
@@ -75,6 +76,7 @@ internal class BookDetailScreenScreenModel(
     activeSessionController: ActiveSessionController,
     saveBookVerdictUseCase: SaveBookVerdictUseCase,
     getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
+    getLibraryTabOrderAsFlowUseCase: GetLibraryTabOrderAsFlowUseCase,
     observeCurrentDateUseCase: ObserveCurrentDateUseCase,
     setEditionAsOwnedUseCase: SetEditionAsOwnedUseCase,
     getAllUserListsUseCase: GetAllUserListsUseCase,
@@ -134,6 +136,7 @@ internal class BookDetailScreenScreenModel(
         activeSessionController = activeSessionController,
         saveBookVerdictUseCase = saveBookVerdictUseCase,
         getDateStyleAsFlowUseCase = getDateStyleAsFlowUseCase,
+        getLibraryTabOrderAsFlowUseCase = getLibraryTabOrderAsFlowUseCase,
         observeCurrentDateUseCase = observeCurrentDateUseCase,
         setEditionAsOwnedUseCase = setEditionAsOwnedUseCase,
         getAllUserListsUseCase = getAllUserListsUseCase,

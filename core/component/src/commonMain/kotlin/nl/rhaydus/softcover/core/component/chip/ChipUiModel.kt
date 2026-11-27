@@ -129,6 +129,13 @@ data class ChipUiModel(
                 trailing = ChipTrailing.Dismiss(label = "Remove Cozy mystery"),
                 interaction = ChipInteraction.Inert,
             ),
+            "Count" to ChipUiModel(
+                key = "count",
+                label = "Literary fiction",
+                trailing = ChipTrailing.Count(text = "2"),
+                interaction = ChipInteraction.Inert,
+                contentDescription = "Literary fiction, 2 books",
+            ),
             "Leading icon" to ChipUiModel(
                 key = "leading-icon",
                 label = "Just now",

@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.feature.profile.presentation.mapper
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.string.shouldEndWith
 import nl.rhaydus.common.formatDecimalNumber
 import nl.rhaydus.common.formatGroupedNumber
 import nl.rhaydus.softcover.core.component.share.ReadingLifeGenre
@@ -11,6 +10,7 @@ import nl.rhaydus.softcover.core.component.share.ReadingLifeShareCardUiModel
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
 import nl.rhaydus.softcover.core.profile.domain.model.MonthCount
+import nl.rhaydus.softcover.core.profile.domain.model.PagesRead
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
@@ -21,12 +21,14 @@ import org.junit.jupiter.api.Test
 class ReadingLifeShareCardMapperTest {
     private class Life(
         val stats: ReadingStats,
+        val pagesRead: PagesRead,
         val history: ReadingHistory,
     ) {
         fun toReadingLifeShareCardUiModel(
             profile: UserProfileData,
             dayStreak: Int = 0,
         ): ReadingLifeShareCardUiModel = stats.toReadingLifeShareCardUiModel(
+            pagesRead = pagesRead,
             history = history,
             profile = profile,
             dayStreak = dayStreak,
@@ -38,14 +40,20 @@ class ReadingLifeShareCardMapperTest {
         slices: List<GenreSlice> = emptyList(),
         average: Double = 0.0,
         trackedYears: Int = 0,
-        booksRead: Int = 0,
         totalPages: Int = 0,
+        finishedBooks: Int = 0,
+        stoppedBooks: Int = 0,
     ): Life = Life(
         stats = ReadingStats(
-            booksRead = booksRead,
-            totalPages = totalPages,
             genres = GenreBreakdown(slices = slices),
             ratings = RatingsDistribution(average = average),
+        ),
+        pagesRead = PagesRead(
+            total = totalPages,
+            finishedBookCount = finishedBooks,
+            stoppedBookCount = stoppedBooks,
+            hasInProgressPages = false,
+            pagesPerDay = null,
         ),
         history = ReadingHistory(
             pagesByMonth = pagesByMonth,
@@ -96,27 +104,81 @@ class ReadingLifeShareCardMapperTest {
         }
 
         @Test
-        fun `uses the singular book for a single book read`() {
+        fun `names finished and stopped books in the books line`() {
             // ----- Arrange -----
-            val life = life(booksRead = 1)
+            val life = life(
+                finishedBooks = 38,
+                stoppedBooks = 4,
+            )
 
             // ----- Act -----
             val result = life.toReadingLifeShareCardUiModel(profile())
 
             // ----- Assert -----
-            result.totalBooksLine shouldEndWith "1 book"
+            result.totalBooksLine shouldBe "across 38 finished books and 4 you didn't finish"
         }
 
         @Test
-        fun `uses the plural books for several books read`() {
+        fun `uses the singular for a single finished book`() {
             // ----- Arrange -----
-            val life = life(booksRead = 12)
+            val life = life(finishedBooks = 1)
 
             // ----- Act -----
             val result = life.toReadingLifeShareCardUiModel(profile())
 
             // ----- Assert -----
-            result.totalBooksLine shouldEndWith "12 books"
+            result.totalBooksLine shouldBe "across 1 finished book"
+        }
+
+        @Test
+        fun `names stopped books in full when nothing was finished`() {
+            // ----- Arrange -----
+            val life = life(stoppedBooks = 3)
+
+            // ----- Act -----
+            val result = life.toReadingLifeShareCardUiModel(profile())
+
+            // ----- Assert -----
+            result.totalBooksLine shouldBe "across 3 books you didn't finish"
+        }
+
+        @Test
+        fun `uses the singular for a single stopped book when nothing was finished`() {
+            // ----- Arrange -----
+            val life = life(stoppedBooks = 1)
+
+            // ----- Act -----
+            val result = life.toReadingLifeShareCardUiModel(profile())
+
+            // ----- Assert -----
+            result.totalBooksLine shouldBe "across 1 book you didn't finish"
+        }
+
+        @Test
+        fun `groups thousands in the finished count`() {
+            // ----- Arrange -----
+            val life = life(
+                finishedBooks = 1_200,
+                stoppedBooks = 1,
+            )
+
+            // ----- Act -----
+            val result = life.toReadingLifeShareCardUiModel(profile())
+
+            // ----- Assert -----
+            result.totalBooksLine shouldBe "across ${formatGroupedNumber(1_200)} finished books and 1 you didn't finish"
+        }
+
+        @Test
+        fun `falls back to zero books when nothing ended`() {
+            // ----- Arrange -----
+            val life = life()
+
+            // ----- Act -----
+            val result = life.toReadingLifeShareCardUiModel(profile())
+
+            // ----- Assert -----
+            result.totalBooksLine shouldBe "across 0 books"
         }
 
         @Test

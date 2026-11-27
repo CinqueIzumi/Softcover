@@ -3,6 +3,8 @@ package nl.rhaydus.softcover.core.book.data.repository
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -41,7 +43,6 @@ import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.domain.model.UpcomingWindow
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
-import kotlin.concurrent.Volatile
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Clock
 import kotlin.time.Duration
@@ -81,9 +82,10 @@ internal class BooksRepositoryImpl(
     private val stagedRemovalBookIds = mutableSetOf<Int>()
     private val inflightRefreshes = mutableMapOf<Set<UserBookStatus>?, Deferred<Unit>>()
 
-    @Volatile
-    override var hasSyncedReadBooksThisSession: Boolean = false
-        private set
+    private val syncedStatuses = MutableStateFlow<Set<UserBookStatus>>(emptySet())
+
+    override val syncedStatusesThisSession: Set<UserBookStatus>
+        get() = syncedStatuses.value
 
     override fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>> {
         return booksLocalDataSource.getBooksFlowByStatus(status = status)
@@ -130,9 +132,8 @@ internal class BooksRepositoryImpl(
             }
         }
 
-        if (statusFilter == null || UserBookStatus.READ in statusFilter) {
-            hasSyncedReadBooksThisSession = true
-        }
+        val synced = statusFilter ?: UserBookStatus.entries.toSet()
+        syncedStatuses.update { it + synced }
     }
 
     private suspend fun runOrJoin(
@@ -279,7 +280,7 @@ internal class BooksRepositoryImpl(
 
     override suspend fun removeAllBooks() {
         booksLocalDataSource.removeAllBooks()
-        hasSyncedReadBooksThisSession = false
+        syncedStatuses.value = emptySet()
     }
 
     override suspend fun fetchBookById(id: Int): Book {
@@ -824,6 +825,7 @@ internal class BooksRepositoryImpl(
                 (snapshot ?: book).withReview(
                     review = review,
                     hasSpoilers = hasSpoilers,
+                    reviewedAt = reviewedAt,
                 )
             },
             enqueue = { optimistic ->

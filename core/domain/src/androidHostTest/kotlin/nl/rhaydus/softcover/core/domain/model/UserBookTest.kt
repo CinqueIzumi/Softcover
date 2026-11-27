@@ -625,6 +625,109 @@ class UserBookTest {
     }
 
     @Nested
+    inner class StopDate {
+        @Test
+        fun `the newest did-not-finish journal decides the date`() {
+            // ----- Arrange -----
+            val userBook = buildUserBook(
+                journals = listOf(
+                    journal(
+                        event = JournalEventType.StatusDidNotFinish,
+                        updatedAt = "2026-05-20T12:00:00.000000",
+                    ),
+                    journal(
+                        event = JournalEventType.StatusDidNotFinish,
+                        updatedAt = "2026-07-03T12:00:00.000000",
+                    ),
+                    journal(
+                        event = JournalEventType.StatusDidNotFinish,
+                        updatedAt = "2026-06-01T12:00:00.000000",
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = userBook.stopDate
+
+            // ----- Assert -----
+            result shouldBe LocalDate(
+                year = 2026,
+                month = 7,
+                day = 3,
+            )
+        }
+
+        @Test
+        fun `other journal events are ignored even when newer`() {
+            // ----- Arrange -----
+            val userBook = buildUserBook(
+                journals = listOf(
+                    journal(
+                        event = JournalEventType.StatusDidNotFinish,
+                        updatedAt = "2026-05-20T12:00:00.000000",
+                    ),
+                    journal(
+                        event = JournalEventType.StatusFinished,
+                        updatedAt = "2026-08-01T12:00:00.000000",
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = userBook.stopDate
+
+            // ----- Assert -----
+            result shouldBe LocalDate(
+                year = 2026,
+                month = 5,
+                day = 20,
+            )
+        }
+
+        @Test
+        fun `a book without a did-not-finish journal has no stop date`() {
+            // ----- Arrange -----
+            val userBook = buildUserBook(
+                journals = listOf(
+                    journal(
+                        event = JournalEventType.StatusFinished,
+                        updatedAt = "2026-08-01T12:00:00.000000",
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = userBook.stopDate
+
+            // ----- Assert -----
+            result.shouldBeNull()
+        }
+
+        @Test
+        fun `a late-evening UTC journal lands on the next local day`() {
+            // ----- Arrange -----
+            val userBook = buildUserBook(
+                journals = listOf(
+                    journal(
+                        event = JournalEventType.StatusDidNotFinish,
+                        updatedAt = "2026-07-01T22:30:00.000000",
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = userBook.stopDate
+
+            // ----- Assert -----
+            result shouldBe LocalDate(
+                year = 2026,
+                month = 7,
+                day = 2,
+            )
+        }
+    }
+
+    @Nested
     inner class GetDnfDateString {
         @Test
         fun `a did-not-finish event in the UTC late evening shows the next local day`() {

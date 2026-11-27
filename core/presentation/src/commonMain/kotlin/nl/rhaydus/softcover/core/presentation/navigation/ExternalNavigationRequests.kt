@@ -3,8 +3,8 @@ package nl.rhaydus.softcover.core.presentation.navigation
 import kotlinx.coroutines.flow.StateFlow
 
 /**
- * Holds the one navigation request an external entry point has made but the UI has not yet acted on.
- * Held as state, not a one-shot event, so a cold start survives until the shell is composed.
+ * Holds the one navigation request an external entry point or a screen pushed over the shell has made
+ * but the UI has not yet acted on. Held as state, not a one-shot event, so it survives until the shell is composed.
  */
 interface ExternalNavigationRequests {
     val pending: StateFlow<ExternalNavigationRequest?>

@@ -82,6 +82,10 @@ interface SettingsLocalDataSource {
 
     suspend fun markReadDatesBackfilled()
 
+    val quotesSynced: Flow<Boolean>
+
+    suspend fun markQuotesSynced()
+
     suspend fun seedEnabledListIds(ids: Set<Int>)
 
     suspend fun resetLibraryVisibilityPreferences()
@@ -288,6 +292,16 @@ internal class SettingsLocalDataSourceImpl(
     override suspend fun markReadDatesBackfilled() {
         appSettingsDataStore.store.updateData { entity ->
             entity.copy(readDatesBackfilled = true)
+        }
+    }
+
+    override val quotesSynced: Flow<Boolean> = appSettingsDataStore.store.data
+        .map { it.quotesSynced }
+        .distinctUntilChanged()
+
+    override suspend fun markQuotesSynced() {
+        appSettingsDataStore.store.updateData { entity ->
+            entity.copy(quotesSynced = true)
         }
     }
 

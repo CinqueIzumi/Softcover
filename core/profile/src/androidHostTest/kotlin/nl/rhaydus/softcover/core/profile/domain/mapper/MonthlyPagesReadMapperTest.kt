@@ -51,6 +51,7 @@ class MonthlyPagesReadMapperTest {
         val result = toMonthlyPages(
             updates = emptyList(),
             readBooks = emptyList(),
+            didNotFinishBooks = emptyList(),
             range = scope.resolve(today),
             timeZone = TimeZone.UTC,
         )
@@ -90,6 +91,7 @@ class MonthlyPagesReadMapperTest {
             val result = toMonthlyPages(
                 updates = updates,
                 readBooks = books,
+                didNotFinishBooks = emptyList(),
                 range = year2026,
                 timeZone = TimeZone.UTC,
             )
@@ -126,6 +128,7 @@ class MonthlyPagesReadMapperTest {
             val result = toMonthlyPages(
                 updates = updates,
                 readBooks = emptyList(),
+                didNotFinishBooks = emptyList(),
                 range = year2026,
                 timeZone = TimeZone.UTC,
             )
@@ -162,6 +165,7 @@ class MonthlyPagesReadMapperTest {
             val result = toMonthlyPages(
                 updates = updates,
                 readBooks = books,
+                didNotFinishBooks = emptyList(),
                 range = year2026,
                 timeZone = TimeZone.UTC,
             )
@@ -213,6 +217,7 @@ class MonthlyPagesReadMapperTest {
             val result = toMonthlyPages(
                 updates = updates,
                 readBooks = books,
+                didNotFinishBooks = emptyList(),
                 range = year2026,
                 timeZone = TimeZone.UTC,
             )
@@ -240,6 +245,7 @@ class MonthlyPagesReadMapperTest {
             val result = toMonthlyPages(
                 updates = emptyList(),
                 readBooks = books,
+                didNotFinishBooks = emptyList(),
                 range = year2026,
                 timeZone = TimeZone.UTC,
             )
@@ -276,6 +282,7 @@ class MonthlyPagesReadMapperTest {
             val result = toMonthlyPages(
                 updates = updates,
                 readBooks = books,
+                didNotFinishBooks = emptyList(),
                 range = year2026,
                 timeZone = TimeZone.UTC,
             )
@@ -300,6 +307,7 @@ class MonthlyPagesReadMapperTest {
             val result = toMonthlyPages(
                 updates = updates,
                 readBooks = emptyList(),
+                didNotFinishBooks = emptyList(),
                 range = year2026,
                 timeZone = TimeZone.of("Europe/Amsterdam"),
             )
@@ -445,6 +453,7 @@ class MonthlyPagesReadMapperTest {
             val result = toMonthlyPages(
                 updates = updates,
                 readBooks = emptyList(),
+                didNotFinishBooks = emptyList(),
                 range = StatsRange.Unbounded,
                 timeZone = TimeZone.UTC,
             )
@@ -478,6 +487,7 @@ class MonthlyPagesReadMapperTest {
             val result = toMonthlyPages(
                 updates = emptyList(),
                 readBooks = books,
+                didNotFinishBooks = emptyList(),
                 range = StatsRange.Unbounded,
                 timeZone = TimeZone.UTC,
             )

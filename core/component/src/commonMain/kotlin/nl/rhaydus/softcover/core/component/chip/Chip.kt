@@ -57,6 +57,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconReso
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerEditorHighlight
 
+private const val COUNT_ALPHA = 0.7f
+
 /**
  * The pill-shaped chip family: one label on a fully-rounded
  * surface, its colours resolved from [ChipUiModel.tone] and [ChipUiModel.selected] through one
@@ -391,6 +393,16 @@ private fun ChipTrailingSlot(
                 insets = insets,
                 onClick = null,
                 rotation = rotation,
+            )
+        }
+
+        is ChipTrailing.Count -> {
+            SoftcoverText(
+                text = trailing.text,
+                style = MaterialTheme.typography.labelMedium,
+                color = style.ink.copy(alpha = COUNT_ALPHA),
+                maxLines = 1,
+                modifier = Modifier.padding(insets),
             )
         }
 

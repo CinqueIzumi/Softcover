@@ -10,48 +10,59 @@ class AtlasContentsMapperTest {
     @Nested
     inner class AtlasContentsHeaderMapping {
         @Test
-        fun `names the chapter count, singular for one chapter`() {
+        fun `counts the chapters it is given`() {
             // ----- Arrange -----
-            val count = AtlasChapter.entries.size
-            val expected = if (count == 1) "One chapter" else "$count chapters"
+            val chapters = listOf(
+                AtlasChapter.YEAR_AT_A_GLANCE,
+                AtlasChapter.SEASONS_AND_RECORDS,
+                AtlasChapter.GENRES_AND_HOW_YOU_READ,
+            )
 
             // ----- Act -----
-            val result = atlasContentsHeader()
+            val result = atlasContentsHeader(chapters)
 
             // ----- Assert -----
-            (result as SectionHeaderUiModel.Section).headlineText shouldBe expected
+            (result as SectionHeaderUiModel.Section).headlineText shouldBe "3 chapters"
+        }
+
+        @Test
+        fun `is singular for one chapter`() {
+            // ----- Arrange -----
+            val chapters = listOf(AtlasChapter.YEAR_AT_A_GLANCE)
+
+            // ----- Act -----
+            val result = atlasContentsHeader(chapters)
+
+            // ----- Assert -----
+            (result as SectionHeaderUiModel.Section).headlineText shouldBe "One chapter"
         }
     }
 
     @Nested
     inner class AtlasContentsRowsMapping {
         @Test
-        fun `yields one row per chapter in reading order`() {
+        fun `yields one row per given chapter in the given order`() {
             // ----- Arrange -----
-            val chapters = AtlasChapter.entries
+            val chapters = listOf(AtlasChapter.GENRES_AND_HOW_YOU_READ, AtlasChapter.YEAR_AT_A_GLANCE)
 
             // ----- Act -----
-            val result = atlasContentsRows()
+            val result = atlasContentsRows(chapters)
 
             // ----- Assert -----
             result.map { it.chapter } shouldBe chapters
         }
 
         @Test
-        fun `gives each chapter its fixed number`() {
+        fun `keeps a chapter's number when a neighbour is left out`() {
             // ----- Arrange -----
-            val expected = mapOf(
-                AtlasChapter.YEAR_AT_A_GLANCE to "01",
-                AtlasChapter.SEASONS_AND_RECORDS to "02",
-                AtlasChapter.GENRES_AND_HOW_YOU_READ to "03",
-                AtlasChapter.TEMPORARY to "99",
-            )
+            val all = atlasContentsRows().associate { it.chapter to it.number }
+            val chapters = AtlasChapter.entries - AtlasChapter.IN_YOUR_WORDS
 
             // ----- Act -----
-            val result = atlasContentsRows()
+            val result = atlasContentsRows(chapters)
 
             // ----- Assert -----
-            result.associate { it.chapter to it.number } shouldBe expected
+            result.associate { it.chapter to it.number } shouldBe all - AtlasChapter.IN_YOUR_WORDS
         }
     }
 
@@ -67,23 +78,6 @@ class AtlasContentsMapperTest {
 
             // ----- Assert -----
             headers.map { it.eyebrow } shouldBe rows.map { "${it.number} · ${it.title}" }
-        }
-
-        @Test
-        fun `titles each chapter eyebrow with its number and name`() {
-            // ----- Arrange -----
-            val chapters = AtlasChapter.entries
-
-            // ----- Act -----
-            val result = chapters.map { atlasChapterEyebrow(it) }
-
-            // ----- Assert -----
-            result shouldBe listOf(
-                "01 · A year at a glance",
-                "02 · Seasons and records",
-                "03 · Genres and how you read",
-                "99 · Temporary",
-            )
         }
     }
 }
