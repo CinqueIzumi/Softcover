@@ -21,6 +21,7 @@ internal class ReadingLifeShareCardCollector : ProfileCollector {
         scope.state
             .map { state ->
                 val readingStats = state.readingStats
+                val pagesRead = state.pagesRead
                 val readingHistory = state.readingHistory
                 val profile = state.userProfileData
 
@@ -28,10 +29,12 @@ internal class ReadingLifeShareCardCollector : ProfileCollector {
                     card = if (
                         state.isShareSheetRequested &&
                         readingStats != null &&
+                        pagesRead != null &&
                         readingHistory != null &&
                         profile != null
                     ) {
                         readingStats.toReadingLifeShareCardUiModel(
+                            pagesRead = pagesRead,
                             history = readingHistory,
                             profile = profile,
                             dayStreak = state.currentStreakDays,

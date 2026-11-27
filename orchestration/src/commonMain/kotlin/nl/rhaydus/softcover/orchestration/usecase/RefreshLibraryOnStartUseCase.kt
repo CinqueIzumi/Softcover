@@ -13,7 +13,7 @@ import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepositor
  * covers every status instead, so books cached before every read was synced pick up their full read history.
  * The same applies until every read's finish-date precision and edition pages have been stored.
  * Until author demographics, page counts and contributor roles have been refilled it covers the Read
- * status, the only one the reading stats need.
+ * and Did not finish statuses, the only ones the reading stats need.
  */
 internal class RefreshLibraryOnStartUseCase(
     private val settingsRepository: SettingsRepository,
@@ -35,7 +35,7 @@ internal class RefreshLibraryOnStartUseCase(
         }
 
         if (demographicsBackfilled.not() || rolesBackfilled.not()) {
-            refreshLibraryUseCase(scope = READ_SCOPE).getOrThrow()
+            refreshLibraryUseCase(scope = READ_AND_STOPPED_SCOPE).getOrThrow()
             return@runCatchingLogged
         }
 
@@ -43,7 +43,9 @@ internal class RefreshLibraryOnStartUseCase(
     }
 
     private companion object {
-        val READ_SCOPE = RefreshScope.ByStatuses(statuses = setOf(UserBookStatus.READ))
+        val READ_AND_STOPPED_SCOPE = RefreshScope.ByStatuses(
+            statuses = setOf(UserBookStatus.READ, UserBookStatus.DID_NOT_FINISH),
+        )
 
         val ACTIVE_SCOPE = RefreshScope.ByStatuses(
             statuses = setOf(UserBookStatus.CURRENTLY_READING, UserBookStatus.PAUSED),

@@ -17,6 +17,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingActivity
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingDay
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingDayBook
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingDayEnding
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingStreak
 import nl.rhaydus.softcover.feature.profile.presentation.state.AtlasStreaks
 import nl.rhaydus.softcover.feature.profile.presentation.state.DayDetailUiModel
@@ -63,7 +64,7 @@ class DayDetailMapperTest {
         toPage = pages,
         updateCount = 1,
         pages = pages,
-        finished = false,
+        ending = ReadingDayEnding.NONE,
         firstUpdateAt = null,
         lastUpdateAt = null,
     )
@@ -489,7 +490,7 @@ class DayDetailMapperTest {
                 toPage = 30,
                 updateCount = 2,
                 pages = 20,
-                finished = false,
+                ending = ReadingDayEnding.NONE,
                 firstUpdateAt = clock(
                     hour = 14,
                     minute = 41,
@@ -518,7 +519,7 @@ class DayDetailMapperTest {
                 toPage = 412,
                 updateCount = 2,
                 pages = 32,
-                finished = true,
+                ending = ReadingDayEnding.FINISHED,
                 firstUpdateAt = clock(
                     hour = 9,
                     minute = 10,
@@ -537,6 +538,33 @@ class DayDetailMapperTest {
         }
 
         @Test
+        fun `marks a stopped book as stopped here after the update times`() {
+            // ----- Arrange -----
+            val book = ReadingDayBook(
+                bookId = 1,
+                fromPage = 100,
+                toPage = 140,
+                updateCount = 1,
+                pages = 40,
+                ending = ReadingDayEnding.STOPPED,
+                firstUpdateAt = clock(
+                    hour = 20,
+                    minute = 5,
+                ),
+                lastUpdateAt = clock(
+                    hour = 20,
+                    minute = 5,
+                ),
+            )
+
+            // ----- Act -----
+            val caption = captionOf(book)
+
+            // ----- Assert -----
+            caption shouldBe "Pages 100 to 140 · 1 update at 20:05 · stopped here"
+        }
+
+        @Test
         fun `keeps the plural count without times when a book has none recorded`() {
             // ----- Arrange -----
             val book = ReadingDayBook(
@@ -545,7 +573,7 @@ class DayDetailMapperTest {
                 toPage = 40,
                 updateCount = 3,
                 pages = 40,
-                finished = false,
+                ending = ReadingDayEnding.NONE,
                 firstUpdateAt = null,
                 lastUpdateAt = null,
             )

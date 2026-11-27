@@ -13,7 +13,14 @@
 - Pushed from Profile's summary card; one long scroll, never tabs. Top to bottom: a `PageMasthead`
   ("Your reading record" / "Stats"); the scope row and its line; the opening tiles (hero "Pages read", the
   page's one `primary`-filled surface, over a full-width "Books" tile); "In this atlas" contents; the
-  chapters.
+  chapters. The hero counts pages as they were read, books in progress and Did not finish included, and
+  says what it counts: "From 38 finished books, 4 you didn't finish and the ones you're reading in the last
+  12 months, about 34 pages a day." Parts that are zero drop out; a past year says "were reading". The
+  finished count can exceed the Books tile in All time (undated reads), and the "didn't finish" count the
+  chapter's (All time counts Did not finish books with no stop date).
+- Every chapter is always shown, so the contents count never changes. A chapter with no data in the window
+  keeps its header and one line saying what would show there; sections within a chapter may still hide
+  their own empty blocks.
 - Scope row: single-select `Tonal` chips with the `Eyebrow` face, "Last 30 days", "Last 6 months", "Last 12
   months", one per calendar year the reader finished a book in (newest first), "All time". Compact and
   medium scroll sideways; expanded wraps. A tap gives selection haptics. The reader lands on this year when
@@ -22,11 +29,11 @@
 - Beneath the row, a quiet italic line names the dates: "Showing 2026", "Showing 24 September to today"
   (the year is added only when the window starts in an earlier one), "Showing every year".
 - The scope moves the opening tiles, the time-of-day chart, the pages-by-month chart, the authors list, the format
-  split, the genre
-  ranking, "Who you read" (Hide untagged authors still applies) and "How you score". "Recently loved" and
+  split, your records, the genre
+  ranking, "In your words", "Who you read" (Hide untagged authors still applies) and "How you score". "Recently loved" and
   the year chart ignore it. Values animate between scopes; labels cross-fade, and reduced motion swaps them in place.
 - A scope with no finished books says so in each section's framing sentence ("No finished books in the last
-  30 days.") instead of drawing an empty chart; the opening tiles show 0 and say nothing was finished. In a
+  30 days.") instead of drawing an empty chart; the hero says "No pages read in the last 30 days.". In a
   narrow scope with too few ratings to classify, "How you score" states the count ("3 rated books in the last
   30 days") instead of "Too early to tell". Captions that say "your finished books" name the scope.
 - A finish date comes from the read or the user book, never from the "finished" journal event, which dates
@@ -35,7 +42,7 @@
   `Second`, zero years a `Fifth` stub) and the caption names that year and its count for the Books / Pages
   metric; a rolling window or All time lights the busiest year.
 - Contents rows (two-digit number, title, caption, chevron) scroll the page to their chapter's top. A
-  chapter opens with an eyebrow "02 · Title". Numbers are fixed per chapter (01, 02, 03 and 99), following the
+  chapter opens with an eyebrow "02 · Title". Numbers are fixed per chapter (01, 02, 03, 05, 06 and 99), following the
   design's chapter list rather than position, so row and header always agree; the other chapters land with
   later 3.3.0 issues.
 - A stat the app holds no data source for yet is left out, never a 0.
@@ -47,7 +54,8 @@
   equal, every read day is the darkest), with a "Fewer pages" to "More" key and future days left empty. It
   fades only when the year changes; the scope otherwise does not move it. Under it, "Current streak" (counted
   back from today, surviving until midnight) and "Longest streak" (the grid year's; a run across 1 January
-  counts whole) tiles. A reading day everywhere has pages in the on-device history. A read day is tappable and reads
+  counts whole) tiles. A reading day everywhere (here, the streaks and the Reading tab's strip) has pages in the
+  on-device history, a Did not finish book's stop day included. A read day is tappable and reads
   out like "14 April, 62 pages". Tapping one opens a day-detail sheet with no haptic: the eyebrow is the date
   ("Tuesday 14 April", with the year only when it is not the current one) and the headline the total ("62
   pages across 2 books"), under a line "Day N of your longest streak." / "Day N of your current streak." /
@@ -56,7 +64,7 @@
   at 14:41", "Pages 112 to 158 · 3 updates, 09:10 to 22:40" ("2 updates at 14:41" when the first and last
   share a minute), "Up to page 40 · 1 update at 08:05" when it started at page 0, with " · finished" added
   for a book finished that day ("Pages 380 to 412 · finished" when only its unlogged remainder fell on the
-  day, with no time). A book no longer in the library is one untappable coverless row, "A book no longer in
+  day, with no time), or " · stopped here" for a Did not finish book's stop day. A book no longer in the library is one untappable coverless row, "A book no longer in
   your library". "Done" closes the sheet; tapping a
   row closes it first and then opens that book's detail. A sync that empties the day closes the sheet. The
   first section, "When you read", is a scoped `ColumnChart` of the share of pages read in each
@@ -75,9 +83,8 @@
   headline naming the busiest month ("A March to remember", "An April to remember"; "A year in pages" when
   nothing was read) over a scoped pages-by-month `ColumnChart`. Pages are the pages read in each month,
   summed from the progress updates logged that month, so a book read across March and April counts in both
-  and unfinished books count. When a book is finished in the scope and its last recorded position is short of
-  its page count, the remainder lands on its finish date; a finished book with no updates puts all its pages
-  there. It has a column for every calendar month the scope touches, so a rolling window shows 12 or 13
+  and unfinished books count. A finished book's unlogged remainder lands on its finish date (all its pages
+  when it has no updates), a Did not finish book's on its stop date. It has a column for every calendar month the scope touches, so a rolling window shows 12 or 13
   months, 6 months 6 or 7, 30 days 1 to 3, a calendar year 12, and the first column of a window that starts
   mid-month is a partial month ("From 27 October 2025, 412 pages"). All time sums each calendar month across
   every year. Month labels are three letters, on every third column. The chart cross-fades only when the
@@ -100,6 +107,15 @@
   of these books has a known format.". With no finished books the caption gives the scope's sentence, or
   "Finish a few books and the formats you read in show up here." for All time, and the chart is dropped.
   The chart animates in place across scopes rather than cross-fading.
+  Then "Your records" shows two side-by-side tappable `BookCard` tiles: "LONGEST BOOK" (the book's title and
+  "1,296 pages") and "QUICKEST READ" (the title and "272 pages in 2 days", "In 2 days" when the page count is
+  unknown). The quickest read is the shortest start-to-finish span among reads with both dates, the longest
+  book the one with most pages among books finished in the scope. A tap opens book detail with the cover
+  shared; when both records are one book only the longest tile shares it. A lone record keeps the left cell,
+  and the caption says what is missing ("None of these reads has both a start and a finish date.", "None of
+  these books has a known page count."); with neither, it says "None of these books has a page count or both
+  reading dates.", or for a scope with no finished reads, "No finished reads in 2026." ("Finish a few books
+  and your records show up here." for All time). Tiles cross-fade only when a record changes book.
   Last, "Time to finish" shows the median calendar days from start to finish as a two by two grid of compact
   `StatTile`s: all books, then under 250, 250 to 450 and over 450 pages (a band with no reads shows a dash).
   The line above reads "Your typical book took 9 days. Ones over 450 pages took 23.", the second sentence
@@ -118,6 +134,27 @@
   the rows and the buttons. Rows visible at first data, the loading swap and a scope switch do not
   animate in. A scope switch folds the ranking back to five. A scope with no genres says "The genres you read most" over its empty
   sentence, with no rows.
+- Chapter 05, "Your reading list" (caption "What waits, and what you set aside."), opens with "4 books you
+  didn't finish" ("Putting a book down is part of reading.", plus " Most of these you stopped in the first
+  quarter." when one quarter holds over half of at least two books with a known stop point). "Where you
+  stopped, by quarter of the book" is four columns, First, Second, Third and Last, each the share of the books with a known stop
+  point in whole percent, empty quarters shown at 0% and the tallest in the lead tone; left out with no
+  known stop, with "1 book has no stop point." beneath when some are unplaced. "Genres" lists the top five by
+  book count as read-only count chips ("A book can count in more than one genre."). No Did not finish
+  book in scope reads "Books you didn't finish" over "Books you mark Did not finish show up here, with
+  where you stopped and their genres."; it is masked while loading.
+- Chapter 06, "In your words" (caption "Reviews, quotes and your own tags."), opens with "What you wrote" ("The
+  reviews you left and the lines you kept.") over two side-by-side standard tiles. "Reviews" counts the
+  reviews written in the scope ("3,200 words in all", "None written in 2026", "None written yet"); "Quotes"
+  counts the quotes saved ("saved from 19 books", "None saved in 2026", "None saved yet"). Under them, "Your
+  most-quoted book" ("You saved 11 lines from Title. This one first.") shows a book `QuoteCard` with the
+  earliest quote in the scope and "Author · 11 quotes"; only library books count. Tapping the card opens
+  that book's detail. Last, "Your own tags" ("The tags you put on books you finished. Tap one to see its
+  books.") ranks up to five of the reader's Tag-category tags as tappable `RankedBars` rows with a book count,
+  each book counted once per tag; it is left out when the scope has none. A tap closes the Atlas and opens
+  Library on the Read shelf (All when Read is hidden) filtered to that tag alone, so the shelf can hold more
+  books than the count. A scope with no reviews, quotes or own tags reads "What you wrote" over "Reviews you
+  write, quotes you save and your own tags show up here." It is shown masked while loading.
 - Chapter 99, "Temporary" (removed later), holds the former Profile charts: "The shape of the years" (a
   `ColumnChart` behind a Books / Pages `SegmentedControl`); "Who you read";
   "How you score" (headline from the rating band, never the bare average); "Recently loved" (up to three
@@ -133,6 +170,8 @@
 - The format split is a `Keys` `ProportionChart` with a fixed format order and tones (Print `Lead`, Ebook
   `Second`, Audiobook `Third`, Print and audio `Fourth`), zero formats dropped and `Unknown` muted last.
   Shares are whole percents that sum to 100; a non-zero share never shows 0%.
+- Did not finish genres are count chips (`ChipTrailing.Count`), not bars: a book counts in several genres,
+  so the counts do not sum to the books.
 - `ColumnChart`: books per year (peak `Lead`, others `Second`, zero a `Fifth` stub); pages per month (the
   peak `Lead` and the only column with a value, the next two `Second`, other non-zero `Third`, zero or
   future `Fifth`; ties go to the earliest month; labels on every third column); time of day (eight

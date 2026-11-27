@@ -51,7 +51,7 @@ import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingPaceForecast
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.progresssheet.presentation.ProgressSheetState
-import nl.rhaydus.softcover.core.uibinding.session.ConfirmedPause
+import nl.rhaydus.softcover.core.uibinding.session.SessionEndingStatus
 import nl.rhaydus.softcover.core.uibinding.verdict.VerdictSheetContext
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.BOOK_REVIEW_STAND_INS
@@ -263,9 +263,9 @@ internal data class BookDetailUiState(
 
     val activeSessionBookId: Int? = null,
 
-    val endSessionPauseRequested: Boolean = false,
+    val endSessionRequest: SessionEndingStatus? = null,
 
-    val endSessionPauseSheet: SheetSession<SheetScaffoldUiModel, ConfirmedPause> = SheetSession.Closed,
+    val endSessionSheet: SheetSession<SheetScaffoldUiModel, SessionEndingStatus> = SheetSession.Closed,
 
     val chosenShareVariant: ShareCardVariant? = null,
 

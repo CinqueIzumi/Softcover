@@ -67,6 +67,7 @@ class ChipUiModelTest {
             val expectedTrailingTypes = setOf(
                 ChipTrailing.Icon::class,
                 ChipTrailing.Disclosure::class,
+                ChipTrailing.Count::class,
                 ChipTrailing.Dismiss::class,
             )
 

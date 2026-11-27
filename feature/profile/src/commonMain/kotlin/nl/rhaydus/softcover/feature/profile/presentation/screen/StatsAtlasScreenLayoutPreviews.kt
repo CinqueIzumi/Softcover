@@ -21,10 +21,12 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingUiMo
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasFormatSplit
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasTimeOfDayPages
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasTopAuthors
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.inYourWordsUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.longestStreakTile
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesMonthSetKey
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.readingRecordsUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeOfDayCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeOfDayChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeToFinishUiModel
@@ -32,12 +34,17 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.topAuthorRows
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.topAuthorsCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearAtAGlanceHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearGrid
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.yourReadingListUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileDidNotFinishPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileHourlyPagesPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileMonthlyPagesPreview
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileOwnTagsPreview
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profilePagesReadPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingActivityPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingHistoryPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingStatsPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileTimeToFinishPreview
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileWrittenStatsPreview
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
 
 private val PreviewReadingStats = profileReadingStatsPreview()
@@ -61,7 +68,10 @@ private val PreviewProfileData = UserProfileData(
 internal val StatsAtlasPreviewState = StatsAtlasUiState(
     isLoading = false,
     userProfileData = PreviewProfileData,
-    opening = atlasOpeningUiModel(PreviewReadingStats),
+    opening = atlasOpeningUiModel(
+        stats = PreviewReadingStats,
+        pagesRead = profilePagesReadPreview(),
+    ),
     readingStats = PreviewReadingStats,
     readingHistory = PreviewReadingHistory,
     scopeChips = atlasScopeChips(
@@ -137,6 +147,17 @@ internal val StatsAtlasPreviewState = StatsAtlasUiState(
     hasFormatSplit = hasFormatSplit(PreviewReadingStats.formatSplit),
     timeToFinish = timeToFinishUiModel(
         timeToFinish = profileTimeToFinishPreview(),
+        scope = StatsScope.AllTime,
+    ),
+    readingRecords = readingRecordsUiModel(
+        stats = PreviewReadingStats,
+        timeToFinish = profileTimeToFinishPreview(),
+        scope = StatsScope.AllTime,
+    ),
+    yourReadingList = yourReadingListUiModel(profileDidNotFinishPreview()),
+    inYourWords = inYourWordsUiModel(
+        written = profileWrittenStatsPreview(),
+        ownTags = profileOwnTagsPreview(),
         scope = StatsScope.AllTime,
     ),
     genreHeader = genreHeader(

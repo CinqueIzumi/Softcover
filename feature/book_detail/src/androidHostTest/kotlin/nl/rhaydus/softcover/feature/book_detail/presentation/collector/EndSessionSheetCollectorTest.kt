@@ -12,6 +12,9 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.component.sheet.isClosing
 import nl.rhaydus.softcover.core.component.sheet.isOpen
+import nl.rhaydus.softcover.core.component.sheet.modelOrNull
+import nl.rhaydus.softcover.core.uibinding.session.SessionEndingStatus
+import nl.rhaydus.softcover.core.uibinding.session.endSessionSheetScaffold
 import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
@@ -22,7 +25,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-class EndSessionPauseSheetCollectorTest {
+class EndSessionSheetCollectorTest {
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
     private lateinit var scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>
@@ -42,7 +45,7 @@ class EndSessionPauseSheetCollectorTest {
 
     private fun TestScope.launchCollector() {
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
-            EndSessionPauseSheetCollector().onLaunch(
+            EndSessionSheetCollector().onLaunch(
                 scope = scope,
                 dependencies = dependencies,
             )
@@ -57,7 +60,7 @@ class EndSessionPauseSheetCollectorTest {
             launchCollector()
 
             // ----- Act -----
-            val sheet = stateFlow.value.endSessionPauseSheet
+            val sheet = stateFlow.value.endSessionSheet
 
             // ----- Assert -----
             sheet shouldBe SheetSession.Closed
@@ -69,35 +72,50 @@ class EndSessionPauseSheetCollectorTest {
             launchCollector()
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(endSessionPauseRequested = true)
+            stateFlow.value = stateFlow.value.copy(endSessionRequest = SessionEndingStatus.Paused)
 
             // ----- Assert -----
-            stateFlow.value.endSessionPauseSheet.isOpen shouldBe true
+            stateFlow.value.endSessionSheet.isOpen shouldBe true
+        }
+
+        @Test
+        fun `opens the sheet for the status that is waiting`() = runTest {
+            // ----- Arrange -----
+            launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(endSessionRequest = SessionEndingStatus.DidNotFinish)
+
+            // ----- Assert -----
+            stateFlow.value.endSessionSheet.modelOrNull shouldBe endSessionSheetScaffold(
+                bookTitle = stateFlow.value.book?.title,
+                targetStatus = SessionEndingStatus.DidNotFinish,
+            )
         }
 
         @Test
         fun `asks the sheet to close when the request is cleared`() = runTest {
             // ----- Arrange -----
             launchCollector()
-            stateFlow.value = stateFlow.value.copy(endSessionPauseRequested = true)
+            stateFlow.value = stateFlow.value.copy(endSessionRequest = SessionEndingStatus.Paused)
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(endSessionPauseRequested = false)
+            stateFlow.value = stateFlow.value.copy(endSessionRequest = null)
 
             // ----- Assert -----
-            stateFlow.value.endSessionPauseSheet.isClosing shouldBe true
+            stateFlow.value.endSessionSheet.isClosing shouldBe true
         }
 
         @Test
         fun `a late requested emission after the request was cleared does not reopen the sheet`() = runTest {
             // ----- Arrange -----
-            val staleState = stateFlow.value.copy(endSessionPauseRequested = true)
+            val staleState = stateFlow.value.copy(endSessionRequest = SessionEndingStatus.Paused)
             var openAfterStaleEmission: Boolean? = null
 
             val lateEmittingState = object : MutableStateFlow<BookDetailUiState> by stateFlow {
                 override suspend fun collect(collector: FlowCollector<BookDetailUiState>): Nothing {
                     collector.emit(staleState)
-                    openAfterStaleEmission = stateFlow.value.endSessionPauseSheet.isOpen
+                    openAfterStaleEmission = stateFlow.value.endSessionSheet.isOpen
                     stateFlow.collect(collector)
                 }
             }
@@ -110,7 +128,7 @@ class EndSessionPauseSheetCollectorTest {
 
             // ----- Act -----
             backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
-                EndSessionPauseSheetCollector().onLaunch(
+                EndSessionSheetCollector().onLaunch(
                     scope = lateScope,
                     dependencies = dependencies,
                 )
@@ -118,7 +136,7 @@ class EndSessionPauseSheetCollectorTest {
 
             // ----- Assert -----
             openAfterStaleEmission shouldBe false
-            stateFlow.value.endSessionPauseSheet.isOpen shouldBe false
+            stateFlow.value.endSessionSheet.isOpen shouldBe false
         }
     }
 }

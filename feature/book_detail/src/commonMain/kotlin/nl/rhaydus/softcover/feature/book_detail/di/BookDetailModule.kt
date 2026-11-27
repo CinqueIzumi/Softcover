@@ -41,7 +41,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.collector.DateStyle
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EditionCardsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EditionSelectionCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EditionSheetCollector
-import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EndSessionPauseSheetCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EndSessionSheetCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ExternalLinksCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.HowItReadSectionCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.HowItReadSheetCollector
@@ -129,7 +129,7 @@ val bookDetailModule = module {
     factory { ChooseListsCollector() } bind BookDetailCollector::class
     factory { ShelveControlHeaderCollector() } bind BookDetailCollector::class
     factory { ActiveSessionBookCollector() } bind BookDetailCollector::class
-    factory { EndSessionPauseSheetCollector() } bind BookDetailCollector::class
+    factory { EndSessionSheetCollector() } bind BookDetailCollector::class
     factory { LensToggleCollector() } bind BookDetailCollector::class
     factory { QuotesSectionCollector() } bind BookDetailCollector::class
     factory { QuotesRefreshCollector() } bind BookDetailCollector::class
@@ -204,12 +204,14 @@ val bookDetailModule = module {
             undoableBookRemover = get(),
             markBookAsReadUseCase = get(),
             pauseBookUseCase = get(),
+            didNotFinishBookUseCase = get(),
             activeSessionController = get(),
             saveBookVerdictUseCase = get(),
             flows = getAll(),
             offlineCopy = get(),
             appDispatchers = get(),
             getDateStyleAsFlowUseCase = get(),
+            getLibraryTabOrderAsFlowUseCase = get(),
             observeCurrentDateUseCase = get(),
             setEditionAsOwnedUseCase = get(),
             getAllUserListsUseCase = get(),

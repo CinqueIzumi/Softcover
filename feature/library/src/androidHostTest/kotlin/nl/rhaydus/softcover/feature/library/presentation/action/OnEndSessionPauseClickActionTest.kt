@@ -10,7 +10,8 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.component.sheet.dismissed
 import nl.rhaydus.softcover.core.component.sheet.isClosing
-import nl.rhaydus.softcover.core.uibinding.session.endSessionPauseSheetScaffold
+import nl.rhaydus.softcover.core.uibinding.session.SessionEndingStatus
+import nl.rhaydus.softcover.core.uibinding.session.endSessionSheetScaffold
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
@@ -44,7 +45,12 @@ class OnEndSessionPauseClickActionTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
                 endSessionPauseBookIds = persistentSetOf(1, 2),
-                endSessionPauseSheet = SheetSession.Open(model = endSessionPauseSheetScaffold(bookTitle = "Title")),
+                endSessionPauseSheet = SheetSession.Open(
+                    model = endSessionSheetScaffold(
+                        bookTitle = "Title",
+                        targetStatus = SessionEndingStatus.Paused,
+                    ),
+                ),
             )
 
             // ----- Act -----

@@ -55,10 +55,11 @@ interface BooksRepository {
     )
 
     /**
-     * Whether a successful [refreshUserBooks] covering the Read status has run since the app started or
-     * since [removeAllBooks]; a caller that only needs the Read books skips its own fetch when true.
+     * The statuses a successful [refreshUserBooks] has covered since the app started or since
+     * [removeAllBooks]; a null filter covers every status. A caller that only needs some statuses skips
+     * its own fetch when they are all in here.
      */
-    val hasSyncedReadBooksThisSession: Boolean
+    val syncedStatusesThisSession: Set<UserBookStatus>
 
     /**
      * Re-fetches the user's books from the remote and reconciles them with the local cache.
@@ -204,6 +205,11 @@ interface BooksRepository {
     ): Book
 
     suspend fun markBookAsPaused(
+        book: Book,
+        editionId: Int? = null,
+    ): Book
+
+    suspend fun markBookAsDidNotFinish(
         book: Book,
         editionId: Int? = null,
     ): Book

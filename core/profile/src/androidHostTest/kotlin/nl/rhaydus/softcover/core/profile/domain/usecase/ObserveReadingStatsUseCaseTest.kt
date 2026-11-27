@@ -77,8 +77,8 @@ class ObserveReadingStatsUseCaseTest {
 
             // ----- Act & Assert -----
             useCase(StatsRange.Unbounded).test {
-                awaitItem().totalPages shouldBe 100
-                awaitItem().totalPages shouldBe 150
+                awaitItem().booksRead shouldBe 1
+                awaitItem().booksRead shouldBe 2
                 awaitComplete()
             }
         }

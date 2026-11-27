@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.core.profile.domain.mapper
 
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import nl.rhaydus.softcover.core.book.domain.model.ProgressUpdate
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.profile.domain.model.MonthCount
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
@@ -12,11 +14,18 @@ private const val RECENTLY_LOVED_COUNT = 3
 private const val LOVED_RATING_FLOOR = 4.0
 
 /**
- * Buckets every finished book by its finish date, so a re-read counts once, in its latest year.
- * Books without a finish date appear nowhere in the history.
+ * Buckets every finished book by its finish date, so a re-read counts once, in its latest year; books
+ * without a finish date appear nowhere in the book counts. Pages come from [attributePages], so a
+ * Did not finish book and an unfinished one count in the year they were read.
  */
-internal fun List<Book>.toReadingHistory(today: LocalDate): ReadingHistory {
-    val dated = mapNotNull { book ->
+internal fun toReadingHistory(
+    updates: List<ProgressUpdate>,
+    readBooks: List<Book>,
+    didNotFinishBooks: List<Book>,
+    today: LocalDate,
+    timeZone: TimeZone,
+): ReadingHistory {
+    val dated = readBooks.mapNotNull { book ->
         book.userBook?.finishDate?.let {
             DatedBook(
                 book = book,
@@ -28,15 +37,26 @@ internal fun List<Book>.toReadingHistory(today: LocalDate): ReadingHistory {
     val years = dated.map { it.finishDate.year }.distinct().sortedDescending()
     val booksPerYear = dated.groupingBy { it.finishDate.year }.eachCount()
 
-    val pagesPerYear = dated.groupBy { it.finishDate.year }
-        .mapValues { (_, books) -> books.sumOf { it.book.statsPages() } }
+    val credits = attributePages(
+        updates = updates,
+        readBooks = readBooks,
+        didNotFinishBooks = didNotFinishBooks,
+        timeZone = timeZone,
+    )
 
-    val yearSpan = if (years.isEmpty()) {
+    val pagesPerYear = credits.groupBy(
+        { it.date.year },
+        { it.pages },
+    ).mapValues { (_, pages) -> pages.sum() }
+
+    val spanYears = years + pagesPerYear.keys
+
+    val yearSpan = if (spanYears.isEmpty()) {
         IntRange.EMPTY
     } else {
-        years.last()..maxOf(
+        spanYears.min()..maxOf(
             today.year,
-            years.first(),
+            spanYears.max(),
         )
     }
 
@@ -55,7 +75,7 @@ internal fun List<Book>.toReadingHistory(today: LocalDate): ReadingHistory {
         },
         yearsRead = years,
         trackedYears = years.size,
-        pagesByMonth = dated.toPagesByMonth(year = today.year),
+        pagesByMonth = credits.toPagesByMonth(year = today.year),
         recentlyLoved = dated.toRecentlyLoved(),
     )
 }
@@ -65,10 +85,13 @@ private data class DatedBook(
     val finishDate: LocalDate,
 )
 
-private fun List<DatedBook>.toPagesByMonth(year: Int): List<MonthCount> {
-    val pagesPerMonth = filter { it.finishDate.year == year }
-        .groupBy { it.finishDate.month.ordinal + 1 }
-        .mapValues { (_, books) -> books.sumOf { it.book.statsPages() } }
+private fun List<AttributedPages>.toPagesByMonth(year: Int): List<MonthCount> {
+    val pagesPerMonth = filter { it.date.year == year }
+        .groupBy(
+            { it.date.month.ordinal + 1 },
+            { it.pages },
+        )
+        .mapValues { (_, pages) -> pages.sum() }
 
     return (1..MONTHS_IN_YEAR).map { month ->
         MonthCount(

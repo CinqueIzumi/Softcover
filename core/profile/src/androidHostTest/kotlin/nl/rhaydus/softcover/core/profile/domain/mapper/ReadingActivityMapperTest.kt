@@ -33,6 +33,7 @@ class ReadingActivityMapperTest {
     ) = toReadingActivity(
         updates = updates,
         readBooks = readBooks,
+        didNotFinishBooks = emptyList(),
         timeZone = timeZone,
     )
 
