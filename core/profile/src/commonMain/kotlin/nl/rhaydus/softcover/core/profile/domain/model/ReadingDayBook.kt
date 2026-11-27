@@ -3,7 +3,8 @@ package nl.rhaydus.softcover.core.profile.domain.model
 import kotlinx.datetime.LocalTime
 
 /**
- * A book's share of one day: [pages] is the day's attributed total, [fromPage] to [toPage] its position span.
+ * A book's share of one day: [pages] is the day's attributed total, [fromPage] to [toPage] its position span;
+ * [ending] says whether the book was finished or stopped that day.
  * The update times are those of its counted updates and are null when it has none.
  */
 data class ReadingDayBook(
@@ -12,7 +13,7 @@ data class ReadingDayBook(
     val toPage: Int,
     val updateCount: Int,
     val pages: Int,
-    val finished: Boolean,
+    val ending: ReadingDayEnding,
     val firstUpdateAt: LocalTime?,
     val lastUpdateAt: LocalTime?,
 )

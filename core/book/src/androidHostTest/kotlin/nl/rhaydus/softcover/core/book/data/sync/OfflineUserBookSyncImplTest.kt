@@ -32,6 +32,8 @@ import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.DatePrecision
+import nl.rhaydus.softcover.core.domain.model.JournalEventType
+import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
@@ -1440,6 +1442,9 @@ class OfflineUserBookSyncImplTest {
             ),
         )
 
+        private fun Book.withJournals(vararg journals: ReadingJournal): Book =
+            copy(userBook = userBook.shouldNotBeNull().copy(journals = journals.toList()))
+
         private suspend fun reconcile(
             kind: PendingUserBookWriteKind,
             snapshot: Book,
@@ -1824,6 +1829,213 @@ class OfflineUserBookSyncImplTest {
 
             // ----- Assert -----
             result.userBook.shouldNotBeNull().reads shouldBe listOf(finished, placeholder)
+        }
+
+        @Test
+        fun `SET_STATUS — a DidNotFinish snapshot restores its status_stopped entry the fetched copy lacks`() = runTest {
+            // ----- Arrange -----
+            val stopped = ReadingJournal(
+                updatedAt = "2026-06-02T10:00:00Z",
+                event = JournalEventType.StatusDidNotFinish.eventName,
+            )
+
+            val started = ReadingJournal(
+                updatedAt = "2026-06-01T10:00:00Z",
+                event = JournalEventType.UserBookReadStarted.eventName,
+            )
+
+            val snapshot = bookWith(BookStatus.DidNotFinish).withJournals(
+                started,
+                stopped,
+            )
+
+            val fetched = bookWith(BookStatus.Reading).withJournals(started)
+
+            // ----- Act -----
+            val result = reconcile(
+                PendingUserBookWriteKind.SET_STATUS,
+                snapshot,
+                fetched,
+            )
+
+            // ----- Assert -----
+            val userBook = result.userBook.shouldNotBeNull()
+            userBook.status shouldBe BookStatus.DidNotFinish
+            userBook.journals shouldBe listOf(started, stopped)
+        }
+
+        @Test
+        fun `SET_STATUS — a status_stopped entry the fetched copy already has is not duplicated`() = runTest {
+            // ----- Arrange -----
+            val localStopped = ReadingJournal(
+                updatedAt = "2026-06-02T10:00:00Z",
+                event = JournalEventType.StatusDidNotFinish.eventName,
+            )
+
+            val serverStopped = ReadingJournal(
+                updatedAt = "2026-06-02T10:00:01Z",
+                event = JournalEventType.StatusDidNotFinish.eventName,
+            )
+
+            val snapshot = bookWith(BookStatus.DidNotFinish).withJournals(localStopped)
+            val fetched = bookWith(BookStatus.DidNotFinish).withJournals(serverStopped)
+
+            // ----- Act -----
+            val result = reconcile(
+                PendingUserBookWriteKind.SET_STATUS,
+                snapshot,
+                fetched,
+            )
+
+            // ----- Assert -----
+            result.userBook.shouldNotBeNull().journals shouldBe listOf(serverStopped)
+        }
+
+        @Test
+        fun `SET_STATUS — a status_stopped the snapshot already held does not stand in for the new one`() = runTest {
+            // ----- Arrange -----
+            val olderStopped = ReadingJournal(
+                updatedAt = "2026-01-02T10:00:00Z",
+                event = JournalEventType.StatusDidNotFinish.eventName,
+            )
+
+            val newStopped = ReadingJournal(
+                updatedAt = "2026-06-02T10:00:00Z",
+                event = JournalEventType.StatusDidNotFinish.eventName,
+            )
+
+            val snapshot = bookWith(BookStatus.DidNotFinish).withJournals(
+                olderStopped,
+                newStopped,
+            )
+
+            val fetched = bookWith(BookStatus.Reading).withJournals(olderStopped)
+
+            // ----- Act -----
+            val result = reconcile(
+                PendingUserBookWriteKind.SET_STATUS,
+                snapshot,
+                fetched,
+            )
+
+            // ----- Assert -----
+            result.userBook.shouldNotBeNull().journals shouldBe listOf(olderStopped, newStopped)
+        }
+
+        @Test
+        fun `SET_STATUS — a server status_stopped stamped earlier than the optimistic one is not duplicated`() = runTest {
+            // ----- Arrange -----
+            val optimisticStopped = ReadingJournal(
+                updatedAt = "2026-06-02T10:05:00Z",
+                event = JournalEventType.StatusDidNotFinish.eventName,
+            )
+
+            val serverStopped = ReadingJournal(
+                updatedAt = "2026-06-02T10:00:00Z",
+                event = JournalEventType.StatusDidNotFinish.eventName,
+            )
+
+            val snapshot = bookWith(BookStatus.DidNotFinish).withJournals(optimisticStopped)
+            val fetched = bookWith(BookStatus.DidNotFinish).withJournals(serverStopped)
+
+            // ----- Act -----
+            val result = reconcile(
+                PendingUserBookWriteKind.SET_STATUS,
+                snapshot,
+                fetched,
+            )
+
+            // ----- Assert -----
+            result.userBook.shouldNotBeNull().journals shouldBe listOf(serverStopped)
+        }
+
+        @Test
+        fun `SET_STATUS — an unseen status_stopped is ignored while fetched status is not DidNotFinish`() = runTest {
+            // ----- Arrange -----
+            val olderFetchedStop = ReadingJournal(
+                updatedAt = "2026-01-02T10:00:00Z",
+                event = JournalEventType.StatusDidNotFinish.eventName,
+            )
+
+            val localStopped = ReadingJournal(
+                updatedAt = "2026-06-02T10:00:00Z",
+                event = JournalEventType.StatusDidNotFinish.eventName,
+            )
+
+            val snapshot = bookWith(BookStatus.DidNotFinish).withJournals(localStopped)
+            val fetched = bookWith(BookStatus.Reading).withJournals(olderFetchedStop)
+
+            // ----- Act -----
+            val result = reconcile(
+                PendingUserBookWriteKind.SET_STATUS,
+                snapshot,
+                fetched,
+            )
+
+            // ----- Assert -----
+            result.userBook.shouldNotBeNull().journals shouldBe listOf(olderFetchedStop, localStopped)
+        }
+
+        @Test
+        fun `SET_STATUS — a snapshot that is not DidNotFinish adds no journal entries`() = runTest {
+            // ----- Arrange -----
+            val stopped = ReadingJournal(
+                updatedAt = "2026-06-02T10:00:00Z",
+                event = JournalEventType.StatusDidNotFinish.eventName,
+            )
+
+            val snapshot = bookWith(BookStatus.Paused).withJournals(stopped)
+            val fetched = bookWith(BookStatus.Reading).withJournals()
+
+            // ----- Act -----
+            val result = reconcile(
+                PendingUserBookWriteKind.SET_STATUS,
+                snapshot,
+                fetched,
+            )
+
+            // ----- Assert -----
+            result.userBook.shouldNotBeNull().journals shouldBe emptyList()
+        }
+
+        @Test
+        fun `SET_STATUS — the stop-point read survives a fetch that has only finished reads when DidNotFinish`() = runTest {
+            // ----- Arrange -----
+            val stopPoint = read(
+                id = -1,
+                page = 40,
+                progress = 40f,
+                startedAt = "2026-06-01",
+            )
+
+            val finished = read(
+                id = 5,
+                progress = 100f,
+                finishedAt = "2025-01-01",
+            )
+
+            val snapshot = bookWith(
+                BookStatus.DidNotFinish,
+                stopPoint,
+                finished,
+            )
+
+            val fetched = bookWith(
+                BookStatus.DidNotFinish,
+                finished,
+            )
+
+            // ----- Act -----
+            val result = reconcile(
+                PendingUserBookWriteKind.SET_STATUS,
+                snapshot,
+                fetched,
+            )
+
+            // ----- Assert -----
+            val userBook = result.userBook.shouldNotBeNull()
+            userBook.reads shouldBe listOf(finished, stopPoint)
+            userBook.currentRead shouldBe stopPoint
         }
 
         @Test

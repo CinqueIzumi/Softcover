@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.core.component.callout
 
 import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -52,6 +53,26 @@ data class CalloutUiModel(
                 eyebrow = "Update available",
                 body = "Keep the app open while the new version downloads.",
                 callToAction = CalloutActionUiModel.Progress(fraction = 0.4f),
+            ),
+            "Detail filled" to CalloutUiModel(
+                variant = CalloutVariant.Neutral(icon = SoftcoverIcon.Info),
+                eyebrow = "Did not finish",
+                body = "You set this one aside.",
+                callToAction = CalloutActionUiModel.Detail(
+                    label = "Why you set it aside",
+                    lines = persistentListOf("Too slow, Lost interest", "The middle dragged for me."),
+                    emptyText = "Add a reason",
+                ),
+            ),
+            "Detail empty" to CalloutUiModel(
+                variant = CalloutVariant.Neutral(icon = SoftcoverIcon.Info),
+                eyebrow = "Did not finish",
+                body = "You set this one aside.",
+                callToAction = CalloutActionUiModel.Detail(
+                    label = "Why you set it aside",
+                    lines = persistentListOf(),
+                    emptyText = "Add a reason",
+                ),
             ),
         )
     }

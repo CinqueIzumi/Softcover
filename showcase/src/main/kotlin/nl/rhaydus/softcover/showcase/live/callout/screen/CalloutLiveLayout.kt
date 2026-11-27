@@ -17,6 +17,7 @@ import nl.rhaydus.softcover.showcase.appearance.action.OnAppearanceClickedAction
 import nl.rhaydus.softcover.showcase.appearance.action.OnBackClickedAction
 import nl.rhaydus.softcover.showcase.appearance.screen.AppearanceSheetHost
 import nl.rhaydus.softcover.showcase.live.callout.action.OnBannerDismissedAction
+import nl.rhaydus.softcover.showcase.live.callout.action.OnCalloutActionClickedAction
 import nl.rhaydus.softcover.showcase.live.callout.action.OnCalloutDismissedAction
 import nl.rhaydus.softcover.showcase.live.callout.action.OnCalloutsRestoredAction
 import nl.rhaydus.softcover.showcase.live.callout.event.CalloutLiveEvent
@@ -57,8 +58,9 @@ internal fun CalloutLiveLayout(
                 Callout(
                     model = callout,
                     onEvent = { event ->
-                        if (event == CalloutEvent.DismissClicked) {
-                            runAction(OnCalloutDismissedAction(callout = callout))
+                        when (event) {
+                            CalloutEvent.DismissClicked -> runAction(OnCalloutDismissedAction(callout = callout))
+                            CalloutEvent.ActionClicked -> runAction(OnCalloutActionClickedAction(callout = callout))
                         }
                     },
                 )

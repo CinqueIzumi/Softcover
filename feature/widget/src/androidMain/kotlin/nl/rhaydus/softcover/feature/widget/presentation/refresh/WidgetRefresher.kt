@@ -121,7 +121,7 @@ internal class WidgetRefresher(
             .drop(1)
             .filter { signedIn -> signedIn.not() }
             .onEach {
-                // Repaint first: a launcher reload while the files are gone would read missing images.
+                // Repaint first so the widgets drop the signed-out user's covers before the cache files go.
                 refresh(widgets)
 
                 trendingFetchTracker.clearFailures()

@@ -7,6 +7,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.progresssheet.presentation.ProgressEntry
 import nl.rhaydus.softcover.core.progresssheet.presentation.ProgressSheetHost
 import nl.rhaydus.softcover.core.progresssheet.presentation.ProgressSheetState
+import nl.rhaydus.softcover.core.progresssheet.presentation.mood.toPendingMoodMoment
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsReadClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -32,6 +33,8 @@ internal object BookDetailProgressSheetHost :
     ) {
         scope.currentLocalVariables.bookMutationJobs[book.id]?.cancel()
 
+        scope.setLocalVariables { it.copy(pendingMoodMoment = null) }
+
         val job = dependencies.launch {
             dependencies.recordBookProgressUseCase(
                 book = book,
@@ -43,6 +46,12 @@ internal object BookDetailProgressSheetHost :
                     if (outcome == ShelfMutationOutcome.Applied) {
                         scope.sendEvent(BookDetailEvent.BookMarkedAsReadEvent())
                     } else {
+                        if (outcome == null) {
+                            val pending = entry.toPendingMoodMoment(book).copy(bookId = scope.currentState.bookId)
+
+                            scope.setLocalVariables { it.copy(pendingMoodMoment = pending) }
+                        }
+
                         scope.sendEvent(BookDetailEvent.ProgressUpdatedEvent())
                     }
                 }
@@ -78,10 +87,22 @@ internal object BookDetailProgressSheetHost :
     override suspend fun awaitPendingWrite(
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
-    ) = Unit
+    ) {
+        scope.currentState.book?.id?.let { scope.currentLocalVariables.bookMutationJobs[it]?.join() }
+    }
 
     override suspend fun afterClose(
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
-    ) = Unit
+    ) {
+        val pending = scope.currentLocalVariables.pendingMoodMoment ?: return
+
+        scope.setLocalVariables { it.copy(pendingMoodMoment = null) }
+
+        dependencies.moodMomentSheetSlice.openAfterProgress(
+            pending = pending,
+            host = BookDetailMoodMomentSheetHost,
+            scope = scope,
+        )
+    }
 }

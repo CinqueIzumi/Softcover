@@ -18,6 +18,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.collector.DateStyleColl
 import nl.rhaydus.softcover.feature.reading.presentation.collector.DeadlineModelsCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.FeaturedBookCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.MastheadCollector
+import nl.rhaydus.softcover.feature.reading.presentation.collector.MoodMomentSheetCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.OnHoldBooksCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.PlanTodayDismissalsCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.ProgressSheetCollector
@@ -66,6 +67,7 @@ val readingModule = module {
             observeReadingActivityUseCase = get(),
             getReadingStreakEnabledAsFlowUseCase = get(),
             progressSheetSlice = get(),
+            moodMomentSheetSlice = get(),
             observeReadingJournalHistoryUseCase = get(),
             refreshReadingJournalHistoryUseCase = get(),
             appDispatchers = get(),
@@ -75,6 +77,7 @@ val readingModule = module {
 
     factory { CurrentlyReadingBooksCollector() } bind ReadingCollector::class
     factory { ProgressSheetCollector() } bind ReadingCollector::class
+    factory { MoodMomentSheetCollector() } bind ReadingCollector::class
     factory { VerdictSheetCollector() } bind ReadingCollector::class
     factory { CoverModelsCollector() } bind ReadingCollector::class
     factory { FeaturedBookCollector() } bind ReadingCollector::class

@@ -3,6 +3,8 @@ package nl.rhaydus.softcover.showcase.live.sheet.mapper
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import nl.rhaydus.softcover.core.component.field.TextFieldUiModel
+import nl.rhaydus.softcover.core.component.field.TextFieldVariant
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.LoadingSheetUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetActionRowUiModel
@@ -10,7 +12,9 @@ import nl.rhaydus.softcover.core.component.sheet.SheetFooterButton
 import nl.rhaydus.softcover.core.component.sheet.SheetFooterEmphasis
 import nl.rhaydus.softcover.core.component.sheet.SheetFooterUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetInputRowUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetLayout
+import nl.rhaydus.softcover.core.component.sheet.SheetRowFace
 import nl.rhaydus.softcover.core.component.sheet.SheetRowGroupUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetRowUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
@@ -56,6 +60,12 @@ internal fun sheetDemos(): ImmutableList<SheetActionRowUiModel<SheetDemo>> = per
         label = "Long sheet",
         description = "A pinned header and footer over a list that scrolls.",
         icon = SoftcoverIcon.LibraryBooks,
+    ),
+    SheetActionRowUiModel(
+        key = SheetDemo.INPUT,
+        label = "Choice with a free-text row",
+        description = "A single-choice list that ends in a row you type into.",
+        icon = SoftcoverIcon.ShoppingBag,
     ),
     SheetActionRowUiModel(
         key = SheetDemo.LOADING,
@@ -125,6 +135,58 @@ internal fun sheetDemoModel(demo: SheetDemo): SheetDemoUiModel = when (demo) {
         ),
     )
 
+    SheetDemo.INPUT -> SheetDemoUiModel.Pinned(
+        scaffold = SheetScaffoldUiModel(
+            header = header(
+                eyebrow = "Your copy",
+                headline = "Where you got it",
+            ),
+            footer = SheetFooterUiModel.Inline(
+                primary = SheetFooterButton(
+                    label = "Save",
+                    dismissesSheet = true,
+                ),
+                secondary = SheetFooterButton(
+                    label = "Clear",
+                    emphasis = SheetFooterEmphasis.Outlined,
+                ),
+            ),
+            layout = SheetLayout.Pinned,
+        ),
+        rows = SheetRowGroupUiModel(
+            rows = persistentListOf(
+                SheetRowUiModel(
+                    key = "bookshop",
+                    label = "Bought in a bookshop",
+                    selected = true,
+                    gloss = "A physical copy, in person.",
+                ),
+                SheetRowUiModel(
+                    key = "online",
+                    label = "Bought online",
+                    selected = false,
+                    gloss = "A physical or digital copy, from a web shop.",
+                ),
+                SheetRowUiModel(
+                    key = "library",
+                    label = "Borrowed from a library",
+                    selected = false,
+                ),
+            ),
+            dismissesSheet = false,
+            input = SheetInputRowUiModel(
+                field = TextFieldUiModel(
+                    key = "somewhere-else",
+                    text = "",
+                    placeholder = "Somewhere else…",
+                    variant = TextFieldVariant.Plain,
+                ),
+                selected = false,
+            ),
+            face = SheetRowFace.Body,
+        ),
+    )
+
     SheetDemo.LOADING -> SheetDemoUiModel.Loading(
         sheet = LoadingSheetUiModel(
             scaffold = SheetScaffoldUiModel(
@@ -164,11 +226,43 @@ internal fun sheetDemoModel(demo: SheetDemo): SheetDemoUiModel = when (demo) {
 }
 
 internal fun SheetDemoUiModel.selecting(key: String): SheetDemoUiModel = when (this) {
+    is SheetDemoUiModel.Pinned -> {
+        val alreadySelected = rows.rows.any { it.key == key && it.selected }
+
+        if (rows.input != null && alreadySelected) {
+            cleared()
+        } else {
+            copy(
+                rows = rows.copy(
+                    rows = rows.rows
+                        .map { it.copy(selected = it.key == key) }
+                        .toImmutableList(),
+                    input = rows.input?.cleared(),
+                ),
+            )
+        }
+    }
+
+    is SheetDemoUiModel.Scrolling,
+    is SheetDemoUiModel.Loading -> this
+}
+
+internal fun SheetDemoUiModel.typing(text: String): SheetDemoUiModel = when (this) {
     is SheetDemoUiModel.Pinned -> copy(
         rows = rows.copy(
-            rows = rows.rows
-                .map { it.copy(selected = it.key == key) }
-                .toImmutableList(),
+            rows = if (text.isEmpty()) {
+                rows.rows
+            } else {
+                rows.rows
+                    .map { it.copy(selected = false) }
+                    .toImmutableList()
+            },
+            input = rows.input?.let { input ->
+                input.copy(
+                    field = input.field.copy(text = text),
+                    selected = text.isNotEmpty(),
+                )
+            },
         ),
     )
 
@@ -182,12 +276,18 @@ internal fun SheetDemoUiModel.cleared(): SheetDemoUiModel = when (this) {
             rows = rows.rows
                 .map { it.copy(selected = false) }
                 .toImmutableList(),
+            input = rows.input?.cleared(),
         ),
     )
 
     is SheetDemoUiModel.Scrolling,
     is SheetDemoUiModel.Loading -> this
 }
+
+private fun SheetInputRowUiModel.cleared(): SheetInputRowUiModel = copy(
+    field = field.copy(text = ""),
+    selected = false,
+)
 
 internal fun SheetDemoUiModel.withProgress(progress: Float): SheetDemoUiModel = when (this) {
     is SheetDemoUiModel.Loading -> copy(sheet = sheet.copy(progress = progress))

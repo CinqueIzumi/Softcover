@@ -1,12 +1,13 @@
 # Widget reliability
 
-Home-screen widgets fail with Glance's "Can't show content" and feel unresponsive. Three fixes: deliver every
-widget image by `Uri` instead of as a bitmap inside the update, give every widget a real loading state with
-text-first rendering, and restrict Random pick to lists the app caches locally.
+Home-screen widgets fail with Glance's "Can't show content" and feel unresponsive. Three fixes: keep every
+widget update under Android's bitmap cap, give every widget a real loading state with text-first rendering,
+and restrict Random pick to lists the app caches locally.
 
 ## Now
 
-- **State:** A1–A5, B1–B3, C1, D1 built and committed on `hotfix/3.2.1`; V passed on Medium_Phone (minified).
+- **State:** A1–A5, B1–B3, C1, D1 shipped in 3.2.1; `widget-bitmap-images` (3.3.0) replaces A's `content://` delivery with
+  bitmaps inside the update, after URIs left widgets blank while Softcover's process was down.
 - **Next:** the user checks the Xiaomi 15T (Trending paging) and the Bigme HiBreak Pro Color (cover quality).
 - **Verification:** `styleCheck`, `:feature:widget:testAndroidHostTest`, `:app:checkR8KeepContract` passed;
   rapid Trending paging, Random pick shuffling and app switching gave no `GlanceAppWidget` error.
@@ -27,12 +28,12 @@ text-first rendering, and restrict Random pick to lists the app caches locally.
 
 ## Decisions
 
-- Images reach the launcher as `content://` URIs from one read-only provider; no widget update carries a bitmap.
-- Image files are content-addressed, rendered once at their displayed size, touched per render, pruned after 7 days untouched.
-- The provider is exported, read-only, and serves only file names from its own directory.
+- Images travel inside the update as bitmaps, never as `content://` URIs: a launcher can then draw a widget without Softcover's process.
+- Image files are a render cache: content-addressed, rendered once at their displayed size, touched per render, pruned after 7 days untouched.
+- Covers are clamped so reported sizes × per-size bitmap bytes stay under half the update cap.
 - Loading: a cold session shows frame + indicator; after a tap, text renders first with cover placeholders.
 - Trending prefetches the neighbouring pages' cover files.
-- Covers render at the largest slot their widget displays (no fixed 86dp), since files carry no bitmap budget.
+- Covers render at the largest slot their widget displays (no fixed 86dp) unless the budget clamps them.
 - Random pick hides lists not enabled for caching, Owned included.
 - A placed Random pick whose list was disabled shows an explanation and opens its settings on tap.
 - The quote widget has no bitmaps; long quotes shrink to fit the real widget size instead of truncating at fixed tiers.
@@ -66,8 +67,6 @@ they rework the same mappers and models. C1 is independent and can run beside A2
 
 ## Risks
 
-- The launcher must open our provider. Pixel's launcher does; HyperOS can only be checked on the device (V).
-- Tinted masks by `Uri` rely on `ImageView.setColorFilter`; check on API 26 during A3.
-- A file pruned while a widget still shows it renders blank until the next update; the 7-day window and the
-  daily maintenance update keep live files touched.
+- A launcher reporting many sizes on a small screen shrinks covers through the budget clamp.
+- Tinted bitmap masks rely on `ImageView.setColorFilter`; check on API 26.
 - Whether the Owned list's id appears in the enabled-ids set; check in C1 before filtering.

@@ -1,0 +1,134 @@
+package nl.rhaydus.softcover.feature.book_detail.presentation.mapper
+
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
+import nl.rhaydus.softcover.core.component.yourcopy.YourCopyValue
+import nl.rhaydus.softcover.core.domain.model.AcquisitionKind
+import nl.rhaydus.softcover.core.domain.model.AcquisitionSource
+import nl.rhaydus.softcover.core.domain.model.BookCopy
+import nl.rhaydus.softcover.core.domain.model.PricePaid
+import nl.rhaydus.softcover.core.uibinding.acquisition.toLabel
+import nl.rhaydus.softcover.feature.book_detail.presentation.TEST_CURRENCIES
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+
+class YourCopyPanelMapperTest {
+    @Nested
+    inner class ToYourCopyPanel {
+        @Test
+        fun `shows an empty row for a copy without a source`() {
+            // ----- Arrange -----
+            val copy = BookCopy(bookId = 1)
+
+            // ----- Act -----
+            val result = copy.toYourCopyPanel(currencies = TEST_CURRENCIES)
+
+            // ----- Assert -----
+            result.rows.single().key shouldBe WHERE_YOU_GOT_IT_ROW_KEY
+            result.rows.single().value.shouldBeInstanceOf<YourCopyValue.Empty>()
+        }
+
+        @Test
+        fun `shows the preset's label for a preset source`() {
+            // ----- Arrange -----
+            val copy = BookCopy(
+                bookId = 1,
+                source = AcquisitionSource.Preset(kind = AcquisitionKind.BOUGHT_SECOND_HAND),
+            )
+
+            // ----- Act -----
+            val result = copy.toYourCopyPanel(currencies = TEST_CURRENCIES)
+
+            // ----- Assert -----
+            result.rows.single().value shouldBe YourCopyValue.Set(text = AcquisitionKind.BOUGHT_SECOND_HAND.toLabel())
+        }
+
+        @Test
+        fun `shows the custom text for another source`() {
+            // ----- Arrange -----
+            val copy = BookCopy(
+                bookId = 1,
+                source = AcquisitionSource.Other(text = "A street stall"),
+            )
+
+            // ----- Act -----
+            val result = copy.toYourCopyPanel(currencies = TEST_CURRENCIES)
+
+            // ----- Assert -----
+            result.rows.single().value shouldBe YourCopyValue.Set(text = "A street stall")
+        }
+
+        @Test
+        fun `shows the price after the source`() {
+            // ----- Arrange -----
+            val copy = BookCopy(
+                bookId = 1,
+                source = AcquisitionSource.Other(text = "A street stall"),
+                price = PricePaid(
+                    amountThousandths = 14_500,
+                    currencyCode = "EUR",
+                ),
+            )
+
+            // ----- Act -----
+            val result = copy.toYourCopyPanel(currencies = TEST_CURRENCIES)
+
+            // ----- Assert -----
+            result.rows.single().value shouldBe YourCopyValue.Set(text = "A street stall")
+            result.rows.single().trailing shouldBe "€14.50"
+        }
+
+        @Test
+        fun `shows the price and keeps the invitation when there is no source`() {
+            // ----- Arrange -----
+            val copy = BookCopy(
+                bookId = 1,
+                price = PricePaid(
+                    amountThousandths = 1_450_000,
+                    currencyCode = "JPY",
+                ),
+            )
+
+            // ----- Act -----
+            val result = copy.toYourCopyPanel(currencies = TEST_CURRENCIES)
+
+            // ----- Assert -----
+            result.rows.single().value shouldBe YourCopyValue.Empty(invitation = "Add where you got it")
+            result.rows.single().trailing shouldBe "¥1450"
+        }
+
+        @Test
+        fun `shows no price for a copy without one`() {
+            // ----- Arrange -----
+            val copy = BookCopy(
+                bookId = 1,
+                source = AcquisitionSource.Other(text = "A street stall"),
+            )
+
+            // ----- Act -----
+            val result = copy.toYourCopyPanel(currencies = TEST_CURRENCIES)
+
+            // ----- Assert -----
+            result.rows.single().trailing.shouldBeNull()
+        }
+
+        @Test
+        fun `shows no price when its currency is not in the catalogue`() {
+            // ----- Arrange -----
+            val copy = BookCopy(
+                bookId = 1,
+                price = PricePaid(
+                    amountThousandths = 14_500,
+                    currencyCode = "XXX",
+                ),
+            )
+
+            // ----- Act -----
+            val result = copy.toYourCopyPanel(currencies = TEST_CURRENCIES)
+
+            // ----- Assert -----
+            result.rows.single().trailing.shouldBeNull()
+        }
+    }
+}

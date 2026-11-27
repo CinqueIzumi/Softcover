@@ -7,8 +7,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
+import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.isStarted
 import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.toHowItReadBlock
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -47,10 +47,5 @@ internal class HowItReadSectionCollector : BookDetailCollector {
                 state.copy(howItRead = block)
             }
         }
-    }
-
-    private fun BookStatus?.isStarted(): Boolean = when (this) {
-        BookStatus.Reading, BookStatus.Paused, BookStatus.Read, BookStatus.DidNotFinish -> true
-        BookStatus.WantToRead, BookStatus.None, null -> false
     }
 }

@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.common.AppDispatchers
+import nl.rhaydus.softcover.core.book.domain.usecase.DidNotFinishBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.FetchBookByIdUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetEditionsByBookIdUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.LoadSimilarBooksPageUseCase
@@ -19,9 +20,19 @@ import nl.rhaydus.softcover.core.book.domain.usecase.SaveUserTagsUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookReviewUseCase
 import nl.rhaydus.softcover.core.component.state.OfflineCopy
+import nl.rhaydus.softcover.core.corpus.domain.usecase.GetBookCopyUseCase
 import nl.rhaydus.softcover.core.corpus.domain.usecase.GetBookTraitsUseCase
+import nl.rhaydus.softcover.core.corpus.domain.usecase.GetDidNotFinishReasonsUseCase
+import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveBookCopyUseCase
+import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveBookMoodsUseCase
 import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveBookTraitsUseCase
+import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveDidNotFinishReasonsUseCase
+import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveMoodMomentsUseCase
+import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveOwnMoodWordsUseCase
+import nl.rhaydus.softcover.core.corpus.domain.usecase.SaveBookCopyUseCase
+import nl.rhaydus.softcover.core.corpus.domain.usecase.SaveBookMoodsUseCase
 import nl.rhaydus.softcover.core.corpus.domain.usecase.SaveBookTraitsUseCase
+import nl.rhaydus.softcover.core.corpus.domain.usecase.SaveDidNotFinishReasonsUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ClearBookDeadlineUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveBookDeadlineUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.SetBookDeadlineUseCase
@@ -36,12 +47,16 @@ import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveBookQuotesUseCas
 import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshBookQuotesUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshReadingJournalHistoryUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetCurrenciesUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryTabOrderAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetUsualCurrencyAsFlowUseCase
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.presentation.removal.UndoableBookRemover
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.core.progresssheet.presentation.ProgressSheetSlice
+import nl.rhaydus.softcover.core.progresssheet.presentation.mood.MoodMomentSheetSlice
 import nl.rhaydus.softcover.core.uibinding.verdict.VerdictSheetContext
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.ObserveUserTagVocabularyUseCase
@@ -72,9 +87,11 @@ internal class BookDetailScreenScreenModel(
     undoableBookRemover: UndoableBookRemover,
     markBookAsReadUseCase: MarkBookAsReadUseCase,
     pauseBookUseCase: PauseBookUseCase,
+    didNotFinishBookUseCase: DidNotFinishBookUseCase,
     activeSessionController: ActiveSessionController,
     saveBookVerdictUseCase: SaveBookVerdictUseCase,
     getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
+    getLibraryTabOrderAsFlowUseCase: GetLibraryTabOrderAsFlowUseCase,
     observeCurrentDateUseCase: ObserveCurrentDateUseCase,
     setEditionAsOwnedUseCase: SetEditionAsOwnedUseCase,
     getAllUserListsUseCase: GetAllUserListsUseCase,
@@ -104,6 +121,19 @@ internal class BookDetailScreenScreenModel(
     observeBookTraitsUseCase: ObserveBookTraitsUseCase,
     getBookTraitsUseCase: GetBookTraitsUseCase,
     saveBookTraitsUseCase: SaveBookTraitsUseCase,
+    observeBookCopyUseCase: ObserveBookCopyUseCase,
+    getBookCopyUseCase: GetBookCopyUseCase,
+    saveBookCopyUseCase: SaveBookCopyUseCase,
+    observeDidNotFinishReasonsUseCase: ObserveDidNotFinishReasonsUseCase,
+    getDidNotFinishReasonsUseCase: GetDidNotFinishReasonsUseCase,
+    saveDidNotFinishReasonsUseCase: SaveDidNotFinishReasonsUseCase,
+    observeBookMoodsUseCase: ObserveBookMoodsUseCase,
+    saveBookMoodsUseCase: SaveBookMoodsUseCase,
+    observeMoodMomentsUseCase: ObserveMoodMomentsUseCase,
+    observeOwnMoodWordsUseCase: ObserveOwnMoodWordsUseCase,
+    moodMomentSheetSlice: MoodMomentSheetSlice,
+    getCurrenciesUseCase: GetCurrenciesUseCase,
+    getUsualCurrencyAsFlowUseCase: GetUsualCurrencyAsFlowUseCase,
     offlineCopy: OfflineCopy,
     flows: List<BookDetailCollector>,
     appDispatchers: AppDispatchers,
@@ -131,9 +161,11 @@ internal class BookDetailScreenScreenModel(
         undoableBookRemover = undoableBookRemover,
         markBookAsReadUseCase = markBookAsReadUseCase,
         pauseBookUseCase = pauseBookUseCase,
+        didNotFinishBookUseCase = didNotFinishBookUseCase,
         activeSessionController = activeSessionController,
         saveBookVerdictUseCase = saveBookVerdictUseCase,
         getDateStyleAsFlowUseCase = getDateStyleAsFlowUseCase,
+        getLibraryTabOrderAsFlowUseCase = getLibraryTabOrderAsFlowUseCase,
         observeCurrentDateUseCase = observeCurrentDateUseCase,
         setEditionAsOwnedUseCase = setEditionAsOwnedUseCase,
         getAllUserListsUseCase = getAllUserListsUseCase,
@@ -163,6 +195,19 @@ internal class BookDetailScreenScreenModel(
         observeBookTraitsUseCase = observeBookTraitsUseCase,
         getBookTraitsUseCase = getBookTraitsUseCase,
         saveBookTraitsUseCase = saveBookTraitsUseCase,
+        observeBookCopyUseCase = observeBookCopyUseCase,
+        getBookCopyUseCase = getBookCopyUseCase,
+        saveBookCopyUseCase = saveBookCopyUseCase,
+        observeDidNotFinishReasonsUseCase = observeDidNotFinishReasonsUseCase,
+        getDidNotFinishReasonsUseCase = getDidNotFinishReasonsUseCase,
+        saveDidNotFinishReasonsUseCase = saveDidNotFinishReasonsUseCase,
+        observeBookMoodsUseCase = observeBookMoodsUseCase,
+        saveBookMoodsUseCase = saveBookMoodsUseCase,
+        observeMoodMomentsUseCase = observeMoodMomentsUseCase,
+        observeOwnMoodWordsUseCase = observeOwnMoodWordsUseCase,
+        moodMomentSheetSlice = moodMomentSheetSlice,
+        getCurrenciesUseCase = getCurrenciesUseCase,
+        getUsualCurrencyAsFlowUseCase = getUsualCurrencyAsFlowUseCase,
         offlineCopy = offlineCopy,
     )
 

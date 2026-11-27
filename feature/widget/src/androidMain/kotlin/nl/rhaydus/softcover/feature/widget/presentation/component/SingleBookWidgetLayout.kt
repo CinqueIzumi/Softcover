@@ -1,15 +1,15 @@
 package nl.rhaydus.softcover.feature.widget.presentation.component
 
-import android.net.Uri
+import android.graphics.Bitmap
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
 import androidx.glance.Image
+import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
 import androidx.glance.LocalSize
-import androidx.glance.appwidget.ImageProvider
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
@@ -43,7 +43,7 @@ import nl.rhaydus.softcover.feature.widget.presentation.util.stackedTitleLines
 internal fun SingleBookWidgetLayout(
     title: String,
     author: String,
-    cover: Uri?,
+    cover: Bitmap?,
     artwork: BookArtworkUiModel?,
     eyebrowHeightDp: Int,
     footHeightDp: Int,
@@ -61,7 +61,7 @@ internal fun SingleBookWidgetLayout(
 
     Box(modifier = GlanceModifier.fillMaxSize()) {
         if (artwork != null) {
-            BackdropUris(
+            BackdropLayers(
                 backdrop = artwork.backdrop,
                 veil = artwork.veil,
                 veilLift = artwork.veilLift,
@@ -170,7 +170,7 @@ internal fun SingleBookWidgetLayout(
 
 @Composable
 private fun BookCover(
-    cover: Uri?,
+    cover: Bitmap?,
     modifier: GlanceModifier = GlanceModifier,
 ) {
     if (cover != null) {

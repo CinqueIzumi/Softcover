@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.widget.presentation.mapper
 
-import android.net.Uri
+import android.graphics.Bitmap
 import app.cash.turbine.test
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.nulls.shouldBeNull
@@ -18,7 +18,7 @@ import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.feature.widget.presentation.model.BookArtworkUiModel
 import nl.rhaydus.softcover.feature.widget.presentation.model.CurrentlyReadingWidgetUiModel
-import nl.rhaydus.softcover.feature.widget.presentation.render.WavyProgressUris
+import nl.rhaydus.softcover.feature.widget.presentation.render.WavyProgressImages
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -32,17 +32,17 @@ class CurrentlyReadingWidgetModelsTest {
     private val coverRequests = mutableListOf<Int>()
     private val coverHeights = mutableListOf<Int>()
     private val artworkRequests = mutableListOf<Int>()
-    private val coverUri = mockk<Uri>()
-    private val progressUris = WavyProgressUris(
-        track = mockk<Uri>(),
-        indicator = mockk<Uri>(),
+    private val coverBitmap = mockk<Bitmap>()
+    private val progressImages = WavyProgressImages(
+        track = mockk<Bitmap>(),
+        indicator = mockk<Bitmap>(),
     )
     private val artwork = BookArtworkUiModel(
         backdrop = null,
-        veil = mockk<Uri>(),
-        veilLift = mockk<Uri>(),
-        washPrimary = mockk<Uri>(),
-        washTertiary = mockk<Uri>(),
+        veil = mockk<Bitmap>(),
+        veilLift = mockk<Bitmap>(),
+        washPrimary = mockk<Bitmap>(),
+        washTertiary = mockk<Bitmap>(),
     )
     private val books = listOf(
         book(1),
@@ -85,28 +85,28 @@ class CurrentlyReadingWidgetModelsTest {
         selectedBookId: Flow<Int?> = flowOf(null),
         coverHeightDp: Flow<Int> = flowOf(200),
         barWidthsDp: Flow<Set<Int>> = flowOf(setOf(100)),
-        coverUri: suspend (Book, Int) -> Uri? = { book, heightDp ->
+        coverBitmap: suspend (Book, Int) -> Bitmap? = { book, heightDp ->
             coverRequests += book.id
             coverHeights += heightDp
-            this.coverUri
+            this.coverBitmap
         },
     ): Flow<CurrentlyReadingWidgetUiModel> = currentlyReadingWidgetModels(
         isSignedIn = flowOf(isSignedIn),
         themeConfiguration = flowOf(ThemeConfiguration()),
         shelf = shelf,
         selectedBookId = selectedBookId,
-        coverUri = coverUri,
+        coverBitmap = coverBitmap,
         coverHeightDp = coverHeightDp,
         barWidthsDp = barWidthsDp,
-        progressUris = { fraction, widthDp ->
+        progressImages = { fraction, widthDp ->
             renders += RenderCall(
                 fraction = fraction,
                 widthDp = widthDp,
             )
 
-            progressUris
+            progressImages
         },
-        artworkUris = { book ->
+        loadArtwork = { book ->
             artworkRequests += book.id
             artwork
         },
@@ -273,7 +273,7 @@ class CurrentlyReadingWidgetModelsTest {
             // ----- Arrange -----
             val flow = models(
                 shelf = flowOf(listOf(book(1))),
-                coverUri = { _, _ -> null },
+                coverBitmap = { _, _ -> null },
             )
 
             // ----- Act -----
@@ -290,7 +290,7 @@ class CurrentlyReadingWidgetModelsTest {
         }
 
         @Test
-        fun `the second emission carries the stored image uris for the shown book`() = runTest {
+        fun `the second emission carries the stored bitmaps for the shown book`() = runTest {
             // ----- Arrange -----
             val flow = models(
                 shelf = flowOf(books),
@@ -312,11 +312,11 @@ class CurrentlyReadingWidgetModelsTest {
                     imagesPending = true,
                 ) shouldBe text
 
-                images.cover shouldBe coverUri
+                images.cover shouldBe coverBitmap
 
                 images.progress shouldBe mapOf(
-                    90 to progressUris,
-                    140 to progressUris,
+                    90 to progressImages,
+                    140 to progressImages,
                 )
 
                 images.artwork shouldBe artwork
@@ -386,10 +386,10 @@ class CurrentlyReadingWidgetModelsTest {
                 themeConfiguration = flowOf(ThemeConfiguration()),
                 shelf = flowOf(listOf(book(1))),
                 selectedBookId = flowOf(null),
-                coverUri = { _, _ -> null },
+                coverBitmap = { _, _ -> null },
                 coverHeightDp = flowOf(200),
                 barWidthsDp = flowOf(setOf(90, 140)),
-                progressUris = { _, widthDp -> if (widthDp == 90) null else progressUris },
+                progressImages = { _, widthDp -> if (widthDp == 90) null else progressImages },
             )
 
             // ----- Act -----
@@ -400,7 +400,7 @@ class CurrentlyReadingWidgetModelsTest {
 
                 // ----- Assert -----
                 images.cover.shouldBeNull()
-                images.progress shouldBe mapOf(140 to progressUris)
+                images.progress shouldBe mapOf(140 to progressImages)
             }
         }
 
@@ -442,13 +442,13 @@ class CurrentlyReadingWidgetModelsTest {
         @Test
         fun `selecting another book while images are pending drops the stale images`() = runTest {
             // ----- Arrange -----
-            val gate = CompletableDeferred<Uri?>()
+            val gate = CompletableDeferred<Bitmap?>()
             val selected = MutableStateFlow<Int?>(1)
 
             val flow = models(
                 shelf = flowOf(books),
                 selectedBookId = selected,
-                coverUri = { book, _ -> if (book.id == 1) gate.await() else coverUri },
+                coverBitmap = { book, _ -> if (book.id == 1) gate.await() else coverBitmap },
             )
 
             flow.test {
@@ -456,13 +456,13 @@ class CurrentlyReadingWidgetModelsTest {
 
                 // ----- Act -----
                 selected.value = 2
-                gate.complete(coverUri)
+                gate.complete(coverBitmap)
 
                 // ----- Assert -----
                 awaitItem().reading().title shouldBe "Title 2"
                 val images = awaitItem().reading()
                 images.title shouldBe "Title 2"
-                images.cover shouldBe coverUri
+                images.cover shouldBe coverBitmap
                 cancelAndIgnoreRemainingEvents()
             }
         }

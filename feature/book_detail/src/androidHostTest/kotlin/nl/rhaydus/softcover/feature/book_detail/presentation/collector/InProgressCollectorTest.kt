@@ -8,6 +8,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -41,7 +42,11 @@ class InProgressCollectorTest {
             eventChannel = Channel(Channel.BUFFERED),
         )
 
-        dependencies = mockk(relaxed = true)
+        dependencies = mockk<BookDetailDependencies>(relaxed = true).also { mock ->
+            every {
+                mock.observeMoodMomentsUseCase(bookId = any())
+            } returns flowOf(emptyList())
+        }
     }
 
     private fun stubBook(

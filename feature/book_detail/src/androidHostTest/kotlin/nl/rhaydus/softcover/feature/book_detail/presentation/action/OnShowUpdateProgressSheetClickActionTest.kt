@@ -9,6 +9,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDateTime
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.progresssheet.presentation.ProgressSheetState
+import nl.rhaydus.softcover.core.progresssheet.presentation.mood.PendingMoodMoment
 import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
@@ -21,6 +22,7 @@ import org.junit.jupiter.api.Test
 
 class OnShowUpdateProgressSheetClickActionTest {
     private lateinit var dependencies: BookDetailDependencies
+    private lateinit var localVariablesFlow: MutableStateFlow<BookDetailLocalVariables>
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
     private lateinit var scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>
 
@@ -28,9 +30,11 @@ class OnShowUpdateProgressSheetClickActionTest {
     fun setUp() {
         stateFlow = MutableStateFlow(buildBookDetailUiState().copy())
 
+        localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
+
         scope = ActionScope(
             stateFlow = stateFlow,
-            localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
+            localVariablesFlow = localVariablesFlow,
             eventChannel = Channel(Channel.BUFFERED),
         )
 
@@ -78,6 +82,30 @@ class OnShowUpdateProgressSheetClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.progressSheet.readAt.shouldBeNull()
+        }
+
+        @Test
+        fun `clears a pending mood moment from an earlier update`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = buildBookDetailUiState().copy(book = PreviewData.baseBook)
+
+            localVariablesFlow.value = BookDetailLocalVariables(
+                pendingMoodMoment = PendingMoodMoment(
+                    bookId = 1,
+                    page = 5,
+                    seconds = null,
+                    percent = 10,
+                ),
+            )
+
+            // ----- Act -----
+            OnShowUpdateProgressSheetClickAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            localVariablesFlow.value.pendingMoodMoment.shouldBeNull()
         }
     }
 }

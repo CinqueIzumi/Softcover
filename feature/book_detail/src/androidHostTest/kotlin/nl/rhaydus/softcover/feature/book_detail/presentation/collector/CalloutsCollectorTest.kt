@@ -7,13 +7,18 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.component.callout.CalloutActionUiModel
+import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveDidNotFinishReasonsUseCase
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookStatus
+import nl.rhaydus.softcover.core.domain.model.DidNotFinishReason
+import nl.rhaydus.softcover.core.domain.model.DidNotFinishReasons
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
@@ -60,6 +65,10 @@ class CalloutsCollectorTest {
             every {
                 getReadDateString(style = any())
             } returns readDate
+
+            every {
+                getDnfDateString(style = any())
+            } returns null
         }
 
         return mockk<Book> {
@@ -233,6 +242,162 @@ class CalloutsCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.shelveReadDate.shouldBeNull()
+            job.cancel()
+        }
+    }
+
+    @Nested
+    inner class StoredReasons {
+        private val saved = DidNotFinishReasons(
+            bookId = 42,
+            reasons = setOf(DidNotFinishReason.TooSlow),
+            ownWords = "The middle dragged",
+        )
+
+        private fun stubObservedReasons(source: Flow<DidNotFinishReasons> = MutableStateFlow(saved)) {
+            val observeUseCase = mockk<ObserveDidNotFinishReasonsUseCase> {
+                every {
+                    this@mockk(bookId = any())
+                } returns source
+            }
+
+            every {
+                dependencies.observeDidNotFinishReasonsUseCase
+            } returns observeUseCase
+        }
+
+        private fun detailLines(): List<String>? = stateFlow.value.statusCallout?.callToAction
+            .shouldBeInstanceOf<CalloutActionUiModel.Detail>().lines
+
+        @Test
+        fun `shows the saved reasons while the status is Did not finish`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stubObservedReasons()
+
+            stateFlow.value = buildBookDetailUiState(bookId = 42).copy(
+                book = stubBook(
+                    status = BookStatus.DidNotFinish,
+                    shelvedEditionId = 10,
+                ),
+            )
+
+            // ----- Act -----
+            val job = launch {
+                CalloutsCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Assert -----
+            detailLines() shouldBe listOf("Too slow", "The middle dragged")
+            job.cancel()
+        }
+
+        @Test
+        fun `hides the reasons when the status moves away and shows them again on return`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stubObservedReasons()
+
+            val dnfBook = stubBook(
+                status = BookStatus.DidNotFinish,
+                shelvedEditionId = 10,
+            )
+
+            stateFlow.value = buildBookDetailUiState(bookId = 42).copy(book = dnfBook)
+
+            val job = launch {
+                CalloutsCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                book = stubBook(
+                    status = BookStatus.Read,
+                    shelvedEditionId = 10,
+                ),
+            )
+
+            val whileRead = stateFlow.value.statusCallout?.callToAction
+            stateFlow.value = stateFlow.value.copy(book = dnfBook)
+
+            // ----- Assert -----
+            whileRead.shouldBeNull()
+            detailLines() shouldBe listOf("Too slow", "The middle dragged")
+            job.cancel()
+        }
+
+        @Test
+        fun `writes no status callout until the reasons of a Did not finish book have loaded`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val loading = MutableSharedFlow<DidNotFinishReasons>()
+            stubObservedReasons(source = loading)
+
+            stateFlow.value = buildBookDetailUiState(bookId = 42).copy(
+                book = stubBook(
+                    status = BookStatus.DidNotFinish,
+                    shelvedEditionId = 10,
+                ),
+            )
+
+            val job = launch {
+                CalloutsCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            val beforeLoad = stateFlow.value.statusCallout
+
+            // ----- Act -----
+            loading.emit(saved)
+
+            // ----- Assert -----
+            beforeLoad.shouldBeNull()
+            detailLines() shouldBe listOf("Too slow", "The middle dragged")
+            job.cancel()
+        }
+
+        @Test
+        fun `keeps the Read callout until the reasons load when the status becomes Did not finish`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val loading = MutableSharedFlow<DidNotFinishReasons>()
+            stubObservedReasons(source = loading)
+
+            stateFlow.value = buildBookDetailUiState(bookId = 42).copy(
+                book = stubBook(
+                    status = BookStatus.Read,
+                    shelvedEditionId = 10,
+                ),
+            )
+
+            val job = launch {
+                CalloutsCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            val readEyebrow = stateFlow.value.statusCallout.shouldNotBeNull().eyebrow
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                book = stubBook(
+                    status = BookStatus.DidNotFinish,
+                    shelvedEditionId = 10,
+                ),
+            )
+
+            val whileLoading = stateFlow.value.statusCallout
+            loading.emit(saved)
+
+            // ----- Assert -----
+            whileLoading.shouldNotBeNull().eyebrow shouldBe readEyebrow
+            whileLoading.callToAction.shouldBeNull()
+            detailLines() shouldBe listOf("Too slow", "The middle dragged")
             job.cancel()
         }
     }

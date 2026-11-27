@@ -45,7 +45,7 @@ import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.feature.widget.R
 import nl.rhaydus.softcover.feature.widget.presentation.callback.CycleQuoteCallback
 import nl.rhaydus.softcover.feature.widget.presentation.callback.QuoteRetryCallback
-import nl.rhaydus.softcover.feature.widget.presentation.component.BackdropUris
+import nl.rhaydus.softcover.feature.widget.presentation.component.BackdropLayers
 import nl.rhaydus.softcover.feature.widget.presentation.component.CYCLE_EYEBROW_HEIGHT_DP
 import nl.rhaydus.softcover.feature.widget.presentation.component.CycleEyebrow
 import nl.rhaydus.softcover.feature.widget.presentation.component.MessageText
@@ -159,7 +159,7 @@ private fun Shown(
         val artwork = content.artwork
 
         if (artwork != null) {
-            BackdropUris(
+            BackdropLayers(
                 backdrop = artwork.backdrop,
                 veil = artwork.veil,
                 veilLift = artwork.veilLift,

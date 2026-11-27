@@ -7,6 +7,8 @@ import nl.rhaydus.softcover.core.database.model.BookTraitsEntity
 internal interface BookTraitsLocalDataSource {
     fun observe(bookId: Int): Flow<BookTraitsEntity?>
 
+    fun observeAll(): Flow<List<BookTraitsEntity>>
+
     suspend fun get(bookId: Int): BookTraitsEntity?
 
     suspend fun upsert(entity: BookTraitsEntity)
@@ -18,6 +20,8 @@ internal class BookTraitsLocalDataSourceImpl(
     private val dao: BookTraitsDao,
 ) : BookTraitsLocalDataSource {
     override fun observe(bookId: Int): Flow<BookTraitsEntity?> = dao.observe(bookId = bookId)
+
+    override fun observeAll(): Flow<List<BookTraitsEntity>> = dao.observeAll()
 
     override suspend fun get(bookId: Int): BookTraitsEntity? = dao.get(bookId = bookId)
 

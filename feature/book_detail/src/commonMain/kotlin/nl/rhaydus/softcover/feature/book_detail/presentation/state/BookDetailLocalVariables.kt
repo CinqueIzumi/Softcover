@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.state
 
 import kotlinx.coroutines.Job
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.progresssheet.presentation.mood.PendingMoodMoment
 import nl.rhaydus.toad.LocalVariables
 
 internal data class BookDetailLocalVariables(
@@ -10,6 +11,9 @@ internal data class BookDetailLocalVariables(
     val editionMutationJobs: Map<Int, Job> = emptyMap(),
     val tagSaveJob: Job? = null,
     val tagVocabularySynced: Boolean = false,
+
+    /** The position a plain progress update stored for the mood sheet that opens when the progress sheet closes. */
+    val pendingMoodMoment: PendingMoodMoment? = null,
 
     /** The book id the similar-books list belongs to; set once its first page starts, so it loads once per source. */
     val similarBooksSourceId: Int? = null,

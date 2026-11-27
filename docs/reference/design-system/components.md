@@ -20,23 +20,24 @@ rules all components follow are in [component-contract.md](component-contract.md
 - **PillButton** — `button` — action pill or icon-only circle in five tones.
 - **Toggle** — `control` — filled or bare icon toggle, or a display-only switch inside a row that owns the tap.
 - **ToggleRow** — `control` — a title over an optional gloss with a trailing switch; the row is the tap target.
-- **TextField** — `field` — pill, outlined, multi-line, hero or numeral input, with an optional error state.
+- **TextField** — `field` — pill, outlined (text, number or decimal keyboard), multi-line, hero or numeral input, optional error.
+- **SelectField** — `field` — the outlined field as a tap target: chosen value and a caret, options open elsewhere.
 - **SegmentedControl** — `control` — one-of-N choice as a pill track or as words in a sentence.
 - **ThemePreviewTile** — `control` — mini-page theme choice.
 - **ColorPalettePreviewTile** — `control` — mini-page spine-colour choice.
 
 ## Chips
 
-- **Chip** — `chip` — the one chip, in ten tones (`TonalDashed` the indeterminate third state) with leading and trailing slots; `Disclosure` flips while expanded; `Eyebrow` face sets caps.
+- **Chip** — `chip` — the one chip, in ten tones (`TonalDashed` the indeterminate third state), with leading and trailing slots; `Disclosure` flips while expanded; `Count` adds a muted count; `Eyebrow` sets caps.
 - **ChipFlow** — `chip` — wraps a `ChipSet` in one flow row.
 
 ## Covers & cards
 
 - **Cover** — `cover` — the only book-cover renderer; falls back to a coverless title jacket, never blank.
 - **CoverOverlay** — `badge` — pins a `Badge` to a cover's corner, optionally greying the cover.
-- **BookCard** — `bookcard` — the one book or series card: cover-only, column or row.
+- **BookCard** — `bookcard` — the one book or series card: cover-only, column, row or tile.
 - **BookCardRail** — `bookcard` — a pageable card rail.
-- **QuoteCard** — `quote` — one saved quote in the editorial quote pattern, with a Delete menu.
+- **QuoteCard** — `quote` — a quote in the editorial quote pattern: saved with a Delete menu, or over a tappable book footer.
 - **MoodTile** — `mood` — a mood's title and book count on one of four inks.
 
 ## States & feedback
@@ -59,7 +60,7 @@ rules all components follow are in [component-contract.md](component-contract.md
 
 - **AdaptiveModalSheet** — `sheet` — foundation sheet plus the snackbar host and `Corners.xxl` panel.
 - **SheetScaffold** — `sheet` — chrome every modal sheet shares: header, body, footer and close; `SheetSession` holds its lifetime.
-- **SheetRowGroup** — `sheet` — hairline-divided single-choice rows that dismiss the sheet on selection.
+- **SheetRowGroup** — `sheet` — hairline-divided single-choice rows that dismiss on selection; an optional free-text row; rows may lead with a code; `sheetRowItems` lays them into a lazy list.
 - **SheetActionRow** — `sheet` — a plain tappable menu row that acts at once.
 - **LoadingSheet** — `sheet` — full-screen blocking wait.
 - **UpdateProgressBottomSheet** — `progress` — pages, percentage or time reading-progress editor.
@@ -69,16 +70,15 @@ rules all components follow are in [component-contract.md](component-contract.md
 
 ## Statistics
 
-- **StatNumber** — `statistic` — springs or rolls a number into place, with an optional prefix or suffix.
-- **StatTile** — `statistic` — a labelled stat on a hero, standard or compact tile; null stat is a dash and the compact tile drops its unit.
+- **StatNumber** — `statistic` — springs or rolls a number into place, with optional prefix or suffix.
+- **StatTile** — `statistic` — a labelled stat on a hero, standard or compact tile; null is a dash; compact adds a caption, no unit.
+- **CountRows** — `statistic` — label-and-count rows, no bar.
 - **ColumnChart** — `chart` — vertical columns on one baseline with a per-column readout.
-- **RankedBars** — `chart` — numbered rows, each a name over a bar filled relative to the lead row, with its share.
-  Rows from `visibleCount` on fold in and out one by one.
-- **ProportionChart** — `chart` — one slim stacked bar of parts of a whole, with its legend as rows or inline keys (`ProportionChartVariant`).
-- **YearGrid** — `chart` — a year of day squares, a row per month, tinted by pages read on four steps with a
-  "Fewer pages → More" key; tapping a read day emits `YearGridEvent.DayTapped`.
-- **RecentDaysGrid** — `chart` — the last 84 days as 12dp squares, 7 rows by 12 columns filled column by column
-  (oldest top-left, today bottom-right), tinted like YearGrid; not interactive, one image node.
+- **RankedBars** — `chart` — numbered rows, a name over a bar sized to the lead row, with its value; rows can be tappable and fold past `visibleCount`.
+- **ScoreBars** — `chart` — italic label and value over a hairline bar filled to a share.
+- **ProportionChart** — `chart` — one slim stacked bar of parts of a whole; legend as rows, inline keys or rows alone (`ProportionChartVariant`).
+- **YearGrid** — `chart` — a year of day squares, a row per month, tinted by pages read; read days are tappable.
+- **RecentDaysGrid** — `chart` — the last 84 days as squares, a column per week, tinted like YearGrid.
 
 ## Share
 
@@ -94,12 +94,14 @@ rules all components follow are in [component-contract.md](component-contract.md
 - **VerdictSheet** — `verdict` — the combined rating-and-review editor.
 - **VerdictBlock** — `verdict` — book-page rating and review card that opens the verdict sheet.
 - **HowItReadBlock / HowItReadSheet** — `traits` — the private reading-survey panel and the sheet that edits it.
+- **HowItFeltBlock / HowItFeltSheet / MoodMomentSheet / MoodRibbon** — `feeling` — private moods: the block, its editor, one mood at a point, and the dots under the progress bar.
+- **YourCopyPanel** — `yourcopy` — the book page's private per-copy rows: a value or an invitation, optionally a figure.
 
 ## Modifiers & helpers
 
 - **`pressScaleClickable` / `Selectable` / `Toggleable`** — foundation `modifier` — the one ripple-less interaction modifier.
 - **`navSharedBounds`** — `modifier` — the one way to make a node a navigation shared element.
-- **`ExitingItems`** — `transition` — keeps removed items of a non-lazy container composed, inert, while a caller-supplied exit (default fade) plays.
+- **`ExitingItems`** — `transition` — keeps removed items of non-lazy containers composed and inert while their exit plays.
 - **`rememberReorderHaptics`** — `haptics` — lift, per-target tick and drop haptics for drag-to-reorder.
 - **`Haptics.play(Feedback)`** — `haptics` — plays the outcome haptic a `FeedbackEvent` carries.
 
@@ -117,7 +119,7 @@ The app's own usage rules:
 - `HeroStatNumberField` for any number edited in a hero context, never a bordered field.
 - `EditorialSearchField` for search inside an editorial header; `SearchTopBar` when search is the app bar.
 - `ExpandableFlowRow` for a wrapping chip set that can run long.
-- Pull-to-refresh draws `PullToRefreshDefaults.LoadingIndicator`, the one exception to wavy progress, under a `PullToRefreshEyebrow`.
+- Pull-to-refresh draws `PullToRefreshDefaults.LoadingIndicator`, the one wavy-progress exception, under a `PullToRefreshEyebrow`.
 - `DesktopTooltip` on every icon-only desktop control; `DesktopContextMenu` mirrors a touch long-press.
 - Haptics go through `LocalHaptics.current`, never `performHapticFeedback`.
-- Press feedback goes through the foundation `pressScaleClickable` family; the bare `pressScale` only drives a shared `interactionSource`.
+- Press feedback goes through foundation's `pressScaleClickable` family; bare `pressScale` only drives a shared `interactionSource`.

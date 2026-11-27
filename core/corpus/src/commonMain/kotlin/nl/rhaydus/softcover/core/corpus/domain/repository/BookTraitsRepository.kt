@@ -7,6 +7,8 @@ interface BookTraitsRepository {
     /** Emits an empty [BookTraits] while nothing is stored for [bookId]. */
     fun observe(bookId: Int): Flow<BookTraits>
 
+    fun observeAll(): Flow<Map<Int, BookTraits>>
+
     suspend fun get(bookId: Int): BookTraits
 
     /** Saving an empty [traits] removes the stored row instead of keeping a blank one. */

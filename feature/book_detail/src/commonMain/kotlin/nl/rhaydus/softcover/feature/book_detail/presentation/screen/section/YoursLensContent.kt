@@ -9,19 +9,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.callout.Callout
+import nl.rhaydus.softcover.core.component.callout.CalloutEvent
 import nl.rhaydus.softcover.core.component.verdict.VerdictBlock
 import nl.rhaydus.softcover.core.component.verdict.VerdictBlockEvent
 import nl.rhaydus.softcover.core.uibinding.verdict.VerdictSheetContext
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnOpenDidNotFinishReasonSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnOpenVerdictSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 
-/**
- * The "Yours" lens content (design-system.md's lens-toggle pattern): your-copy sections in order —
- * in-progress / DNF / read / want-to-read status, your reads (every read-through), your verdict
- * (rating + review), how it read, your quotes, your tags. Each section keeps its existing visibility gate, so a
- * section with nothing to show simply doesn't compose.
- */
 @Composable
 internal fun YoursLensContent(
     state: BookDetailUiState,
@@ -41,6 +37,13 @@ internal fun YoursLensContent(
             state.statusCallout?.let { callout ->
                 Callout(
                     model = callout,
+                    onEvent = { event ->
+                        when (event) {
+                            CalloutEvent.ActionClicked -> runAction(OnOpenDidNotFinishReasonSheetAction())
+
+                            CalloutEvent.DismissClicked -> Unit
+                        }
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = Spacing.gutter),
@@ -78,6 +81,19 @@ internal fun YoursLensContent(
             )
         }
 
+        state.howItFelt?.let { howItFelt ->
+            if (hasLeadingBlock) {
+                Spacer(modifier = Modifier.height(Spacing.section))
+            }
+
+            hasLeadingBlock = true
+
+            HowItFeltSection(
+                model = howItFelt,
+                runAction = runAction,
+            )
+        }
+
         state.howItRead?.let { howItRead ->
             if (hasLeadingBlock) {
                 Spacer(modifier = Modifier.height(Spacing.section))
@@ -110,8 +126,22 @@ internal fun YoursLensContent(
                 Spacer(modifier = Modifier.height(Spacing.section))
             }
 
+            hasLeadingBlock = true
+
             UserTagsSection(
                 state = state,
+                runAction = runAction,
+            )
+        }
+
+        state.yourCopy?.let { yourCopy ->
+            if (hasLeadingBlock) {
+                Spacer(modifier = Modifier.height(Spacing.section))
+            }
+
+            YourCopySection(
+                state = state,
+                model = yourCopy,
                 runAction = runAction,
             )
         }

@@ -22,6 +22,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnab
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObservePlanTodayDismissalsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingActivityUseCase
 import nl.rhaydus.softcover.core.progresssheet.presentation.ProgressSheetSlice
+import nl.rhaydus.softcover.core.progresssheet.presentation.mood.MoodMomentSheetSlice
 import nl.rhaydus.toad.ActionDependencies
 
 internal data class ReadingScreenDependencies(
@@ -43,6 +44,7 @@ internal data class ReadingScreenDependencies(
     val observeReadingActivityUseCase: ObserveReadingActivityUseCase,
     val getReadingStreakEnabledAsFlowUseCase: GetReadingStreakEnabledAsFlowUseCase,
     val progressSheetSlice: ProgressSheetSlice,
+    val moodMomentSheetSlice: MoodMomentSheetSlice,
     val observeReadingJournalHistoryUseCase: ObserveReadingJournalHistoryUseCase,
     val refreshReadingJournalHistoryUseCase: RefreshReadingJournalHistoryUseCase,
     override val coroutineScope: CoroutineScope,

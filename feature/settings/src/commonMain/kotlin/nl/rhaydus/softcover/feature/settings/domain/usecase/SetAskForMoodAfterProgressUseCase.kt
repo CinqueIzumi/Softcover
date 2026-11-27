@@ -1,0 +1,12 @@
+package nl.rhaydus.softcover.feature.settings.domain.usecase
+
+import nl.rhaydus.common.runCatchingLogged
+import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
+
+class SetAskForMoodAfterProgressUseCase(
+    private val settingsRepository: SettingsRepository,
+) {
+    suspend operator fun invoke(enabled: Boolean): Result<Unit> = runCatchingLogged {
+        settingsRepository.setAskForMoodAfterProgress(enabled = enabled)
+    }
+}

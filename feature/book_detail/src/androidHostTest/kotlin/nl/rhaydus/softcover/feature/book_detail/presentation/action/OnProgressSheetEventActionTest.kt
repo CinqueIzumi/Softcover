@@ -98,6 +98,14 @@ class OnProgressSheetEventActionTest {
                 every {
                     it.id
                 } returns 42
+
+                every {
+                    it.currentEdition
+                } returns null
+
+                every {
+                    it.defaultEdition
+                } returns null
             }
 
             stateFlow.value = buildBookDetailUiState().copy(book = book)

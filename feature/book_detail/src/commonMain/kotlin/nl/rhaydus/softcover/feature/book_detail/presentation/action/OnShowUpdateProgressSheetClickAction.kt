@@ -11,6 +11,8 @@ internal class OnShowUpdateProgressSheetClickAction : BookDetailAction {
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
+        scope.setLocalVariables { it.copy(pendingMoodMoment = null) }
+
         scope.setState {
             it.copy(progressSheet = it.progressSheet.opened())
         }

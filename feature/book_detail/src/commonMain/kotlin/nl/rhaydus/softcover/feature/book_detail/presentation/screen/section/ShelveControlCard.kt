@@ -50,6 +50,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.tabularFigures
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearMutationFailureAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsDidNotFinishClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsPausedClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsReadClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsReadingClickAction
@@ -155,6 +156,22 @@ internal fun ShelveControlCard(
                         onClick = { book?.let { runAction(OnMarkBookAsReadClickAction(book = it)) } },
                         celebrationKey = state.markAsReadBurst.triggerKey,
                         trailingStatus = state.shelveReadDate,
+                    )
+
+                    ShelveRow(
+                        label = "Did not finish",
+                        iconRes = drawableIconResource(
+                            icon = SoftcoverIcon.Stop,
+                            contentDescription = "",
+                        ),
+                        selected = status == BookStatus.DidNotFinish,
+                        isLoading = isLoading,
+                        onClick = {
+                            book?.let {
+                                runAction(OnMarkBookAsDidNotFinishClickAction(book = it))
+                            }
+                        },
+                        readingStatus = state.shelveReadingStatus,
                     )
                 }
             }

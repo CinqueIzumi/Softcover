@@ -11,10 +11,16 @@ private val TextFieldUiModel.submits: Boolean
 private val TextFieldUiModel.keyboardType: KeyboardType
     get() = when (variant) {
         is TextFieldVariant.Numeral -> KeyboardType.Number
-        is TextFieldVariant.Outlined -> if (variant.numeric) KeyboardType.Number else KeyboardType.Text
+        is TextFieldVariant.Outlined -> when (variant.keyboard) {
+            TextFieldKeyboard.Text -> KeyboardType.Text
+            TextFieldKeyboard.Number -> KeyboardType.Number
+            TextFieldKeyboard.Decimal -> KeyboardType.Decimal
+        }
         is TextFieldVariant.Pill,
         TextFieldVariant.Multiline,
-        TextFieldVariant.Hero -> KeyboardType.Text
+        TextFieldVariant.Hero,
+        TextFieldVariant.Bare,
+        TextFieldVariant.Plain -> KeyboardType.Text
     }
 
 internal fun TextFieldUiModel.keyboardOptions(): KeyboardOptions = KeyboardOptions(
